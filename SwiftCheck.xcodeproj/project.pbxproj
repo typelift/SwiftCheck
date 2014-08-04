@@ -10,6 +10,24 @@
 		844FCC93198B320500EB242A /* SwiftCheck.h in Headers */ = {isa = PBXBuildFile; fileRef = 844FCC92198B320500EB242A /* SwiftCheck.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		844FCC99198B320500EB242A /* SwiftCheck.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 844FCC8D198B320500EB242A /* SwiftCheck.framework */; };
 		844FCCA0198B320500EB242A /* SwiftCheckTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCC9F198B320500EB242A /* SwiftCheckTests.swift */; };
+		844FCCAA198B323800EB242A /* Arbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCA9198B323800EB242A /* Arbitrary.swift */; };
+		844FCCAC198B32DC00EB242A /* Gen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCAB198B32DC00EB242A /* Gen.swift */; };
+		844FCCAE198B367000EB242A /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCAD198B367000EB242A /* Property.swift */; };
+		844FCCB0198B36BE00EB242A /* Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCAF198B36BE00EB242A /* Test.swift */; };
+		844FCCB2198B375300EB242A /* Maybe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCB1198B375300EB242A /* Maybe.swift */; };
+		844FCCB4198B39F300EB242A /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCB3198B39F300EB242A /* State.swift */; };
+		844FCCB6198B3C0A00EB242A /* Functor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCB5198B3C0A00EB242A /* Functor.swift */; };
+		844FCCB8198B3DB500EB242A /* Monad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCB7198B3DB500EB242A /* Monad.swift */; };
+		844FCCBA198B3DC800EB242A /* Applicative.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCB9198B3DC800EB242A /* Applicative.swift */; };
+		844FCCBC198B405000EB242A /* IO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCBB198B405000EB242A /* IO.swift */; };
+		844FCCBE198D9F9B00EB242A /* ST.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCBD198D9F9B00EB242A /* ST.swift */; };
+		844FCCC1198EB4CA00EB242A /* Array.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCC0198EB4CA00EB242A /* Array.swift */; };
+		844FCCC3198EC4F000EB242A /* Random.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCC2198EC4F000EB242A /* Random.swift */; };
+		844FCCC5198ECC4D00EB242A /* IORef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCC4198ECC4D00EB242A /* IORef.swift */; };
+		844FCCC7198EFB4700EB242A /* Rose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCC6198EFB4700EB242A /* Rose.swift */; };
+		844FCCC9198EFF9B00EB242A /* SimpleSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCC8198EFF9B00EB242A /* SimpleSpec.swift */; };
+		844FCCCB198F204500EB242A /* Either.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCCA198F204500EB242A /* Either.swift */; };
+		844FCCCF198F24CF00EB242A /* Combinators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCCE198F24CF00EB242A /* Combinators.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -29,6 +47,24 @@
 		844FCC98198B320500EB242A /* SwiftCheckTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftCheckTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		844FCC9E198B320500EB242A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		844FCC9F198B320500EB242A /* SwiftCheckTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftCheckTests.swift; sourceTree = "<group>"; };
+		844FCCA9198B323800EB242A /* Arbitrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Arbitrary.swift; sourceTree = "<group>"; };
+		844FCCAB198B32DC00EB242A /* Gen.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Gen.swift; sourceTree = "<group>"; };
+		844FCCAD198B367000EB242A /* Property.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Property.swift; sourceTree = "<group>"; };
+		844FCCAF198B36BE00EB242A /* Test.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Test.swift; sourceTree = "<group>"; };
+		844FCCB1198B375300EB242A /* Maybe.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Maybe.swift; sourceTree = "<group>"; };
+		844FCCB3198B39F300EB242A /* State.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = State.swift; sourceTree = "<group>"; };
+		844FCCB5198B3C0A00EB242A /* Functor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Functor.swift; sourceTree = "<group>"; };
+		844FCCB7198B3DB500EB242A /* Monad.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Monad.swift; sourceTree = "<group>"; };
+		844FCCB9198B3DC800EB242A /* Applicative.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Applicative.swift; sourceTree = "<group>"; };
+		844FCCBB198B405000EB242A /* IO.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IO.swift; sourceTree = "<group>"; };
+		844FCCBD198D9F9B00EB242A /* ST.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ST.swift; sourceTree = "<group>"; };
+		844FCCC0198EB4CA00EB242A /* Array.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Array.swift; sourceTree = "<group>"; };
+		844FCCC2198EC4F000EB242A /* Random.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Random.swift; sourceTree = "<group>"; };
+		844FCCC4198ECC4D00EB242A /* IORef.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IORef.swift; sourceTree = "<group>"; };
+		844FCCC6198EFB4700EB242A /* Rose.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Rose.swift; sourceTree = "<group>"; };
+		844FCCC8198EFF9B00EB242A /* SimpleSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleSpec.swift; sourceTree = "<group>"; };
+		844FCCCA198F204500EB242A /* Either.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Either.swift; sourceTree = "<group>"; };
+		844FCCCE198F24CF00EB242A /* Combinators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Combinators.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +108,16 @@
 			isa = PBXGroup;
 			children = (
 				844FCC92198B320500EB242A /* SwiftCheck.h */,
+				844FCCAF198B36BE00EB242A /* Test.swift */,
+				844FCCA9198B323800EB242A /* Arbitrary.swift */,
+				844FCCAB198B32DC00EB242A /* Gen.swift */,
+				844FCCCE198F24CF00EB242A /* Combinators.swift */,
+				844FCCAD198B367000EB242A /* Property.swift */,
+				844FCCC6198EFB4700EB242A /* Rose.swift */,
+				844FCCB3198B39F300EB242A /* State.swift */,
+				844FCCCD198F23C900EB242A /* System */,
+				844FCCCC198F23A900EB242A /* Data */,
+				844FCCBF198DC36500EB242A /* Control */,
 				844FCC90198B320500EB242A /* Supporting Files */,
 			);
 			path = SwiftCheck;
@@ -89,6 +135,7 @@
 			isa = PBXGroup;
 			children = (
 				844FCC9F198B320500EB242A /* SwiftCheckTests.swift */,
+				844FCCC8198EFF9B00EB242A /* SimpleSpec.swift */,
 				844FCC9D198B320500EB242A /* Supporting Files */,
 			);
 			path = SwiftCheckTests;
@@ -100,6 +147,37 @@
 				844FCC9E198B320500EB242A /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		844FCCBF198DC36500EB242A /* Control */ = {
+			isa = PBXGroup;
+			children = (
+				844FCCB5198B3C0A00EB242A /* Functor.swift */,
+				844FCCB9198B3DC800EB242A /* Applicative.swift */,
+				844FCCB7198B3DB500EB242A /* Monad.swift */,
+			);
+			name = Control;
+			sourceTree = "<group>";
+		};
+		844FCCCC198F23A900EB242A /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				844FCCC0198EB4CA00EB242A /* Array.swift */,
+				844FCCCA198F204500EB242A /* Either.swift */,
+				844FCCB1198B375300EB242A /* Maybe.swift */,
+			);
+			name = Data;
+			sourceTree = "<group>";
+		};
+		844FCCCD198F23C900EB242A /* System */ = {
+			isa = PBXGroup;
+			children = (
+				844FCCBB198B405000EB242A /* IO.swift */,
+				844FCCBD198D9F9B00EB242A /* ST.swift */,
+				844FCCC4198ECC4D00EB242A /* IORef.swift */,
+				844FCCC2198EC4F000EB242A /* Random.swift */,
+			);
+			name = System;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -210,6 +288,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				844FCCAE198B367000EB242A /* Property.swift in Sources */,
+				844FCCB0198B36BE00EB242A /* Test.swift in Sources */,
+				844FCCC3198EC4F000EB242A /* Random.swift in Sources */,
+				844FCCB2198B375300EB242A /* Maybe.swift in Sources */,
+				844FCCBE198D9F9B00EB242A /* ST.swift in Sources */,
+				844FCCC5198ECC4D00EB242A /* IORef.swift in Sources */,
+				844FCCBC198B405000EB242A /* IO.swift in Sources */,
+				844FCCAC198B32DC00EB242A /* Gen.swift in Sources */,
+				844FCCCB198F204500EB242A /* Either.swift in Sources */,
+				844FCCBA198B3DC800EB242A /* Applicative.swift in Sources */,
+				844FCCAA198B323800EB242A /* Arbitrary.swift in Sources */,
+				844FCCB8198B3DB500EB242A /* Monad.swift in Sources */,
+				844FCCC1198EB4CA00EB242A /* Array.swift in Sources */,
+				844FCCB6198B3C0A00EB242A /* Functor.swift in Sources */,
+				844FCCB4198B39F300EB242A /* State.swift in Sources */,
+				844FCCCF198F24CF00EB242A /* Combinators.swift in Sources */,
+				844FCCC7198EFB4700EB242A /* Rose.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -217,6 +312,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				844FCCC9198EFF9B00EB242A /* SimpleSpec.swift in Sources */,
 				844FCCA0198B320500EB242A /* SwiftCheckTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -316,6 +412,7 @@
 		844FCCA4198B320500EB242A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -327,12 +424,14 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
 		844FCCA5198B320500EB242A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
