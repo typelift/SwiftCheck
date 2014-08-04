@@ -9,8 +9,8 @@
 import Foundation
 
 public protocol Comonad : Applicative {
-	typealias FBA = F<B> -> A
-	func extend(fn: FBA) -> FB
+	typealias FAB = F<A> -> B
+	func extend(fn: FAB) -> FB
 }
 
 

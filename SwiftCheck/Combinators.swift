@@ -52,7 +52,7 @@ public func choose<A>(rng: (A, A)) -> Gen<A> {
 	})
 }
 
-public func promote<A, M : Monad, N : Monad where M.A == Gen<A>, N.A == A>(m: M) -> Gen<M> {
+public func promote<A, M : Monad, N : Monad where M.A == Gen<A>, N.A == A>(m: M) -> Gen<N> {
 	return Gen<M>(unGen: { (let r) in
 		return { (let n) in
 			return liftM({ (let mm) in
