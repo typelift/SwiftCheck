@@ -23,3 +23,7 @@ public protocol Monad : Applicative {
 	typealias AFB = A -> F<B>
 	func bind(fn: AFB) -> FB
 }
+
+/// Be a dear and also implement
+
+/// join<A>(rs: M<M<A>>) -> M<A>

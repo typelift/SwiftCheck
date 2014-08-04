@@ -52,13 +52,15 @@ public func choose<A>(rng: (A, A)) -> Gen<A> {
 	})
 }
 
-//public func promote<G : Gen, M : Monad where M.A == G>(m: M) -> Gen<M> {
-//	return Gen<M>(unGen: { (let r) in
-//		return { (let n) in
-//			return
-//		}
-//	})
-//}
+public func promote<A, M : Monad, N : Monad where M.A == Gen<A>, N.A == A>(m: M) -> Gen<M> {
+	return Gen<M>(unGen: { (let r) in
+		return { (let n) in
+			return liftM({ (let mm) in
+				return mm.unGen(r)(n)
+			})(m)
+		}
+	})
+}
 
 public func suchThat<A>(gen: Gen<A>)(p: (A -> Bool)) -> Gen<A> {
 	return suchThatMaybe(gen)(p).bind({ (let mx) in

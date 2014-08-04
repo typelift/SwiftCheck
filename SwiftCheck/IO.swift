@@ -78,3 +78,7 @@ extension IO : Monad {
 //@prefix public func <-<A, B>(x : IO<A>) -> A{
 //	return x.unsafePerformIO()
 //}
+
+public func join<A>(rs: IO<IO<A>>) -> IO<A> {
+	return rs.unsafePerformIO()
+}

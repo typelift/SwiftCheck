@@ -75,6 +75,12 @@ public func sequence<A>(ms: [Gen<A>]) -> Gen<[A]> {
 	})
 }
 
+public func join<A>(rs: Gen<Gen<A>>) -> Gen<A> {
+	return rs >>= { (let x) in
+		return x
+	}
+}
+
 public func liftM<A, R>(f: A -> R)(m1 : Gen<A>) -> Gen<R> {
 	return m1 >>= { (let x1) in
 		return Gen.pure(f(x1))

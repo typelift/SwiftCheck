@@ -55,3 +55,12 @@ extension Either : Monad {
 		}
 	}
 }
+
+public func join<A, B>(rs: Either<A, Either<A, B>>) -> Either<A, B> {
+	switch rs {
+		case .Left(let x):
+			return .Left(x)
+		case .Right(let either):
+			return either
+	}
+}

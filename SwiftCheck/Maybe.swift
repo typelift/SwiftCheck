@@ -61,3 +61,11 @@ extension Maybe : Monad {
 	})
 }
 
+public func join<A>(rs: Maybe<Maybe<A>>) -> Maybe<A> {
+	switch rs {
+		case .Nothing:
+			return .Nothing
+		case .Just(let x):
+			return x
+	}
+}
