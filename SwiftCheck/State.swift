@@ -17,7 +17,7 @@ public struct State {
 	var computeSize       : Int -> Int -> Int
 	var numSuccessTests   : Int
 	var numDiscardedTests : Int
-	var collected         : [[(String,Int)]] 
+	var collected         : [[(String,Int)]]
 	var expectedFailure   : Bool
 	var randomSeed        : StdGen
 	var numSuccessShrinks : Int

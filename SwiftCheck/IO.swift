@@ -65,11 +65,11 @@ extension IO : Monad {
 	}
 }
 
-@infix public func >>=<A, B>(x : IO<A>, f : A -> IO<B>) -> IO<B> {
+public func >>=<A, B>(x : IO<A>, f : A -> IO<B>) -> IO<B> {
 	return x.bind(f)
 }
 
-@infix public func >><A, B>(x : IO<A>, y : IO<B>) -> IO<B> {
+public func >><A, B>(x : IO<A>, y : IO<B>) -> IO<B> {
 	return x.bind({ (_) in
 		return y
 	})

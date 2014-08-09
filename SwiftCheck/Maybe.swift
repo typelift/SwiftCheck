@@ -51,11 +51,11 @@ extension Maybe : Monad {
 	}
 }
 
-@infix public func >>=<A, B>(x : Maybe<A>, f : A -> Maybe<B>) -> Maybe<B> {
+public func >>=<A, B>(x : Maybe<A>, f : A -> Maybe<B>) -> Maybe<B> {
 	return x.bind(f)
 }
 
-@infix public func >><A, B>(x : Maybe<A>, y : Maybe<B>) -> Maybe<B> {
+public func >><A, B>(x : Maybe<A>, y : Maybe<B>) -> Maybe<B> {
 	return x.bind({ (_) in
 		return y
 	})

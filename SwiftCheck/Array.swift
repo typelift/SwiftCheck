@@ -8,18 +8,18 @@
 
 import Foundation
 
-operator infix ++ { associativity left }
-operator infix +> { associativity left }
+infix operator ++ { associativity left }
+infix operator +> { associativity left }
 
 
-@infix func +><T>(lhs : T, rhs : [T]) -> [T] {
+func +><T>(lhs : T, rhs : [T]) -> [T] {
 	var arr = rhs
 	arr.insert(lhs, atIndex: 0)
 	return arr
 }
 
-@infix func ++<T>(var lhs : [T], rhs : [T]) -> [T] {
-	lhs += rhs
+infix func ++<T>(var lhs : [T], rhs : [T]) -> [T] {
+	lhs.append(rhs)
 	return lhs
 }
 

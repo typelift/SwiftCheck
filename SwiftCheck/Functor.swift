@@ -8,7 +8,7 @@
 
 import Foundation
 
-operator infix <^ {
+infix operator <^ {
 	associativity left
 	precedence 4
 }
@@ -26,6 +26,6 @@ public protocol Functor {
 	func fmap(f: (A -> B)) -> FB
 }
 
-//@infix func <^<A, B, F : Functor, G : Functor where F.B == B, F.A == A>(x: A)(f: F) -> G {
+//infix func <^<A, B, F : Functor, G : Functor where F.B == B, F.A == A>(x: A)(f: F) -> G {
 //	return f.fmap(const(x, f))
 //}

@@ -65,11 +65,11 @@ public func sequence<A>(ms: [Gen<A>]) -> Gen<[A]> {
 	})(z: Gen<[A]>.pure([]))(lst: ms)
 }
 
-@infix public func >>=<A, B>(x : Gen<A>, f : A -> Gen<B>) -> Gen<B> {
+public func >>=<A, B>(x : Gen<A>, f : A -> Gen<B>) -> Gen<B> {
 	return x.bind(f)
 }
 
-@infix public func >><A, B>(x : Gen<A>, y : Gen<B>) -> Gen<B> {
+public func >><A, B>(x : Gen<A>, y : Gen<B>) -> Gen<B> {
 	return x.bind({ (_) in
 		return y
 	})

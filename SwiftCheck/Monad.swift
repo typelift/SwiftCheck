@@ -8,11 +8,11 @@
 
 import Foundation
 
-operator infix >> {
+infix operator >> {
 	associativity left
 }
 
-operator infix >>= {
+infix operator >>= {
 	associativity left
 }
 

@@ -17,10 +17,10 @@ extension Rose : Functor {
 	typealias B = Any
 	public func fmap<B>(f: (A -> B)) -> Rose<B> {
 		switch self {
-		case .MkRose(let root, let children):
-			return Rose<B>.MkRose(f(root), children.map() { $0.fmap(f) })
-		case .IORose(var rs):
-			return Rose<B>.IORose(rs.fmap() { $0.fmap(f) })
+			case .MkRose(let root, let children):
+				return Rose<B>.MkRose(f(root), children.map() { $0.fmap(f) })
+			case .IORose(var rs):
+				return Rose<B>.IORose(rs.fmap() { $0.fmap(f) })
 		}
 	}
 }
@@ -46,11 +46,11 @@ extension Rose : Monad {
 	}
 }
 
-@infix public func >>=<A, B>(x : Rose<A>, f : A -> Rose<B>) -> Rose<B> {
+public func >>=<A, B>(x : Rose<A>, f : A -> Rose<B>) -> Rose<B> {
 	return x.bind(f)
 }
 
-@infix public func >><A, B>(x : Rose<A>, y : Rose<B>) -> Rose<B> {
+public func >><A, B>(x : Rose<A>, y : Rose<B>) -> Rose<B> {
 	return x.bind({ (_) in
 		return y
 	})
@@ -82,10 +82,10 @@ public func reduce(rs: Rose<TestResult>) -> IO<Rose<TestResult>> {
 
 public func on<A>(f: (A -> [Rose<A>] -> Rose<A>))(rs: Rose<A>) -> Rose<A> {
 	switch rs {
-	case .MkRose(let x, let rs):
-		return f(x)(rs)
-	case .IORose(let m):
-		return Rose.IORose(m.fmap(on(f)))
+		case .MkRose(let x, let rs):
+			return f(x)(rs)
+		case .IORose(let m):
+			return Rose.IORose(m.fmap(on(f)))
 	}
 }
 

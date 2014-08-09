@@ -196,9 +196,9 @@ public func cover<PROP : Testable>(b : Bool)(n : Int)(s : String)(p : PROP) -> P
 	return p.property()
 }
 
-operator infix ==> {}
+infix operator ==> {}
 
-@infix public func ==><PROP : Testable>(b: Bool, p : PROP) -> Property {
+public func ==><PROP : Testable>(b: Bool, p : PROP) -> Property {
 	if b {
 		return p.property()
 	}
@@ -215,16 +215,16 @@ public func forAll<A : Printable, PROP : Testable>(gen : Gen<A>)(pf : (A -> PROP
 	}
 }
 
-operator infix ^&^ {}
-operator infix ^&&^ {}
+infix operator ^&^ {}
+infix operator ^&&^ {}
 
-@infix public func ^&^<PROP : Testable>(p1 : PROP, p2 : PROP) -> Property {
+public func ^&^<PROP : Testable>(p1 : PROP, p2 : PROP) -> Property {
 	return Bool.arbitrary() >>= { (let b) in
 		printTestCase(b ? "LHS" : "RHS")(p: b ? p1 : p2)
 	}
 }
 
-//@infix public func ^&&^<PROP : Testable>(p1 : PROP, p2 : PROP) -> Property {
+//infix public func ^&&^<PROP : Testable>(p1 : PROP, p2 : PROP) -> Property {
 //	return conjoin [ p1.property(), p2.property() ]
 //}
 //
