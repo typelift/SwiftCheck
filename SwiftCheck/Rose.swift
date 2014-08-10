@@ -9,8 +9,8 @@
 import Foundation
 
 public enum Rose<A> {
-	case MkRose(A, [Rose<A>])
-	case IORose(IO<Rose<A>>)
+	case MkRose(Box<A>, [Rose<A>])
+	case IORose(Box<IO<Rose<A>>>)
 }
 
 extension Rose : Functor {
@@ -80,7 +80,7 @@ public func reduce(rs: Rose<TestResult>) -> IO<Rose<TestResult>> {
 	}
 }
 
-public func on<A>(f: (A -> [Rose<A>] -> Rose<A>))(rs: Rose<A>) -> Rose<A> {
+public func onRose<A>(f: (A -> [Rose<A>] -> Rose<A>))(rs: Rose<A>) -> Rose<A> {
 	switch rs {
 		case .MkRose(let x, let rs):
 			return f(x)(rs)

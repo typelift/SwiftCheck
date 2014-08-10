@@ -143,7 +143,7 @@ public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> IO<Result> {
 
 	switch rose {
 		case .MkRose(let res, _):
-			switch res {
+			switch res.value {
 				case .MkResult(Maybe.Just(true), let expect, _, _, let stamp, _):
 					var st2 = st
 					st2.numSuccessTests += 1

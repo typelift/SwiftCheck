@@ -51,11 +51,10 @@ public struct Prop {
 
 
 public func protectResults(rs: Rose<TestResult>) -> Rose<TestResult> {
-	return on({ (let x) in
+	return onRose({ (let x) in
 		return { (let rs) in
-			return Rose.IORose(protectResult(IO<TestResult>.pure(x)) >>= { (let y) in
-				return IO<Rose<TestResult>>.pure(Rose.MkRose(y, rs.map(protectResults)))
-			})
+			let y = protectResult(IO<TestResult>.pure(x)).unsafePerformIO()
+			return Rose.MkRose(Box<TestResult>(y), rs.map(protectResults))
 		}
 	})(rs: rs)
 }
@@ -126,9 +125,9 @@ public func mapSize<PROP : Testable> (f: Int -> Int)(p: PROP) -> Property {
 
 public func noShrinking<PROP : Testable>(p: PROP) -> Property {
 	return mapRoseResult({ (let rs) in
-		return on({ (let res) in
+		return onRose({ (let res) in
 			return { (_) in
-				return Rose.MkRose(res, [])
+				return Rose.MkRose(Box<TestResult>(res), [])
 			}
 		})(rs: rs)
 	})(p: p)

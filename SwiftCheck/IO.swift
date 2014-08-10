@@ -21,14 +21,14 @@ public struct IO<A> {
 	}
 
 	public func flatMap<B>(f: A -> IO<B>) -> IO<B> {
-		return IO<B>(apply: { (let rw) in
+		return IO<B>({ (let rw) in
 			let (nw, a) = self.apply(rw: rw)
 			return f(a).apply(rw: nw)
 		})
 	}
 
 	public func map<B>(f : A -> B) -> IO<B> {
-		return IO<B>(apply: { (let rw) in
+		return IO<B>({ (let rw) in
 			let (nw, a) = self.apply(rw: rw)
 			return (nw, f(a))
 		})
@@ -51,7 +51,7 @@ extension IO : Applicative {
 	}
 
 	public func ap<B>(fn: IO<A -> B>) -> IO<B> {
-		return IO<B>(apply: { (let rw) in
+		return IO<B>({ (let rw) in
 			let f = fn.unsafePerformIO()
 			let (nw, x) = self.apply(rw: rw)
 			return (nw, f(x))
@@ -81,4 +81,8 @@ public func >><A, B>(x : IO<A>, y : IO<B>) -> IO<B> {
 
 public func join<A>(rs: IO<IO<A>>) -> IO<A> {
 	return rs.unsafePerformIO()
+}
+
+public func do_<A>(fn: () -> IO<A>) -> IO<A> {
+	return fn()
 }

@@ -30,6 +30,7 @@
 		844FCCCF198F24CF00EB242A /* Combinators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCCE198F24CF00EB242A /* Combinators.swift */; };
 		8478A382198F2F1C00033523 /* Copointed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8478A381198F2F1C00033523 /* Copointed.swift */; };
 		8478A384198F2F4A00033523 /* Comonad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8478A383198F2F4A00033523 /* Comonad.swift */; };
+		847E498119971693001975E5 /* Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847E498019971693001975E5 /* Box.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,6 +70,7 @@
 		844FCCCE198F24CF00EB242A /* Combinators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Combinators.swift; sourceTree = "<group>"; };
 		8478A381198F2F1C00033523 /* Copointed.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Copointed.swift; sourceTree = "<group>"; };
 		8478A383198F2F4A00033523 /* Comonad.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Comonad.swift; sourceTree = "<group>"; };
+		847E498019971693001975E5 /* Box.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Box.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -169,6 +171,7 @@
 			isa = PBXGroup;
 			children = (
 				844FCCC0198EB4CA00EB242A /* Array.swift */,
+				847E498019971693001975E5 /* Box.swift */,
 				844FCCCA198F204500EB242A /* Either.swift */,
 				844FCCB1198B375300EB242A /* Maybe.swift */,
 			);
@@ -303,6 +306,7 @@
 				844FCCC5198ECC4D00EB242A /* IORef.swift in Sources */,
 				844FCCBC198B405000EB242A /* IO.swift in Sources */,
 				844FCCAC198B32DC00EB242A /* Gen.swift in Sources */,
+				847E498119971693001975E5 /* Box.swift in Sources */,
 				844FCCCB198F204500EB242A /* Either.swift in Sources */,
 				844FCCBA198B3DC800EB242A /* Applicative.swift in Sources */,
 				8478A384198F2F4A00033523 /* Comonad.swift in Sources */,
