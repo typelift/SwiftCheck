@@ -21,6 +21,26 @@ extension Gen : Functor {
 			}
 		})
 	}
+
+    public func bind<B>(fn: A -> Gen<B>) -> Gen<B> {
+		return Gen<B>(unGen: { (let r) in
+			return { (let n) in
+				let (r1, r2) = r.split()
+				let m = fn(self.unGen(r1)(n))
+				return m.unGen(r2)(n)
+			}
+		})
+	}
+
+    public func bindLift(fn: A -> LiftTestableGen) -> LiftTestableGen {
+		return LiftTestableGen(Gen<Prop>(unGen: { (let r) in
+			return { (let n) in
+				let (r1, r2) = r.split()
+				let m = fn(self.unGen(r1)(n))
+				return mkGen(m).unGen(r2)(n)
+			}
+		}))
+	}
 }
 
 extension Gen : Applicative {
@@ -41,17 +61,6 @@ extension Gen : Applicative {
 	}
 }
 
-extension Gen : Monad {
-	public func bind<B>(fn: A -> Gen<B>) -> Gen<B> {
-		return Gen<B>(unGen: { (let r) in
-			return { (let n) in
-				let (r1, r2) = r.split()
-				let m = fn(self.unGen(r1)(n))
-				return m.unGen(r2)(n)
-			}
-		})
-	}
-}
 
 public func sequence<A>(ms: [Gen<A>]) -> Gen<[A]> {
 	return foldr({ (let x) in
@@ -85,6 +94,23 @@ public func liftM<A, R>(f: A -> R)(m1 : Gen<A>) -> Gen<R> {
 	return m1 >>= { (let x1) in
 		return Gen.pure(f(x1))
 	}
+}
+
+public func promote<A>(x : Rose<Gen<A>>) -> Gen<Rose<A>> {
+    return delay().bind({ (let eval : Gen<A> -> A) in
+        return Gen<Rose<A>>.pure(liftM(eval)(m1: x))
+    })
+}
+
+
+public func delay<A>() -> Gen<Gen<A> -> A> {
+    return Gen(unGen: { (let r) in
+        return { (let n) in
+            return { (let g) in
+                return g.unGen(r)(n)
+            }
+        }
+    })
 }
 
 

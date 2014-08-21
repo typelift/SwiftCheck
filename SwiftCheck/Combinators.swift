@@ -14,10 +14,10 @@ private func vary(k : Int)(r: StdGen) -> StdGen {
 	return (k == (k / 2)) ? gen : vary(k / 2)(r: r)
 }
 
-public func variant<A>(k0: Int)(m: Gen<A>) -> Gen<A> {
+public func variant<A>(seed: Int)(m: Gen<A>) -> Gen<A> {
 	return Gen<A>(unGen: { (let r) in
 		return { (let n) in
-			return m.unGen(vary(k0)(r: r))(n)
+			return m.unGen(vary(seed)(r: r))(n)
 		}
 	})
 }
@@ -52,16 +52,6 @@ public func choose<A>(rng: (A, A)) -> Gen<A> {
 	})
 }
 
-public func promote<A, M : Monad, N : Monad where M.A == Gen<A>, N.A == A>(m: M) -> Gen<N> {
-	return Gen<M>(unGen: { (let r) in
-		return { (let n) in
-			return liftM({ (let mm) in
-				return mm.unGen(r)(n)
-			})(m)
-		}
-	})
-}
-
 public func suchThat<A>(gen: Gen<A>)(p: (A -> Bool)) -> Gen<A> {
 	return suchThatMaybe(gen)(p).bind({ (let mx) in
 		switch mx {
@@ -75,20 +65,21 @@ public func suchThat<A>(gen: Gen<A>)(p: (A -> Bool)) -> Gen<A> {
 	})
 }
 
+private func try<A>(gen: Gen<A>, k: Int, n : Int, p: A -> Bool) -> Gen<Maybe<A>> {
+    if n == 0 {
+        return Gen<Maybe<A>>.pure(Maybe<A>.Nothing)
+    }
+    return resize(2 * k + n)(m: gen).bind({ (let x : A) -> Gen<Maybe<A>> in
+        if p(x) {
+            Gen<Maybe<A>>.pure(Maybe.Just(x))
+        }
+        return try(gen, k + 1, n - 1, p)
+    })
+}
+
 public func suchThatMaybe<A>(gen: Gen<A>)(p: A -> Bool) -> Gen<Maybe<A>> {
-	func try(k: Int, n : Int) -> Gen<Maybe<A>> {
-		if n == 0 {
-			return Gen<Maybe<A>>.pure(Maybe<A>.Nothing)
-		}
-		return resize(2 * k + n)(m: gen).bind({ (let x : A) -> Gen<Maybe<A>> in
-			if p(x) {
-				Gen<Maybe<A>>.pure(Maybe.Just(x))
-			}
-			return try(k + 1, n - 1)
-		})
-	}
 	return sized({ (let n) in
-		return try(0, max(n, 1))
+		return try(gen, 0, max(n, 1), p)
 	})
 }
 
@@ -128,17 +119,17 @@ public func elements<A>(xs: [A]) -> Gen<A> {
 	})
 }
 
+func size(k : Double)(m : Int) -> Int {
+    let n = Double(m)
+    return Int((log(n + 1)) * k / log(100))
+}
+
 public func growingElements<A>(xs: [A]) -> Gen<A> {
 	assert(xs.count != 0, "growingElements used with empty list")
 
 	let k = Double(xs.count)
-	func size(m : Int) -> Int {
-		let n = Double(m)
-		return Int((log(n + 1)) * k / log(100))
-	}
-
 	return sized({ (let n) in
-		return elements(take(max(1, size(n)))(xs: xs))
+		return elements(take(max(1, size(k)(m: n)))(xs: xs))
 	})
 }
 

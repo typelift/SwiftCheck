@@ -10,12 +10,10 @@ import XCTest
 import SwiftCheck
 
 class SimpleSpec : XCTestCase {
-	func prop_reverse<A: Equatable>(xs: [A]) -> Bool {
-		return xs.reverse().reverse() == xs
-	}
-
-	func runTest() {
-		quickCheck(prop_reverse)
-	}
+    func prop(xs: [Int]) -> Bool {
+        xs == xs.reverse().reverse()
+    }
+    func testAll() {
+        quickCheck(prop);
+    }
 }
-

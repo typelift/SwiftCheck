@@ -14,13 +14,13 @@ public protocol RealWorld {}
 public let realWorld = World<RealWorld>()
 
 public struct IO<A> {
-	var apply: (rw: World<RealWorld>) -> (World<RealWorld>, A)
+	let apply: (rw: World<RealWorld>) -> (World<RealWorld>, A)
 
 	func unsafePerformIO() -> A  {
 		return self.apply(rw: realWorld).1
 	}
 
-	public func flatMap<B>(f: A -> IO<B>) -> IO<B> {
+    public func bind<B>(f: A -> IO<B>) -> IO<B> {
 		return IO<B>({ (let rw) in
 			let (nw, a) = self.apply(rw: rw)
 			return f(a).apply(rw: nw)
@@ -56,12 +56,6 @@ extension IO : Applicative {
 			let (nw, x) = self.apply(rw: rw)
 			return (nw, f(x))
 		})
-	}
-}
-
-extension IO : Monad {
-	public func bind<B>(fn: A -> IO<B>) -> IO<B> {
-		return self.flatMap(fn)
 	}
 }
 

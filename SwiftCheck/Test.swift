@@ -66,44 +66,43 @@ public func quickCheckResult<P : Testable>(p : P) -> IO<Result> {
 	return quickCheckWithResult(stdArgs(), p)
 }
 
+private func computeSize(args : Arguments)(x: Int)(y: Int) -> Int {
+    switch args {
+        case .Arguments(Maybe.Nothing, _, _, _, _):
+            return computeSize_(x)(d: y)
+        case .Arguments(Maybe.Just(let (_, s)), _, _, _, _):
+            return s
+    }
+}
+
 private func computeSize_(n: Int)(d: Int) -> Int {
 	return 0 //
 }
 
+private func rnd(args : Arguments) -> IO<StdGen> {
+    switch args {
+        case .Arguments(Maybe.Nothing, _, _, _, _):
+            return newStdGen()
+        case .Arguments(Maybe.Just(let (rnd, _)), _, _, _, _):
+            return IO<StdGen>.pure(rnd)
+    }
+}
+
 public func quickCheckWithResult<P : Testable>(args : Arguments, p : P) -> IO<Result> {
-	func rnd() -> IO<StdGen> {
-		switch args {
-		case .Arguments(Maybe.Nothing, _, _, _, _):
-			return newStdGen()
-		case .Arguments(Maybe.Just(let (rnd, _)), _, _, _, _):
-			return IO<StdGen>.pure(rnd)
-		}
-	}
-
-	func computeSize(x: Int)(y: Int) -> Int {
-		switch args {
-			case .Arguments(Maybe.Nothing, _, _, _, _):
-				return computeSize_(x)(d: y)
-			case .Arguments(Maybe.Just(let (_, s)), _, _, _, _):
-				return s
-		}
-	}
-
 	switch args {
 		case .Arguments(let replay, let maxSuccess, let maxDiscard, let maxSize, let chatty):
 			return test(State(terminal: Terminal(),
 				maxSuccessTests: maxSuccess,
 				maxDiscardedTests: maxDiscard,
-				computeSize: computeSize,
+				computeSize: computeSize(args),
 				numSuccessTests: 0,
 				numDiscardedTests: 0,
 				collected: [],
 				expectedFailure: false,
-				randomSeed: rnd().unsafePerformIO(),
+				randomSeed: rnd(args).unsafePerformIO(),
 				numSuccessShrinks: 0,
-				numTryShrinks: 0))(p.property().unGen)
+				numTryShrinks: 0))(p.property().unProperty.unGen)
 	}
-	assert(false, "")
 }
 
 public func test(st: State)(f: (StdGen -> Int -> Prop)) -> IO<Result> {
@@ -165,8 +164,13 @@ public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> IO<Result> {
 					}
 //					let numShrinks = st.
 					return test(st)(f)
+                default:
+                    break
 			}
+        default:
+            break
 	}
+	assert(false, "")
 }
 
 public func summary(s: State) -> [(String, Int)] { return [] }

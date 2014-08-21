@@ -18,21 +18,17 @@ func +><T>(lhs : T, rhs : [T]) -> [T] {
 	return arr
 }
 
-infix func ++<T>(var lhs : [T], rhs : [T]) -> [T] {
-	lhs.append(rhs)
+func ++<T>(var lhs : [T], rhs : [T]) -> [T] {
+	lhs += rhs
 	return lhs
 }
 
 public func foldl<A, B>(f: B -> A -> B) (z0: B)(xs0: [A]) -> B {
-	func lgo(z: B)(xs: [A]) -> B {
-		if xs.count == 0 {
-			return z
-		}
-		let hd = xs[0]
-		let tl = Array<A>(xs[1..<xs.count])
-		return lgo(f(z)(hd))(xs: tl)
-	}
-	return lgo(z0)(xs: xs0)
+    var xs = z0
+    for x in xs0 {
+        xs = f(xs)(x)
+    }
+    return xs
 }
 
 public func foldl1<A>(f: A -> A -> A)(xs0: [A]) -> A {
@@ -42,15 +38,11 @@ public func foldl1<A>(f: A -> A -> A)(xs0: [A]) -> A {
 }
 
 public func foldr<A, B>(k: (A -> B -> B))(z: B)(lst: [A]) -> B {
-	func go(xs: [A]) -> B {
-		if xs.count == 0 {
-			return z
-		}
-		let hd = lst[0]
-		let tl = Array<A>(lst[1..<xs.count])
-		return k(hd)(go(tl))
-	}
-	return go(lst)
+    var xs = z
+    for x in lst.reverse() {
+        xs = k(x)(z)
+    }
+    return xs
 }
 
 public func take<A>(n: Int)(xs: [A]) -> [A] {
@@ -67,11 +59,19 @@ public func take<A>(n: Int)(xs: [A]) -> [A] {
 }
 
 public func sum(n: [Int]) -> Int {
-	return foldl1({ $0 + $1 })(n)
+    return foldl1({ (let r) in
+        return { (let l) in
+            return l + r
+        }
+    })(xs0: n)
 }
 
 public func sum(n: [UInt]) -> UInt {
-	return foldl1({ $0 + $1 })(n)
+    return foldl1({ (let r) in
+        return { (let l) in
+            return l + r
+        }
+    })(xs0: n)
 }
 
 

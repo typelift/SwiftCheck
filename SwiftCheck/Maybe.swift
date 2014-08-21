@@ -40,26 +40,26 @@ extension Maybe : Applicative {
 	}
 }
 
-extension Maybe : Monad {
-	public func bind<B>(fn: A -> Maybe<B>) -> Maybe<B> {
-		switch self {
-			case .Nothing:
-				return .Nothing
-			case .Just(let x):
-				return fn(x)
-		}
-	}
-}
+//extension Maybe : Monad {
+//	public func bind<B>(fn: A -> Maybe<B>) -> Maybe<B> {
+//		switch self {
+//			case .Nothing:
+//				return Maybe<B>.Nothing
+//			case .Just(let x):
+//				return fn(x)
+//		}
+//	}
+//}
 
-public func >>=<A, B>(x : Maybe<A>, f : A -> Maybe<B>) -> Maybe<B> {
-	return x.bind(f)
-}
-
-public func >><A, B>(x : Maybe<A>, y : Maybe<B>) -> Maybe<B> {
-	return x.bind({ (_) in
-		return y
-	})
-}
+//public func >>=<A, B>(x : Maybe<A>, f : A -> Maybe<B>) -> Maybe<B> {
+//	return x.bind(f)
+//}
+//
+//public func >><A, B>(x : Maybe<A>, y : Maybe<B>) -> Maybe<B> {
+//	return x.bind({ (_) in
+//		return y
+//	})
+//}
 
 public func join<A>(rs: Maybe<Maybe<A>>) -> Maybe<A> {
 	switch rs {
