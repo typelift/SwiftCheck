@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		843DF9AF19A8524D00BDFDB1 /* Witness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843DF9AE19A8524D00BDFDB1 /* Witness.swift */; };
 		844FCC93198B320500EB242A /* SwiftCheck.h in Headers */ = {isa = PBXBuildFile; fileRef = 844FCC92198B320500EB242A /* SwiftCheck.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		844FCC99198B320500EB242A /* SwiftCheck.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 844FCC8D198B320500EB242A /* SwiftCheck.framework */; };
 		844FCCA0198B320500EB242A /* SwiftCheckTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCC9F198B320500EB242A /* SwiftCheckTests.swift */; };
@@ -31,7 +32,6 @@
 		8478A384198F2F4A00033523 /* Comonad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8478A383198F2F4A00033523 /* Comonad.swift */; };
 		847E498119971693001975E5 /* Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847E498019971693001975E5 /* Box.swift */; };
 		84B7975E19A5511200BB1852 /* STRef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B7975D19A5511200BB1852 /* STRef.swift */; };
-		84DBE5FC19A5956F002B2EFB /* Lift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DBE5FB19A5956F002B2EFB /* Lift.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +45,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		843DF9AE19A8524D00BDFDB1 /* Witness.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Witness.swift; sourceTree = "<group>"; };
 		844FCC8D198B320500EB242A /* SwiftCheck.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCheck.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		844FCC91198B320500EB242A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		844FCC92198B320500EB242A /* SwiftCheck.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftCheck.h; sourceTree = "<group>"; };
@@ -72,7 +73,6 @@
 		8478A383198F2F4A00033523 /* Comonad.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Comonad.swift; sourceTree = "<group>"; };
 		847E498019971693001975E5 /* Box.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Box.swift; sourceTree = "<group>"; };
 		84B7975D19A5511200BB1852 /* STRef.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STRef.swift; sourceTree = "<group>"; };
-		84DBE5FB19A5956F002B2EFB /* Lift.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Lift.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,7 +120,7 @@
 				844FCCA9198B323800EB242A /* Arbitrary.swift */,
 				844FCCAB198B32DC00EB242A /* Gen.swift */,
 				844FCCCE198F24CF00EB242A /* Combinators.swift */,
-				84DBE5FB19A5956F002B2EFB /* Lift.swift */,
+				843DF9AE19A8524D00BDFDB1 /* Witness.swift */,
 				844FCCAD198B367000EB242A /* Property.swift */,
 				844FCCC6198EFB4700EB242A /* Rose.swift */,
 				844FCCB3198B39F300EB242A /* State.swift */,
@@ -303,7 +303,6 @@
 				844FCCAE198B367000EB242A /* Property.swift in Sources */,
 				844FCCB0198B36BE00EB242A /* Test.swift in Sources */,
 				844FCCC3198EC4F000EB242A /* Random.swift in Sources */,
-				84DBE5FC19A5956F002B2EFB /* Lift.swift in Sources */,
 				8478A382198F2F1C00033523 /* Copointed.swift in Sources */,
 				844FCCB2198B375300EB242A /* Maybe.swift in Sources */,
 				844FCCBE198D9F9B00EB242A /* ST.swift in Sources */,
@@ -315,6 +314,7 @@
 				844FCCBA198B3DC800EB242A /* Applicative.swift in Sources */,
 				8478A384198F2F4A00033523 /* Comonad.swift in Sources */,
 				844FCCAA198B323800EB242A /* Arbitrary.swift in Sources */,
+				843DF9AF19A8524D00BDFDB1 /* Witness.swift in Sources */,
 				844FCCB8198B3DB500EB242A /* Monad.swift in Sources */,
 				844FCCC1198EB4CA00EB242A /* Array.swift in Sources */,
 				844FCCB6198B3C0A00EB242A /* Functor.swift in Sources */,

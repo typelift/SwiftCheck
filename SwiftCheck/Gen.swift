@@ -22,7 +22,7 @@ extension Gen : Functor {
 		})
 	}
 
-    public func bind<B>(fn: A -> Gen<B>) -> Gen<B> {
+	public func bind<B>(fn: A -> Gen<B>) -> Gen<B> {
 		return Gen<B>(unGen: { (let r) in
 			return { (let n) in
 				let (r1, r2) = r.split()
@@ -32,8 +32,8 @@ extension Gen : Functor {
 		})
 	}
 
-    public func bindLift(fn: A -> LiftTestableGen) -> LiftTestableGen {
-		return LiftTestableGen(Gen<Prop>(unGen: { (let r) in
+	public func bindWitness(fn: A -> WitnessTestableGen) -> WitnessTestableGen {
+		return WitnessTestableGen(Gen<Prop>(unGen: { (let r) in
 			return { (let n) in
 				let (r1, r2) = r.split()
 				let m = fn(self.unGen(r1)(n))
@@ -96,21 +96,25 @@ public func liftM<A, R>(f: A -> R)(m1 : Gen<A>) -> Gen<R> {
 	}
 }
 
+public func do_<A>(fn: () -> Gen<A>) -> Gen<A> {
+	return fn()
+}
+
 public func promote<A>(x : Rose<Gen<A>>) -> Gen<Rose<A>> {
-    return delay().bind({ (let eval : Gen<A> -> A) in
-        return Gen<Rose<A>>.pure(liftM(eval)(m1: x))
-    })
+	return delay().bind({ (let eval : Gen<A> -> A) in
+		return Gen<Rose<A>>.pure(liftM(eval)(m1: x))
+	})
 }
 
 
 public func delay<A>() -> Gen<Gen<A> -> A> {
-    return Gen(unGen: { (let r) in
-        return { (let n) in
-            return { (let g) in
-                return g.unGen(r)(n)
-            }
-        }
-    })
+	return Gen(unGen: { (let r) in
+		return { (let n) in
+			return { (let g) in
+				return g.unGen(r)(n)
+			}
+		}
+	})
 }
 
 

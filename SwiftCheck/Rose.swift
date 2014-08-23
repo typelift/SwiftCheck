@@ -24,7 +24,7 @@ extension Rose : Functor {
 		}
 	}
 
-    public func bind<B>(fn: A -> Rose<B>) -> Rose<B> {
+	public func bind<B>(fn: A -> Rose<B>) -> Rose<B> {
 		return join(self.fmap(fn))
 	}
 }
@@ -69,12 +69,12 @@ public func join<A>(rs: Rose<Rose<A>>) -> Rose<A> {
 		case .IORose(var rs):
 			return Rose.IORose(Box<IO<Rose<A>>>(rs.value.fmap(join)))
 		case .MkRose(let bx , let rs):
-            switch bx.value {
-                case .IORose(let rm):
-                    return Rose.IORose(Box(IO<Rose<A>>.pure(join(Rose.MkRose(Box(rm.value.unsafePerformIO()), rs)))))
-                case .MkRose(let x, let ts):
-                    return Rose.MkRose(x, rs.map(join) ++ ts)
-            }
+			switch bx.value {
+				case .IORose(let rm):
+					return Rose.IORose(Box(IO<Rose<A>>.pure(join(Rose.MkRose(Box(rm.value.unsafePerformIO()), rs)))))
+				case .MkRose(let x, let ts):
+					return Rose.MkRose(x, rs.map(join) ++ ts)
+			}
 			
 	}
 }
@@ -99,4 +99,8 @@ public func onRose<A>(f: (A -> [Rose<A>] -> Rose<A>))(rs: Rose<A>) -> Rose<A> {
 
 public func protectRose(x: IO<Rose<TestResult>>) -> IO<Rose<TestResult>> {
 	return protect(IO<Rose<TestResult>>.pure(Rose<TestResult>.pure(exception("Exception"))))
+}
+
+public func do_<A>(fn: () -> Rose<A>) -> Rose<A> {
+	return fn()
 }

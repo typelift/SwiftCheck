@@ -24,11 +24,11 @@ func ++<T>(var lhs : [T], rhs : [T]) -> [T] {
 }
 
 public func foldl<A, B>(f: B -> A -> B) (z0: B)(xs0: [A]) -> B {
-    var xs = z0
-    for x in xs0 {
-        xs = f(xs)(x)
-    }
-    return xs
+	var xs = z0
+	for x in xs0 {
+		xs = f(xs)(x)
+	}
+	return xs
 }
 
 public func foldl1<A>(f: A -> A -> A)(xs0: [A]) -> A {
@@ -38,11 +38,11 @@ public func foldl1<A>(f: A -> A -> A)(xs0: [A]) -> A {
 }
 
 public func foldr<A, B>(k: (A -> B -> B))(z: B)(lst: [A]) -> B {
-    var xs = z
-    for x in lst.reverse() {
-        xs = k(x)(z)
-    }
-    return xs
+	var xs = z
+	for x in lst.reverse() {
+		xs = k(x)(z)
+	}
+	return xs
 }
 
 public func take<A>(n: Int)(xs: [A]) -> [A] {
@@ -59,19 +59,19 @@ public func take<A>(n: Int)(xs: [A]) -> [A] {
 }
 
 public func sum(n: [Int]) -> Int {
-    return foldl1({ (let r) in
-        return { (let l) in
-            return l + r
-        }
-    })(xs0: n)
+	return foldl1({ (let r) in
+		return { (let l) in
+			return l + r
+		}
+	})(xs0: n)
 }
 
 public func sum(n: [UInt]) -> UInt {
-    return foldl1({ (let r) in
-        return { (let l) in
-            return l + r
-        }
-    })(xs0: n)
+	return foldl1({ (let r) in
+		return { (let l) in
+			return l + r
+		}
+	})(xs0: n)
 }
 
 
@@ -80,4 +80,22 @@ func quicksort<T : Comparable>(l : [T]) -> [T] {
 	let p = l[0]
 	let xs = Array<T>(l[1..<l.count])
 	return quicksort(xs.filter { $0 < p }) ++ [p] ++ quicksort(xs.filter { $0 >= p })
+}
+
+private func sequenceF<A>(m: Rose<A>)(n: Rose<[A]>) -> Rose<[A]> {
+	return m >>= { (let x) in
+		return n >>= { (let xs) in
+			var arr = xs
+			arr.insert(x, atIndex: 0)
+			return Rose<[A]>.pure(arr)
+		}
+	}
+}
+
+func sequence<A>(ms : [Rose<A>]) -> Rose<[A]> {
+	return foldr(sequenceF)(z: Rose<[A]>.pure([]))(lst: ms)
+}
+
+func mapM<A, B>(f: A -> Rose<B>, xs: [A]) -> Rose<[B]> {
+	return sequence(xs.map(f))
 }

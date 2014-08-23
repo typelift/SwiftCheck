@@ -13,7 +13,7 @@ public protocol Testable {
 }
 
 public func unProperty(x : Property) -> Gen<Prop> {
-    return x.unProperty
+	return x.unProperty
 }
 
 func result(ok: Maybe<Bool>) -> TestResult {
@@ -90,17 +90,17 @@ public func mapSize<PROP : Testable> (f: Int -> Int)(p: PROP) -> Property {
 }
 
 private func props<A, PROP : Testable>(shrinker: A -> [A])(x : A)(pf: A -> PROP) -> Rose<Gen<Prop>> {
-    return Rose.MkRose(Box(pf(x).property().unProperty), shrinker(x).map({ (let x1) in
-        return props(shrinker)(x: x)(pf: pf)
-    }))
+	return Rose.MkRose(Box(pf(x).property().unProperty), shrinker(x).map({ (let x1) in
+		return props(shrinker)(x: x)(pf: pf)
+	}))
 }
 
-public func shrinking<A, PROP : Testable> (shrinker: A -> [A])(x0: A)(pf: A -> PROP) -> Property {
-    return Property(promote(props(shrinker)(x: x0)(pf: pf)).fmap({ (let rs) in
-        return Prop(unProp: join(rs.fmap({ (let x) in
-            return x.unProp
-        })))
-    }))
+public func shrinking<A> (shrinker: A -> [A], x0: A, pf: A -> Testable) -> Property {
+	return Property(promote(props(shrinker)(x: x0)(pf: pf)).fmap({ (let rs) in
+		return Prop(unProp: join(rs.fmap({ (let x) in
+			return x.unProp
+		})))
+	}))
 }
 
 public func noShrinking<PROP : Testable>(p: PROP) -> Property {
@@ -123,12 +123,21 @@ public func callback<PROP : Testable>(cb: Callback)(p: PROP) -> Property {
 }
 
 public func counterexample<PROP : Testable>(s : String)(p: PROP) -> Property {
-    return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { (let st) in
-        return { (let _res) in
-            println(s)
-            return IO.pure(())
-        }
-    }))(p: p)
+	return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { (let st) in
+		return { (let _res) in
+			println(s)
+			return IO.pure(())
+		}
+	}))(p: p)
+}
+
+public func counterexample<PROP : Testable>(s : String)(p: PROP) -> Testable {
+	return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { (let st) in
+		return { (let _res) in
+			println(s)
+			return IO.pure(())
+		}
+	}))(p: p)
 }
 
 public func printTestCase<PROP : Testable>(s: String)(p: PROP) -> Property {
@@ -195,11 +204,11 @@ public func ==><PROP : Testable>(b: Bool, p : PROP) -> Property {
 
 //public func within<PROP : Testable>(n : Int)(p : PROP) -> Property {
 //	return mapRoseResult({ (let rose) in
-//        return ioRose(do_({
-//            let rs = reduce(rose)
-//            
-//        }))
-//    })
+//		return ioRose(do_({
+//			let rs = reduce(rose)
+//			
+//		}))
+//	})
 //}
 
 public func forAll<A : Printable, PROP : Testable>(gen : Gen<A>)(pf : (A -> PROP)) -> Property {
@@ -208,33 +217,75 @@ public func forAll<A : Printable, PROP : Testable>(gen : Gen<A>)(pf : (A -> PROP
 	})
 }
 
-public func forAllShrink<A : Printable, PROP : Testable>(gen : Gen<A>)(shrinker: A -> [A])(pf : (A -> PROP)) -> Property {
-	return Property(gen.bindLift({ (let x) in
-        return LiftTestableGen(Gen<Prop>(unGen: { (let r) in
-			return { (let n) in
-				let (r1, r2) = r.split()
-				let m = LiftTestableGen(unProperty(shrinking(shrinker)(x0: gen.unGen(r1)(n))(pf: { (let x0) in
-                    return counterexample(x0.description)(pf(x0))
-                }))).mp
-				return m.unGen(r2)(n)
-			}
-		}))
+public func forAllShrink<A : Printable, PROP : Testable>(gen : Gen<A>)(shrinker: A -> [A])(f : A -> PROP) -> Property {
+	let counterexample_ : String -> PROP -> Property = { (let s : String) -> PROP -> Property in
+		return { (let p :PROP) -> Property in
+			return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { (let st) in
+				return { (let _res) in
+					println(s)
+					return IO.pure(())
+				}
+			}))(p: p)
+		}
+	}
+	return Property(gen.bindWitness({ (let x : A) -> WitnessTestableGen in
+		return WitnessTestableGen(unProperty(shrinking(shrinker, x, { (let xs : A) -> Testable in
+			return counterexample_(xs.description)(f(xs))
+		})))
 	}))
 }
 
 infix operator ^&^ {}
 infix operator ^&&^ {}
 
-public func ^&^<PROP : Testable>(p1 : PROP, p2 : PROP) -> Property {
-	return Property(true.arbitrary() >>= { (let b) in
-		return printTestCase(b ? "LHS" : "RHS")(p: b ? p1 : p2).unProperty
-	})
-}
-
-//infix public func ^&&^<PROP : Testable>(p1 : PROP, p2 : PROP) -> Property {
-//	return conjoin [ p1.property(), p2.property() ]
+//public func ^&^<PROP : Testable>(p1 : PROP, p2 : PROP) -> Property {
+//	return Property(true.arbitrary() >>= { (let b) in
+//		return printTestCase(b ? "LHS" : "RHS")(p: b ? p1 : p2).unProperty
+//	})
 //}
 //
+//public func ^&&^<PROP : Testable>(p1 : PROP, p2 : PROP) -> Property {
+//	return conjoin([ p1.property(), p2.property() ])
+//}
+//
+//private func conj<PROP : Testable, A>(ps: [TestResult], rs : [Rose<Prop>]) -> Rose<TestResult> {
+//	if rs.count == 0 {
+//		return Rose.MkRose(Box(succeeded()), [])
+//	}
+//	return Rose.IORose(do_({
+//		let rose = reduce(rs[0])
+//		switch rose {
+//			case .MkRose(let result, _): {
+////				if !result.expect {
+////					return (return failed { reason = "expectFailure may not occur inside a conjunction" })
+////				}
+//				switch result.ok {
+//					case .Just(true):
+//						return Rose.pure(conj(cbs +> result.callbacks))
+//					case .Just(false):
+//						return Rose.pure(rose)
+//					case Nothing:
+//
+//				}
+//			}
+//
+//		}
+//	}))
+//}
+//
+//public func conjoin<PROP : Testable>(ps : [PROP]) -> Property {
+//	return Property(Gen<Prop>.pure(Prop(conj([])(mapM({ (let p) in
+//		return unProperty(p.property()).fmap { (let x) in
+//			return x.unProp
+//		}
+//	}, ps)))))
+//}
+
+infix operator === {}
+
+public func ===<A where A : Equatable, A : Printable>(x : A, y : A) -> Property {
+	return counterexample(x.description + "/=" + y.description)(p: x == y)
+}
 
 public enum Callback {
 	case PostTest(kind: CallbackKind, f: State -> Result -> IO<()>)
@@ -257,15 +308,16 @@ public enum TestResult {
 }
 
 public struct Property {
-    let unProperty : Gen<Prop>
+	let unProperty : Gen<Prop>
 
-    public init(_ val: Gen<Prop>) {
-        self.unProperty = val;
-    }
+	public init(_ val: Gen<Prop>) {
+		self.unProperty = val;
+	}
 
-    public init(_ val: LiftTestableGen) {
-        self.unProperty = mkGen(val);
-    }
+	public init(_ val: WitnessTestableGen) {
+		self.unProperty = mkGen(val);
+	}
+
 }
 
 
@@ -274,9 +326,9 @@ public struct Prop {
 }
 
 extension Property : Testable {
-    public func property() -> Property {
-        return Property(self.unProperty)
-    }
+	public func property() -> Property {
+		return Property(self.unProperty)
+	}
 }
 
 extension Prop : Testable {

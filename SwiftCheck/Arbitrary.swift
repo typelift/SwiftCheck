@@ -10,18 +10,18 @@ import Foundation
 
 public protocol Arbitrary {
 	typealias A : Arbitrary
-    func arbitrary() -> Gen<A>
-	func shrink() -> [A]
+	class func arbitrary() -> Gen<A>
+	class func shrink(A) -> [A]
 }
 
 extension Bool : Arbitrary {
 	typealias A = Bool
-	public func arbitrary() -> Gen<Bool> {
+	public static func arbitrary() -> Gen<Bool> {
 		return choose((false, true))
 	}
 
-	public func shrink() -> [Bool] {
-		if self {
+	public static func shrink(x : Bool) -> [Bool] {
+		if x {
 			return [false]
 		}
 		return []
@@ -31,21 +31,21 @@ extension Bool : Arbitrary {
 extension Bool : CoArbitrary {
 	public static func coarbitrary<C>(x: Bool) -> Gen<C> -> Gen<C> {
 		if x {
-            return variant(1)
-        }
-        return variant(0)
+			return variant(1)
+		}
+		return variant(0)
 	}
 }
 
 extension Int : Arbitrary {
 	typealias A = Int
-	public func arbitrary() -> Gen<Int> {
+	public static func arbitrary() -> Gen<Int> {
 		return sized({ (let n) in
-            return choose((-n, n))
-        })
+			return choose((-n, n))
+		})
 	}
 
-	public func shrink() -> [Int] {
+	public static func shrink(_ : Int) -> [Int] {
 		return []
 	}
 }
