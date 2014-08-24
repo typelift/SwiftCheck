@@ -16,8 +16,7 @@ infix operator >>= {
 	associativity left
 }
 
-//operator prefix <- {
-//}
+infix operator <- { }
 
 public protocol Monad : Applicative {
 	typealias AFB = A -> F<B>

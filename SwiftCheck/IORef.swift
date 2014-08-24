@@ -22,14 +22,12 @@ public struct IORef<A> {
 	}
 
 	mutating func atomicModifyIORef<B>(vfn : (A -> A)) -> IO<A> {
-		return stToIO(value.modifySTRef(vfn)) >>= { (_) in
-			return self.readIORef()
-		}
+		return stToIO(value.modifySTRef(vfn)) >> readIORef()
 	}
 }
 
 public func newIORef<A>(v: A) -> IO<IORef<A>> {
-	return stRefToIO(STRef<RealWorld, A>(a: v)).bind({ (let vari) in
+	return stRefToIO(STRef<RealWorld, A>(v)).bind({ (let vari) in
 		return IO<IORef<A>>.pure(IORef(value: vari))
 	})
 }

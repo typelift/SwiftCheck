@@ -95,7 +95,7 @@ private func props<A, PROP : Testable>(shrinker: A -> [A])(x : A)(pf: A -> PROP)
 	}))
 }
 
-public func shrinking<A> (shrinker: A -> [A], x0: A, pf: A -> Testable) -> Property {
+public func shrinking<A, PROP : Testable> (shrinker: A -> [A])(x0: A)(pf: A -> PROP) -> Property {
 	return Property(promote(props(shrinker)(x: x0)(pf: pf)).fmap({ (let rs) in
 		return Prop(unProp: join(rs.fmap({ (let x) in
 			return x.unProp
@@ -229,7 +229,7 @@ public func forAllShrink<A : Printable, PROP : Testable>(gen : Gen<A>)(shrinker:
 		}
 	}
 	return Property(gen.bindWitness({ (let x : A) -> WitnessTestableGen in
-		return WitnessTestableGen(unProperty(shrinking(shrinker, x, { (let xs : A) -> Testable in
+		return WitnessTestableGen(unProperty(shrinking(shrinker)(x0: x)({ (let xs : A) -> Testable in
 			return counterexample_(xs.description)(f(xs))
 		})))
 	}))

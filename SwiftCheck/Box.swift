@@ -9,17 +9,17 @@
 import Foundation
 
 public final class Box<T> {
-  let _value : () -> T
-    
-  public init(_ value : T) {
-    self._value = { value }
-  }
-  
-  public var value: T {
-    return _value()
-  }
-  
-  public func map<U>(fn: T -> U) -> Box<U> {
-    return Box<U>(fn(value)) // TODO: file rdar, type inf fails without <U>
-  }
+	let val : () -> T
+
+	public init(_ value : T) {
+		self.val = { value }
+	}
+
+	public var value: T {
+		return val()
+	}
+
+	public func map<U>(fn: T -> U) -> Box<U> {
+		return Box<U>(fn(value))
+	}
 }

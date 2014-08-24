@@ -20,7 +20,7 @@ public struct IO<A> {
 		return self.apply(rw: realWorld).1
 	}
 
-    public func bind<B>(f: A -> IO<B>) -> IO<B> {
+	public func bind<B>(f: A -> IO<B>) -> IO<B> {
 		return IO<B>({ (let rw) in
 			let (nw, a) = self.apply(rw: rw)
 			return f(a).apply(rw: nw)
@@ -68,10 +68,10 @@ public func >><A, B>(x : IO<A>, y : IO<B>) -> IO<B> {
 		return y
 	})
 }
-//
-//@prefix public func <-<A, B>(x : IO<A>) -> A{
-//	return x.unsafePerformIO()
-//}
+
+public func <-<A, B>(inout lhs : A, rhs : IO<A>) {
+	lhs = rhs.unsafePerformIO()
+}
 
 public func join<A>(rs: IO<IO<A>>) -> IO<A> {
 	return rs.unsafePerformIO()
