@@ -218,19 +218,9 @@ public func forAll<A : Printable, PROP : Testable>(gen : Gen<A>)(pf : (A -> PROP
 }
 
 public func forAllShrink<A : Printable, PROP : Testable>(gen : Gen<A>)(shrinker: A -> [A])(f : A -> PROP) -> Property {
-	let counterexample_ : String -> PROP -> Property = { (let s : String) -> PROP -> Property in
-		return { (let p :PROP) -> Property in
-			return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { (let st) in
-				return { (let _res) in
-					println(s)
-					return IO.pure(())
-				}
-			}))(p: p)
-		}
-	}
 	return Property(gen.bindWitness({ (let x : A) -> WitnessTestableGen in
 		return WitnessTestableGen(unProperty(shrinking(shrinker)(x0: x)({ (let xs : A) -> Testable in
-			return counterexample_(xs.description)(f(xs))
+			return unsafeCoerce(counterexample(xs.description)(p: f(xs)))
 		})))
 	}))
 }

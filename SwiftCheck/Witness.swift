@@ -33,30 +33,9 @@ public struct LiftTestableFunction<A, PROP : Testable where A : Arbitrary, A : P
 		self.mp = mp
 	}
 
-	let forAllShrink_ : Gen<A> -> (A -> [A]) -> (A -> PROP) = {(let gen : Gen<A>) in
-		return { (let shrinker: (A -> [A])) in
-			return { (let f : (A -> PROP)) in
-				let counterexample_ : String -> PROP -> Property = { (let s : String) -> PROP -> Property in
-					return { (let p :PROP) -> Property in
-						return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { (let st) in
-							return { (let _res) in
-								println(s)
-								return IO.pure(())
-							}
-						}))(p: p)
-					}
-				}
-				return Property(gen.bindWitness({ (let x : A) -> WitnessTestableGen in
-					return WitnessTestableGen(unProperty(shrinking(shrinker, x, { (let xs : A) -> Testable in
-						return counterexample_(xs.description)(f(xs))
-					})))
-				}))
-			}
-		}
-	}
-
 	public func property() -> Property {
-		return forAllShrink_(A.arbitrary)(shrinker: A.shrink)(f: mp)
+		let x : Property = unsafeCoerce(forAllShrink(A.arbitrary)(shrinker: A.shrink)(f: mp))
+        return x
 	}
 }
 
