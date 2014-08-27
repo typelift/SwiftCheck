@@ -11,9 +11,15 @@ import SwiftCheck
 
 class SimpleSpec : XCTestCase {
     func prop(xs: [Int]) -> Bool {
-        xs == xs.reverse().reverse()
+        return xs == xs.reverse().reverse()
     }
-    func testAll() {
-        quickCheck(prop);
-    }
+  
+	func refl(x : Int) -> Bool {
+		return x == x
+	}
+	
+	func testAll() {
+		quickCheck(refl)
+	}
+	
 }

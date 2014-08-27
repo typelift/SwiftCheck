@@ -26,7 +26,7 @@ extension WitnessTestableGen : Testable {
 	}
 }
 
-public struct LiftTestableFunction<A, PROP : Testable where A : Arbitrary, A : Printable> : Testable {
+public struct WitnessTestableFunction<A, PROP : Testable where A : Arbitrary, A : Printable> : Testable {
 	let mp : A -> PROP
 
 	public init(_ mp: A -> PROP) {
@@ -34,8 +34,7 @@ public struct LiftTestableFunction<A, PROP : Testable where A : Arbitrary, A : P
 	}
 
 	public func property() -> Property {
-		let x : Property = unsafeCoerce(forAllShrink(A.arbitrary)(shrinker: A.shrink)(f: mp))
-        return x
+		return unsafeCoerce(forAllShrink(A.arbitrary)(shrinker: A.shrink)(f: mp))
 	}
 }
 

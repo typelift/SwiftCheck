@@ -206,7 +206,7 @@ public func ==><PROP : Testable>(b: Bool, p : PROP) -> Property {
 //	return mapRoseResult({ (let rose) in
 //		return ioRose(do_({
 //			let rs = reduce(rose)
-//			
+//
 //		}))
 //	})
 //}
@@ -228,11 +228,11 @@ public func forAllShrink<A : Printable, PROP : Testable>(gen : Gen<A>)(shrinker:
 infix operator ^&^ {}
 infix operator ^&&^ {}
 
-//public func ^&^<PROP : Testable>(p1 : PROP, p2 : PROP) -> Property {
-//	return Property(true.arbitrary() >>= { (let b) in
-//		return printTestCase(b ? "LHS" : "RHS")(p: b ? p1 : p2).unProperty
-//	})
-//}
+public func ^&^<PROP : Testable>(p1 : PROP, p2 : PROP) -> Property {
+	return Property(Bool.arbitrary() >>= { (let b) in
+		return printTestCase(b ? "LHS" : "RHS")(p: b ? p1 : p2).unProperty
+	})
+}
 //
 //public func ^&&^<PROP : Testable>(p1 : PROP, p2 : PROP) -> Property {
 //	return conjoin([ p1.property(), p2.property() ])
