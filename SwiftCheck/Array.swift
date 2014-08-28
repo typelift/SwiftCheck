@@ -82,17 +82,19 @@ func quicksort<T : Comparable>(l : [T]) -> [T] {
 	return quicksort(xs.filter { $0 < p }) ++ [p] ++ quicksort(xs.filter { $0 >= p })
 }
 
-private func sequenceF<A>(m: Rose<A>)(n: Rose<[A]>) -> Rose<[A]> {
-	return m >>= { (let x) in
-		return n >>= { (let xs) in
-			var arr = xs
-			arr.insert(x, atIndex: 0)
-			return Rose<[A]>.pure(arr)
-		}
-	}
-}
 
 func sequence<A>(ms : [Rose<A>]) -> Rose<[A]> {
+	let sequenceF : Rose<A> -> Rose<[A]> -> Rose<[A]> = { (m: Rose<A>) in
+		return { (n: Rose<[A]>) in
+			return m >>= { (let x) in
+				return n >>= { (let xs) in
+					var arr = xs
+					arr.insert(x, atIndex: 0)
+					return Rose<[A]>.pure(arr)
+				}
+			}
+		}
+	}
 	return foldr(sequenceF)(z: Rose<[A]>.pure([]))(lst: ms)
 }
 

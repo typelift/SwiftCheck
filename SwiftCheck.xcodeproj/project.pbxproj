@@ -10,7 +10,6 @@
 		843DF9AF19A8524D00BDFDB1 /* Witness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843DF9AE19A8524D00BDFDB1 /* Witness.swift */; };
 		844FCC93198B320500EB242A /* SwiftCheck.h in Headers */ = {isa = PBXBuildFile; fileRef = 844FCC92198B320500EB242A /* SwiftCheck.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		844FCC99198B320500EB242A /* SwiftCheck.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 844FCC8D198B320500EB242A /* SwiftCheck.framework */; };
-		844FCCA0198B320500EB242A /* SwiftCheckTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCC9F198B320500EB242A /* SwiftCheckTests.swift */; };
 		844FCCAA198B323800EB242A /* Arbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCA9198B323800EB242A /* Arbitrary.swift */; };
 		844FCCAC198B32DC00EB242A /* Gen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCAB198B32DC00EB242A /* Gen.swift */; };
 		844FCCAE198B367000EB242A /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCAD198B367000EB242A /* Property.swift */; };
@@ -52,7 +51,6 @@
 		844FCC92198B320500EB242A /* SwiftCheck.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftCheck.h; sourceTree = "<group>"; };
 		844FCC98198B320500EB242A /* SwiftCheckTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftCheckTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		844FCC9E198B320500EB242A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		844FCC9F198B320500EB242A /* SwiftCheckTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftCheckTests.swift; sourceTree = "<group>"; };
 		844FCCA9198B323800EB242A /* Arbitrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Arbitrary.swift; sourceTree = "<group>"; };
 		844FCCAB198B32DC00EB242A /* Gen.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Gen.swift; sourceTree = "<group>"; };
 		844FCCAD198B367000EB242A /* Property.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Property.swift; sourceTree = "<group>"; };
@@ -146,7 +144,6 @@
 		844FCC9C198B320500EB242A /* SwiftCheckTests */ = {
 			isa = PBXGroup;
 			children = (
-				844FCC9F198B320500EB242A /* SwiftCheckTests.swift */,
 				844FCCC8198EFF9B00EB242A /* SimpleSpec.swift */,
 				844FCC9D198B320500EB242A /* Supporting Files */,
 			);
@@ -333,7 +330,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				844FCCC9198EFF9B00EB242A /* SimpleSpec.swift in Sources */,
-				844FCCA0198B320500EB242A /* SwiftCheckTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
