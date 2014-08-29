@@ -104,3 +104,23 @@ public func protectRose(x: IO<Rose<TestResult>>) -> IO<Rose<TestResult>> {
 public func do_<A>(fn: () -> Rose<A>) -> Rose<A> {
 	return fn()
 }
+
+public func sequence<A>(ms : [Rose<A>]) -> Rose<[A]> {
+	let sequenceF : Rose<A> -> Rose<[A]> -> Rose<[A]> = { (m: Rose<A>) in
+		return { (n: Rose<[A]>) in
+			return m >>= { (let x) in
+				return n >>= { (let xs) in
+					var arr = xs
+					arr.insert(x, atIndex: 0)
+					return Rose<[A]>.pure(arr)
+				}
+			}
+		}
+	}
+	return foldr(sequenceF)(z: Rose<[A]>.pure([]))(lst: ms)
+}
+
+public func mapM<A, B>(f: A -> Rose<B>, xs: [A]) -> Rose<[B]> {
+	return sequence(xs.map(f))
+}
+

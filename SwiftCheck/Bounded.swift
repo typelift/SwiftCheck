@@ -13,22 +13,6 @@ public protocol Bounded {
 	class func maxBound() -> Self
 }
 
-//public struct BoundedEmptyTuple : Bounded {
-//	typealias A = ()
-//	
-//	public static func minBound() -> A {
-//		return ()
-//	}
-//	public static func maxBound() -> A {
-//		return ()
-//	}
-//}
-
-public enum List<T> {
-    case Nil
-    case Cons(T, List<T>)
-}
-
 extension Bool : Bounded {
 	public static func minBound() -> Bool {
 		return false

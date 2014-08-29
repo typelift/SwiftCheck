@@ -82,6 +82,47 @@ public func shrinkNothing<A>(_ : A) -> [A] {
 	return []
 }
 
+private func shrinkOne<A>(shr : A -> [A])(lst : [A]) -> [[A]] {
+	switch destructure(lst) {
+		case .Empty():
+			return []
+		case .Destructure(let x, let xs):
+			return (shr(x) >>= { (let x_) in
+				return [x_ +> xs]
+			}) ++ (shrinkOne(shr)(lst: xs) >>= { (let xs_) in
+				return [x +> xs_]
+			})
+	}
+	
+}
+
+private func removes<A>(k : Int)(n : Int)(xs : [A]) -> [[A]] {
+	if k > n {
+		return []
+	}
+	let xs1 = take(k)(xs: xs)
+    let xs2 = drop(k)(lst: xs)
+	if xs2.count == 0 {
+		return [[]]
+	}
+	return xs2 +> removes(k)(n: n - k)(xs: xs2).map({ (let lst) in
+		return xs1 ++ lst
+	})
+}
+
+public func shrinkList<A>(shr : A -> [A]) -> [A] -> [[A]] {
+	return { (let xs) in
+		let n = xs.count
+		return concat((takeWhile({ (let x) in
+			return x > 0
+		})(iterate({ (let x) in
+			return x / 2
+		})(n)) >>= { (let k) in
+			return [removes(k)(n: n)(xs: xs)]
+		}) ++ shrinkOne(shr)(lst: xs))
+
+	}
+}
 
 //struct MaybeArbitrary<A : Arbitrary> : Arbitrary {
 //	typealias A = Maybe<A>
