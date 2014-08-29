@@ -30,6 +30,7 @@
 		8478A382198F2F1C00033523 /* Copointed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8478A381198F2F1C00033523 /* Copointed.swift */; };
 		8478A384198F2F4A00033523 /* Comonad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8478A383198F2F4A00033523 /* Comonad.swift */; };
 		847E498119971693001975E5 /* Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847E498019971693001975E5 /* Box.swift */; };
+		849E33C919B0055400C9769A /* Bounded.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849E33C819B0055400C9769A /* Bounded.swift */; };
 		84AB429319AD8D93000B345C /* BelieveMe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AB429219AD8D93000B345C /* BelieveMe.swift */; };
 		84B7975E19A5511200BB1852 /* STRef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B7975D19A5511200BB1852 /* STRef.swift */; };
 /* End PBXBuildFile section */
@@ -71,6 +72,7 @@
 		8478A381198F2F1C00033523 /* Copointed.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Copointed.swift; sourceTree = "<group>"; };
 		8478A383198F2F4A00033523 /* Comonad.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Comonad.swift; sourceTree = "<group>"; };
 		847E498019971693001975E5 /* Box.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Box.swift; sourceTree = "<group>"; };
+		849E33C819B0055400C9769A /* Bounded.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bounded.swift; sourceTree = "<group>"; };
 		84AB429219AD8D93000B345C /* BelieveMe.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BelieveMe.swift; sourceTree = "<group>"; };
 		84B7975D19A5511200BB1852 /* STRef.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STRef.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -124,6 +126,7 @@
 				844FCCAD198B367000EB242A /* Property.swift */,
 				844FCCC6198EFB4700EB242A /* Rose.swift */,
 				844FCCB3198B39F300EB242A /* State.swift */,
+				849E33C819B0055400C9769A /* Bounded.swift */,
 				84AB429219AD8D93000B345C /* BelieveMe.swift */,
 				844FCCCD198F23C900EB242A /* System */,
 				844FCCCC198F23A900EB242A /* Data */,
@@ -310,6 +313,7 @@
 				844FCCBC198B405000EB242A /* IO.swift in Sources */,
 				844FCCAC198B32DC00EB242A /* Gen.swift in Sources */,
 				847E498119971693001975E5 /* Box.swift in Sources */,
+				849E33C919B0055400C9769A /* Bounded.swift in Sources */,
 				84B7975E19A5511200BB1852 /* STRef.swift in Sources */,
 				844FCCBA198B3DC800EB242A /* Applicative.swift in Sources */,
 				8478A384198F2F4A00033523 /* Comonad.swift in Sources */,

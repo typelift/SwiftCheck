@@ -40,15 +40,48 @@ extension Bool : CoArbitrary {
 extension Int : Arbitrary {
 	typealias A = Int
 	public static func arbitrary() -> Gen<Int> {
-		return sized({ (let n) in
-			return choose((-n, n))
-		})
+		return arbitrarySizedInteger()
 	}
 
 	public static func shrink(_ : Int) -> [Int] {
 		return []
 	}
 }
+
+public func withBounds<A : Bounded>(f : A -> A -> Gen<A>) -> Gen<A> {
+	return f(A.minBound())(A.maxBound())
+}
+
+public func arbitraryBoundedIntegral<A : Bounded where A : IntegerLiteralConvertible>() -> Gen<A> {
+	return withBounds({ (let mn : A) -> A -> Gen<A> in
+		return { (let mx : A) -> Gen<A> in
+			return choose((A.convertFromIntegerLiteral(unsafeCoerce(mn)), A.convertFromIntegerLiteral(unsafeCoerce(mx)))) >>= { (let n) in
+				return Gen<A>.pure(n)
+			}
+		}
+	})
+}
+
+private func inBounds<A : IntegerType>(fi : (Int -> A)) -> Gen<Int> -> Gen<A> {
+	return { (let g) in
+		return suchThat(g)({ (let x) in
+			return (fi(x) as Int) == x
+		}).fmap(fi)
+	}
+}
+
+public func arbitrarySizedInteger<A : IntegerType where A : IntegerLiteralConvertible>() -> Gen<A> {
+	return sized({ (let n : Int) -> Gen<A> in
+		return inBounds({ (let m) in
+			return A.convertFromIntegerLiteral(unsafeCoerce(m))
+		})(choose((n, n)))
+	})
+}
+
+public func shrinkNothing<A>(_ : A) -> [A] {
+	return []
+}
+
 
 //struct MaybeArbitrary<A : Arbitrary> : Arbitrary {
 //	typealias A = Maybe<A>
