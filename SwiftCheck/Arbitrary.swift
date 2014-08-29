@@ -82,15 +82,15 @@ public func shrinkNothing<A>(_ : A) -> [A] {
 	return []
 }
 
-private func shrinkOne<A>(shr : A -> [A])(lst : [A]) -> [[A]] {
+private func shrinkOne<A>(shr : A -> [A])(lst : [A]) -> [[[A]]] {
 	switch destructure(lst) {
 		case .Empty():
 			return []
 		case .Destructure(let x, let xs):
 			return (shr(x) >>= { (let x_) in
-				return [x_ +> xs]
+				return [[x_ +> xs]]
 			}) ++ (shrinkOne(shr)(lst: xs) >>= { (let xs_) in
-				return [x +> xs_]
+				return [[x] +> xs_]
 			})
 	}
 	
@@ -101,7 +101,7 @@ private func removes<A>(k : Int)(n : Int)(xs : [A]) -> [[A]] {
 		return []
 	}
 	let xs1 = take(k)(xs: xs)
-    let xs2 = drop(k)(lst: xs)
+	let xs2 = drop(k)(lst: xs)
 	if xs2.count == 0 {
 		return [[]]
 	}
@@ -119,8 +119,7 @@ public func shrinkList<A>(shr : A -> [A]) -> [A] -> [[A]] {
 			return x / 2
 		})(n)) >>= { (let k) in
 			return [removes(k)(n: n)(xs: xs)]
-		}) ++ shrinkOne(shr)(lst: xs))
-
+		}) ++ (shrinkOne(shr)(lst: xs)))
 	}
 }
 
