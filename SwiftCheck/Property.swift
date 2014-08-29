@@ -17,14 +17,14 @@ public func unProperty(x : Property) -> Gen<Prop> {
 }
 
 func result(ok: Maybe<Bool>) -> TestResult {
-	return TestResult.MkResult(ok: ok, expect: true, reason: "", interrupted: false, stamp: [], callbacks: [])
+	return .MkResult(ok: ok, expect: true, reason: "", interrupted: false, stamp: [], callbacks: [])
 }
 
 public func protectResults(rs: Rose<TestResult>) -> Rose<TestResult> {
 	return onRose({ (let x) in
 		return { (let rs) in
 			let y = protectResult(IO.pure(x)).unsafePerformIO()
-			return Rose.MkRose(Box(y), rs.map(protectResults))
+			return .MkRose(Box(y), rs.map(protectResults))
 		}
 	})(rs: rs)
 }
@@ -90,7 +90,7 @@ public func mapSize<PROP : Testable> (f: Int -> Int)(p: PROP) -> Property {
 }
 
 private func props<A, PROP : Testable>(shrinker: A -> [A])(x : A)(pf: A -> PROP) -> Rose<Gen<Prop>> {
-	return Rose.MkRose(Box(pf(x).property().unProperty), shrinker(x).map({ (let x1) in
+	return .MkRose(Box(pf(x).property().unProperty), shrinker(x).map({ (let x1) in
 		return props(shrinker)(x: x)(pf: pf)
 	}))
 }
@@ -107,7 +107,7 @@ public func noShrinking<PROP : Testable>(p: PROP) -> Property {
 	return mapRoseResult({ (let rs) in
 		return onRose({ (let res) in
 			return { (_) in
-				return Rose.MkRose(Box(res), [])
+				.MkRose(Box(res), [])
 			}
 		})(rs: rs)
 	})(p: p)
@@ -117,7 +117,7 @@ public func callback<PROP : Testable>(cb: Callback)(p: PROP) -> Property {
 	return mapTotalResult({ (var res) in
 		switch res {
 			case .MkResult(let ok, let expect, let reason, let interrupted, let stamp, let callbacks):
-				return TestResult.MkResult(ok: ok, expect: expect, reason: reason, interrupted: interrupted, stamp: stamp, callbacks: cb +> callbacks)
+				return .MkResult(ok: ok, expect: expect, reason: reason, interrupted: interrupted, stamp: stamp, callbacks: cb +> callbacks)
 		}
 	})(p: p)
 }

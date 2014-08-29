@@ -15,7 +15,7 @@ private func vary(k : Int)(r: StdGen) -> StdGen {
 }
 
 public func variant<A>(seed: Int)(m: Gen<A>) -> Gen<A> {
-	return Gen<A>(unGen: { (let r) in
+	return Gen(unGen: { (let r) in
 		return { (let n) in
 			return m.unGen(vary(seed)(r: r))(n)
 		}
@@ -23,16 +23,15 @@ public func variant<A>(seed: Int)(m: Gen<A>) -> Gen<A> {
 }
 
 public func sized<A>(f: Int -> Gen<A>) -> Gen<A> {
-	return Gen<A>(unGen:{ (let r) in
+	return Gen(unGen:{ (let r) in
 		return { (let n) in
-			let m = f(n)
-			return m.unGen(r)(n)
+			return f(n).unGen(r)(n)
 		}
 	})
 }
 
 public func resize<A>(n : Int)(m: Gen<A>) -> Gen<A> {
-	return Gen<A>(unGen: { (let r) in
+	return Gen(unGen: { (let r) in
 		return { (_) in
 			return m.unGen(r)(n)
 		}
@@ -40,7 +39,7 @@ public func resize<A>(n : Int)(m: Gen<A>) -> Gen<A> {
 }
 
 public func choose<A>(rng: (A, A)) -> Gen<A> {
-	return Gen<A>(unGen: { (let s) in
+	return Gen(unGen: { (let s) in
 		return { (_) in
 			let x = rng.0
 			let y = rng.1
@@ -56,22 +55,22 @@ public func suchThat<A>(gen: Gen<A>)(p: (A -> Bool)) -> Gen<A> {
 	return suchThatMaybe(gen)(p).bind({ (let mx) in
 		switch mx {
 			case .Just(let x):
-				return Gen<A>.pure(x)
-		case .Nothing:
-			return sized({ (let n) in
-				return resize(n + 1)(m: suchThat(gen)(p))
-			})
+				return Gen.pure(x)
+			case .Nothing:
+				return sized({ (let n) in
+					return resize(n + 1)(m: suchThat(gen)(p))
+				})
 		}
 	})
 }
 
 private func try<A>(gen: Gen<A>, k: Int, n : Int, p: A -> Bool) -> Gen<Maybe<A>> {
     if n == 0 {
-        return Gen<Maybe<A>>.pure(Maybe<A>.Nothing)
+        return Gen.pure(.Nothing)
     }
     return resize(2 * k + n)(m: gen).bind({ (let x : A) -> Gen<Maybe<A>> in
         if p(x) {
-            Gen<Maybe<A>>.pure(Maybe.Just(x))
+            Gen<Maybe<A>>.pure(.Just(x))
         }
         return try(gen, k + 1, n - 1, p)
     })
@@ -102,11 +101,8 @@ private func pick<A>(n: Int)(lst: [(Int, Gen<A>)]) -> Gen<A> {
 
 public func frequency<A>(xs: [(Int, Gen<A>)]) -> Gen<A> {
 	assert(xs.count != 0, "frequency used with empty list")
-
-
-	let tot = sum(xs.map() { $0.0 })
-
-	return choose((1, tot)) >>= { (let l) in
+	
+	return choose((1, sum(xs.map() { $0.0 }))) >>= { (let l) in
 		return pick(l)(lst: xs)
 	}
 }

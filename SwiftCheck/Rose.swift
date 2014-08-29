@@ -18,9 +18,9 @@ extension Rose : Functor {
 	public func fmap<B>(f: (A -> B)) -> Rose<B> {
 		switch self {
 			case .MkRose(let root, let children):
-				return Rose<B>.MkRose(Box(f(root.value)), children.map() { $0.fmap(f) })
+				return .MkRose(Box(f(root.value)), children.map() { $0.fmap(f) })
 			case .IORose(let rs):
-				return Rose<B>.IORose(Box<IO<Rose<B>>>(rs.value.fmap() { $0.fmap(f) }))
+				return .IORose(Box(rs.value.fmap() { $0.fmap(f) }))
 		}
 	}
 
@@ -31,7 +31,7 @@ extension Rose : Functor {
 
 extension Rose : Applicative {
 	public static func pure(a: A) -> Rose<A> {
-		return Rose.MkRose(Box(a), [])
+		return .MkRose(Box(a), [])
 	}
 
 	public func ap<B>(fn: Rose<A -> B>) -> Rose<B> {
@@ -55,7 +55,7 @@ public func >><A, B>(x : Rose<A>, y : Rose<B>) -> Rose<B> {
 }
 
 public func ioRose(x: IO<Rose<TestResult>>) -> Rose<TestResult> {
-	return Rose.IORose(Box<IO<Rose<TestResult>>>(protectRose(x)))
+	return .IORose(Box(protectRose(x)))
 }
 
 public func liftM<A, R>(f: A -> R)(m1 : Rose<A>) -> Rose<R> {
@@ -67,13 +67,13 @@ public func liftM<A, R>(f: A -> R)(m1 : Rose<A>) -> Rose<R> {
 public func join<A>(rs: Rose<Rose<A>>) -> Rose<A> {
 	switch rs {
 		case .IORose(var rs):
-			return Rose.IORose(Box<IO<Rose<A>>>(rs.value.fmap(join)))
+			return .IORose(Box<IO<Rose<A>>>(rs.value.fmap(join)))
 		case .MkRose(let bx , let rs):
 			switch bx.value {
 				case .IORose(let rm):
-					return Rose.IORose(Box(IO<Rose<A>>.pure(join(Rose.MkRose(Box(rm.value.unsafePerformIO()), rs)))))
+					return .IORose(Box(IO.pure(join(.MkRose(Box(rm.value.unsafePerformIO()), rs)))))
 				case .MkRose(let x, let ts):
-					return Rose.MkRose(x, rs.map(join) ++ ts)
+					return .MkRose(x, rs.map(join) ++ ts)
 			}
 			
 	}
@@ -93,12 +93,12 @@ public func onRose<A>(f: (A -> [Rose<A>] -> Rose<A>))(rs: Rose<A>) -> Rose<A> {
 		case .MkRose(let x, let rs):
 			return f(x.value)(rs)
 		case .IORose(let m):
-			return Rose.IORose(Box<IO<Rose<A>>>(m.value.fmap(onRose(f))))
+			return .IORose(Box(m.value.fmap(onRose(f))))
 	}
 }
 
 public func protectRose(x: IO<Rose<TestResult>>) -> IO<Rose<TestResult>> {
-	return protect(IO<Rose<TestResult>>.pure(Rose<TestResult>.pure(exception("Exception"))))
+	return protect(IO.pure(Rose.pure(exception("Exception"))))
 }
 
 public func do_<A>(fn: () -> Rose<A>) -> Rose<A> {

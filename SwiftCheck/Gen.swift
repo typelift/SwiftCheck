@@ -45,7 +45,7 @@ extension Gen : Functor {
 
 extension Gen : Applicative {
 	public static func pure(a: A) -> Gen<A> {
-		return Gen<A>(unGen: { (_) in
+		return Gen(unGen: { (_) in
 			return { (_) in
 				return a
 			}
