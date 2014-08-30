@@ -27,6 +27,15 @@ func ++<T>(var lhs : [T], rhs : [T]) -> [T] {
 	return lhs
 }
 
+public func tail<A>(lst : [A]) -> [A] {
+	switch destructure(lst) {
+		case .Destructure(_, let xs):
+			return xs
+		case .Empty():
+			assert(false, "Cannot take the tail of an empty list.")
+	}
+}
+
 public func foldl<A, B>(f: B -> A -> B) (z0: B)(xs0: [A]) -> B {
 	var xs = z0
 	for x in xs0 {
@@ -82,6 +91,27 @@ public func drop<A>(n : Int)(lst : [A]) -> [A] {
 		return []
 	case .Destructure(_, let xs):
 		return drop(n - 1)(lst: xs)
+	}
+}
+
+public func nub<A : Equatable>(xs : [A]) -> [A] {
+	return nubBy({ (let x) in
+		return { (let y) in
+			return x == y
+		}
+	})(xs)
+}
+
+public func nubBy<A>(eq : A -> A -> Bool) -> [A] -> [A] {
+	return { (let lst) in
+		switch destructure(lst) {
+		case .Empty():
+			return []
+		case .Destructure(let x, let xs):
+			return x +> nubBy(eq)(xs.filter({ (let y) in
+				return !(eq(x)(y))
+			}))
+		}
 	}
 }
 
