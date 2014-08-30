@@ -8,13 +8,13 @@
 
 import Foundation
 
-private func vary(k : Int)(r: StdGen) -> StdGen {
+private func vary<S : IntegerType>(k : S)(r: StdGen) -> StdGen {
 	let s = r.split()
 	var gen = ((k % 2) == 0) ? s.0 : s.1
 	return (k == (k / 2)) ? gen : vary(k / 2)(r: r)
 }
 
-public func variant<A>(seed: Int)(m: Gen<A>) -> Gen<A> {
+public func variant<A, S : IntegerType>(seed: S)(m: Gen<A>) -> Gen<A> {
 	return Gen(unGen: { (let r) in
 		return { (let n) in
 			return m.unGen(vary(seed)(r: r))(n)

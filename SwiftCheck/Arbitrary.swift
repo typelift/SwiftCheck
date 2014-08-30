@@ -28,15 +28,6 @@ extension Bool : Arbitrary {
 	}
 }
 
-extension Bool : CoArbitrary {
-	public static func coarbitrary<C>(x: Bool) -> Gen<C> -> Gen<C> {
-		if x {
-			return variant(1)
-		}
-		return variant(0)
-	}
-}
-
 extension Int : Arbitrary {
 	typealias A = Int
 	public static func arbitrary() -> Gen<Int> {
@@ -359,6 +350,79 @@ public func shrinkDouble(x : Double) -> [Double] {
 
 protocol CoArbitrary {
 	class func coarbitrary<C>(x: Self) -> Gen<C> -> Gen<C>
+}
+
+public func coarbitraryIntegral<A : IntegerType, B>(x : A) -> Gen<B> -> Gen<B> {
+	return variant(x)
+}
+
+extension Bool : CoArbitrary {
+	public static func coarbitrary<C>(x: Bool) -> Gen<C> -> Gen<C> {
+		if x {
+			return variant(1)
+		}
+		return variant(0)
+	}
+}
+
+extension Int : CoArbitrary {
+	public static func coarbitrary<C>(x: Int) -> Gen<C> -> Gen<C> {
+		return coarbitraryIntegral(x)
+	}
+}
+
+extension Int8 : CoArbitrary {
+	public static func coarbitrary<C>(x: Int8) -> Gen<C> -> Gen<C> {
+		return coarbitraryIntegral(x)
+	}
+}
+
+extension Int16 : CoArbitrary {
+	public static func coarbitrary<C>(x: Int16) -> Gen<C> -> Gen<C> {
+		return coarbitraryIntegral(x)
+	}
+}
+
+extension Int32 : CoArbitrary {
+	public static func coarbitrary<C>(x: Int32) -> Gen<C> -> Gen<C> {
+		return coarbitraryIntegral(x)
+	}
+}
+
+extension Int64 : CoArbitrary {
+	public static func coarbitrary<C>(x: Int64) -> Gen<C> -> Gen<C> {
+		return coarbitraryIntegral(x)
+	}
+}
+
+extension UInt : CoArbitrary {
+	public static func coarbitrary<C>(x: UInt) -> Gen<C> -> Gen<C> {
+		return coarbitraryIntegral(x)
+	}
+}
+
+extension UInt8 : CoArbitrary {
+	public static func coarbitrary<C>(x: UInt8) -> Gen<C> -> Gen<C> {
+		return coarbitraryIntegral(x)
+	}
+}
+
+extension UInt16 : CoArbitrary {
+	public static func coarbitrary<C>(x: UInt16) -> Gen<C> -> Gen<C> {
+		return coarbitraryIntegral(x)
+	}
+}
+
+extension UInt32 : CoArbitrary {
+	public static func coarbitrary<C>(x: UInt32) -> Gen<C> -> Gen<C> {
+		return coarbitraryIntegral(x)
+	}
+}
+
+extension UInt64 : CoArbitrary {
+	public static func coarbitrary<C>(x: UInt64) -> Gen<C> -> Gen<C> {
+		return coarbitraryIntegral(x)
+	}
 }
 
 infix operator ^ {}
