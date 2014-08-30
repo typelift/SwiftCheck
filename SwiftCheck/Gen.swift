@@ -116,8 +116,3 @@ public func delay<A>() -> Gen<Gen<A> -> A> {
 		}
 	})
 }
-
-
-
-
-

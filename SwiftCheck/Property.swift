@@ -217,12 +217,13 @@ public func forAll<A : Printable, PROP : Testable>(gen : Gen<A>)(pf : (A -> PROP
 	})
 }
 
-public func forAllShrink<A : Printable, PROP : Testable>(gen : Gen<A>)(shrinker: A -> [A])(f : A -> PROP) -> Property {
-	return Property(gen.bindWitness({ (let x : A) -> WitnessTestableGen in
-		return WitnessTestableGen(unProperty(shrinking(shrinker)(x0: x)({ (let xs : A) -> Testable in
-			return unsafeCoerce(counterexample(xs.description)(p: f(xs)))
-		})))
-	}))
+public func forAllShrink<A : Printable>(gen : Gen<A>)(shrinker: A -> [A])(f : (A -> Testable)) -> Property {
+	let pf : A -> Testable = { (let xs)  in
+			return unsafeCoerce(counterexample(xs.description)(p: f(xs))) as Testable
+	}
+	return Property(gen >>= { (let x)  in
+		return unProperty(shrinking(shrinker)(x0: x)(pf: pf)) 
+	})
 }
 
 infix operator ^&^ {}
@@ -304,10 +305,6 @@ public struct Property {
 		self.unProperty = val;
 	}
 
-	public init(_ val: WitnessTestableGen) {
-		self.unProperty = mkGen(val);
-	}
-
 }
 
 
@@ -338,6 +335,3 @@ extension Bool : Testable {
 		return liftBool(self).property()
 	}
 }
-
-
-

@@ -46,5 +46,5 @@ import Foundation
 // We can work it out
 // We can work it out
 public func unsafeCoerce<A, B>(x : A) -> B {
-    return unsafeBitCast(x, B.self)
+	return unsafeBitCast(x, B.self)
 }

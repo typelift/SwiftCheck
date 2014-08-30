@@ -54,11 +54,11 @@ public func theStdGen() -> IORef<StdGen> {
 }
 
 public func newStdGen() -> IO<StdGen> {
-	return IO<StdGen>.pure(theStdGen().readIORef().unsafePerformIO().split().1)
+	return IO.pure(theStdGen().readIORef().unsafePerformIO().split().1)
 }
 
 private func mkStdRNG(i: Int) -> IO<StdGen> {
 	let ct = clock()
 	let (sec, psec) = (time(nil), time(nil))
-	return IO<StdGen>.pure(StdGen(a:UInt32(sec), b:UInt32(psec)))
+	return IO.pure(StdGen(a:UInt32(sec), b:UInt32(psec)))
 }

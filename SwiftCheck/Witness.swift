@@ -26,15 +26,19 @@ extension WitnessTestableGen : Testable {
 	}
 }
 
-public struct WitnessTestableFunction<A, PROP : Testable where A : Arbitrary, A : Printable> : Testable {
-	let mp : A -> PROP
+public struct WitnessTestableFunction<A : Arbitrary> : Testable {
+	let mp : A -> Testable
 
-	public init(_ mp: A -> PROP) {
+	public init(_ mp: A -> Testable) {
 		self.mp = mp
 	}
 
 	public func property() -> Property {
-		return unsafeCoerce(forAllShrink(A.arbitrary)(shrinker: A.shrink)(f: mp))
+		return forAllShrink(A.arbitrary())(shrinker: { (let x) in
+			return A.shrink(x)
+		})({ (let x) in
+			return unsafeCoerce(self.mp(x))
+		})
 	}
 }
 

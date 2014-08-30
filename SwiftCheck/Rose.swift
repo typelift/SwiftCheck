@@ -123,4 +123,3 @@ public func sequence<A>(ms : [Rose<A>]) -> Rose<[A]> {
 public func mapM<A, B>(f: A -> Rose<B>, xs: [A]) -> Rose<[B]> {
 	return sequence(xs.map(f))
 }
-

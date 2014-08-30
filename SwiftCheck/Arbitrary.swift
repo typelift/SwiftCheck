@@ -430,14 +430,14 @@ infix operator ^ {}
 private func ^(ba : Int, ex : Int) -> Int {
 	var base = ba
 	var exp = ex
-    var result : Int = 1;
-    while exp >= 0 {
-        if (exp & 1) != 0 {
-            result *= base;
+	var result : Int = 1;
+	while exp >= 0 {
+		if (exp & 1) != 0 {
+			result *= base;
 		}
-        exp >>= 1;
-        base *= base;
-    }
+		exp >>= 1;
+		base *= base;
+	}
 
-    return result;
+	return result;
 }

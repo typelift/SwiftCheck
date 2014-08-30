@@ -65,15 +65,15 @@ public func suchThat<A>(gen: Gen<A>)(p: (A -> Bool)) -> Gen<A> {
 }
 
 private func try<A>(gen: Gen<A>, k: Int, n : Int, p: A -> Bool) -> Gen<Maybe<A>> {
-    if n == 0 {
-        return Gen.pure(.Nothing)
-    }
-    return resize(2 * k + n)(m: gen).bind({ (let x : A) -> Gen<Maybe<A>> in
-        if p(x) {
-            Gen<Maybe<A>>.pure(.Just(x))
-        }
-        return try(gen, k + 1, n - 1, p)
-    })
+	if n == 0 {
+		return Gen.pure(.Nothing)
+	}
+	return resize(2 * k + n)(m: gen).bind({ (let x : A) -> Gen<Maybe<A>> in
+		if p(x) {
+			Gen<Maybe<A>>.pure(.Just(x))
+		}
+		return try(gen, k + 1, n - 1, p)
+	})
 }
 
 public func suchThatMaybe<A>(gen: Gen<A>)(p: A -> Bool) -> Gen<Maybe<A>> {
@@ -116,8 +116,8 @@ public func elements<A>(xs: [A]) -> Gen<A> {
 }
 
 func size(k : Double)(m : Int) -> Int {
-    let n = Double(m)
-    return Int((log(n + 1)) * k / log(100))
+	let n = Double(m)
+	return Int((log(n + 1)) * k / log(100))
 }
 
 public func growingElements<A>(xs: [A]) -> Gen<A> {
@@ -148,4 +148,3 @@ public func listOf1<A>(gen: Gen<A>) -> Gen<[A]> {
 public func vectorOf<A>(k: Int)(gen : Gen<A>) -> Gen<[A]> {
 	return sequence(Array<Gen<A>>(count: k, repeatedValue: gen))
 }
-
