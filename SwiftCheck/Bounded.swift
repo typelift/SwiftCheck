@@ -137,3 +137,33 @@ extension Int64 : Bounded {
 	}
 }
 
+extension Float : Bounded {
+	public static func minBound() -> Float {
+		return FLT_MIN
+	}
+
+	public static func maxBound() -> Float {
+		return FLT_MAX
+	}
+}
+
+extension Double : Bounded {
+	public static func minBound() -> Double {
+		return DBL_MIN
+	}
+
+	public static func maxBound() -> Double {
+		return DBL_MAX
+	}
+} 
+
+//extension Float80 : Bounded {
+//	public static func minBound() -> Float80 {
+//		return LDBL_MIN
+//	}
+//
+//	public static func maxBound() -> Float80 {
+//		return LDBL_MAX
+//	}
+//}
+

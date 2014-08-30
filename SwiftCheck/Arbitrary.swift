@@ -40,7 +40,7 @@ extension Bool : CoArbitrary {
 extension Int : Arbitrary {
 	typealias A = Int
 	public static func arbitrary() -> Gen<Int> {
-		return arbitrarySizedBoundedIntegral()
+		return arbitrarySizedInteger()
 	}
 
 	public static func shrink(x : Int) -> [Int] {
@@ -51,7 +51,7 @@ extension Int : Arbitrary {
 extension Int8 : Arbitrary {
 	typealias A = Int8
 	public static func arbitrary() -> Gen<Int8> {
-		return arbitrarySizedBoundedIntegral()
+		return arbitrarySizedBoundedInteger()
 	}
 
 	public static func shrink(x : Int8) -> [Int8] {
@@ -62,7 +62,7 @@ extension Int8 : Arbitrary {
 extension Int16 : Arbitrary {
 	typealias A = Int16
 	public static func arbitrary() -> Gen<Int16> {
-		return arbitrarySizedBoundedIntegral()
+		return arbitrarySizedBoundedInteger()
 	}
 
 	public static func shrink(x : Int16) -> [Int16] {
@@ -73,7 +73,7 @@ extension Int16 : Arbitrary {
 extension Int32 : Arbitrary {
 	typealias A = Int32
 	public static func arbitrary() -> Gen<Int32> {
-		return arbitrarySizedBoundedIntegral()
+		return arbitrarySizedBoundedInteger()
 	}
 
 	public static func shrink(x : Int32) -> [Int32] {
@@ -84,7 +84,7 @@ extension Int32 : Arbitrary {
 extension Int64 : Arbitrary {
 	typealias A = Int64
 	public static func arbitrary() -> Gen<Int64> {
-		return arbitrarySizedBoundedIntegral()
+		return arbitrarySizedBoundedInteger()
 	}
 
 	public static func shrink(x : Int64) -> [Int64] {
@@ -95,7 +95,7 @@ extension Int64 : Arbitrary {
 extension UInt : Arbitrary {
 	typealias A = UInt
 	public static func arbitrary() -> Gen<UInt> {
-		return arbitrarySizedBoundedIntegral()
+		return arbitrarySizedInteger()
 	}
 
 	public static func shrink(x : UInt) -> [UInt] {
@@ -106,7 +106,7 @@ extension UInt : Arbitrary {
 extension UInt8 : Arbitrary {
 	typealias A = UInt8
 	public static func arbitrary() -> Gen<UInt8> {
-		return arbitrarySizedBoundedIntegral()
+		return arbitrarySizedBoundedInteger()
 	}
 
 	public static func shrink(x : UInt8) -> [UInt8] {
@@ -117,7 +117,7 @@ extension UInt8 : Arbitrary {
 extension UInt16 : Arbitrary {
 	typealias A = UInt16
 	public static func arbitrary() -> Gen<UInt16> {
-		return arbitrarySizedBoundedIntegral()
+		return arbitrarySizedBoundedInteger()
 	}
 
 	public static func shrink(x : UInt16) -> [UInt16] {
@@ -128,7 +128,7 @@ extension UInt16 : Arbitrary {
 extension UInt32 : Arbitrary {
 	typealias A = UInt32
 	public static func arbitrary() -> Gen<UInt32> {
-		return arbitrarySizedBoundedIntegral()
+		return arbitrarySizedBoundedInteger()
 	}
 
 	public static func shrink(x : UInt32) -> [UInt32] {
@@ -139,11 +139,33 @@ extension UInt32 : Arbitrary {
 extension UInt64 : Arbitrary {
 	typealias A = UInt64
 	public static func arbitrary() -> Gen<UInt64> {
-		return arbitrarySizedBoundedIntegral()
+		return arbitrarySizedBoundedInteger()
 	}
 
 	public static func shrink(x : UInt64) -> [UInt64] {
 		return shrinkIntegral(x)
+	}
+}
+
+extension Float : Arbitrary {
+	typealias A = Float
+	public static func arbitrary() -> Gen<Float> {
+		return arbitrarySizedFloating()
+	}
+
+	public static func shrink(x : Float) -> [Float] {
+		return shrinkFloat(x)
+	}
+}
+
+extension Double : Arbitrary {
+	typealias A = Double
+	public static func arbitrary() -> Gen<Double> {
+		return arbitrarySizedFloating()
+	}
+
+	public static func shrink(x : Double) -> [Double] {
+		return shrinkDouble(x)
 	}
 }
 
@@ -168,7 +190,7 @@ private func bits<N : IntegerType>(n : N) -> Int {
 	return 1 + bits(n / 2)
 }
 
-public func arbitrarySizedBoundedIntegral<A : Bounded where A : IntegerType>() -> Gen<A> {
+public func arbitrarySizedBoundedInteger<A : Bounded where A : IntegerType>() -> Gen<A> {
 	return withBounds({ (let mn) in
 		return { (let mx) in
 			return sized({ (let s) in
@@ -194,6 +216,18 @@ public func arbitrarySizedInteger<A : IntegerType where A : IntegerLiteralConver
 		return inBounds({ (let m) in
 			return A.convertFromIntegerLiteral(unsafeCoerce(m))
 		})(choose((0 - n, n)))
+	})
+}
+
+public func arbitrarySizedFloating<A : FloatingPointType>() -> Gen<A> {
+	let precision : Int = 9999999999999
+	return sized({ (let n) in
+		let m = Int(n)
+		return choose((-m * precision, m * precision)) >>= { (let a) in
+			return choose((1, precision)) >>= { (let b) in
+				return Gen.pure(A(a % b))
+			}
+		}
 	})
 }
 
@@ -245,7 +279,7 @@ public func shrinkList<A>(shr : A -> [A]) -> [A] -> [[A]] {
 public func shrinkIntegral<A : IntegerType>(x: A) -> [A] {
 	let z = (x >= 0) ? x : (0 - x)
 	return nub([z] ++ (takeWhile({ (let y) in
-		return doubleAbs(y, z)
+		return moralAbs(y, z)
 	})(tail(iterate({ (let n) in
 		return n / 2
 	})(x)) >>= { (let i) in
@@ -253,7 +287,7 @@ public func shrinkIntegral<A : IntegerType>(x: A) -> [A] {
 	})))
 }
 
-private func doubleAbs<A : IntegerType>(a : A, b : A) -> Bool {
+private func moralAbs<A : IntegerType>(a : A, b : A) -> Bool {
 	switch (a >= 0, b >= 0) {
 		case (true, true):
 			return a < b
@@ -266,6 +300,36 @@ private func doubleAbs<A : IntegerType>(a : A, b : A) -> Bool {
 		default:
 			assert(false, "Non-exhaustive pattern match performed.")
 	}
+}
+
+public func shrinkFloatToInteger(x : Float) -> [Float] {
+	let y = (x < 0) ? -x : x
+	return nub([y] ++ shrinkIntegral(Int64(y)).map({ (let n) in
+		return Float(n)
+	}))
+}
+
+public func shrinkDoubleToInteger(x : Double) -> [Double] {
+	let y = (x < 0) ? -x : x
+	return nub([y] ++ shrinkIntegral(Int64(y)).map({ (let n) in
+		return Double(n)
+	}))
+}
+
+public func shrinkFloat(x : Float) -> [Float] {
+	return nub(shrinkFloatToInteger(x) ++ take(20)(xs: iterate({ (let n) in
+		return n / 2.0
+	})(x)).filter({ (let x_) in
+		return abs(x - x_) < abs(x)
+	}))
+}
+
+public func shrinkDouble(x : Double) -> [Double] {
+	return nub(shrinkDoubleToInteger(x) ++ take(20)(xs: iterate({ (let n) in
+		return n / 2.0
+	})(x)).filter({ (let x_) in
+		return abs(x - x_) < abs(x)
+	}))
 }
 
 //struct MaybeArbitrary<A : Arbitrary> : Arbitrary {
