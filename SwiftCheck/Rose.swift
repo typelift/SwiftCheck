@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Swift_Extras
 
 public enum Rose<A> {
 	case MkRose(Box<A>, [Rose<A>])

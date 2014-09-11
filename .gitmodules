@@ -1,0 +1,3 @@
+[submodule "External/Swift-Extras"]
+	path = External/Swift-Extras
+	url = https://github.com/CodaFi/Swift-Extras.git

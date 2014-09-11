@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Swift_Extras
 
 public struct Gen<A> {
 	var unGen: StdGen -> Int -> A
@@ -14,12 +15,14 @@ public struct Gen<A> {
 
 extension Gen : Functor {
 	typealias B = Any
-	public func fmap<B>(f: (A -> B)) -> Gen<B> {
-		return Gen<B>(unGen: { (let r) in
-			return { (let n) in
-				return f(self.unGen(r)(n))
-			}
-		})
+	public static func fmap<B>(f: (A -> B)) -> Gen<A> -> Gen<B> {
+		return { (let g) in
+			Gen<B>(unGen: { (let r) in
+				return { (let n) in
+					return f(g.unGen(r)(n))
+				}
+			}) 
+		}
 	}
 
 	public func bind<B>(fn: A -> Gen<B>) -> Gen<B> {
@@ -43,6 +46,16 @@ extension Gen : Functor {
 	}
 }
 
+public func <%><A, B>(f: A -> B, ar : Gen<A>) -> Gen<B> {
+	return Gen.fmap(f)(ar)
+}
+
+public func <^<A, B>(x : A, l : Gen<B>) -> Gen<A> {
+	return Gen.fmap(const(x))(l)
+}
+
+
+
 extension Gen : Applicative {
 	public static func pure(a: A) -> Gen<A> {
 		return Gen(unGen: { (_) in
@@ -61,14 +74,23 @@ extension Gen : Applicative {
 	}
 }
 
+public func <*><A, B>(a : Gen<A -> B> , l : Gen<A>) -> Gen<B> {
+	return l.ap(a)
+}
+
+public func *><A, B>(a : Gen<A>, b : Gen<B>) -> Gen<B> {
+	return const(id) <%> a <*> b
+}
+
+public func <*<A, B>(a : Gen<A>, b : Gen<B>) -> Gen<A> {
+	return const <%> a <*> b
+}
 
 public func sequence<A>(ms: [Gen<A>]) -> Gen<[A]> {
-	return foldr({ (let x) in
-		return { (let y) in
-			return x >>= { (let x) in
-				return y >>= { (let xs) in
-					return Gen<[A]>.pure(x +> xs)
-				}
+	return foldr({ (let x, let y) in
+		return x >>= { (let x1) in
+			return y >>= { (let xs) in
+				return Gen<[A]>.pure([x1] + xs)
 			}
 		}
 	})(z: Gen<[A]>.pure([]))(lst: ms)
@@ -101,7 +123,7 @@ public func do_<A>(fn: () -> Gen<A>) -> Gen<A> {
 }
 
 public func promote<A>(x : Rose<Gen<A>>) -> Gen<Rose<A>> {
-	return delay().bind({ (let eval : Gen<A> -> A) in
+	return delay() >>= ({ (let eval : Gen<A> -> A) in
 		return Gen<Rose<A>>.pure(liftM(eval)(m1: x))
 	})
 }

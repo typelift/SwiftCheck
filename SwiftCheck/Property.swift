@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Swift_Extras
 
 public protocol Testable {
 	func property() -> Property
@@ -16,7 +17,7 @@ public func unProperty(x : Property) -> Gen<Prop> {
 	return x.unProperty
 }
 
-func result(ok: Maybe<Bool>) -> TestResult {
+func result(ok: Bool?) -> TestResult {
 	return .MkResult(ok: ok, expect: true, reason: "", interrupted: false, stamp: [], callbacks: [])
 }
 
@@ -42,15 +43,15 @@ public func protect<A>(x: IO<A>) -> IO<A> {
 }
 
 func succeeded() -> TestResult {
-	return result(Maybe.Just(true))
+	return result(Optional.Some(true))
 }
 
 func failed() -> TestResult {
-	return result(Maybe.Just(false))
+	return result(Optional.Some(false))
 }
 
 func rejected() -> TestResult {
-	return result(Maybe.Nothing)
+	return result(Optional.None)
 }
 
 
@@ -80,7 +81,7 @@ func mapRoseResult<PROP : Testable>(f: Rose<TestResult> -> Rose<TestResult>)(p: 
 }
 
 func mapProp<PROP : Testable>(f: Prop -> Prop)(p: PROP) -> Property {
-	return Property(p.property().unProperty.fmap(f))
+	return Property(Gen.fmap(f)(p.property().unProperty))
 }
 
 public func mapSize<PROP : Testable> (f: Int -> Int)(p: PROP) -> Property {
@@ -96,11 +97,11 @@ private func props<A, PROP : Testable>(shrinker: A -> [A])(x : A)(pf: A -> PROP)
 }
 
 public func shrinking<A, PROP : Testable> (shrinker: A -> [A])(x0: A)(pf: A -> PROP) -> Property {
-	return Property(promote(props(shrinker)(x: x0)(pf: pf)).fmap({ (let rs) in
+	return Property(Gen.fmap({ (let rs) in
 		return Prop(unProp: join(rs.fmap({ (let x) in
 			return x.unProp
 		})))
-	}))
+	})(promote(props(shrinker)(x: x0)(pf: pf))))
 }
 
 public func noShrinking<PROP : Testable>(p: PROP) -> Property {
@@ -117,7 +118,7 @@ public func callback<PROP : Testable>(cb: Callback)(p: PROP) -> Property {
 	return mapTotalResult({ (var res) in
 		switch res {
 			case .MkResult(let ok, let expect, let reason, let interrupted, let stamp, let callbacks):
-				return .MkResult(ok: ok, expect: expect, reason: reason, interrupted: interrupted, stamp: stamp, callbacks: cb +> callbacks)
+				return .MkResult(ok: ok, expect: expect, reason: reason, interrupted: interrupted, stamp: stamp, callbacks: [cb] + callbacks)
 		}
 	})(p: p)
 }
@@ -186,7 +187,7 @@ public func cover<PROP : Testable>(b : Bool)(n : Int)(s : String)(p : PROP) -> P
 		return mapTotalResult({ (let res) in
 			switch res {
 				case .MkResult(let ok, let expect, let reason, let interrupted, let stamp, let callbacks):
-					return TestResult.MkResult(ok: ok, expect: false, reason: reason, interrupted: interrupted, stamp: (s, n) +> stamp, callbacks: callbacks)
+					return TestResult.MkResult(ok: ok, expect: false, reason: reason, interrupted: interrupted, stamp: [(s, n)] + stamp, callbacks: callbacks)
 			}
 		})(p:p)
 	}
@@ -222,7 +223,7 @@ public func forAllShrink<A : Printable>(gen : Gen<A>)(shrinker: A -> [A])(f : (A
 			return unsafeCoerce(counterexample(xs.description)(p: f(xs))) as Testable
 	}
 	return Property(gen >>= { (let x)  in
-		return unProperty(shrinking(shrinker)(x0: x)(pf: pf)) 
+		return unProperty(shrinking(shrinker)(x0: x)(pf: pf))
 	})
 }
 
@@ -290,7 +291,7 @@ public enum CallbackKind {
 
 public enum TestResult {
 	case MkResult(
-	ok : Maybe<Bool>,
+	ok : Optional<Bool>,
 	expect : Bool,
 	reason : String,
 	interrupted : Bool,

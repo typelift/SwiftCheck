@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Swift_Extras
 
 public protocol Arbitrary {
 	typealias A : Arbitrary
@@ -186,7 +187,7 @@ public func arbitrarySizedBoundedInteger<A : Bounded where A : IntegerType>() ->
 		return { (let mx) in
 			return sized({ (let s) in
 				let k = 2 ^ (s * (max(bits(mn), max(bits(mx), 40))) / 100)
-				return choose((max(mn as Int, (0 - k)), min(mx as Int, k))).bind({ (let n) in
+				return choose((max(mn as Int, (0 - k)), min(mx as Int, k))) >>= ({ (let n) in
 					return Gen.pure(A.convertFromIntegerLiteral(unsafeCoerce(n)))
 				})
 			})
@@ -196,9 +197,9 @@ public func arbitrarySizedBoundedInteger<A : Bounded where A : IntegerType>() ->
 
 private func inBounds<A : IntegerType>(fi : (Int -> A)) -> Gen<Int> -> Gen<A> {
 	return { (let g) in
-		return suchThat(g)({ (let x) in
+		return Gen.fmap(fi)(suchThat(g)({ (let x) in
 			return (fi(x) as Int) == x
-		}).fmap(fi)
+		}))
 	}
 }
 
@@ -227,15 +228,15 @@ public func shrinkNothing<A>(_ : A) -> [A] {
 }
 
 private func shrinkOne<A>(shr : A -> [A])(lst : [A]) -> [[[A]]] {
-	switch destructure(lst) {
+	switch lst.destruct() {
 		case .Empty():
 			return []
 		case .Destructure(let x, let xs):
-			return (shr(x) >>= { (let x_) in
+			return concatMap({ (let x_) in
 				return [[x_ +> xs]]
-			}) ++ (shrinkOne(shr)(lst: xs) >>= { (let xs_) in
+			})(l: shr(x)) ++ concatMap({ (let xs_) in
 				return [[x] +> xs_]
-			})
+			})(l: shrinkOne(shr)(lst: xs))
 	}
 	
 }
@@ -244,38 +245,38 @@ private func removes<A>(k : Int)(n : Int)(xs : [A]) -> [[A]] {
 	if k > n {
 		return []
 	}
-	let xs1 = take(k)(xs: xs)
-	let xs2 = drop(k)(lst: xs)
+	let xs1 = take(k)(l: xs)
+	let xs2 = drop(k)(l: xs)
 	if xs2.count == 0 {
 		return [[]]
 	}
-	return xs2 +> removes(k)(n: n - k)(xs: xs2).map({ (let lst) in
-		return xs1 ++ lst
+	return [xs2] + removes(k)(n: n - k)(xs: xs2).map({ (let lst) in
+		return xs1 + lst
 	})
 }
 
 public func shrinkList<A>(shr : A -> [A]) -> [A] -> [[A]] {
 	return { (let xs) in
 		let n = xs.count
-		return concat((takeWhile({ (let x) in
-			return x > 0
-		})(iterate({ (let x) in
-			return x / 2
-		})(n)) >>= { (let k) in
+		return concat((concatMap({ (let k) in
 			return [removes(k)(n: n)(xs: xs)]
-		}) ++ (shrinkOne(shr)(lst: xs)))
+		})(l: takeWhile({ (let x) in
+			return x > 0
+		})(l: iterate({ (let x) in
+			return x / 2
+		})(n))) ++ (shrinkOne(shr)(lst: xs))))
 	}
 }
 
 public func shrinkIntegral<A : IntegerType>(x: A) -> [A] {
 	let z = (x >= 0) ? x : (0 - x)
-	return nub([z] ++ (takeWhile({ (let y) in
-		return moralAbs(y, z)
-	})(tail(iterate({ (let n) in
-		return n / 2
-	})(x)) >>= { (let i) in
+	return concatMap({ (let i) in
 		return 0 +> [z - 1]
-	})))
+	})(l: nub([z] + (takeWhile({ (let y) in
+		return moralAbs(y, z)
+	})(l: tail(iterate({ (let n) in
+		return n / 2
+	})(x))))))
 }
 
 private func moralAbs<A : IntegerType>(a : A, b : A) -> Bool {
@@ -295,20 +296,20 @@ private func moralAbs<A : IntegerType>(a : A, b : A) -> Bool {
 
 public func shrinkFloatToInteger(x : Float) -> [Float] {
 	let y = (x < 0) ? -x : x
-	return nub([y] ++ shrinkIntegral(Int64(y)).map({ (let n) in
+	return nub([y] + shrinkIntegral(Int64(y)).map({ (let n) in
 		return Float(n)
 	}))
 }
 
 public func shrinkDoubleToInteger(x : Double) -> [Double] {
 	let y = (x < 0) ? -x : x
-	return nub([y] ++ shrinkIntegral(Int64(y)).map({ (let n) in
+	return nub([y] + shrinkIntegral(Int64(y)).map({ (let n) in
 		return Double(n)
 	}))
 }
 
 public func shrinkFloat(x : Float) -> [Float] {
-	return nub(shrinkFloatToInteger(x) ++ take(20)(xs: iterate({ (let n) in
+	return nub(shrinkFloatToInteger(x) + take(20)(l: iterate({ (let n) in
 		return n / 2.0
 	})(x)).filter({ (let x_) in
 		return abs(x - x_) < abs(x)
@@ -316,27 +317,27 @@ public func shrinkFloat(x : Float) -> [Float] {
 }
 
 public func shrinkDouble(x : Double) -> [Double] {
-	return nub(shrinkDoubleToInteger(x) ++ take(20)(xs: iterate({ (let n) in
+	return nub(shrinkDoubleToInteger(x) + take(20)(l: iterate({ (let n) in
 		return n / 2.0
 	})(x)).filter({ (let x_) in
 		return abs(x - x_) < abs(x)
 	}))
 }
 
-//struct MaybeArbitrary<A : Arbitrary> : Arbitrary {
-//	typealias A = Maybe<A>
+//struct OptionalArbitrary<A : Arbitrary> : Arbitrary {
+//	typealias A = Optional<A>
 //
-//	public let m : Maybe<A>
+//	public let m : Optional<A>
 //
-//	public init(_ m: Maybe<A>) {
+//	public init(_ m: Optional<A>) {
 //		self.m = m
 //	}
 //
-//	static func arbitrary() -> Gen<Maybe<A>> {
-//		return frequency([(1, Gen<Maybe<A>>.pure(Maybe.Nothing)), (3, liftM({ (let x) in return Just(x.arbitrary()) }))])
+//	static func arbitrary() -> Gen<Optional<A>> {
+//		return frequency([(1, Gen<Optional<A>>.pure(Optional.None)), (3, liftM({ (let x) in return Just(x.arbitrary()) }))])
 //	}
 //
-//	func shrink() -> [Maybe<A>] {
+//	func shrink() -> [Optional<A>] {
 //		switch self.m {
 //			case .Just(let x):
 //				return .Nothing +> x.shrink().map() { Just($0) }

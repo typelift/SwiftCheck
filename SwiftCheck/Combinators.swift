@@ -52,7 +52,7 @@ public func choose<A>(rng: (A, A)) -> Gen<A> {
 }
 
 public func suchThat<A>(gen: Gen<A>)(p: (A -> Bool)) -> Gen<A> {
-	return suchThatMaybe(gen)(p).bind({ (let mx) in
+	return suchThatOptional(gen)(p) >>= ({ (let mx) in
 		switch mx {
 			case .Just(let x):
 				return Gen.pure(x)
@@ -64,19 +64,19 @@ public func suchThat<A>(gen: Gen<A>)(p: (A -> Bool)) -> Gen<A> {
 	})
 }
 
-private func try<A>(gen: Gen<A>, k: Int, n : Int, p: A -> Bool) -> Gen<Maybe<A>> {
+private func try<A>(gen: Gen<A>, k: Int, n : Int, p: A -> Bool) -> Gen<Optional<A>> {
 	if n == 0 {
 		return Gen.pure(.Nothing)
 	}
-	return resize(2 * k + n)(m: gen).bind({ (let x : A) -> Gen<Maybe<A>> in
+	return resize(2 * k + n)(m: gen) >>= ({ (let x : A) -> Gen<Optional<A>> in
 		if p(x) {
-			Gen<Maybe<A>>.pure(.Just(x))
+			Gen<Optional<A>>.pure(.Just(x))
 		}
 		return try(gen, k + 1, n - 1, p)
 	})
 }
 
-public func suchThatMaybe<A>(gen: Gen<A>)(p: A -> Bool) -> Gen<Maybe<A>> {
+public func suchThatOptional<A>(gen: Gen<A>)(p: A -> Bool) -> Gen<Optional<A>> {
 	return sized({ (let n) in
 		return try(gen, 0, max(n, 1), p)
 	})
@@ -85,7 +85,7 @@ public func suchThatMaybe<A>(gen: Gen<A>)(p: A -> Bool) -> Gen<Maybe<A>> {
 public func oneOf<A>(gs : [Gen<A>]) -> Gen<A> {
 	assert(gs.count != 0, "oneOf used with empty list")
 
-	return choose((0, gs.count - 1)).bind({ (let x) in
+	return choose((0, gs.count - 1)) >>= ({ (let x) in
 		return gs[x]
 	})
 }

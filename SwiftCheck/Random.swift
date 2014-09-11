@@ -6,6 +6,8 @@
 //  Copyright (c) 2014 Robert Widmann. All rights reserved.
 //
 
+import Swift_Extras
+
 public protocol RandonGen {
 	func next() -> (Int, Self)
 	func genRange() -> (Int, Int)

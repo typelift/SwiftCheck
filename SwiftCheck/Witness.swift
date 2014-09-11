@@ -20,7 +20,7 @@ public struct WitnessTestableGen {
 
 extension WitnessTestableGen : Testable {
 	public func property() -> Property {
-		return Property(mp.bind({ (let p) in
+		return Property(mp >>= ({ (let p) in
 			return p.property().unProperty
 		}))
 	}
@@ -36,7 +36,7 @@ public struct WitnessTestableFunction<A : Arbitrary> : Testable {
 	public func property() -> Property {
 		return forAllShrink(A.arbitrary())(shrinker: { (let x) in
 			return A.shrink(x)
-		})({ (let x) in
+		})(f: { (let x) in
 			return unsafeCoerce(self.mp(x))
 		})
 	}

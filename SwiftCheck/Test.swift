@@ -7,10 +7,11 @@
 //
 
 import Foundation
+import Swift_Extras
 
 public enum Arguments {
 	case Arguments(
-		replay : Maybe<(StdGen, Int)>
+		replay : Optional<(StdGen, Int)>
 		, maxSuccess : Int
 		, maxDiscard : Int
 		, maxSize : Int
@@ -51,7 +52,7 @@ public func isSuccess(r: Result) -> Bool {
 }
 
 public func stdArgs() -> Arguments{
-	return Arguments.Arguments(replay: Maybe.Nothing, maxSuccess: 100, maxDiscard: 500, maxSize: 100, chatty: true)
+	return Arguments.Arguments(replay: .None, maxSuccess: 100, maxDiscard: 500, maxSize: 100, chatty: true)
 }
 
 public func quickCheck<P : Testable>(prop: P) -> IO<()> {
@@ -76,9 +77,9 @@ public func quickCheckResult<P : Testable>(p : P) -> IO<Result> {
 
 private func computeSize(args : Arguments)(x: Int)(y: Int) -> Int {
 	switch args {
-	case .Arguments(Maybe.Nothing, _, _, _, _):
+	case .Arguments(Optional.None, _, _, _, _):
 		return computeSize_(x)(d: y)
-	case .Arguments(Maybe.Just(let (_, s)), _, _, _, _):
+	case .Arguments(Optional.Some(let (_, s)), _, _, _, _):
 		return s
 	}
 }
@@ -89,9 +90,9 @@ private func computeSize_(n: Int)(d: Int) -> Int {
 
 private func rnd(args : Arguments) -> IO<StdGen> {
 	switch args {
-	case .Arguments(Maybe.Nothing, _, _, _, _):
+	case .Arguments(Optional.None, _, _, _, _):
 		return newStdGen()
-	case .Arguments(Maybe.Just(let (rnd, _)), _, _, _, _):
+	case .Arguments(Optional.Some(let (rnd, _)), _, _, _, _):
 		return IO<StdGen>.pure(rnd)
 	}
 }
@@ -150,30 +151,30 @@ public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> IO<Result> {
 	
 	switch rose {
 	case .MkRose(let res, _):
-		switch res.value {
-		case .MkResult(Maybe.Just(true), let expect, _, _, let stamp, _):
-			var st2 = st
-			st2.numSuccessTests += 1
-			st2.randomSeed = rnd2
-			st2.collected = stamp +> st.collected
-			st2.expectedFailure = expect
-			return test(st2)(f)
-		case .MkResult(Maybe.Nothing, let expect, _, _, _, _):
-			var st2 = st
-			st2.numSuccessTests += 1
-			st2.randomSeed = rnd2
-			st2.expectedFailure = expect
-			return test(st)(f)
-		case .MkResult(Maybe.Just(false), let expect, _, _, _, _):
-			if expect {
-				print("*** Failed! ")
-			} else {
-				print("+++ OK, failed as expected. ")
-			}
-			//					let numShrinks = st.
-			return test(st)(f)
-		default:
-			break
+		switch res.unBox() {
+			case .MkResult(Optional.Some(true), let expect, _, _, let stamp, _):
+				var st2 = st
+				st2.numSuccessTests += 1
+				st2.randomSeed = rnd2
+				st2.collected = [stamp] + st.collected
+				st2.expectedFailure = expect
+				return test(st2)(f)
+			case .MkResult(Optional.None, let expect, _, _, _, _):
+				var st2 = st
+				st2.numSuccessTests += 1
+				st2.randomSeed = rnd2
+				st2.expectedFailure = expect
+				return test(st)(f)
+			case .MkResult(Optional.Some(false), let expect, _, _, _, _):
+				if expect {
+					print("*** Failed! ")
+				} else {
+					print("+++ OK, failed as expected. ")
+				}
+				//					let numShrinks = st.
+				return test(st)(f)
+			default:
+				break
 		}
 	default:
 		break
