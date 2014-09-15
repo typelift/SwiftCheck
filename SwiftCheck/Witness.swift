@@ -7,7 +7,7 @@
 //
 
 import Foundation
-
+import Swift_Extras
 
 public struct WitnessTestableGen {
 	let mp : Gen<Prop>
@@ -34,11 +34,7 @@ public struct WitnessTestableFunction<A : Arbitrary> : Testable {
 	}
 
 	public func property() -> Property {
-		return forAllShrink(A.arbitrary())(shrinker: { (let x) in
-			return A.shrink(x)
-		})(f: { (let x) in
-			return unsafeCoerce(self.mp(x))
-		})
+		return forAllShrink(A.arbitrary())(shrinker: A.shrink)(f: self.mp)
 	}
 }
 

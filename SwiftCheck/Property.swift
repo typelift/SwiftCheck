@@ -252,11 +252,11 @@ public func ^&^<PROP : Testable>(p1 : PROP, p2 : PROP) -> Property {
 ////					return (return failed { reason = "expectFailure may not occur inside a conjunction" })
 ////				}
 //				switch result.ok {
-//					case .Just(true):
+//					case .Some(true):
 //						return Rose.pure(conj(cbs +> result.callbacks))
-//					case .Just(false):
+//					case .Some(false):
 //						return Rose.pure(rose)
-//					case Nothing:
+//					case None:
 //
 //				}
 //			}

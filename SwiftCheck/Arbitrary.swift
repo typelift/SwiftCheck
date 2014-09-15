@@ -223,7 +223,7 @@ public func arbitrarySizedFloating<A : FloatingPointType>() -> Gen<A> {
 	})
 }
 
-public func shrinkNothing<A>(_ : A) -> [A] {
+public func shrinkNone<A>(_ : A) -> [A] {
 	return []
 }
 
@@ -272,7 +272,7 @@ public func shrinkIntegral<A : IntegerType>(x: A) -> [A] {
 	let z = (x >= 0) ? x : (0 - x)
 	return concatMap({ (let i) in
 		return 0 +> [z - 1]
-	})(l: nub([z] + (takeWhile({ (let y) in
+	})(l: nub([z] ++ (takeWhile({ (let y) in
 		return moralAbs(y, z)
 	})(l: tail(iterate({ (let n) in
 		return n / 2
@@ -334,13 +334,13 @@ public func shrinkDouble(x : Double) -> [Double] {
 //	}
 //
 //	static func arbitrary() -> Gen<Optional<A>> {
-//		return frequency([(1, Gen<Optional<A>>.pure(Optional.None)), (3, liftM({ (let x) in return Just(x.arbitrary()) }))])
+//		return frequency([(1, Gen<Optional<A>>.pure(Optional.None)), (3, liftM({ (let x) in return Some(x.arbitrary()) }))])
 //	}
 //
 //	func shrink() -> [Optional<A>] {
 //		switch self.m {
-//			case .Just(let x):
-//				return .Nothing +> x.shrink().map() { Just($0) }
+//			case .Some(let x):
+//				return .None +> x.shrink().map() { Some($0) }
 //			default:
 //				return []
 //		}

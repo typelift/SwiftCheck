@@ -54,9 +54,9 @@ public func choose<A>(rng: (A, A)) -> Gen<A> {
 public func suchThat<A>(gen: Gen<A>)(p: (A -> Bool)) -> Gen<A> {
 	return suchThatOptional(gen)(p) >>= ({ (let mx) in
 		switch mx {
-			case .Just(let x):
+			case .Some(let x):
 				return Gen.pure(x)
-			case .Nothing:
+			case .None:
 				return sized({ (let n) in
 					return resize(n + 1)(m: suchThat(gen)(p))
 				})
@@ -66,11 +66,11 @@ public func suchThat<A>(gen: Gen<A>)(p: (A -> Bool)) -> Gen<A> {
 
 private func try<A>(gen: Gen<A>, k: Int, n : Int, p: A -> Bool) -> Gen<Optional<A>> {
 	if n == 0 {
-		return Gen.pure(.Nothing)
+		return Gen.pure(.None)
 	}
 	return resize(2 * k + n)(m: gen) >>= ({ (let x : A) -> Gen<Optional<A>> in
 		if p(x) {
-			Gen<Optional<A>>.pure(.Just(x))
+			Gen<Optional<A>>.pure(.Some(x))
 		}
 		return try(gen, k + 1, n - 1, p)
 	})

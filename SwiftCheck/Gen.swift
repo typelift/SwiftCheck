@@ -93,7 +93,7 @@ public func sequence<A>(ms: [Gen<A>]) -> Gen<[A]> {
 				return Gen<[A]>.pure([x1] + xs)
 			}
 		}
-	})(z: Gen<[A]>.pure([]))(lst: ms)
+	})(z: Gen<[A]>.pure([]))(l: ms)
 }
 
 public func >>=<A, B>(x : Gen<A>, f : A -> Gen<B>) -> Gen<B> {

@@ -43,12 +43,11 @@ private func stdRange() -> (UInt, UInt) {
 }
 
 public func setStdGen(g: StdGen) -> IO<()> {
-	var gen = theStdGen()
-	return gen.writeIORef(g)
+	return writeIORef(theStdGen())(v: g)
 }
 
 public func getStdGen() -> IO<StdGen> {
-	return theStdGen().readIORef()
+	return readIORef(theStdGen())
 }
 
 public func theStdGen() -> IORef<StdGen> {
@@ -56,7 +55,7 @@ public func theStdGen() -> IORef<StdGen> {
 }
 
 public func newStdGen() -> IO<StdGen> {
-	return IO.pure(theStdGen().readIORef().unsafePerformIO().split().1)
+	return IO.pure(readIORef(theStdGen()).unsafePerformIO().split().1)
 }
 
 private func mkStdRNG(i: Int) -> IO<StdGen> {
