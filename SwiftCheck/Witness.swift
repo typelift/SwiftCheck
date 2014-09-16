@@ -20,21 +20,21 @@ public struct WitnessTestableGen {
 
 extension WitnessTestableGen : Testable {
 	public func property() -> Property {
-		return Property(mp >>= ({ (let p) in
+		return Property(mp >>- ({ (let p) in
 			return p.property().unProperty
 		}))
 	}
 }
 
-public struct WitnessTestableFunction<A : Arbitrary> : Testable {
-	let mp : A -> Testable
+public struct WitnessTestableFunction<A : Arbitrary, B : Testable> : Testable {
+	let mp : A -> B
 
-	public init(_ mp: A -> Testable) {
+	public init(_ mp: A -> B) {
 		self.mp = mp
 	}
 
 	public func property() -> Property {
-		return forAllShrink(A.arbitrary())(shrinker: A.shrink)(f: self.mp)
+		return undefined()
 	}
 }
 
