@@ -168,7 +168,7 @@ public func withBounds<A : Bounded>(f : A -> A -> Gen<A>) -> Gen<A> {
 public func arbitraryBoundedIntegral<A : Bounded where A : IntegerType>() -> Gen<A> {
 	return withBounds({ (let mn : A) -> A -> Gen<A> in
 		return { (let mx : A) -> Gen<A> in
-			return choose((A.convertFromIntegerLiteral(unsafeCoerce(mn)), A.convertFromIntegerLiteral(unsafeCoerce(mx)))) >>= { (let n) in
+			return choose((A.convertFromIntegerLiteral(unsafeCoerce(mn)), A.convertFromIntegerLiteral(unsafeCoerce(mx)))) >>- { (let n) in
 				return Gen<A>.pure(n)
 			}
 		}
@@ -187,7 +187,7 @@ public func arbitrarySizedBoundedInteger<A : Bounded where A : IntegerType>() ->
 		return { (let mx) in
 			return sized({ (let s) in
 				let k = 2 ^ (s * (max(bits(mn), max(bits(mx), 40))) / 100)
-				return choose((max(mn as Int, (0 - k)), min(mx as Int, k))) >>= ({ (let n) in
+				return choose((max(mn as Int, (0 - k)), min(mx as Int, k))) >>- ({ (let n) in
 					return Gen.pure(A.convertFromIntegerLiteral(unsafeCoerce(n)))
 				})
 			})
@@ -215,8 +215,8 @@ public func arbitrarySizedFloating<A : FloatingPointType>() -> Gen<A> {
 	let precision : Int = 9999999999999
 	return sized({ (let n) in
 		let m = Int(n)
-		return choose((-m * precision, m * precision)) >>= { (let a) in
-			return choose((1, precision)) >>= { (let b) in
+		return choose((-m * precision, m * precision)) >>- { (let a) in
+			return choose((1, precision)) >>- { (let b) in
 				return Gen.pure(A(a % b))
 			}
 		}
@@ -238,7 +238,6 @@ private func shrinkOne<A>(shr : A -> [A])(lst : [A]) -> [[[A]]] {
 				return [[x] +> xs_]
 			})(l: shrinkOne(shr)(lst: xs))
 	}
-	
 }
 
 private func removes<A>(k : Int)(n : Int)(xs : [A]) -> [[A]] {

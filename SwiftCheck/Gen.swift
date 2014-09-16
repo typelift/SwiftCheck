@@ -55,7 +55,6 @@ public func <^<A, B>(x : A, l : Gen<B>) -> Gen<A> {
 }
 
 
-
 extension Gen : Applicative {
 	public static func pure(a: A) -> Gen<A> {
 		return Gen(unGen: { (_) in
@@ -88,15 +87,15 @@ public func <*<A, B>(a : Gen<A>, b : Gen<B>) -> Gen<A> {
 
 public func sequence<A>(ms: [Gen<A>]) -> Gen<[A]> {
 	return foldr({ (let x, let y) in
-		return x >>= { (let x1) in
-			return y >>= { (let xs) in
+		return x >>- { (let x1) in
+			return y >>- { (let xs) in
 				return Gen<[A]>.pure([x1] + xs)
 			}
 		}
 	})(z: Gen<[A]>.pure([]))(l: ms)
 }
 
-public func >>=<A, B>(x : Gen<A>, f : A -> Gen<B>) -> Gen<B> {
+public func >>-<A, B>(x : Gen<A>, f : A -> Gen<B>) -> Gen<B> {
 	return x.bind(f)
 }
 
@@ -107,13 +106,13 @@ public func >><A, B>(x : Gen<A>, y : Gen<B>) -> Gen<B> {
 }
 
 public func join<A>(rs: Gen<Gen<A>>) -> Gen<A> {
-	return rs >>= { (let x) in
+	return rs >>- { (let x) in
 		return x
 	}
 }
 
 public func liftM<A, R>(f: A -> R)(m1 : Gen<A>) -> Gen<R> {
-	return m1 >>= { (let x1) in
+	return m1 >>- { (let x1) in
 		return Gen.pure(f(x1))
 	}
 }
@@ -123,7 +122,7 @@ public func do_<A>(fn: () -> Gen<A>) -> Gen<A> {
 }
 
 public func promote<A>(x : Rose<Gen<A>>) -> Gen<Rose<A>> {
-	return delay() >>= ({ (let eval : Gen<A> -> A) in
+	return delay() >>- ({ (let eval : Gen<A> -> A) in
 		return Gen<Rose<A>>.pure(liftM(eval)(m1: x))
 	})
 }

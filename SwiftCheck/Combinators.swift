@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Swift_Extras
 
 private func vary<S : IntegerType>(k : S)(r: StdGen) -> StdGen {
 	let s = r.split()
@@ -52,7 +53,7 @@ public func choose<A>(rng: (A, A)) -> Gen<A> {
 }
 
 public func suchThat<A>(gen: Gen<A>)(p: (A -> Bool)) -> Gen<A> {
-	return suchThatOptional(gen)(p) >>= ({ (let mx) in
+	return suchThatOptional(gen)(p) >>- ({ (let mx) in
 		switch mx {
 			case .Some(let x):
 				return Gen.pure(x)
@@ -68,7 +69,7 @@ private func try<A>(gen: Gen<A>, k: Int, n : Int, p: A -> Bool) -> Gen<Optional<
 	if n == 0 {
 		return Gen.pure(.None)
 	}
-	return resize(2 * k + n)(m: gen) >>= ({ (let x : A) -> Gen<Optional<A>> in
+	return resize(2 * k + n)(m: gen) >>- ({ (let x : A) -> Gen<Optional<A>> in
 		if p(x) {
 			Gen<Optional<A>>.pure(.Some(x))
 		}
@@ -85,7 +86,7 @@ public func suchThatOptional<A>(gen: Gen<A>)(p: A -> Bool) -> Gen<Optional<A>> {
 public func oneOf<A>(gs : [Gen<A>]) -> Gen<A> {
 	assert(gs.count != 0, "oneOf used with empty list")
 
-	return choose((0, gs.count - 1)) >>= ({ (let x) in
+	return choose((0, gs.count - 1)) >>- ({ (let x) in
 		return gs[x]
 	})
 }
@@ -102,7 +103,7 @@ private func pick<A>(n: Int)(lst: [(Int, Gen<A>)]) -> Gen<A> {
 public func frequency<A>(xs: [(Int, Gen<A>)]) -> Gen<A> {
 	assert(xs.count != 0, "frequency used with empty list")
 	
-	return choose((1, sum(xs.map() { $0.0 }))) >>= { (let l) in
+	return choose((1, sum(xs.map() { $0.0 }))) >>- { (let l) in
 		return pick(l)(lst: xs)
 	}
 }
@@ -110,9 +111,9 @@ public func frequency<A>(xs: [(Int, Gen<A>)]) -> Gen<A> {
 public func elements<A>(xs: [A]) -> Gen<A> {
 	assert(xs.count != 0, "elements used with empty list")
 
-	return choose((0, xs.count - 1)).fmap({ (let i) in
+	return Gen.fmap({ (let i) in
 		return xs[i]
-	})
+	})(choose((0, xs.count - 1)))
 }
 
 func size(k : Double)(m : Int) -> Int {
@@ -125,13 +126,13 @@ public func growingElements<A>(xs: [A]) -> Gen<A> {
 
 	let k = Double(xs.count)
 	return sized({ (let n) in
-		return elements(take(max(1, size(k)(m: n)))(xs: xs))
+		return elements(take(max(1, size(k)(m: n)))(l: xs))
 	})
 }
 
 public func listOf<A>(gen: Gen<A>) -> Gen<[A]> {
 	return sized({ (let n) in
-		return choose((0, n)) >>= { (let k) in
+		return choose((0, n)) >>- { (let k) in
 			return vectorOf(k)(gen: gen)
 		}
 	})
@@ -139,7 +140,7 @@ public func listOf<A>(gen: Gen<A>) -> Gen<[A]> {
 
 public func listOf1<A>(gen: Gen<A>) -> Gen<[A]> {
 	return sized({ (let n) in
-		return choose((1, max(1, n))) >>= { (let k) in
+		return choose((1, max(1, n))) >>- { (let k) in
 			return vectorOf(k)(gen: gen)
 		}
 	})

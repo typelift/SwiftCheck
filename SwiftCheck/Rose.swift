@@ -16,18 +16,24 @@ public enum Rose<A> {
 
 extension Rose : Functor {
 	typealias B = Any
-	public func fmap<B>(f: (A -> B)) -> Rose<B> {
-		switch self {
-			case .MkRose(let root, let children):
-				return .MkRose(Box(f(root.value)), children.map() { $0.fmap(f) })
-			case .IORose(let rs):
-				return .IORose(Box(rs.value.fmap() { $0.fmap(f) }))
+	public static func fmap<B>(f : (A -> B)) -> Rose<A> -> Rose<B> {
+		return {
+			switch $0 {
+				case .MkRose(let root, let children):
+					return .MkRose(Box(f(root.unBox())), children.map() { Rose.fmap(f)($0) })
+				case .IORose(let rs):
+					return .IORose(Box(IO.fmap({ Rose.fmap(f)($0) })(rs.unBox())))
+			}
 		}
 	}
+}
 
-	public func bind<B>(fn: A -> Rose<B>) -> Rose<B> {
-		return join(self.fmap(fn))
-	}
+public func <%><A, B>(f: A -> B, rs : Rose<A>) -> Rose<B> {
+	return Rose.fmap(f)(rs)
+}
+
+public func <^<A, B>(x : A, rs : Rose<B>) -> Rose<A> {
+	return Rose.fmap(const(x))(rs)
 }
 
 extension Rose : Applicative {
@@ -37,15 +43,33 @@ extension Rose : Applicative {
 
 	public func ap<B>(fn: Rose<A -> B>) -> Rose<B> {
 		switch fn {
-		case .MkRose(let f, _):
-			return self.fmap(f.value)
-		case .IORose(let rs):
-			return self.ap(rs.value.unsafePerformIO()) ///EEWW, EW, EW, EW, EW
+			case .MkRose(let f, _):
+				return Rose.fmap(f.unBox())(self)
+			case .IORose(let rs):
+				return self.ap(rs.unBox().unsafePerformIO()) ///EEWW, EW, EW, EW, EW
 		}
 	}
 }
 
-public func >>=<A, B>(x : Rose<A>, f : A -> Rose<B>) -> Rose<B> {
+public func <*><A, B>(a : Rose<A -> B> , l : Rose<A>) -> Rose<B> {
+	return l.ap(a)
+}
+
+public func *><A, B>(a : Rose<A>, b : Rose<B>) -> Rose<B> {
+	return const(id) <%> a <*> b
+}
+
+public func <*<A, B>(a : Rose<A>, b : Rose<B>) -> Rose<A> {
+	return const <%> a <*> b
+}
+
+extension Rose : Monad {
+	public func bind<B>(fn: A -> Rose<B>) -> Rose<B> {
+		return joinRose(Rose.fmap(fn)(self))
+	}
+}
+
+public func >>-<A, B>(x : Rose<A>, f : A -> Rose<B>) -> Rose<B> {
 	return x.bind(f)
 }
 
@@ -60,21 +84,21 @@ public func ioRose(x: IO<Rose<TestResult>>) -> Rose<TestResult> {
 }
 
 public func liftM<A, R>(f: A -> R)(m1 : Rose<A>) -> Rose<R> {
-	return m1 >>= { (let x1) in
+	return m1 >>- { (let x1) in
 		return Rose.pure(f(x1))
 	}
 }
 
-public func join<A>(rs: Rose<Rose<A>>) -> Rose<A> {
+public func joinRose<A>(rs: Rose<Rose<A>>) -> Rose<A> {
 	switch rs {
 		case .IORose(var rs):
-			return .IORose(Box<IO<Rose<A>>>(rs.value.fmap(join)))
+			return .IORose(Box(IO.fmap(joinRose)(rs.unBox())))
 		case .MkRose(let bx , let rs):
-			switch bx.value {
+			switch bx.unBox() {
 				case .IORose(let rm):
-					return .IORose(Box(IO.pure(join(.MkRose(Box(rm.value.unsafePerformIO()), rs)))))
+					return .IORose(Box(IO.pure(joinRose(.MkRose(Box(rm.unBox().unsafePerformIO()), rs)))))
 				case .MkRose(let x, let ts):
-					return .MkRose(x, rs.map(join) ++ ts)
+					return .MkRose(x, rs.map(joinRose) ++ ts)
 			}
 			
 	}
@@ -85,16 +109,16 @@ public func reduce(rs: Rose<TestResult>) -> IO<Rose<TestResult>> {
 		case .MkRose(_, _):
 			return IO.pure(rs)
 		case .IORose(let m):
-			return m.value >>= reduce
+			return m.unBox() >>- reduce
 	}
 }
 
 public func onRose<A>(f: (A -> [Rose<A>] -> Rose<A>))(rs: Rose<A>) -> Rose<A> {
 	switch rs {
 		case .MkRose(let x, let rs):
-			return f(x.value)(rs)
+			return f(x.unBox())(rs)
 		case .IORose(let m):
-			return .IORose(Box(m.value.fmap(onRose(f))))
+			return .IORose(Box(IO.fmap(onRose(f))(m.unBox())))
 	}
 }
 
@@ -109,8 +133,8 @@ public func do_<A>(fn: () -> Rose<A>) -> Rose<A> {
 public func sequence<A>(ms : [Rose<A>]) -> Rose<[A]> {
 	let sequenceF : Rose<A> -> Rose<[A]> -> Rose<[A]> = { (m: Rose<A>) in
 		return { (n: Rose<[A]>) in
-			return m >>= { (let x) in
-				return n >>= { (let xs) in
+			return m >>- { (let x) in
+				return n >>- { (let xs) in
 					var arr = xs
 					arr.insert(x, atIndex: 0)
 					return Rose<[A]>.pure(arr)
@@ -118,7 +142,7 @@ public func sequence<A>(ms : [Rose<A>]) -> Rose<[A]> {
 			}
 		}
 	}
-	return foldr(sequenceF)(z: Rose<[A]>.pure([]))(lst: ms)
+	return foldr(sequenceF)(z: Rose<[A]>.pure([]))(l: ms)
 }
 
 public func mapM<A, B>(f: A -> Rose<B>, xs: [A]) -> Rose<[B]> {
