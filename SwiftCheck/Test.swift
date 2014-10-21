@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Swift_Extras
+import Basis
 
 public enum Arguments {
 	case Arguments(
@@ -59,8 +59,8 @@ public func quickCheck<P : Testable>(prop: P) -> IO<()> {
 	return quickCheckWith(stdArgs(), prop)
 }
 
-public func quickCheck<A, PROP : Testable where A : Arbitrary, A : Printable>(prop: A -> PROP) -> IO<()> {
-	return quickCheckWith(stdArgs(), WitnessTestableFunction(prop))
+public func quickCheck<A : Arbitrary, PROP : Testable>(prop: A.A -> PROP) -> IO<()> {
+	return quickCheckWith(stdArgs(), WitnessTestableFunction<A, PROP>(prop))
 }
 
 //public func quickCheck<A, PROP : Testable where A : Arbitrary, A : Printable>(prop: [A] -> PROP) -> IO<()> {

@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Swift_Extras
+import Basis
 
 public protocol Testable {
 	func property() -> Property
@@ -218,9 +218,17 @@ public func forAll<A : Printable>(gen : Gen<A>)(pf : (A -> Testable)) -> Propert
 	})
 }
 
-public func forAllShrink<A : Printable>(gen : Gen<A>)(shrinker: A -> [A])(f : (A -> Testable)) -> Property {
+public func forAllShrink<A : Printable>(gen : Gen<A>)(shrinker: A -> [A])(f : A -> Testable) -> Property {
 	return Property(gen >>- { (let x : A) in
 		return unProperty(shrinking(shrinker)(x0: x)({ (let xs : A) -> Testable  in
+			return counterexample(xs.description)(p: f(xs))
+		}))
+	})
+}
+
+public func forAllShrink<A : Arbitrary>(gen : Gen<A.A>)(shrinker: A.A -> [A.A])(f : A.A -> Testable) -> Property {
+	return Property(gen >>- { (let x : A.A) in
+		return unProperty(shrinking(shrinker)(x0: x)({ (let xs : A.A) -> Testable  in
 			return counterexample(xs.description)(p: f(xs))
 		}))
 	})

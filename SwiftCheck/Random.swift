@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Robert Widmann. All rights reserved.
 //
 
-import Swift_Extras
+import Basis
 
 public protocol RandonGen {
 	func next() -> (Int, Self)
@@ -19,7 +19,7 @@ public struct StdGen {
 	//	private var seed: UInt32
 	
 	func next() -> (UInt32, StdGen) {
-		return ((arc4random() % self.b) + self.a, self.split().1)
+		return ((arc4random() % self.b) + self.a, StdGen(a: self.a + 1, b: self.b + 1))
 	}
 	
 	func genRange() -> (UInt, UInt) {

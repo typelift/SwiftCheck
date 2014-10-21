@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Swift_Extras
+import Basis
 
 public enum Rose<A> {
 	case MkRose(Box<A>, [Rose<A>])
@@ -32,7 +32,7 @@ public func <%><A, B>(f: A -> B, rs : Rose<A>) -> Rose<B> {
 	return Rose.fmap(f)(rs)
 }
 
-public func <^<A, B>(x : A, rs : Rose<B>) -> Rose<A> {
+public func <%<A, B>(x : A, rs : Rose<B>) -> Rose<A> {
 	return Rose.fmap(const(x))(rs)
 }
 
@@ -98,7 +98,7 @@ public func joinRose<A>(rs: Rose<Rose<A>>) -> Rose<A> {
 				case .IORose(let rm):
 					return .IORose(Box(IO.pure(joinRose(.MkRose(Box(rm.unBox().unsafePerformIO()), rs)))))
 				case .MkRose(let x, let ts):
-					return .MkRose(x, rs.map(joinRose) ++ ts)
+					return .MkRose(x, rs.map(joinRose) + ts)
 			}
 			
 	}
@@ -142,7 +142,7 @@ public func sequence<A>(ms : [Rose<A>]) -> Rose<[A]> {
 			}
 		}
 	}
-	return foldr(sequenceF)(z: Rose<[A]>.pure([]))(l: ms)
+	return foldr(sequenceF)(Rose<[A]>.pure([]))(ms)
 }
 
 public func mapM<A, B>(f: A -> Rose<B>, xs: [A]) -> Rose<[B]> {

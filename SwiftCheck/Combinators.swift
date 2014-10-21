@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Swift_Extras
+import Basis
 
 private func vary<S : IntegerType>(k : S)(r: StdGen) -> StdGen {
 	let s = r.split()
@@ -108,6 +108,10 @@ public func frequency<A>(xs: [(Int, Gen<A>)]) -> Gen<A> {
 	}
 }
 
+private func sum<N : IntegerType>(l : [N]) -> N {
+	return foldl({ $0 + $1 })(0)(l)
+}
+
 public func elements<A>(xs: [A]) -> Gen<A> {
 	assert(xs.count != 0, "elements used with empty list")
 
@@ -126,7 +130,7 @@ public func growingElements<A>(xs: [A]) -> Gen<A> {
 
 	let k = Double(xs.count)
 	return sized({ (let n) in
-		return elements(take(max(1, size(k)(m: n)))(l: xs))
+		return elements(take(max(1, size(k)(m: n)))(xs))
 	})
 }
 

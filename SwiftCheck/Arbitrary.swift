@@ -7,9 +7,9 @@
 //
 
 import Foundation
-import Swift_Extras
+import Basis
 
-public protocol Arbitrary {
+public protocol Arbitrary : Printable {
 	typealias A : Arbitrary
 	class func arbitrary() -> Gen<A>
 	class func shrink(A) -> [A]
@@ -168,7 +168,7 @@ public func withBounds<A : Bounded>(f : A -> A -> Gen<A>) -> Gen<A> {
 public func arbitraryBoundedIntegral<A : Bounded where A : IntegerType>() -> Gen<A> {
 	return withBounds({ (let mn : A) -> A -> Gen<A> in
 		return { (let mx : A) -> Gen<A> in
-			return choose((A.convertFromIntegerLiteral(unsafeCoerce(mn)), A.convertFromIntegerLiteral(unsafeCoerce(mx)))) >>- { (let n) in
+			return choose((A(integerLiteral: unsafeCoerce(mn)), A(integerLiteral: unsafeCoerce(mx)))) >>- { (let n) in
 				return Gen<A>.pure(n)
 			}
 		}
@@ -188,7 +188,7 @@ public func arbitrarySizedBoundedInteger<A : Bounded where A : IntegerType>() ->
 			return sized({ (let s) in
 				let k = 2 ^ (s * (max(bits(mn), max(bits(mx), 40))) / 100)
 				return choose((max(mn as Int, (0 - k)), min(mx as Int, k))) >>- ({ (let n) in
-					return Gen.pure(A.convertFromIntegerLiteral(unsafeCoerce(n)))
+					return Gen.pure(A(integerLiteral: unsafeCoerce(n)))
 				})
 			})
 		}
@@ -206,7 +206,7 @@ private func inBounds<A : IntegerType>(fi : (Int -> A)) -> Gen<Int> -> Gen<A> {
 public func arbitrarySizedInteger<A : IntegerType where A : IntegerLiteralConvertible>() -> Gen<A> {
 	return sized({ (let n : Int) -> Gen<A> in
 		return inBounds({ (let m) in
-			return A.convertFromIntegerLiteral(unsafeCoerce(m))
+			return A(integerLiteral: unsafeCoerce(m))
 		})(choose((0 - n, n)))
 	})
 }
@@ -223,20 +223,34 @@ public func arbitrarySizedFloating<A : FloatingPointType>() -> Gen<A> {
 	})
 }
 
+public enum ArrayD<A> {
+	case Empty
+	case Destructure(A, [A])
+}
+
+internal func destruct<T>(arr : Array<T>) -> ArrayD<T> {
+	if arr.count == 0 {
+		return .Empty
+	} else if arr.count == 1 {
+		return .Destructure(head(arr), [])
+	}
+	return .Destructure(head(arr), tail(arr))
+}
+
 public func shrinkNone<A>(_ : A) -> [A] {
 	return []
 }
 
 private func shrinkOne<A>(shr : A -> [A])(lst : [A]) -> [[[A]]] {
-	switch lst.destruct() {
+	switch destruct(lst) {
 		case .Empty():
 			return []
 		case .Destructure(let x, let xs):
 			return concatMap({ (let x_) in
-				return [[x_ +> xs]]
-			})(l: shr(x)) ++ concatMap({ (let xs_) in
-				return [[x] +> xs_]
-			})(l: shrinkOne(shr)(lst: xs))
+				return [[ (x_ <| xs) ]]
+			})(shr(x)) + concatMap({ (let xs_) in
+				return [ ([x] <| xs_) ]
+			})(shrinkOne(shr)(lst: xs))
 	}
 }
 
@@ -244,8 +258,8 @@ private func removes<A>(k : Int)(n : Int)(xs : [A]) -> [[A]] {
 	if k > n {
 		return []
 	}
-	let xs1 = take(k)(l: xs)
-	let xs2 = drop(k)(l: xs)
+	let xs1 = take(k)(xs)
+	let xs2 = drop(k)(xs)
 	if xs2.count == 0 {
 		return [[]]
 	}
@@ -259,23 +273,23 @@ public func shrinkList<A>(shr : A -> [A]) -> [A] -> [[A]] {
 		let n = xs.count
 		return concat((concatMap({ (let k) in
 			return [removes(k)(n: n)(xs: xs)]
-		})(l: takeWhile({ (let x) in
+		})(takeWhile({ (let x) in
 			return x > 0
-		})(l: iterate({ (let x) in
+		})(Array(iterate({ (let x) in
 			return x / 2
-		})(n))) ++ (shrinkOne(shr)(lst: xs))))
+		})(x: n)))) + (shrinkOne(shr)(lst: xs))))
 	}
 }
 
 public func shrinkIntegral<A : IntegerType>(x: A) -> [A] {
 	let z = (x >= 0) ? x : (0 - x)
 	return concatMap({ (let i) in
-		return 0 +> [z - 1]
-	})(l: nub([z] ++ (takeWhile({ (let y) in
+		return 0 <| [z - 1]
+	})(nub([z] + (takeWhile({ (let y) in
 		return moralAbs(y, z)
-	})(l: tail(iterate({ (let n) in
+	})(tail(Array(iterate({ (let n) in
 		return n / 2
-	})(x))))))
+	})(x: x)))))))
 }
 
 private func moralAbs<A : IntegerType>(a : A, b : A) -> Bool {
@@ -308,17 +322,18 @@ public func shrinkDoubleToInteger(x : Double) -> [Double] {
 }
 
 public func shrinkFloat(x : Float) -> [Float] {
-	return nub(shrinkFloatToInteger(x) + take(20)(l: iterate({ (let n) in
+	let xss = take(20)(Array(iterate({ (let n) in
 		return n / 2.0
-	})(x)).filter({ (let x_) in
-		return abs(x - x_) < abs(x)
-	}))
+	})(x: x))).filter({ x2 in
+		return abs(x - x2) < abs(x)
+	})
+	return nub(shrinkFloatToInteger(x) + xss)
 }
 
 public func shrinkDouble(x : Double) -> [Double] {
-	return nub(shrinkDoubleToInteger(x) + take(20)(l: iterate({ (let n) in
+	return nub(shrinkDoubleToInteger(x) + take(20)(Array(iterate({ (let n) in
 		return n / 2.0
-	})(x)).filter({ (let x_) in
+	})(x: x))).filter({ (let x_) in
 		return abs(x - x_) < abs(x)
 	}))
 }

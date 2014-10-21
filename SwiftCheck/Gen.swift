@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Swift_Extras
+import Basis
 
 public struct Gen<A> {
 	var unGen: StdGen -> Int -> A
@@ -50,7 +50,7 @@ public func <%><A, B>(f: A -> B, ar : Gen<A>) -> Gen<B> {
 	return Gen.fmap(f)(ar)
 }
 
-public func <^<A, B>(x : A, l : Gen<B>) -> Gen<A> {
+public func <%<A, B>(x : A, l : Gen<B>) -> Gen<A> {
 	return Gen.fmap(const(x))(l)
 }
 
@@ -92,7 +92,7 @@ public func sequence<A>(ms: [Gen<A>]) -> Gen<[A]> {
 				return Gen<[A]>.pure([x1] + xs)
 			}
 		}
-	})(z: Gen<[A]>.pure([]))(l: ms)
+	})(Gen<[A]>.pure([]))(ms)
 }
 
 public func >>-<A, B>(x : Gen<A>, f : A -> Gen<B>) -> Gen<B> {
