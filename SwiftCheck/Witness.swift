@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Swift_Extras
+import Basis
 
 public struct WitnessTestableGen {
 	let mp : Gen<Prop>
@@ -27,14 +27,14 @@ extension WitnessTestableGen : Testable {
 }
 
 public struct WitnessTestableFunction<A : Arbitrary, B : Testable> : Testable {
-	let mp : A -> B
+	let mp : A.A -> B
 
-	public init(_ mp: A -> B) {
+	public init(_ mp: A.A -> B) {
 		self.mp = mp
 	}
 
 	public func property() -> Property {
-		return undefined()
+		return forAllShrink(A.arbitrary())(shrinker: A.shrink)(f: self.mp)
 	}
 }
 
