@@ -10,7 +10,7 @@ import Basis
 
 public enum Rose<A> {
 	case MkRose(Box<A>, [Rose<A>])
-	case IORose(Box<IO<Rose<A>>>)
+	case IORose(IO<Rose<A>>)
 }
 
 extension Rose : Functor {
@@ -21,7 +21,7 @@ extension Rose : Functor {
 				case .MkRose(let root, let children):
 					return .MkRose(Box(f(root.unBox())), children.map() { Rose.fmap(f)($0) })
 				case .IORose(let rs):
-					return .IORose(Box(IO.fmap({ Rose.fmap(f)($0) })(rs.unBox())))
+					return .IORose(IO.fmap({ Rose.fmap(f)($0) })(rs))
 			}
 		}
 	}
@@ -45,7 +45,7 @@ extension Rose : Applicative {
 			case .MkRose(let f, _):
 				return Rose.fmap(f.unBox())(self)
 			case .IORose(let rs):
-				return self.ap(!rs.unBox()) ///EEWW, EW, EW, EW, EW
+				return self.ap(!rs) ///EEWW, EW, EW, EW, EW
 		}
 	}
 }
@@ -79,7 +79,7 @@ public func >><A, B>(x : Rose<A>, y : Rose<B>) -> Rose<B> {
 }
 
 public func ioRose(x: IO<Rose<TestResult>>) -> Rose<TestResult> {
-	return .IORose(Box(protectRose(x)))
+	return .IORose(protectRose(x))
 }
 
 public func liftM<A, R>(f: A -> R)(m1 : Rose<A>) -> Rose<R> {
@@ -91,11 +91,11 @@ public func liftM<A, R>(f: A -> R)(m1 : Rose<A>) -> Rose<R> {
 public func joinRose<A>(rs: Rose<Rose<A>>) -> Rose<A> {
 	switch rs {
 		case .IORose(var rs):
-			return .IORose(Box(IO.fmap(joinRose)(rs.unBox())))
+			return .IORose(IO.fmap(joinRose)(rs))
 		case .MkRose(let bx , let rs):
 			switch bx.unBox() {
 				case .IORose(let rm):
-					return .IORose(Box(IO.pure(joinRose(.MkRose(Box(rm.unBox().unsafePerformIO()), rs)))))
+					return .IORose(IO.pure(joinRose(.MkRose(Box(!rm), rs))))
 				case .MkRose(let x, let ts):
 					return .MkRose(x, rs.map(joinRose) + ts)
 			}
@@ -108,7 +108,7 @@ public func reduce(rs: Rose<TestResult>) -> IO<Rose<TestResult>> {
 		case .MkRose(_, _):
 			return IO.pure(rs)
 		case .IORose(let m):
-			return m.unBox() >>- reduce
+			return m >>- reduce
 	}
 }
 
@@ -117,7 +117,7 @@ public func onRose<A>(f: (A -> [Rose<A>] -> Rose<A>))(rs: Rose<A>) -> Rose<A> {
 		case .MkRose(let x, let rs):
 			return f(x.unBox())(rs)
 		case .IORose(let m):
-			return .IORose(Box(IO.fmap(onRose(f))(m.unBox())))
+			return .IORose(IO.fmap(onRose(f))(m))
 	}
 }
 

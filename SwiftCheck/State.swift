@@ -10,15 +10,15 @@
 public struct Terminal {}
 
 public struct State {
-	var terminal          : Terminal
-	var maxSuccessTests   : Int
-	var maxDiscardedTests : Int
-	var computeSize       : Int -> Int -> Int
-	var numSuccessTests   : Int
-	var numDiscardedTests : Int
-	var collected         : [[(String,Int)]]
-	var expectedFailure   : Bool
-	var randomSeed        : StdGen
-	var numSuccessShrinks : Int
-	var numTryShrinks     : Int
+	var terminal			: Terminal
+	var maxSuccessTests		: Int
+	var maxDiscardedTests	: Int
+	var computeSize			: Int -> Int -> Int
+	var numSuccessTests		: Int
+	var numDiscardedTests	: Int
+	var collected			: [[(String,Int)]]
+	var expectedFailure		: Bool
+	var randomSeed			: StdGen
+	var numSuccessShrinks	: Int
+	var numTryShrinks		: Int
 }

@@ -43,10 +43,10 @@ public enum Result {
 
 public func isSuccess(r: Result) -> Bool {
 	switch r {
-	case .Success:
-		return true
-	default:
-		return false
+		case .Success:
+			return true
+		default:
+			return false
 	}
 }
 
