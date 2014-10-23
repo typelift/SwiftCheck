@@ -6,7 +6,6 @@
 //  Copyright (c) 2014 Robert Widmann. All rights reserved.
 //
 
-import Foundation
 import Basis
 
 public enum Rose<A> {
@@ -46,7 +45,7 @@ extension Rose : Applicative {
 			case .MkRose(let f, _):
 				return Rose.fmap(f.unBox())(self)
 			case .IORose(let rs):
-				return self.ap(rs.unBox().unsafePerformIO()) ///EEWW, EW, EW, EW, EW
+				return self.ap(!rs.unBox()) ///EEWW, EW, EW, EW, EW
 		}
 	}
 }

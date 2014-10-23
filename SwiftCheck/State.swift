@@ -6,7 +6,6 @@
 //  Copyright (c) 2014 Robert Widmann. All rights reserved.
 //
 
-import Foundation
 
 public struct Terminal {}
 

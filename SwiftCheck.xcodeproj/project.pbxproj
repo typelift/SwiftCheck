@@ -19,7 +19,6 @@
 		844FCCC7198EFB4700EB242A /* Rose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCC6198EFB4700EB242A /* Rose.swift */; };
 		844FCCC9198EFF9B00EB242A /* SimpleSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCC8198EFF9B00EB242A /* SimpleSpec.swift */; };
 		844FCCCF198F24CF00EB242A /* Combinators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCCE198F24CF00EB242A /* Combinators.swift */; };
-		849E33C919B0055400C9769A /* Bounded.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849E33C819B0055400C9769A /* Bounded.swift */; };
 		84BFE0EC19F6FCD4002A8ECE /* Basis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84BFE0E719F6FCC1002A8ECE /* Basis.framework */; };
 /* End PBXBuildFile section */
 
@@ -70,7 +69,6 @@
 		844FCCC6198EFB4700EB242A /* Rose.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Rose.swift; sourceTree = "<group>"; };
 		844FCCC8198EFF9B00EB242A /* SimpleSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleSpec.swift; sourceTree = "<group>"; };
 		844FCCCE198F24CF00EB242A /* Combinators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Combinators.swift; sourceTree = "<group>"; };
-		849E33C819B0055400C9769A /* Bounded.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bounded.swift; sourceTree = "<group>"; };
 		84BFE0E119F6FCC1002A8ECE /* Basis.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Basis.xcodeproj; path = External/Basis/Basis.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -125,7 +123,6 @@
 				844FCCAD198B367000EB242A /* Property.swift */,
 				844FCCC6198EFB4700EB242A /* Rose.swift */,
 				844FCCB3198B39F300EB242A /* State.swift */,
-				849E33C819B0055400C9769A /* Bounded.swift */,
 				844FCCCD198F23C900EB242A /* System */,
 				844FCC90198B320500EB242A /* Supporting Files */,
 			);
@@ -310,7 +307,6 @@
 				844FCCB0198B36BE00EB242A /* Test.swift in Sources */,
 				844FCCC3198EC4F000EB242A /* Random.swift in Sources */,
 				844FCCAC198B32DC00EB242A /* Gen.swift in Sources */,
-				849E33C919B0055400C9769A /* Bounded.swift in Sources */,
 				844FCCAA198B323800EB242A /* Arbitrary.swift in Sources */,
 				843DF9AF19A8524D00BDFDB1 /* Witness.swift in Sources */,
 				844FCCB4198B39F300EB242A /* State.swift in Sources */,
