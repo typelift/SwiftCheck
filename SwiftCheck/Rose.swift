@@ -45,7 +45,7 @@ extension Rose : Applicative {
 			case .MkRose(let f, _):
 				return Rose.fmap(f.unBox())(self)
 			case .IORose(let rs):
-				return self.ap(!rs) ///EEWW, EW, EW, EW, EW
+				return self.ap(!rs) ///EEWW, EW, EW, EW, EW, EW
 		}
 	}
 }
