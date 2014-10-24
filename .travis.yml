@@ -1,10 +1,6 @@
-language: swift
+language: objective-c
 
 install: git submodule update -i --recursive
-
-before_install:
-- brew update
-- brew upgrade xctool
 
 script:
 - xctool -project SwiftCheck.xcodeproj -scheme SwiftCheck -sdk macosx ONLY_ACTIVE_ARCH=NO clean build
