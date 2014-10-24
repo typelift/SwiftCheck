@@ -19,7 +19,7 @@ class SimpleSpec : XCTestCase {
 	}
 	
 	func testAll() {
-		quickCheck(refl)
+		quickCheck(WitnessTestableFunction<Int, Bool>(refl))
 	}
 	
 }

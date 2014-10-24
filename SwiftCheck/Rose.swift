@@ -83,7 +83,7 @@ public func ioRose(x: IO<Rose<TestResult>>) -> Rose<TestResult> {
 }
 
 public func liftM<A, R>(f: A -> R)(m1 : Rose<A>) -> Rose<R> {
-	return m1 >>- { (let x1) in
+	return m1 >>- { x1 in
 		return Rose.pure(f(x1))
 	}
 }
@@ -132,8 +132,8 @@ public func do_<A>(fn: () -> Rose<A>) -> Rose<A> {
 public func sequence<A>(ms : [Rose<A>]) -> Rose<[A]> {
 	let sequenceF : Rose<A> -> Rose<[A]> -> Rose<[A]> = { (m: Rose<A>) in
 		return { (n: Rose<[A]>) in
-			return m >>- { (let x) in
-				return n >>- { (let xs) in
+			return m >>- { x in
+				return n >>- { xs in
 					var arr = xs
 					arr.insert(x, atIndex: 0)
 					return Rose<[A]>.pure(arr)

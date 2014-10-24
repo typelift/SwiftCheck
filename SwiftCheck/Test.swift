@@ -54,32 +54,32 @@ public func stdArgs() -> Arguments{
 	return Arguments.Arguments(replay: .None, maxSuccess: 100, maxDiscard: 500, maxSize: 100, chatty: true)
 }
 
-public func quickCheck<P : Testable>(prop: P) -> IO<()> {
+public func quickCheck(prop: Testable) -> IO<()> {
 	return quickCheckWith(stdArgs(), prop)
 }
 
-public func quickCheck<A : Arbitrary, PROP : Testable>(prop: A.A -> PROP) -> IO<()> {
-	return quickCheckWith(stdArgs(), WitnessTestableFunction<A, PROP>(prop))
+public func quickCheck<A : Arbitrary, P where P : Testable>(prop: A.A -> P) -> IO<()> {
+	return quickCheckWith(stdArgs(), WitnessTestableFunction<A, P>(prop))
 }
 
 //public func quickCheck<A, PROP : Testable where A : Arbitrary, A : Printable>(prop: [A] -> PROP) -> IO<()> {
 //  return quickCheckWith(stdArgs(), WitnessTestableFunction(prop))
 //}
 
-public func quickCheckWith<P : Testable>(args: Arguments, p : P) -> IO<()> {
+public func quickCheckWith(args: Arguments, p : Testable) -> IO<()> {
 	return quickCheckWithResult(args, p) >> IO<()>.pure(())
 }
 
-public func quickCheckResult<P : Testable>(p : P) -> IO<Result> {
+public func quickCheckResult(p : Testable) -> IO<Result> {
 	return quickCheckWithResult(stdArgs(), p)
 }
 
 private func computeSize(args : Arguments)(x: Int)(y: Int) -> Int {
 	switch args {
-	case .Arguments(Optional.None, _, _, _, _):
-		return computeSize_(x)(d: y)
-	case .Arguments(Optional.Some(let (_, s)), _, _, _, _):
-		return s
+		case .Arguments(Optional.None, _, _, _, _):
+			return computeSize_(x)(d: y)
+		case .Arguments(Optional.Some(let (_, s)), _, _, _, _):
+			return s
 	}
 }
 
@@ -96,7 +96,7 @@ private func rnd(args : Arguments) -> IO<StdGen> {
 	}
 }
 
-public func quickCheckWithResult<P : Testable>(args : Arguments, p : P) -> IO<Result> {
+public func quickCheckWithResult(args : Arguments, p : Testable) -> IO<Result> {
 	switch args {
 	case .Arguments(let replay, let maxSuccess, let maxDiscard, let maxSize, let chatty):
 		return test(State(terminal: Terminal(),
