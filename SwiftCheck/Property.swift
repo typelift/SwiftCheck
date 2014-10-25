@@ -23,7 +23,7 @@ func result(ok: Bool?) -> TestResult {
 public func protectResults(rs: Rose<TestResult>) -> Rose<TestResult> {
 	return onRose({ x in
 		return { rs in
-			let y = protectResult(IO.pure(x)).unsafePerformIO()
+			let y = !protectResult(IO.pure(x))
 			return .MkRose(Box(y), rs.map(protectResults))
 		}
 	})(rs: rs)
@@ -113,22 +113,23 @@ public func noShrinking(p: Testable) -> Property {
 	})(p: p)
 }
 
-public func callback(cb: Callback)(p: Testable) -> Property {
-	return mapTotalResult({ (var res) in
-		switch res {
-			case .MkResult(let ok, let expect, let reason, let interrupted, let stamp, let callbacks):
-				return .MkResult(ok: ok, expect: expect, reason: reason, interrupted: interrupted, stamp: stamp, callbacks: [cb] + callbacks)
-		}
-	})(p: p)
+public func callback(cb: Callback) -> Testable -> Property {
+	return { p in 
+		mapTotalResult({ (var res) in
+			switch res {
+				case .MkResult(let ok, let expect, let reason, let interrupted, let stamp, let callbacks):
+					return .MkResult(ok: ok, expect: expect, reason: reason, interrupted: interrupted, stamp: stamp, callbacks: [cb] + callbacks)
+			}
+		})(p: p)
+	}
 }
 
 public func counterexample(s : String)(p: Testable) -> Property {
 	return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { st in
-		return { _res in
-			println(s)
-			return IO.pure(())
+		return { _ in
+			return putStrLn(s)
 		}
-	}))(p: p)
+	}))(p)
 }
 
 //public func counterexample(s : String)(p: Testable) -> Testable {
@@ -142,10 +143,10 @@ public func counterexample(s : String)(p: Testable) -> Property {
 
 public func printTestCase(s: String)(p: Testable) -> Property {
 	return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { st in
-		return { (_) in
-			return IO.pure(println(s))
+		return { _ in
+			return putStrLn(s)
 		}
-	}))(p: p)
+	}))(p)
 }
 
 public func whenFail(m: IO<()>)(p: Testable) -> Property {
@@ -153,7 +154,7 @@ public func whenFail(m: IO<()>)(p: Testable) -> Property {
 		return { (_) in
 			return m
 		}
-	}))(p: p)
+	}))(p)
 }
 
 //public func verbose(p : Testable) -> Property {

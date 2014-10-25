@@ -71,7 +71,7 @@ private func try<A>(gen: Gen<A>, k: Int, n : Int, p: A -> Bool) -> Gen<Optional<
 	}
 	return resize(2 * k + n)(m: gen) >>- ({ (let x : A) -> Gen<Optional<A>> in
 		if p(x) {
-			Gen<Optional<A>>.pure(.Some(x))
+			return Gen.pure(.Some(x))
 		}
 		return try(gen, k + 1, n - 1, p)
 	})
@@ -106,10 +106,6 @@ public func frequency<A>(xs: [(Int, Gen<A>)]) -> Gen<A> {
 	return choose((1, sum(xs.map() { $0.0 }))) >>- { l in
 		return pick(l)(lst: xs)
 	}
-}
-
-private func sum<N : IntegerType>(l : [N]) -> N {
-	return foldl({ $0 + $1 })(0)(l)
 }
 
 public func elements<A>(xs: [A]) -> Gen<A> {

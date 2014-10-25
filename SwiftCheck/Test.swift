@@ -62,10 +62,6 @@ public func quickCheck<A : Arbitrary, P where P : Testable>(prop: A.A -> P) -> I
 	return quickCheckWith(stdArgs(), WitnessTestableFunction<A, P>(prop))
 }
 
-//public func quickCheck<A, PROP : Testable where A : Arbitrary, A : Printable>(prop: [A] -> PROP) -> IO<()> {
-//  return quickCheckWith(stdArgs(), WitnessTestableFunction(prop))
-//}
-
 public func quickCheckWith(args: Arguments, p : Testable) -> IO<()> {
 	return quickCheckWithResult(args, p) >> IO<()>.pure(())
 }
@@ -99,7 +95,7 @@ private func rnd(args : Arguments) -> IO<StdGen> {
 public func quickCheckWithResult(args : Arguments, p : Testable) -> IO<Result> {
 	switch args {
 	case .Arguments(let replay, let maxSuccess, let maxDiscard, let maxSize, let chatty):
-		return test(State(terminal: Terminal(),
+		let state = State(terminal: Terminal(),
 			maxSuccessTests: maxSuccess,
 			maxDiscardedTests: maxDiscard,
 			computeSize: computeSize(args),
@@ -107,9 +103,10 @@ public func quickCheckWithResult(args : Arguments, p : Testable) -> IO<Result> {
 			numDiscardedTests: 0,
 			collected: [],
 			expectedFailure: false,
-			randomSeed: rnd(args).unsafePerformIO(),
+			randomSeed: !rnd(args),
 			numSuccessShrinks: 0,
-			numTryShrinks: 0))(p.property().unProperty.unGen)
+			numTryShrinks: 0)
+		return test(state)(p.property().unProperty.unGen)
 	}
 }
 
@@ -146,37 +143,37 @@ public func giveUp(st: State)(f: (StdGen -> Int -> Prop)) -> IO<Result> {
 public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> IO<Result> {
 	let size = st.computeSize(st.numSuccessTests)(st.numDiscardedTests)
 	let (rnd1,rnd2) = st.randomSeed.split()
-	var rose : Rose<TestResult> = protectRose(reduce(f(rnd1)(size).unProp)).unsafePerformIO()
+	let rose : Rose<TestResult> = !protectRose(reduce(f(rnd1)(size).unProp))
 	
 	switch rose {
-	case .MkRose(let res, _):
-		switch res.unBox() {
-			case .MkResult(Optional.Some(true), let expect, _, _, let stamp, _):
-				var st2 = st
-				st2.numSuccessTests += 1
-				st2.randomSeed = rnd2
-				st2.collected = [stamp] + st.collected
-				st2.expectedFailure = expect
-				return test(st2)(f)
-			case .MkResult(Optional.None, let expect, _, _, _, _):
-				var st2 = st
-				st2.numSuccessTests += 1
-				st2.randomSeed = rnd2
-				st2.expectedFailure = expect
-				return test(st)(f)
-			case .MkResult(Optional.Some(false), let expect, _, _, _, _):
-				if expect {
-					print("*** Failed! ")
-				} else {
-					print("+++ OK, failed as expected. ")
-				}
-				//					let numShrinks = st.
-				return test(st)(f)
-			default:
-				break
-		}
-	default:
-		break
+		case .MkRose(let res, _):
+			switch res.unBox() {
+				case .MkResult(Optional.Some(true), let expect, _, _, let stamp, _):
+					var st2 = st
+					st2.numSuccessTests += 1
+					st2.randomSeed = rnd2
+					st2.collected = [stamp] + st.collected
+					st2.expectedFailure = expect
+					return test(st2)(f)
+				case .MkResult(Optional.None, let expect, _, _, _, _):
+					var st2 = st
+					st2.numSuccessTests += 1
+					st2.randomSeed = rnd2
+					st2.expectedFailure = expect
+					return test(st)(f)
+				case .MkResult(Optional.Some(false), let expect, _, _, _, _):
+					if expect {
+						print("*** Failed! ")
+					} else {
+						print("+++ OK, failed as expected. ")
+					}
+					//					let numShrinks = st.
+					return test(st)(f)
+				default:
+					break
+			}
+		default:
+			break
 	}
 	assert(false, "")
 }
