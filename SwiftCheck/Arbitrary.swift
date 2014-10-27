@@ -222,20 +222,6 @@ public func arbitrarySizedFloating<A : FloatingPointType>() -> Gen<A> {
 	})
 }
 
-public enum ArrayD<A> {
-	case Empty
-	case Destructure(A, [A])
-}
-
-internal func destruct<T>(arr : Array<T>) -> ArrayD<T> {
-	if arr.count == 0 {
-		return .Empty
-	} else if arr.count == 1 {
-		return .Destructure(head(arr), [])
-	}
-	return .Destructure(head(arr), tail(arr))
-}
-
 public func shrinkNone<A>(_ : A) -> [A] {
 	return []
 }
