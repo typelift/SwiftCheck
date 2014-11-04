@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Robert Widmann. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 //! Project version number for SwiftCheck.
 FOUNDATION_EXPORT double SwiftCheckVersionNumber;
