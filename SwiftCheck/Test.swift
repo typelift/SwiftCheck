@@ -54,32 +54,28 @@ public func stdArgs() -> Arguments{
 	return Arguments.Arguments(replay: .None, maxSuccess: 100, maxDiscard: 500, maxSize: 100, chatty: true)
 }
 
-public func quickCheck<P : Testable>(prop: P) -> IO<()> {
+public func quickCheck(prop: Testable) -> IO<()> {
 	return quickCheckWith(stdArgs(), prop)
 }
 
-public func quickCheck<A : Arbitrary, PROP : Testable>(prop: A.A -> PROP) -> IO<()> {
-	return quickCheckWith(stdArgs(), WitnessTestableFunction<A, PROP>(prop))
+public func quickCheck<A : Arbitrary, P : Testable>(prop: A.A -> P) -> IO<()> {
+	return quickCheckWith(stdArgs(), WitnessTestableFunction<A, P>(prop))
 }
 
-//public func quickCheck<A, PROP : Testable where A : Arbitrary, A : Printable>(prop: [A] -> PROP) -> IO<()> {
-//  return quickCheckWith(stdArgs(), WitnessTestableFunction(prop))
-//}
-
-public func quickCheckWith<P : Testable>(args: Arguments, p : P) -> IO<()> {
+public func quickCheckWith(args: Arguments, p : Testable) -> IO<()> {
 	return quickCheckWithResult(args, p) >> IO<()>.pure(())
 }
 
-public func quickCheckResult<P : Testable>(p : P) -> IO<Result> {
+public func quickCheckResult(p : Testable) -> IO<Result> {
 	return quickCheckWithResult(stdArgs(), p)
 }
 
 private func computeSize(args : Arguments)(x: Int)(y: Int) -> Int {
 	switch args {
-	case .Arguments(Optional.None, _, _, _, _):
-		return computeSize_(x)(d: y)
-	case .Arguments(Optional.Some(let (_, s)), _, _, _, _):
-		return s
+		case .Arguments(Optional.None, _, _, _, _):
+			return computeSize_(x)(d: y)
+		case .Arguments(Optional.Some(let (_, s)), _, _, _, _):
+			return s
 	}
 }
 
@@ -96,10 +92,10 @@ private func rnd(args : Arguments) -> IO<StdGen> {
 	}
 }
 
-public func quickCheckWithResult<P : Testable>(args : Arguments, p : P) -> IO<Result> {
+public func quickCheckWithResult(args : Arguments, p : Testable) -> IO<Result> {
 	switch args {
 	case .Arguments(let replay, let maxSuccess, let maxDiscard, let maxSize, let chatty):
-		return test(State(terminal: Terminal(),
+		let state = State(terminal: Terminal(),
 			maxSuccessTests: maxSuccess,
 			maxDiscardedTests: maxDiscard,
 			computeSize: computeSize(args),
@@ -107,9 +103,10 @@ public func quickCheckWithResult<P : Testable>(args : Arguments, p : P) -> IO<Re
 			numDiscardedTests: 0,
 			collected: [],
 			expectedFailure: false,
-			randomSeed: rnd(args).unsafePerformIO(),
+			randomSeed: !rnd(args),
 			numSuccessShrinks: 0,
-			numTryShrinks: 0))(p.property().unProperty.unGen)
+			numTryShrinks: 0)
+		return test(state)(p.property().unProperty.unGen)
 	}
 }
 
@@ -146,37 +143,37 @@ public func giveUp(st: State)(f: (StdGen -> Int -> Prop)) -> IO<Result> {
 public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> IO<Result> {
 	let size = st.computeSize(st.numSuccessTests)(st.numDiscardedTests)
 	let (rnd1,rnd2) = st.randomSeed.split()
-	var rose : Rose<TestResult> = protectRose(reduce(f(rnd1)(size).unProp)).unsafePerformIO()
+	let rose : Rose<TestResult> = !protectRose(reduce(f(rnd1)(size).unProp))
 	
 	switch rose {
-	case .MkRose(let res, _):
-		switch res.unBox() {
-			case .MkResult(Optional.Some(true), let expect, _, _, let stamp, _):
-				var st2 = st
-				st2.numSuccessTests += 1
-				st2.randomSeed = rnd2
-				st2.collected = [stamp] + st.collected
-				st2.expectedFailure = expect
-				return test(st2)(f)
-			case .MkResult(Optional.None, let expect, _, _, _, _):
-				var st2 = st
-				st2.numSuccessTests += 1
-				st2.randomSeed = rnd2
-				st2.expectedFailure = expect
-				return test(st)(f)
-			case .MkResult(Optional.Some(false), let expect, _, _, _, _):
-				if expect {
-					print("*** Failed! ")
-				} else {
-					print("+++ OK, failed as expected. ")
-				}
-				//					let numShrinks = st.
-				return test(st)(f)
-			default:
-				break
-		}
-	default:
-		break
+		case .MkRose(let res, _):
+			switch res.unBox() {
+				case .MkResult(Optional.Some(true), let expect, _, _, let stamp, _):
+					var st2 = st
+					st2.numSuccessTests += 1
+					st2.randomSeed = rnd2
+					st2.collected = [stamp] + st.collected
+					st2.expectedFailure = expect
+					return test(st2)(f)
+				case .MkResult(Optional.None, let expect, _, _, _, _):
+					var st2 = st
+					st2.numSuccessTests += 1
+					st2.randomSeed = rnd2
+					st2.expectedFailure = expect
+					return test(st)(f)
+				case .MkResult(Optional.Some(false), let expect, _, _, _, _):
+					if expect {
+						print("*** Failed! ")
+					} else {
+						print("+++ OK, failed as expected. ")
+					}
+					//					let numShrinks = st.
+					return test(st)(f)
+				default:
+					break
+			}
+		default:
+			break
 	}
 	assert(false, "")
 }

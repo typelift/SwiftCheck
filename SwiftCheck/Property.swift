@@ -21,9 +21,9 @@ func result(ok: Bool?) -> TestResult {
 }
 
 public func protectResults(rs: Rose<TestResult>) -> Rose<TestResult> {
-	return onRose({ (let x) in
-		return { (let rs) in
-			let y = protectResult(IO.pure(x)).unsafePerformIO()
+	return onRose({ x in
+		return { rs in
+			let y = !protectResult(IO.pure(x))
 			return .MkRose(Box(y), rs.map(protectResults))
 		}
 	})(rs: rs)
@@ -62,19 +62,19 @@ func liftBool(b: Bool) -> TestResult {
 }
 
 func mapResult(f: TestResult -> TestResult)(p: Testable) -> Property {
-	return mapRoseResult({ (let rs) in
+	return mapRoseResult({ rs in
 		return protectResults(Rose.fmap(f)(rs))
 	})(p: p)
 }
 
 func mapTotalResult(f: TestResult -> TestResult)(p: Testable) -> Property {
-	return mapRoseResult({ (let rs) in
+	return mapRoseResult({ rs in
 		return Rose.fmap(f)(rs)
 	})(p: p)
 }
 
 func mapRoseResult(f: Rose<TestResult> -> Rose<TestResult>)(p: Testable) -> Property {
-	return mapProp({ (let t) in
+	return mapProp({ t in
 		return Prop(unProp: f(t.unProp))
 	})(p: p)
 }
@@ -84,13 +84,13 @@ func mapProp(f: Prop -> Prop)(p: Testable) -> Property {
 }
 
 public func mapSize (f: Int -> Int)(p: Testable) -> Property {
-	return Property(sized({ (let n) in
+	return Property(sized({ n in
 		return resize(f(n))(m: p.property().unProperty)
 	}))
 }
 
 private func props<A>(shrinker: A -> [A])(x : A)(pf: A -> Testable) -> Rose<Gen<Prop>> {
-	return .MkRose(Box(pf(x).property().unProperty), shrinker(x).map({ (let x1) in
+	return .MkRose(Box(pf(x).property().unProperty), shrinker(x).map({ x1 in
 		return props(shrinker)(x: x)(pf: pf)
 	}))
 }
@@ -104,8 +104,8 @@ public func shrinking<A> (shrinker: A -> [A])(x0: A)(pf: A -> Testable) -> Prope
 }
 
 public func noShrinking(p: Testable) -> Property {
-	return mapRoseResult({ (let rs) in
-		return onRose({ (let res) in
+	return mapRoseResult({ rs in
+		return onRose({ res in
 			return { (_) in
 				.MkRose(Box(res), [])
 			}
@@ -113,27 +113,28 @@ public func noShrinking(p: Testable) -> Property {
 	})(p: p)
 }
 
-public func callback(cb: Callback)(p: Testable) -> Property {
-	return mapTotalResult({ (var res) in
-		switch res {
-			case .MkResult(let ok, let expect, let reason, let interrupted, let stamp, let callbacks):
-				return .MkResult(ok: ok, expect: expect, reason: reason, interrupted: interrupted, stamp: stamp, callbacks: [cb] + callbacks)
-		}
-	})(p: p)
+public func callback(cb: Callback) -> Testable -> Property {
+	return { p in 
+		mapTotalResult({ (var res) in
+			switch res {
+				case .MkResult(let ok, let expect, let reason, let interrupted, let stamp, let callbacks):
+					return .MkResult(ok: ok, expect: expect, reason: reason, interrupted: interrupted, stamp: stamp, callbacks: [cb] + callbacks)
+			}
+		})(p: p)
+	}
 }
 
 public func counterexample(s : String)(p: Testable) -> Property {
-	return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { (let st) in
-		return { (let _res) in
-			println(s)
-			return IO.pure(())
+	return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { st in
+		return { _ in
+			return putStrLn(s)
 		}
-	}))(p: p)
+	}))(p)
 }
 
 //public func counterexample(s : String)(p: Testable) -> Testable {
-//	return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { (let st) in
-//		return { (let _res) in
+//	return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { st in
+//		return { _res in
 //			println(s)
 //			return IO.pure(())
 //		}
@@ -141,19 +142,19 @@ public func counterexample(s : String)(p: Testable) -> Property {
 //}
 
 public func printTestCase(s: String)(p: Testable) -> Property {
-	return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { (let st) in
-		return { (_) in
-			return IO.pure(println(s))
+	return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { st in
+		return { _ in
+			return putStrLn(s)
 		}
-	}))(p: p)
+	}))(p)
 }
 
 public func whenFail(m: IO<()>)(p: Testable) -> Property {
-	return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { (let st) in
+	return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { st in
 		return { (_) in
 			return m
 		}
-	}))(p: p)
+	}))(p)
 }
 
 //public func verbose(p : Testable) -> Property {
@@ -161,7 +162,7 @@ public func whenFail(m: IO<()>)(p: Testable) -> Property {
 //}
 
 public func expectFailure(p : Testable) -> Property {
-	return mapTotalResult({ (let res) in
+	return mapTotalResult({ res in
 		switch res {
 			case .MkResult(let ok, let expect, let reason, let interrupted, let stamp, let callbacks):
 				return TestResult.MkResult(ok: ok, expect: false, reason: reason, interrupted: interrupted, stamp: stamp, callbacks: callbacks)
@@ -183,7 +184,7 @@ public func classify(b : Bool)(s : String)(p : Testable) -> Property {
 
 public func cover(b : Bool)(n : Int)(s : String)(p : Testable) -> Property {
 	if b {
-		return mapTotalResult({ (let res) in
+		return mapTotalResult({ res in
 			switch res {
 				case .MkResult(let ok, let expect, let reason, let interrupted, let stamp, let callbacks):
 					return TestResult.MkResult(ok: ok, expect: false, reason: reason, interrupted: interrupted, stamp: [(s, n)] + stamp, callbacks: callbacks)
@@ -203,7 +204,7 @@ public func ==>(b: Bool, p : Testable) -> Property {
 }
 
 //public func within(n : Int)(p : Testable) -> Property {
-//	return mapRoseResult({ (let rose) in
+//	return mapRoseResult({ rose in
 //		return ioRose(do_({
 //			let rs = reduce(rose)
 //
@@ -212,7 +213,7 @@ public func ==>(b: Bool, p : Testable) -> Property {
 //}
 
 public func forAll<A : Printable>(gen : Gen<A>)(pf : (A -> Testable)) -> Property {
-	return Property(gen >>- { (let x) in
+	return Property(gen >>- { x in
 		return printTestCase(x.description)(p: pf(x)).unProperty
 	})
 }
@@ -237,7 +238,7 @@ infix operator ^&^ {}
 infix operator ^&&^ {}
 
 public func ^&^(p1 : Testable, p2 : Testable) -> Property {
-	return Property(Bool.arbitrary() >>- { (let b) in
+	return Property(Bool.arbitrary() >>- { b in
 		return printTestCase(b ? "LHS" : "RHS")(p: b ? p1 : p2).unProperty
 	})
 }
@@ -272,8 +273,8 @@ public func ^&^(p1 : Testable, p2 : Testable) -> Property {
 //}
 //
 //public func conjoin(ps : [Testable]) -> Property {
-//	return Property(Gen<Prop>.pure(Prop(conj([])(mapM({ (let p) in
-//		return unProperty(p.property()).fmap { (let x) in
+//	return Property(Gen<Prop>.pure(Prop(conj([])(mapM({ p in
+//		return unProperty(p.property()).fmap { x in
 //			return x.unProp
 //		}
 //	}, ps)))))

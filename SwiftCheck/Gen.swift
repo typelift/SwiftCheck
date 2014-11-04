@@ -15,9 +15,9 @@ public struct Gen<A> {
 extension Gen : Functor {
 	typealias B = Any
 	public static func fmap<B>(f: (A -> B)) -> Gen<A> -> Gen<B> {
-		return { (let g) in
-			Gen<B>(unGen: { (let r) in
-				return { (let n) in
+		return { g in
+			Gen<B>(unGen: { r in
+				return { n in
 					return f(g.unGen(r)(n))
 				}
 			}) 
@@ -25,8 +25,8 @@ extension Gen : Functor {
 	}
 
 	public func bind<B>(fn: A -> Gen<B>) -> Gen<B> {
-		return Gen<B>(unGen: { (let r) in
-			return { (let n) in
+		return Gen<B>(unGen: { r in
+			return { n in
 				let (r1, r2) = r.split()
 				let m = fn(self.unGen(r1)(n))
 				return m.unGen(r2)(n)
@@ -35,8 +35,8 @@ extension Gen : Functor {
 	}
 
 	public func bindWitness(fn: A -> WitnessTestableGen) -> WitnessTestableGen {
-		return WitnessTestableGen(Gen<Prop>(unGen: { (let r) in
-			return { (let n) in
+		return WitnessTestableGen(Gen<Prop>(unGen: { r in
+			return { n in
 				let (r1, r2) = r.split()
 				let m = fn(self.unGen(r1)(n))
 				return mkGen(m).unGen(r2)(n)
@@ -64,8 +64,8 @@ extension Gen : Applicative {
 	}
 
 	public func ap<B>(fn: Gen<A -> B>) -> Gen<B> {
-		return Gen<B>(unGen: { (let r) in
-			return { (let n) in
+		return Gen<B>(unGen: { r in
+			return { n in
 				return fn.unGen(r)(n)(self.unGen(r)(n))
 			}
 		})
@@ -86,8 +86,8 @@ public func <*<A, B>(a : Gen<A>, b : Gen<B>) -> Gen<A> {
 
 public func sequence<A>(ms: [Gen<A>]) -> Gen<[A]> {
 	return foldr({ (let x, let y) in
-		return x >>- { (let x1) in
-			return y >>- { (let xs) in
+		return x >>- { x1 in
+			return y >>- { xs in
 				return Gen<[A]>.pure([x1] + xs)
 			}
 		}
@@ -105,13 +105,13 @@ public func >><A, B>(x : Gen<A>, y : Gen<B>) -> Gen<B> {
 }
 
 public func join<A>(rs: Gen<Gen<A>>) -> Gen<A> {
-	return rs >>- { (let x) in
+	return rs >>- { x in
 		return x
 	}
 }
 
 public func liftM<A, R>(f: A -> R)(m1 : Gen<A>) -> Gen<R> {
-	return m1 >>- { (let x1) in
+	return m1 >>- { x1 in
 		return Gen.pure(f(x1))
 	}
 }
@@ -128,9 +128,9 @@ public func promote<A>(x : Rose<Gen<A>>) -> Gen<Rose<A>> {
 
 
 public func delay<A>() -> Gen<Gen<A> -> A> {
-	return Gen(unGen: { (let r) in
-		return { (let n) in
-			return { (let g) in
+	return Gen(unGen: { r in
+		return { n in
+			return { g in
 				return g.unGen(r)(n)
 			}
 		}

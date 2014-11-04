@@ -1,0 +1,8 @@
+language: objective-c
+osx_image: xcode61
+
+install: git submodule update -i --recursive
+
+script:
+- xctool -project SwiftCheck.xcodeproj -scheme SwiftCheck -sdk macosx ONLY_ACTIVE_ARCH=NO clean build
+- xctool -project SwiftCheck-iOS.xcodeproj -scheme SwiftCheck -sdk iphonesimulator8.1 ONLY_ACTIVE_ARCH=NO clean build

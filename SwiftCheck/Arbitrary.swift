@@ -167,7 +167,7 @@ public func withBounds<A : Bounded>(f : A -> A -> Gen<A>) -> Gen<A> {
 public func arbitraryBoundedIntegral<A : Bounded where A : IntegerType>() -> Gen<A> {
 	return withBounds({ (let mn : A) -> A -> Gen<A> in
 		return { (let mx : A) -> Gen<A> in
-			return choose((A(integerLiteral: unsafeCoerce(mn)), A(integerLiteral: unsafeCoerce(mx)))) >>- { (let n) in
+			return choose((A(integerLiteral: unsafeCoerce(mn)), A(integerLiteral: unsafeCoerce(mx)))) >>- { n in
 				return Gen<A>.pure(n)
 			}
 		}
@@ -182,11 +182,11 @@ private func bits<N : IntegerType>(n : N) -> Int {
 }
 
 public func arbitrarySizedBoundedInteger<A : Bounded where A : IntegerType>() -> Gen<A> {
-	return withBounds({ (let mn) in
-		return { (let mx) in
-			return sized({ (let s) in
+	return withBounds({ mn in
+		return { mx in
+			return sized({ s in
 				let k = 2 ^ (s * (max(bits(mn), max(bits(mx), 40))) / 100)
-				return choose((max(mn as Int, (0 - k)), min(mx as Int, k))) >>- ({ (let n) in
+				return choose((max(mn as Int, (0 - k)), min(mx as Int, k))) >>- ({ n in
 					return Gen.pure(A(integerLiteral: unsafeCoerce(n)))
 				})
 			})
@@ -195,8 +195,8 @@ public func arbitrarySizedBoundedInteger<A : Bounded where A : IntegerType>() ->
 }
 
 private func inBounds<A : IntegerType>(fi : (Int -> A)) -> Gen<Int> -> Gen<A> {
-	return { (let g) in
-		return Gen.fmap(fi)(suchThat(g)({ (let x) in
+	return { g in
+		return Gen.fmap(fi)(suchThat(g)({ x in
 			return (fi(x) as Int) == x
 		}))
 	}
@@ -204,7 +204,7 @@ private func inBounds<A : IntegerType>(fi : (Int -> A)) -> Gen<Int> -> Gen<A> {
 
 public func arbitrarySizedInteger<A : IntegerType where A : IntegerLiteralConvertible>() -> Gen<A> {
 	return sized({ (let n : Int) -> Gen<A> in
-		return inBounds({ (let m) in
+		return inBounds({ m in
 			return A(integerLiteral: unsafeCoerce(m))
 		})(choose((0 - n, n)))
 	})
@@ -212,28 +212,14 @@ public func arbitrarySizedInteger<A : IntegerType where A : IntegerLiteralConver
 
 public func arbitrarySizedFloating<A : FloatingPointType>() -> Gen<A> {
 	let precision : Int = 9999999999999
-	return sized({ (let n) in
+	return sized({ n in
 		let m = Int(n)
-		return choose((-m * precision, m * precision)) >>- { (let a) in
-			return choose((1, precision)) >>- { (let b) in
+		return choose((-m * precision, m * precision)) >>- { a in
+			return choose((1, precision)) >>- { b in
 				return Gen.pure(A(a % b))
 			}
 		}
 	})
-}
-
-public enum ArrayD<A> {
-	case Empty
-	case Destructure(A, [A])
-}
-
-internal func destruct<T>(arr : Array<T>) -> ArrayD<T> {
-	if arr.count == 0 {
-		return .Empty
-	} else if arr.count == 1 {
-		return .Destructure(head(arr), [])
-	}
-	return .Destructure(head(arr), tail(arr))
 }
 
 public func shrinkNone<A>(_ : A) -> [A] {
@@ -245,9 +231,9 @@ private func shrinkOne<A>(shr : A -> [A])(lst : [A]) -> [[[A]]] {
 		case .Empty():
 			return []
 		case .Destructure(let x, let xs):
-			return concatMap({ (let x_) in
+			return concatMap({ x_ in
 				return [[ (x_ <| xs) ]]
-			})(shr(x)) + concatMap({ (let xs_) in
+			})(shr(x)) + concatMap({ xs_ in
 				return [ ([x] <| xs_) ]
 			})(shrinkOne(shr)(lst: xs))
 	}
@@ -262,19 +248,19 @@ private func removes<A>(k : Int)(n : Int)(xs : [A]) -> [[A]] {
 	if xs2.count == 0 {
 		return [[]]
 	}
-	return [xs2] + removes(k)(n: n - k)(xs: xs2).map({ (let lst) in
+	return [xs2] + removes(k)(n: n - k)(xs: xs2).map({ lst in
 		return xs1 + lst
 	})
 }
 
 public func shrinkList<A>(shr : A -> [A]) -> [A] -> [[A]] {
-	return { (let xs) in
+	return { xs in
 		let n = xs.count
-		return concat((concatMap({ (let k) in
+		return concat((concatMap({ k in
 			return [removes(k)(n: n)(xs: xs)]
-		})(takeWhile({ (let x) in
+		})(takeWhile({ x in
 			return x > 0
-		})(Array(iterate({ (let x) in
+		})(Array(iterate({ x in
 			return x / 2
 		})(x: n)))) + (shrinkOne(shr)(lst: xs))))
 	}
@@ -282,11 +268,11 @@ public func shrinkList<A>(shr : A -> [A]) -> [A] -> [[A]] {
 
 public func shrinkIntegral<A : IntegerType>(x: A) -> [A] {
 	let z = (x >= 0) ? x : (0 - x)
-	return concatMap({ (let i) in
+	return concatMap({ i in
 		return 0 <| [z - 1]
-	})(nub([z] + (takeWhile({ (let y) in
+	})(nub([z] + (takeWhile({ y in
 		return moralAbs(y, z)
-	})(tail(Array(iterate({ (let n) in
+	})(tail(Array(iterate({ n in
 		return n / 2
 	})(x: x)))))))
 }
@@ -308,20 +294,20 @@ private func moralAbs<A : IntegerType>(a : A, b : A) -> Bool {
 
 public func shrinkFloatToInteger(x : Float) -> [Float] {
 	let y = (x < 0) ? -x : x
-	return nub([y] + shrinkIntegral(Int64(y)).map({ (let n) in
+	return nub([y] + shrinkIntegral(Int64(y)).map({ n in
 		return Float(n)
 	}))
 }
 
 public func shrinkDoubleToInteger(x : Double) -> [Double] {
 	let y = (x < 0) ? -x : x
-	return nub([y] + shrinkIntegral(Int64(y)).map({ (let n) in
+	return nub([y] + shrinkIntegral(Int64(y)).map({ n in
 		return Double(n)
 	}))
 }
 
 public func shrinkFloat(x : Float) -> [Float] {
-	let xss = take(20)(Array(iterate({ (let n) in
+	let xss = take(20)(Array(iterate({ n in
 		return n / 2.0
 	})(x: x))).filter({ x2 in
 		return abs(x - x2) < abs(x)
@@ -330,9 +316,9 @@ public func shrinkFloat(x : Float) -> [Float] {
 }
 
 public func shrinkDouble(x : Double) -> [Double] {
-	return nub(shrinkDoubleToInteger(x) + take(20)(Array(iterate({ (let n) in
+	return nub(shrinkDoubleToInteger(x) + take(20)(Array(iterate({ n in
 		return n / 2.0
-	})(x: x))).filter({ (let x_) in
+	})(x: x))).filter({ x_ in
 		return abs(x - x_) < abs(x)
 	}))
 }
@@ -347,7 +333,7 @@ public func shrinkDouble(x : Double) -> [Double] {
 //	}
 //
 //	static func arbitrary() -> Gen<Optional<A>> {
-//		return frequency([(1, Gen<Optional<A>>.pure(Optional.None)), (3, liftM({ (let x) in return Some(x.arbitrary()) }))])
+//		return frequency([(1, Gen<Optional<A>>.pure(Optional.None)), (3, liftM({ x in return Some(x.arbitrary()) }))])
 //	}
 //
 //	func shrink() -> [Optional<A>] {
