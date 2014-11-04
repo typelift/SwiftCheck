@@ -58,7 +58,7 @@ public func quickCheck(prop: Testable) -> IO<()> {
 	return quickCheckWith(stdArgs(), prop)
 }
 
-public func quickCheck<A : Arbitrary, P where P : Testable>(prop: A.A -> P) -> IO<()> {
+public func quickCheck<A : Arbitrary, P : Testable>(prop: A.A -> P) -> IO<()> {
 	return quickCheckWith(stdArgs(), WitnessTestableFunction<A, P>(prop))
 }
 
