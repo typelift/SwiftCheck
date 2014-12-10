@@ -9,9 +9,9 @@
 import Basis
 
 public protocol Arbitrary : Printable {
-	typealias A : Arbitrary
-	class func arbitrary() -> Gen<A>
-	class func shrink(A) -> [A]
+//	typealias A : Arbitrary
+	class func arbitrary() -> Gen<Self>
+	class func shrink(Self) -> [Self]
 }
 
 extension Bool : Arbitrary {
@@ -441,3 +441,4 @@ private func ^(ba : Int, ex : Int) -> Int {
 
 	return result;
 }
+

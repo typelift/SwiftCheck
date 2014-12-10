@@ -10,6 +10,7 @@ import Basis
 
 public protocol Testable {
 	func property() -> Property
+	var exhaustive : Bool { get }
 }
 
 public func unProperty(x : Property) -> Gen<Prop> {
@@ -138,7 +139,7 @@ public func counterexample(s : String)(p: Testable) -> Property {
 //			println(s)
 //			return IO.pure(())
 //		}
-//	}))(p: p)
+//	}))(p)
 //}
 
 public func printTestCase(s: String)(p: Testable) -> Property {
@@ -166,6 +167,15 @@ public func expectFailure(p : Testable) -> Property {
 		switch res {
 			case .MkResult(let ok, let expect, let reason, let interrupted, let stamp, let callbacks):
 				return TestResult.MkResult(ok: ok, expect: false, reason: reason, interrupted: interrupted, stamp: stamp, callbacks: callbacks)
+		}
+	})(p: p)
+}
+
+public func once(p : Testable) -> Property {
+	return mapTotalResult({ res in
+		switch res {
+			case .MkResult(let ok, let expect, let reason, let interrupted, let stamp, let callbacks):
+				return TestResult.MkResult(ok: ok, expect: expect, reason: reason, interrupted: true, stamp: stamp, callbacks: callbacks)
 		}
 	})(p: p)
 }
@@ -212,27 +222,6 @@ public func ==>(b: Bool, p : Testable) -> Property {
 //	})
 //}
 
-public func forAll<A : Printable>(gen : Gen<A>)(pf : (A -> Testable)) -> Property {
-	return Property(gen >>- { x in
-		return printTestCase(x.description)(p: pf(x)).unProperty
-	})
-}
-
-public func forAllShrink<A : Printable>(gen : Gen<A>)(shrinker: A -> [A])(f : A -> Testable) -> Property {
-	return Property(gen >>- { (let x : A) in
-		return unProperty(shrinking(shrinker)(x0: x)({ (let xs : A) -> Testable  in
-			return counterexample(xs.description)(p: f(xs))
-		}))
-	})
-}
-
-public func forAllShrink<A : Arbitrary>(gen : Gen<A.A>)(shrinker: A.A -> [A.A])(f : A.A -> Testable) -> Property {
-	return Property(gen >>- { (let x : A.A) in
-		return unProperty(shrinking(shrinker)(x0: x)({ (let xs : A.A) -> Testable  in
-			return counterexample(xs.description)(p: f(xs))
-		}))
-	})
-}
 
 infix operator ^&^ {}
 infix operator ^&&^ {}
@@ -308,6 +297,7 @@ public enum TestResult {
 
 public struct Property : Testable {
 	let unProperty : Gen<Prop>
+	public var exhaustive : Bool { return false }
 
 	public init(_ val: Gen<Prop>) {
 		self.unProperty = val;
@@ -321,6 +311,7 @@ public struct Property : Testable {
 
 public struct Prop : Testable {
 	var unProp: Rose<TestResult>
+	public var exhaustive : Bool { return false }
 
 	public func property() -> Property {
 		return Property(Gen.pure(Prop(unProp: ioRose(IO.pure(self.unProp)))))
@@ -328,12 +319,16 @@ public struct Prop : Testable {
 }
 
 extension TestResult : Testable {
+	public var exhaustive : Bool { return false }
+
 	public func property() -> Property {
 		return Property(Gen.pure(Prop(unProp: protectResults(Rose.pure(self)))))
 	}
 }
 
 extension Bool : Testable {
+	public var exhaustive : Bool { return false }
+
 	public func property() -> Property {
 		return liftBool(self).property()
 	}

@@ -13,7 +13,7 @@ public struct Gen<A> {
 }
 
 extension Gen : Functor {
-	typealias B = Any
+	typealias B = Swift.Any
 	public static func fmap<B>(f: (A -> B)) -> Gen<A> -> Gen<B> {
 		return { g in
 			Gen<B>(unGen: { r in

@@ -18,6 +18,8 @@ public struct WitnessTestableGen {
 }
 
 extension WitnessTestableGen : Testable {
+	public var exhaustive : Bool { return false }
+	
 	public func property() -> Property {
 		return Property(mp >>- ({ p in
 			return p.property().unProperty
@@ -25,17 +27,18 @@ extension WitnessTestableGen : Testable {
 	}
 }
 
-public struct WitnessTestableFunction<A : Arbitrary, B : Testable> : Testable {
-	let mp : A.A -> B
-
-	public init(_ mp: A.A -> B) {
-		self.mp = mp
-	}
-
-	public func property() -> Property {
-		return forAllShrink(A.arbitrary())(shrinker: { A.shrink($0) })(f: self.mp)
-	}
-}
+//public struct WitnessTestableFunction<A : Arbitrary, B : Testable> : Testable {
+//	public var exhaustive : Bool { return false }
+//	let mp : A.A -> B
+//
+//	public init(_ mp: A.A -> B) {
+//		self.mp = mp
+//	}
+//
+//	public func property() -> Property {
+//		return forAllShrink(A.arbitrary())(shrinker: { A.shrink($0) })(f: self.mp)
+//	}
+//}
 
 public func mkGen(x : WitnessTestableGen) -> Gen<Prop> {
 	return x.mp

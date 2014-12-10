@@ -14,7 +14,7 @@ public enum Rose<A> {
 }
 
 extension Rose : Functor {
-	typealias B = Any
+	typealias B = Swift.Any
 	public static func fmap<B>(f : (A -> B)) -> Rose<A> -> Rose<B> {
 		return {
 			switch $0 {
