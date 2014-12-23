@@ -225,31 +225,32 @@ public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> IO<Result> {
 	let size = st.computeSize(st.numSuccessTests)(st.numDiscardedTests)
 	let (rnd1,rnd2) = st.randomSeed.split()
 	let rose : Rose<TestResult> = !protectRose(reduce(f(rnd1)(size).unProp))
-	
+
 	switch rose {
 		case .MkRose(let res, _):
 			switch res.unBox() {
-				case .MkResult(Optional.Some(true), let expect, _, _, let stamp, _):
+				case .MkResult(.Some(true), let expect, _, _, let stamp, _):
 					var st2 = st
 					st2.numSuccessTests += 1
 					st2.randomSeed = rnd2
 					st2.collected = [stamp] + st.collected
 					st2.expectedFailure = expect
 					return test(st2)(f)
-				case .MkResult(Optional.None, let expect, _, _, _, _):
+				case .MkResult(.None, let expect, _, _, _, _):
 					var st2 = st
 					st2.numSuccessTests += 1
 					st2.randomSeed = rnd2
 					st2.expectedFailure = expect
 					return test(st)(f)
-				case .MkResult(Optional.Some(false), let expect, _, _, _, _):
+				case .MkResult(.Some(false), let expect, _, _, _, _):
 					if expect {
-						print("*** Failed! ")
+						println("*** Failed! ")
 					} else {
-						print("+++ OK, failed as expected. ")
+						println("+++ OK, failed as expected. ")
 					}
-					//					let numShrinks = st.
-					return test(st)(f)
+					var st2 = st
+					st2.numSuccessTests += 1
+					return test(st2)(f)
 				default:
 					break
 			}

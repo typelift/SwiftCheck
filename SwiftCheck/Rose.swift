@@ -122,7 +122,7 @@ public func onRose<A>(f: (A -> [Rose<A>] -> Rose<A>))(rs: Rose<A>) -> Rose<A> {
 }
 
 public func protectRose(x: IO<Rose<TestResult>>) -> IO<Rose<TestResult>> {
-	return protect(IO.pure(Rose.pure(exception("Exception"))))
+	return protect(Rose.pure • exception("Exception"))(x)
 }
 
 public func do_<A>(fn: () -> Rose<A>) -> Rose<A> {

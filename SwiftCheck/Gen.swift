@@ -33,16 +33,6 @@ extension Gen : Functor {
 			}
 		})
 	}
-
-	public func bindWitness(fn: A -> WitnessTestableGen) -> WitnessTestableGen {
-		return WitnessTestableGen(Gen<Prop>(unGen: { r in
-			return { n in
-				let (r1, r2) = r.split()
-				let m = fn(self.unGen(r1)(n))
-				return mkGen(m).unGen(r2)(n)
-			}
-		}))
-	}
 }
 
 public func <%><A, B>(f: A -> B, ar : Gen<A>) -> Gen<B> {

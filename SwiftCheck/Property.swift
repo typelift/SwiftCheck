@@ -30,16 +30,20 @@ public func protectResults(rs: Rose<TestResult>) -> Rose<TestResult> {
 	})(rs: rs)
 }
 
-public func exception(msg: String) -> TestResult {
-	return failed()
+public func exception(msg: String) -> Exception -> TestResult {
+	return { e in failed() }
 }
 
 public func protectResult(res: IO<TestResult>) -> IO<TestResult> {
-	return protect(res)
+	return protect({ e in exception("Exception")(e) })(res)
 }
 
-public func protect<A>(x: IO<A>) -> IO<A> {
-	return x
+private func tryEvaluateIO<A>(m : IO<A>) -> IO<Either<Exception, A>> {
+	return IO.fmap({ Either.right($0) })(m)
+}
+
+public func protect<A>(f : Exception -> A) -> IO<A> -> IO<A> {
+	return { x in either(f)(id) <%> tryEvaluateIO(x) }
 }
 
 func succeeded() -> TestResult {

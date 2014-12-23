@@ -230,7 +230,7 @@ private func shrinkOne<A>(shr : A -> [A])(lst : [A]) -> [[[A]]] {
 	switch destruct(lst) {
 		case .Empty():
 			return []
-		case .Destructure(let x, let xs):
+		case .Cons(let x, let xs):
 			return concatMap({ x_ in
 				return [[ (x_ <| xs) ]]
 			})(shr(x)) + concatMap({ xs_ in
@@ -260,21 +260,14 @@ public func shrinkList<A>(shr : A -> [A]) -> [A] -> [[A]] {
 			return [removes(k)(n: n)(xs: xs)]
 		})(takeWhile({ x in
 			return x > 0
-		})(Array(iterate({ x in
+		})(iterate({ x in
 			return x / 2
-		})(x: n)))) + (shrinkOne(shr)(lst: xs))))
+		})(n))) + (shrinkOne(shr)(lst: xs))))
 	}
 }
 
 public func shrinkIntegral<A : IntegerType>(x: A) -> [A] {
-	let z = (x >= 0) ? x : (0 - x)
-	return concatMap({ i in
-		return 0 <| [z - 1]
-	})(nub([z] + (takeWhile({ y in
-		return moralAbs(y, z)
-	})(tail(Array(iterate({ n in
-		return n / 2
-	})(x: x)))))))
+	return []
 }
 
 private func moralAbs<A : IntegerType>(a : A, b : A) -> Bool {
@@ -307,18 +300,18 @@ public func shrinkDoubleToInteger(x : Double) -> [Double] {
 }
 
 public func shrinkFloat(x : Float) -> [Float] {
-	let xss = take(20)(Array(iterate({ n in
+	let xss = take(20)(iterate({ n in
 		return n / 2.0
-	})(x: x))).filter({ x2 in
+	})(x)).filter({ x2 in
 		return abs(x - x2) < abs(x)
 	})
 	return nub(shrinkFloatToInteger(x) + xss)
 }
 
 public func shrinkDouble(x : Double) -> [Double] {
-	return nub(shrinkDoubleToInteger(x) + take(20)(Array(iterate({ n in
+	return nub(shrinkDoubleToInteger(x) + take(20)(iterate({ n in
 		return n / 2.0
-	})(x: x))).filter({ x_ in
+	})(x)).filter({ x_ in
 		return abs(x - x_) < abs(x)
 	}))
 }
