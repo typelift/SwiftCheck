@@ -9,7 +9,7 @@
 import Basis
 
 public enum Rose<A> {
-	case MkRose(Box<A>, [Rose<A>])
+	case MkRose(Box<A>, @autoclosure() -> [Rose<A>])
 	case IORose(IO<Rose<A>>)
 }
 
@@ -19,7 +19,7 @@ extension Rose : Functor {
 		return {
 			switch $0 {
 				case .MkRose(let root, let children):
-					return .MkRose(Box(f(root.unBox())), children.map() { Rose.fmap(f)($0) })
+					return .MkRose(Box(f(root.unBox())), children().map() { Rose.fmap(f)($0) })
 				case .IORose(let rs):
 					return .IORose(IO.fmap({ Rose.fmap(f)($0) })(rs))
 			}
@@ -97,7 +97,7 @@ public func joinRose<A>(rs: Rose<Rose<A>>) -> Rose<A> {
 				case .IORose(let rm):
 					return .IORose(IO.pure(joinRose(.MkRose(Box(!rm), rs))))
 				case .MkRose(let x, let ts):
-					return .MkRose(x, rs.map(joinRose) + ts)
+					return .MkRose(x, rs().map(joinRose) + ts())
 			}
 			
 	}
@@ -115,7 +115,7 @@ public func reduce(rs: Rose<TestResult>) -> IO<Rose<TestResult>> {
 public func onRose<A>(f: (A -> [Rose<A>] -> Rose<A>))(rs: Rose<A>) -> Rose<A> {
 	switch rs {
 		case .MkRose(let x, let rs):
-			return f(x.unBox())(rs)
+			return f(x.unBox())(rs())
 		case .IORose(let m):
 			return .IORose(IO.fmap(onRose(f))(m))
 	}

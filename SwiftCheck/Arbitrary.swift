@@ -267,7 +267,13 @@ public func shrinkList<A>(shr : A -> [A]) -> [A] -> [[A]] {
 }
 
 public func shrinkIntegral<A : IntegerType>(x: A) -> [A] {
-	return []
+	let z = (x < 0) ? (0 - x) : x
+	let l = [z] + (takeWhile({ y in
+		return moralAbs(y, x)
+	})(tail(iterate({ n in
+		return n / 2
+	})(x))))
+	return nub(l)
 }
 
 private func moralAbs<A : IntegerType>(a : A, b : A) -> Bool {

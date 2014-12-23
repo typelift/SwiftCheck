@@ -96,7 +96,7 @@ public func mapSize (f: Int -> Int)(p: Testable) -> Property {
 
 private func props<A>(shrinker: A -> [A])(x : A)(pf: A -> Testable) -> Rose<Gen<Prop>> {
 	return .MkRose(Box(pf(x).property().unProperty), shrinker(x).map({ x1 in
-		return props(shrinker)(x: x)(pf: pf)
+		return props(shrinker)(x: x1)(pf: pf)
 	}))
 }
 
@@ -201,7 +201,7 @@ public func cover(b : Bool)(n : Int)(s : String)(p : Testable) -> Property {
 		return mapTotalResult({ res in
 			switch res {
 				case .MkResult(let ok, let expect, let reason, let interrupted, let stamp, let callbacks):
-					return TestResult.MkResult(ok: ok, expect: false, reason: reason, interrupted: interrupted, stamp: [(s, n)] + stamp, callbacks: callbacks)
+					return TestResult.MkResult(ok: ok, expect: expect, reason: reason, interrupted: interrupted, stamp: [(s, n)] + stamp, callbacks: callbacks)
 			}
 		})(p:p)
 	}

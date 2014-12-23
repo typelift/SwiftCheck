@@ -198,19 +198,25 @@ public func quickCheckWithResult(args : Arguments, p : Testable) -> IO<Result> {
 }
 
 public func test(st: State)(f: (StdGen -> Int -> Prop)) -> IO<Result> {
-	if st.numSuccessTests >= st.maxSuccessTests {
-		return doneTesting(st)(f)
-	} else if st.numDiscardedTests >= st.maxDiscardedTests {
-		return giveUp(st)(f)
-	} else {
-		return runATest(st)(f)
+	var state = st
+	while true {
+		if state.numSuccessTests >= state.maxSuccessTests {
+			return doneTesting(state)(f)
+		}
+		if state.numDiscardedTests >= state.maxDiscardedTests {
+			return giveUp(state)(f)
+		}
+		state = runATest(state)(f)
 	}
 }
 
 public func doneTesting(st: State)(f: (StdGen -> Int -> Prop)) -> IO<Result> {	
 	if st.expectedFailure {
+		putStrLn("*** Passed " + "\(st.numSuccessTests)" + " tests")
 		return IO<Result>.pure(Result.Success(numTests: st.numSuccessTests, labels: summary(st), output: ""))
 	} else {
+		putStrLn("*** Failed! ")
+		putStrLn("*** Passed " + "\(st.numSuccessTests)" + " tests")
 		return IO<Result>.pure(Result.NoExpectedFailure(numTests: st.numSuccessTests, labels: summary(st), output: ""))
 	}
 }
@@ -221,7 +227,7 @@ public func giveUp(st: State)(f: (StdGen -> Int -> Prop)) -> IO<Result> {
 	return IO<Result>.pure(Result.GaveUp(numTests: st.numSuccessTests, labels: summary(st), output: ""))
 }
 
-public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> IO<Result> {
+public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> State {
 	let size = st.computeSize(st.numSuccessTests)(st.numDiscardedTests)
 	let (rnd1,rnd2) = st.randomSeed.split()
 	let rose : Rose<TestResult> = !protectRose(reduce(f(rnd1)(size).unProp))
@@ -235,13 +241,13 @@ public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> IO<Result> {
 					st2.randomSeed = rnd2
 					st2.collected = [stamp] + st.collected
 					st2.expectedFailure = expect
-					return test(st2)(f)
+					return st2
 				case .MkResult(.None, let expect, _, _, _, _):
 					var st2 = st
 					st2.numSuccessTests += 1
 					st2.randomSeed = rnd2
 					st2.expectedFailure = expect
-					return test(st)(f)
+					return st2
 				case .MkResult(.Some(false), let expect, _, _, _, _):
 					if expect {
 						println("*** Failed! ")
@@ -250,9 +256,9 @@ public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> IO<Result> {
 					}
 					var st2 = st
 					st2.numSuccessTests += 1
-					return test(st2)(f)
-				default:
-					break
+					return st2
+			default:
+				break
 			}
 		default:
 			break
