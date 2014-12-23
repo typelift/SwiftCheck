@@ -16,9 +16,10 @@ class SimpleSpec : XCTestCase {
 			return i == i
 		}
 		
-		let prop = forAll { (xs : [Int]) in
-			return xs == xs.reverse().reverse()
-		}
+//		let prop = forAll { (xs : [Int]) in
+//			return xs == xs.reverse().reverse()
+//		}
+		quickCheck(refl)
 	}
 	
 

@@ -52,40 +52,40 @@ public func stdArgs() -> Arguments{
 	return Arguments(replay: .None, maxSuccess: 100, maxDiscard: 500, maxSize: 100, chatty: true)
 }
 
-public func forAll<A : Arbitrary>(gen : Gen<A>)(pf : (A -> Testable)) -> Property {
-	return forAllShrink(gen)(A.shrink)(pf)
+public func forAll<A : Arbitrary>(gen : Gen<A>, pf : (A -> Testable)) -> Property {
+	return forAllShrink(gen, { A.shrink($0) }, pf)
 }
 
 public func forAll<A : Arbitrary, B : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(pf : (A, B) -> Testable) -> Property {
-	return forAll(genA)({ t in forAll(genB)({ b in pf(t, b) }) })
+	return forAll(genA, { t in forAll(genB, { b in pf(t, b) }) })
 }
 
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(pf : (A, B, C) -> Testable) -> Property {
-	return forAll(genA)({ t in forAll(genB)(genB: genC)({ b, c in pf(t, b, c) }) })
+	return forAll(genA, { t in forAll(genB)(genB: genC)({ b, c in pf(t, b, c) }) })
 }
 
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(genD : Gen<D>)(pf : (A, B, C, D) -> Testable) -> Property {
-	return forAll(genA)({ t in forAll(genB)(genB: genC)(genC: genD)({ b, c, d in pf(t, b, c, d) }) })
+	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)({ b, c, d in pf(t, b, c, d) }) })
 }
 
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(genD : Gen<D>)(genE : Gen<E>)(pf : (A, B, C, D, E) -> Testable) -> Property {
-	return forAll(genA)({ t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)({ b, c, d, e in pf(t, b, c, d, e) }) })
+	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)({ b, c, d, e in pf(t, b, c, d, e) }) })
 }
 
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(genD : Gen<D>)(genE : Gen<E>)(genF : Gen<F>)(pf : (A, B, C, D, E, F) -> Testable) -> Property {
-	return forAll(genA)({ t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)({ b, c, d, e, f in pf(t, b, c, d, e, f) }) })
+	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)({ b, c, d, e, f in pf(t, b, c, d, e, f) }) })
 }
 
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(genD : Gen<D>)(genE : Gen<E>)(genF : Gen<F>)(genG : Gen<G>)(pf : (A, B, C, D, E, F, G) -> Testable) -> Property {
-	return forAll(genA)({ t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)(genF : genG)({ b, c, d, e, f, g in pf(t, b, c, d, e, f, g) }) })
+	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)(genF : genG)({ b, c, d, e, f, g in pf(t, b, c, d, e, f, g) }) })
 }
 
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary, H : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(genD : Gen<D>)(genE : Gen<E>)(genF : Gen<F>)(genG : Gen<G>)(genH : Gen<H>)(pf : (A, B, C, D, E, F, G, H) -> Testable) -> Property {
-	return forAll(genA)({ t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)(genF : genG)(genG : genH)({ b, c, d, e, f, g, h in pf(t, b, c, d, e, f, g, h) }) })
+	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)(genF : genG)(genG : genH)({ b, c, d, e, f, g, h in pf(t, b, c, d, e, f, g, h) }) })
 }
 
 public func forAll<A : Arbitrary>(pf : (A -> Testable)) -> Property {
-	return forAllShrink(A.arbitrary())(A.shrink)(pf)
+	return forAllShrink(A.arbitrary(), { A.shrink($0) }, pf)
 }
 
 public func forAll<A : Arbitrary, B : Arbitrary>(pf : (A, B) -> Testable) -> Property {
@@ -130,7 +130,7 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 //	})
 //}
 
-public func forAllShrink<A : Arbitrary>(gen : Gen<A>)(shrinker: A -> [A])(f : A -> Testable) -> Property {
+public func forAllShrink<A : Arbitrary>(gen : Gen<A>, shrinker: A -> [A], f : A -> Testable) -> Property {
 	return Property(gen >>- { (let x : A) in
 		return unProperty(shrinking(shrinker)(x0: x)({ (let xs : A) -> Testable  in
 			return counterexample(xs.description)(p: f(xs))
@@ -138,6 +138,9 @@ public func forAllShrink<A : Arbitrary>(gen : Gen<A>)(shrinker: A -> [A])(f : A 
 	})
 }
 
+public func quickCheck(prop : Testable) -> IO<()> {
+	return quickCheckWithResult(stdArgs(), prop) >> IO.pure(())
+}
 
 public func quickCheckWithResult(args : Arguments, p : Testable) -> IO<Result> {
 	func roundTo(n : Int)(m : Int) -> Int {
