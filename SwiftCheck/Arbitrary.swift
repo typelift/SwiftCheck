@@ -17,7 +17,7 @@ public protocol Arbitrary : Printable {
 extension Bool : Arbitrary {
 	typealias A = Bool
 	public static func arbitrary() -> Gen<Bool> {
-		return choose((false, true))
+		return Gen.pure((rand() % 2) == 1)
 	}
 
 	public static func shrink(x : Bool) -> [Bool] {
@@ -160,11 +160,19 @@ extension Double : Arbitrary {
 	}
 }
 
+public func arbitraryArray<A : Arbitrary>() -> Gen<[A]> {
+	return sized({ n in
+		return choose((0, n)) >>- { k in
+			return sequence(Array(1...k).map({ _ in A.arbitrary() }))
+		}
+	})
+}
+
 public func withBounds<A : Bounded>(f : A -> A -> Gen<A>) -> Gen<A> {
 	return f(A.minBound())(A.maxBound())
 }
 
-public func arbitraryBoundedIntegral<A : Bounded where A : IntegerType>() -> Gen<A> {
+public func arbitraryBoundedIntegral<A : Bounded where A : SignedIntegerType>() -> Gen<A> {
 	return withBounds({ (let mn : A) -> A -> Gen<A> in
 		return { (let mx : A) -> Gen<A> in
 			return choose((A(integerLiteral: unsafeCoerce(mn)), A(integerLiteral: unsafeCoerce(mx)))) >>- { n in

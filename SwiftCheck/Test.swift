@@ -116,18 +116,16 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 	return forAll({ t in forAll({ b, c, d, e, f, g, h in pf(t, b, c, d, e, f, g, h) }) })
 }
 
-//public func forAll<A : Printable>(pf : (A -> Testable)) -> Property {
-//	return Property(gen >>- { x in
-//		return printTestCase(x.description)(p: pf(x)).unProperty
-//	})
+//public func forAll<A : Arbitrary>(pf : ([A] -> Testable)) -> Property {
+//	return forAllShrink(arbitraryArray(), shrinkList({ A.shrink($0) }), pf)
 //}
-
-//public func forAllShrink<A : Arbitrary>(gen : Gen<A>)(shrinker: A -> [A])(f : A -> Testable) -> Property {
-//	return Property(gen >>- { (let x : A) in
-//		return unProperty(shrinking(shrinker)(x0: x)({ (let xs : A) -> Testable  in
-//			return counterexample(xs.description)(p: f(xs))
-//		}))
-//	})
+//
+//public func forAll<A : Arbitrary, B : Arbitrary>(pf : ([A], [B]) -> Testable) -> Property {
+//	return forAll({ t in forAll({ b in pf(t, b) }) })
+//}
+//
+//public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary>(pf : ([A], [B], [C]) -> Testable) -> Property {
+//	return forAll({ t in forAll({ b, c in pf(t, b, c) }) })
 //}
 
 public func forAllShrink<A : Arbitrary>(gen : Gen<A>, shrinker: A -> [A], f : A -> Testable) -> Property {
