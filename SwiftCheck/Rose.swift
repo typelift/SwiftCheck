@@ -15,6 +15,8 @@ public enum Rose<A> {
 
 extension Rose : Functor {
 	typealias B = Swift.Any
+	typealias FB = Rose<B>
+
 	public static func fmap<B>(f : (A -> B)) -> Rose<A> -> Rose<B> {
 		return {
 			switch $0 {
@@ -36,22 +38,26 @@ public func <%<A, B>(x : A, rs : Rose<B>) -> Rose<A> {
 }
 
 extension Rose : Applicative {
-	public static func pure(a: A) -> Rose<A> {
+	typealias FAB = Rose<A -> B>
+
+	public static func pure(a : A) -> Rose<A> {
 		return .MkRose(Box(a), [])
 	}
 
-	public func ap<B>(fn: Rose<A -> B>) -> Rose<B> {
-		switch fn {
-			case .MkRose(let f, _):
-				return Rose.fmap(f.unBox())(self)
-			case .IORose(let rs):
-				return self.ap(!rs) ///EEWW, EW, EW, EW, EW, EW
+	public static func ap<B>(fn : Rose<A -> B>) -> Rose<A> -> Rose<B> {
+		return { r in
+			switch fn {
+				case .MkRose(let f, _):
+					return Rose.fmap(f.unBox())(r)
+				case .IORose(let rs):
+					return Rose.ap(!rs)(r) ///EEWW, EW, EW, EW, EW, EW
+			}
 		}
 	}
 }
 
 public func <*><A, B>(a : Rose<A -> B> , l : Rose<A>) -> Rose<B> {
-	return l.ap(a)
+	return Rose.ap(a)(l)
 }
 
 public func *><A, B>(a : Rose<A>, b : Rose<B>) -> Rose<B> {

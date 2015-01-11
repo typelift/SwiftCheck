@@ -45,6 +45,8 @@ public func <%<A, B>(x : A, l : Gen<B>) -> Gen<A> {
 
 
 extension Gen : Applicative {
+	typealias FAB = Gen<A -> B>
+
 	public static func pure(a: A) -> Gen<A> {
 		return Gen(unGen: { (_) in
 			return { (_) in
@@ -53,17 +55,17 @@ extension Gen : Applicative {
 		})
 	}
 
-	public func ap<B>(fn: Gen<A -> B>) -> Gen<B> {
-		return Gen<B>(unGen: { r in
+	public static func ap<B>(fn : Gen<A -> B>) -> Gen<A> -> Gen<B> {
+		return { g in Gen<B>(unGen: { r in
 			return { n in
-				return fn.unGen(r)(n)(self.unGen(r)(n))
+				return fn.unGen(r)(n)(g.unGen(r)(n))
 			}
-		})
+		}) }
 	}
 }
 
 public func <*><A, B>(a : Gen<A -> B> , l : Gen<A>) -> Gen<B> {
-	return l.ap(a)
+	return Gen.ap(a)(l)
 }
 
 public func *><A, B>(a : Gen<A>, b : Gen<B>) -> Gen<B> {
