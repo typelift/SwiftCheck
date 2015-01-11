@@ -7,6 +7,7 @@
 //
 
 import Basis
+import Darwin
 
 public protocol Arbitrary : Printable {
 //	typealias A : Arbitrary
@@ -17,7 +18,7 @@ public protocol Arbitrary : Printable {
 extension Bool : Arbitrary {
 	typealias A = Bool
 	public static func arbitrary() -> Gen<Bool> {
-		return Gen.pure((rand() % 2) == 1)
+		return Gen.pure((arc4random() % 2) == 1)
 	}
 
 	public static func shrink(x : Bool) -> [Bool] {
@@ -31,7 +32,7 @@ extension Bool : Arbitrary {
 extension Int : Arbitrary {
 	typealias A = Int
 	public static func arbitrary() -> Gen<Int> {
-		return sized({ n in Gen.pure((Int(rand()) % (n + n + 1)) - n) })
+		return sized({ n in Gen.pure((Int(arc4random()) % (n + n + 1)) - n) })
 	}
 
 	public static func shrink(x : Int) -> [Int] {
@@ -42,7 +43,7 @@ extension Int : Arbitrary {
 extension Int8 : Arbitrary {
 	typealias A = Int8
 	public static func arbitrary() -> Gen<Int8> {
-		return sized({ n in Gen.pure((Int8(rand()) % (n + n + 1)) - n) })
+		return sized({ n in Gen.pure((Int8(arc4random()) % (n + n + 1)) - n) })
 	}
 
 	public static func shrink(x : Int8) -> [Int8] {
@@ -53,7 +54,7 @@ extension Int8 : Arbitrary {
 extension Int16 : Arbitrary {
 	typealias A = Int16
 	public static func arbitrary() -> Gen<Int16> {
-		return sized({ n in Gen.pure((Int16(rand()) % (n + n + 1)) - n) })
+		return sized({ n in Gen.pure((Int16(arc4random()) % (n + n + 1)) - n) })
 	}
 
 	public static func shrink(x : Int16) -> [Int16] {
@@ -64,7 +65,7 @@ extension Int16 : Arbitrary {
 extension Int32 : Arbitrary {
 	typealias A = Int32
 	public static func arbitrary() -> Gen<Int32> {
-		return sized({ n in Gen.pure((Int32(rand()) % (n + n + 1)) - n) })
+		return sized({ n in Gen.pure((Int32(arc4random()) % (n + n + 1)) - n) })
 	}
 
 	public static func shrink(x : Int32) -> [Int32] {
@@ -75,7 +76,7 @@ extension Int32 : Arbitrary {
 extension Int64 : Arbitrary {
 	typealias A = Int64
 	public static func arbitrary() -> Gen<Int64> {
-		return sized({ n in Gen.pure((Int64(rand()) % (n + n + 1)) - n) })
+		return sized({ n in Gen.pure((Int64(arc4random()) % (n + n + 1)) - n) })
 	}
 
 	public static func shrink(x : Int64) -> [Int64] {
@@ -86,7 +87,7 @@ extension Int64 : Arbitrary {
 extension UInt : Arbitrary {
 	typealias A = UInt
 	public static func arbitrary() -> Gen<UInt> {
-		return sized({ n in Gen.pure((UInt(rand()) % (n + n + 1)) - n) })
+		return sized({ n in Gen<UInt>.pure(UInt(arc4random() &% UInt32(abs(n)))) })
 	}
 
 	public static func shrink(x : UInt) -> [UInt] {
@@ -97,7 +98,7 @@ extension UInt : Arbitrary {
 extension UInt8 : Arbitrary {
 	typealias A = UInt8
 	public static func arbitrary() -> Gen<UInt8> {
-		return sized({ n in Gen.pure((UInt8(rand()) % (n + n + 1)) - n) })
+		return sized({ n in Gen<UInt8>.pure(UInt8(arc4random() &% UInt32(abs(n)))) })
 	}
 
 	public static func shrink(x : UInt8) -> [UInt8] {
@@ -108,7 +109,7 @@ extension UInt8 : Arbitrary {
 extension UInt16 : Arbitrary {
 	typealias A = UInt16
 	public static func arbitrary() -> Gen<UInt16> {
-		return sized({ n in Gen.pure((UInt16(rand()) % (n + n + 1)) - n) })
+		return sized({ n in Gen<UInt16>.pure(UInt16(arc4random() &% UInt32(abs(n)))) })
 	}
 
 	public static func shrink(x : UInt16) -> [UInt16] {
@@ -119,7 +120,7 @@ extension UInt16 : Arbitrary {
 extension UInt32 : Arbitrary {
 	typealias A = UInt32
 	public static func arbitrary() -> Gen<UInt32> {
-		return sized({ n in Gen.pure((UInt32(rand()) % (n + n + 1)) - n) })
+		return sized({ n in Gen<UInt32>.pure(UInt32(arc4random() &% UInt32(abs(n)))) })
 	}
 
 	public static func shrink(x : UInt32) -> [UInt32] {
@@ -130,7 +131,7 @@ extension UInt32 : Arbitrary {
 extension UInt64 : Arbitrary {
 	typealias A = UInt64
 	public static func arbitrary() -> Gen<UInt64> {
-		return sized({ n in Gen.pure((UInt64(rand()) % (n + n + 1)) - n) })
+		return sized({ n in Gen<UInt64>.pure(UInt64(arc4random() &% UInt32(abs(n)))) })
 	}
 
 	public static func shrink(x : UInt64) -> [UInt64] {
@@ -141,7 +142,9 @@ extension UInt64 : Arbitrary {
 extension Float : Arbitrary {
 	typealias A = Float
 	public static func arbitrary() -> Gen<Float> {
-		return arbitrarySizedFloating()
+		return sized({ n in
+			return n == 0 ? Gen<Float>.pure(0.0) : Gen<Float>.pure(Float(-n) + Float(arc4random()) / Float(UINT32_MAX / UInt32((n)*2)))
+		})
 	}
 
 	public static func shrink(x : Float) -> [Float] {
@@ -152,7 +155,9 @@ extension Float : Arbitrary {
 extension Double : Arbitrary {
 	typealias A = Double
 	public static func arbitrary() -> Gen<Double> {
-		return arbitrarySizedFloating()
+		return sized({ n in
+			return n == 0 ? Gen<Double>.pure(0.0) : Gen<Double>.pure(Double(-n) + Double(arc4random()) / Double(UINT32_MAX / UInt32(n*2)))
+		})
 	}
 
 	public static func shrink(x : Double) -> [Double] {
@@ -195,18 +200,6 @@ private func inBounds<A : IntegerType>(fi : (Int -> A)) -> Gen<Int> -> Gen<A> {
 			return (fi(x) as Int) == x
 		}))
 	}
-}
-
-public func arbitrarySizedFloating<A : FloatingPointType>() -> Gen<A> {
-	let precision : Int = 9999999999999
-	return sized({ n in
-		let m = Int(n)
-		return choose((-m * precision, m * precision)) >>- { a in
-			return choose((1, precision)) >>- { b in
-				return Gen.pure(A(a % b))
-			}
-		}
-	})
 }
 
 public func shrinkNone<A>(_ : A) -> [A] {

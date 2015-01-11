@@ -12,14 +12,30 @@ import SwiftCheck
 class SimpleSpec : XCTestCase {
 	
 	func testAll() {
-		let refl = forAll { (i : Int) in
+		let reflInt = forAll { (i : Int) in
 			return i == i
 		}
-		
+
+		let reflUInt = forAll { (i : UInt) in
+			return i == i
+		}
+
+		let reflFloat = forAll { (i : Float) in
+			return i == i
+		}
+
+		let reflDouble = forAll { (i : Double) in
+			return i == i
+		}
+
 //		let prop = forAll { (xs : [Int]) in
 //			return xs == xs.reverse().reverse()
 //		}
-		quickCheck(refl)
+		quickCheck(reflInt)
+		quickCheck(reflUInt)
+		quickCheck(reflFloat)
+		quickCheck(reflDouble)
+
 	}
 	
 
