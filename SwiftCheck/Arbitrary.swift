@@ -31,7 +31,7 @@ extension Bool : Arbitrary {
 extension Int : Arbitrary {
 	typealias A = Int
 	public static func arbitrary() -> Gen<Int> {
-		return arbitrarySizedInteger()
+		return sized({ n in Gen.pure((Int(rand()) % (n + n + 1)) - n) })
 	}
 
 	public static func shrink(x : Int) -> [Int] {
@@ -42,7 +42,7 @@ extension Int : Arbitrary {
 extension Int8 : Arbitrary {
 	typealias A = Int8
 	public static func arbitrary() -> Gen<Int8> {
-		return arbitrarySizedBoundedInteger()
+		return sized({ n in Gen.pure((Int8(rand()) % (n + n + 1)) - n) })
 	}
 
 	public static func shrink(x : Int8) -> [Int8] {
@@ -53,7 +53,7 @@ extension Int8 : Arbitrary {
 extension Int16 : Arbitrary {
 	typealias A = Int16
 	public static func arbitrary() -> Gen<Int16> {
-		return arbitrarySizedBoundedInteger()
+		return sized({ n in Gen.pure((Int16(rand()) % (n + n + 1)) - n) })
 	}
 
 	public static func shrink(x : Int16) -> [Int16] {
@@ -64,7 +64,7 @@ extension Int16 : Arbitrary {
 extension Int32 : Arbitrary {
 	typealias A = Int32
 	public static func arbitrary() -> Gen<Int32> {
-		return arbitrarySizedBoundedInteger()
+		return sized({ n in Gen.pure((Int32(rand()) % (n + n + 1)) - n) })
 	}
 
 	public static func shrink(x : Int32) -> [Int32] {
@@ -75,7 +75,7 @@ extension Int32 : Arbitrary {
 extension Int64 : Arbitrary {
 	typealias A = Int64
 	public static func arbitrary() -> Gen<Int64> {
-		return arbitrarySizedBoundedInteger()
+		return sized({ n in Gen.pure((Int64(rand()) % (n + n + 1)) - n) })
 	}
 
 	public static func shrink(x : Int64) -> [Int64] {
@@ -86,7 +86,7 @@ extension Int64 : Arbitrary {
 extension UInt : Arbitrary {
 	typealias A = UInt
 	public static func arbitrary() -> Gen<UInt> {
-		return arbitrarySizedInteger()
+		return sized({ n in Gen.pure((UInt(rand()) % (n + n + 1)) - n) })
 	}
 
 	public static func shrink(x : UInt) -> [UInt] {
@@ -97,7 +97,7 @@ extension UInt : Arbitrary {
 extension UInt8 : Arbitrary {
 	typealias A = UInt8
 	public static func arbitrary() -> Gen<UInt8> {
-		return arbitrarySizedBoundedInteger()
+		return sized({ n in Gen.pure((UInt8(rand()) % (n + n + 1)) - n) })
 	}
 
 	public static func shrink(x : UInt8) -> [UInt8] {
@@ -108,7 +108,7 @@ extension UInt8 : Arbitrary {
 extension UInt16 : Arbitrary {
 	typealias A = UInt16
 	public static func arbitrary() -> Gen<UInt16> {
-		return arbitrarySizedBoundedInteger()
+		return sized({ n in Gen.pure((UInt16(rand()) % (n + n + 1)) - n) })
 	}
 
 	public static func shrink(x : UInt16) -> [UInt16] {
@@ -119,7 +119,7 @@ extension UInt16 : Arbitrary {
 extension UInt32 : Arbitrary {
 	typealias A = UInt32
 	public static func arbitrary() -> Gen<UInt32> {
-		return arbitrarySizedBoundedInteger()
+		return sized({ n in Gen.pure((UInt32(rand()) % (n + n + 1)) - n) })
 	}
 
 	public static func shrink(x : UInt32) -> [UInt32] {
@@ -130,7 +130,7 @@ extension UInt32 : Arbitrary {
 extension UInt64 : Arbitrary {
 	typealias A = UInt64
 	public static func arbitrary() -> Gen<UInt64> {
-		return arbitrarySizedBoundedInteger()
+		return sized({ n in Gen.pure((UInt64(rand()) % (n + n + 1)) - n) })
 	}
 
 	public static func shrink(x : UInt64) -> [UInt64] {
@@ -189,33 +189,12 @@ private func bits<N : IntegerType>(n : N) -> Int {
 	return 1 + bits(n / 2)
 }
 
-public func arbitrarySizedBoundedInteger<A : Bounded where A : IntegerType>() -> Gen<A> {
-	return withBounds({ mn in
-		return { mx in
-			return sized({ s in
-				let k = 2 ^ (s * (max(bits(mn), max(bits(mx), 40))) / 100)
-				return choose((max(mn as Int, (0 - k)), min(mx as Int, k))) >>- ({ n in
-					return Gen.pure(A(integerLiteral: unsafeCoerce(n)))
-				})
-			})
-		}
-	})
-}
-
 private func inBounds<A : IntegerType>(fi : (Int -> A)) -> Gen<Int> -> Gen<A> {
 	return { g in
 		return Gen.fmap(fi)(suchThat(g)({ x in
 			return (fi(x) as Int) == x
 		}))
 	}
-}
-
-public func arbitrarySizedInteger<A : IntegerType where A : IntegerLiteralConvertible>() -> Gen<A> {
-	return sized({ (let n : Int) -> Gen<A> in
-		return inBounds({ m in
-			return A(integerLiteral: unsafeCoerce(m))
-		})(choose((0 - n, n)))
-	})
 }
 
 public func arbitrarySizedFloating<A : FloatingPointType>() -> Gen<A> {

@@ -120,7 +120,7 @@
 				844FCCAD198B367000EB242A /* Property.swift */,
 				844FCCC6198EFB4700EB242A /* Rose.swift */,
 				844FCCB3198B39F300EB242A /* State.swift */,
-				844FCCCD198F23C900EB242A /* System */,
+				844FCCC2198EC4F000EB242A /* Random.swift */,
 				844FCC90198B320500EB242A /* Supporting Files */,
 			);
 			path = SwiftCheck;
@@ -149,14 +149,6 @@
 				844FCC9E198B320500EB242A /* Info.plist */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		844FCCCD198F23C900EB242A /* System */ = {
-			isa = PBXGroup;
-			children = (
-				844FCCC2198EC4F000EB242A /* Random.swift */,
-			);
-			name = System;
 			sourceTree = "<group>";
 		};
 		84BFE0E219F6FCC1002A8ECE /* Products */ = {

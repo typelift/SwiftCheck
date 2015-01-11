@@ -17,7 +17,6 @@
 		841FAE8B19FB1CEA00AF4EA2 /* Rose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FAE5319FB1BDB00AF4EA2 /* Rose.swift */; };
 		841FAE8C19FB1CEA00AF4EA2 /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FAE5419FB1BDB00AF4EA2 /* State.swift */; };
 		841FAE8D19FB1CEA00AF4EA2 /* Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FAE5619FB1BDB00AF4EA2 /* Test.swift */; };
-		841FAE8E19FB1CEA00AF4EA2 /* Witness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FAE5719FB1BDB00AF4EA2 /* Witness.swift */; };
 		841FAE8F19FB1CF000AF4EA2 /* SwiftCheck.h in Headers */ = {isa = PBXBuildFile; fileRef = 841FAE5519FB1BDB00AF4EA2 /* SwiftCheck.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		841FAE9B19FB1D0A00AF4EA2 /* Basis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 841FAE9619FB1CFE00AF4EA2 /* Basis.framework */; };
 /* End PBXBuildFile section */
@@ -64,7 +63,6 @@
 		841FAE5419FB1BDB00AF4EA2 /* State.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = State.swift; path = SwiftCheck/State.swift; sourceTree = SOURCE_ROOT; };
 		841FAE5519FB1BDB00AF4EA2 /* SwiftCheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SwiftCheck.h; path = SwiftCheck/SwiftCheck.h; sourceTree = SOURCE_ROOT; };
 		841FAE5619FB1BDB00AF4EA2 /* Test.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Test.swift; path = SwiftCheck/Test.swift; sourceTree = SOURCE_ROOT; };
-		841FAE5719FB1BDB00AF4EA2 /* Witness.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Witness.swift; path = SwiftCheck/Witness.swift; sourceTree = SOURCE_ROOT; };
 		841FAE6319FB1C0A00AF4EA2 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = SwiftCheckTests/Info.plist; sourceTree = SOURCE_ROOT; };
 		841FAE6419FB1C0A00AF4EA2 /* SimpleSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SimpleSpec.swift; path = SwiftCheckTests/SimpleSpec.swift; sourceTree = SOURCE_ROOT; };
 		841FAE6C19FB1C7000AF4EA2 /* SwiftCheck.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCheck.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -123,7 +121,6 @@
 				841FAE5319FB1BDB00AF4EA2 /* Rose.swift */,
 				841FAE5419FB1BDB00AF4EA2 /* State.swift */,
 				841FAE5619FB1BDB00AF4EA2 /* Test.swift */,
-				841FAE5719FB1BDB00AF4EA2 /* Witness.swift */,
 				841FAE3419FB1BA800AF4EA2 /* Supporting Files */,
 			);
 			path = "SwiftCheck-iOS";
@@ -302,7 +299,6 @@
 				841FAE8B19FB1CEA00AF4EA2 /* Rose.swift in Sources */,
 				841FAE8C19FB1CEA00AF4EA2 /* State.swift in Sources */,
 				841FAE8D19FB1CEA00AF4EA2 /* Test.swift in Sources */,
-				841FAE8E19FB1CEA00AF4EA2 /* Witness.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -498,6 +494,7 @@
 				841FAE8119FB1C7100AF4EA2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		841FAE8219FB1C7100AF4EA2 /* Build configuration list for PBXNativeTarget "SwiftCheckTests" */ = {
 			isa = XCConfigurationList;
@@ -506,6 +503,7 @@
 				841FAE8419FB1C7100AF4EA2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
