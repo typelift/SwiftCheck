@@ -39,15 +39,14 @@ public func resize<A>(n : Int)(m: Gen<A>) -> Gen<A> {
 	})
 }
 
-public func choose<A>(rng: (A, A)) -> Gen<A> {
+public func choose<A : SignedIntegerType>(rng: (A, A)) -> Gen<A> {
 	return Gen(unGen: { s in
 		return { (_) in
-			let x = rng.0
-			let y = rng.1
-			if (rand() / RAND_MAX) == 0 {
-				return x
-			}
-			return y
+			let l = rng.0
+			let h = rng.1
+			let x = numericCast(RAND_MAX * rand()) as A
+			let y = numericCast(h - l + 1) as A
+			return numericCast(l + x % y)
 		}
 	})
 }

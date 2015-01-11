@@ -13,7 +13,7 @@ public struct Gen<A> {
 }
 
 extension Gen : Functor {
-	typealias B = Any
+	typealias B = Swift.Any
 	public static func fmap<B>(f: (A -> B)) -> Gen<A> -> Gen<B> {
 		return { g in
 			Gen<B>(unGen: { r in
@@ -33,16 +33,6 @@ extension Gen : Functor {
 			}
 		})
 	}
-
-	public func bindWitness(fn: A -> WitnessTestableGen) -> WitnessTestableGen {
-		return WitnessTestableGen(Gen<Prop>(unGen: { r in
-			return { n in
-				let (r1, r2) = r.split()
-				let m = fn(self.unGen(r1)(n))
-				return mkGen(m).unGen(r2)(n)
-			}
-		}))
-	}
 }
 
 public func <%><A, B>(f: A -> B, ar : Gen<A>) -> Gen<B> {
@@ -55,6 +45,8 @@ public func <%<A, B>(x : A, l : Gen<B>) -> Gen<A> {
 
 
 extension Gen : Applicative {
+	typealias FAB = Gen<A -> B>
+
 	public static func pure(a: A) -> Gen<A> {
 		return Gen(unGen: { (_) in
 			return { (_) in
@@ -63,17 +55,17 @@ extension Gen : Applicative {
 		})
 	}
 
-	public func ap<B>(fn: Gen<A -> B>) -> Gen<B> {
-		return Gen<B>(unGen: { r in
+	public static func ap<B>(fn : Gen<A -> B>) -> Gen<A> -> Gen<B> {
+		return { g in Gen<B>(unGen: { r in
 			return { n in
-				return fn.unGen(r)(n)(self.unGen(r)(n))
+				return fn.unGen(r)(n)(g.unGen(r)(n))
 			}
-		})
+		}) }
 	}
 }
 
 public func <*><A, B>(a : Gen<A -> B> , l : Gen<A>) -> Gen<B> {
-	return l.ap(a)
+	return Gen.ap(a)(l)
 }
 
 public func *><A, B>(a : Gen<A>, b : Gen<B>) -> Gen<B> {

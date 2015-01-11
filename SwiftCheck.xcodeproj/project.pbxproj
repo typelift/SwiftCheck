@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		843DF9AF19A8524D00BDFDB1 /* Witness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843DF9AE19A8524D00BDFDB1 /* Witness.swift */; };
 		844FCC93198B320500EB242A /* SwiftCheck.h in Headers */ = {isa = PBXBuildFile; fileRef = 844FCC92198B320500EB242A /* SwiftCheck.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		844FCC99198B320500EB242A /* SwiftCheck.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 844FCC8D198B320500EB242A /* SwiftCheck.framework */; };
 		844FCCAA198B323800EB242A /* Arbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCA9198B323800EB242A /* Arbitrary.swift */; };
@@ -54,7 +53,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		843DF9AE19A8524D00BDFDB1 /* Witness.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Witness.swift; sourceTree = "<group>"; };
 		844FCC8D198B320500EB242A /* SwiftCheck.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCheck.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		844FCC91198B320500EB242A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		844FCC92198B320500EB242A /* SwiftCheck.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftCheck.h; sourceTree = "<group>"; };
@@ -119,11 +117,10 @@
 				844FCCA9198B323800EB242A /* Arbitrary.swift */,
 				844FCCAB198B32DC00EB242A /* Gen.swift */,
 				844FCCCE198F24CF00EB242A /* Combinators.swift */,
-				843DF9AE19A8524D00BDFDB1 /* Witness.swift */,
 				844FCCAD198B367000EB242A /* Property.swift */,
 				844FCCC6198EFB4700EB242A /* Rose.swift */,
 				844FCCB3198B39F300EB242A /* State.swift */,
-				844FCCCD198F23C900EB242A /* System */,
+				844FCCC2198EC4F000EB242A /* Random.swift */,
 				844FCC90198B320500EB242A /* Supporting Files */,
 			);
 			path = SwiftCheck;
@@ -152,14 +149,6 @@
 				844FCC9E198B320500EB242A /* Info.plist */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		844FCCCD198F23C900EB242A /* System */ = {
-			isa = PBXGroup;
-			children = (
-				844FCCC2198EC4F000EB242A /* Random.swift */,
-			);
-			name = System;
 			sourceTree = "<group>";
 		};
 		84BFE0E219F6FCC1002A8ECE /* Products */ = {
@@ -308,7 +297,6 @@
 				844FCCC3198EC4F000EB242A /* Random.swift in Sources */,
 				844FCCAC198B32DC00EB242A /* Gen.swift in Sources */,
 				844FCCAA198B323800EB242A /* Arbitrary.swift in Sources */,
-				843DF9AF19A8524D00BDFDB1 /* Witness.swift in Sources */,
 				844FCCB4198B39F300EB242A /* State.swift in Sources */,
 				844FCCCF198F24CF00EB242A /* Combinators.swift in Sources */,
 				844FCCC7198EFB4700EB242A /* Rose.swift in Sources */,

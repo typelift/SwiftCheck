@@ -7,17 +7,18 @@
 //
 
 import Basis
+import Darwin
 
 public protocol Arbitrary : Printable {
-	typealias A : Arbitrary
-	class func arbitrary() -> Gen<A>
-	class func shrink(A) -> [A]
+//	typealias A : Arbitrary
+	class func arbitrary() -> Gen<Self>
+	class func shrink(Self) -> [Self]
 }
 
 extension Bool : Arbitrary {
 	typealias A = Bool
 	public static func arbitrary() -> Gen<Bool> {
-		return choose((false, true))
+		return Gen.pure((arc4random() % 2) == 1)
 	}
 
 	public static func shrink(x : Bool) -> [Bool] {
@@ -31,7 +32,7 @@ extension Bool : Arbitrary {
 extension Int : Arbitrary {
 	typealias A = Int
 	public static func arbitrary() -> Gen<Int> {
-		return arbitrarySizedInteger()
+		return sized({ n in Gen.pure((Int(arc4random()) % (n + n + 1)) - n) })
 	}
 
 	public static func shrink(x : Int) -> [Int] {
@@ -42,7 +43,7 @@ extension Int : Arbitrary {
 extension Int8 : Arbitrary {
 	typealias A = Int8
 	public static func arbitrary() -> Gen<Int8> {
-		return arbitrarySizedBoundedInteger()
+		return sized({ n in Gen.pure((Int8(arc4random()) % (n + n + 1)) - n) })
 	}
 
 	public static func shrink(x : Int8) -> [Int8] {
@@ -53,7 +54,7 @@ extension Int8 : Arbitrary {
 extension Int16 : Arbitrary {
 	typealias A = Int16
 	public static func arbitrary() -> Gen<Int16> {
-		return arbitrarySizedBoundedInteger()
+		return sized({ n in Gen.pure((Int16(arc4random()) % (n + n + 1)) - n) })
 	}
 
 	public static func shrink(x : Int16) -> [Int16] {
@@ -64,7 +65,7 @@ extension Int16 : Arbitrary {
 extension Int32 : Arbitrary {
 	typealias A = Int32
 	public static func arbitrary() -> Gen<Int32> {
-		return arbitrarySizedBoundedInteger()
+		return sized({ n in Gen.pure((Int32(arc4random()) % (n + n + 1)) - n) })
 	}
 
 	public static func shrink(x : Int32) -> [Int32] {
@@ -75,7 +76,7 @@ extension Int32 : Arbitrary {
 extension Int64 : Arbitrary {
 	typealias A = Int64
 	public static func arbitrary() -> Gen<Int64> {
-		return arbitrarySizedBoundedInteger()
+		return sized({ n in Gen.pure((Int64(arc4random()) % (n + n + 1)) - n) })
 	}
 
 	public static func shrink(x : Int64) -> [Int64] {
@@ -86,7 +87,7 @@ extension Int64 : Arbitrary {
 extension UInt : Arbitrary {
 	typealias A = UInt
 	public static func arbitrary() -> Gen<UInt> {
-		return arbitrarySizedInteger()
+		return sized({ n in Gen<UInt>.pure(UInt(arc4random() &% UInt32(abs(n)))) })
 	}
 
 	public static func shrink(x : UInt) -> [UInt] {
@@ -97,7 +98,7 @@ extension UInt : Arbitrary {
 extension UInt8 : Arbitrary {
 	typealias A = UInt8
 	public static func arbitrary() -> Gen<UInt8> {
-		return arbitrarySizedBoundedInteger()
+		return sized({ n in Gen<UInt8>.pure(UInt8(arc4random() &% UInt32(abs(n)))) })
 	}
 
 	public static func shrink(x : UInt8) -> [UInt8] {
@@ -108,7 +109,7 @@ extension UInt8 : Arbitrary {
 extension UInt16 : Arbitrary {
 	typealias A = UInt16
 	public static func arbitrary() -> Gen<UInt16> {
-		return arbitrarySizedBoundedInteger()
+		return sized({ n in Gen<UInt16>.pure(UInt16(arc4random() &% UInt32(abs(n)))) })
 	}
 
 	public static func shrink(x : UInt16) -> [UInt16] {
@@ -119,7 +120,7 @@ extension UInt16 : Arbitrary {
 extension UInt32 : Arbitrary {
 	typealias A = UInt32
 	public static func arbitrary() -> Gen<UInt32> {
-		return arbitrarySizedBoundedInteger()
+		return sized({ n in Gen<UInt32>.pure(UInt32(arc4random() &% UInt32(abs(n)))) })
 	}
 
 	public static func shrink(x : UInt32) -> [UInt32] {
@@ -130,7 +131,7 @@ extension UInt32 : Arbitrary {
 extension UInt64 : Arbitrary {
 	typealias A = UInt64
 	public static func arbitrary() -> Gen<UInt64> {
-		return arbitrarySizedBoundedInteger()
+		return sized({ n in Gen<UInt64>.pure(UInt64(arc4random() &% UInt32(abs(n)))) })
 	}
 
 	public static func shrink(x : UInt64) -> [UInt64] {
@@ -141,7 +142,9 @@ extension UInt64 : Arbitrary {
 extension Float : Arbitrary {
 	typealias A = Float
 	public static func arbitrary() -> Gen<Float> {
-		return arbitrarySizedFloating()
+		return sized({ n in
+			return n == 0 ? Gen<Float>.pure(0.0) : Gen<Float>.pure(Float(-n) + Float(arc4random()) / Float(UINT32_MAX / UInt32((n)*2)))
+		})
 	}
 
 	public static func shrink(x : Float) -> [Float] {
@@ -152,7 +155,9 @@ extension Float : Arbitrary {
 extension Double : Arbitrary {
 	typealias A = Double
 	public static func arbitrary() -> Gen<Double> {
-		return arbitrarySizedFloating()
+		return sized({ n in
+			return n == 0 ? Gen<Double>.pure(0.0) : Gen<Double>.pure(Double(-n) + Double(arc4random()) / Double(UINT32_MAX / UInt32(n*2)))
+		})
 	}
 
 	public static func shrink(x : Double) -> [Double] {
@@ -160,11 +165,54 @@ extension Double : Arbitrary {
 	}
 }
 
+extension UnicodeScalar : Arbitrary {
+	typealias A = UnicodeScalar
+	public static func arbitrary() -> Gen<UnicodeScalar> {
+		return UInt32.arbitrary() >>- {  Gen.pure(UnicodeScalar($0)) }
+	}
+
+	public static func shrink(x : UnicodeScalar) -> [UnicodeScalar] {
+		return shrinkNone(x)
+	}
+}
+
+//extension String : Arbitrary {
+//	typealias A = String
+//	public static func arbitrary() -> Gen<String> {
+//		let chars = sized({ n in vectorOf(n)(gen: UnicodeScalar.arbitrary()) })
+//		return chars >>- { ls in Gen<String>.pure(String(ls.map({ x in Character(x) }))) }
+//	}
+//
+//	public static func shrink(x : String) -> [String] {
+//		return shrinkNone(x)
+//	}
+//}
+
+/// rdar://19437275
+//extension Character : Arbitrary {
+//	typealias A = Character
+//	public static func arbitrary() -> Gen<Character> {
+//		return choose((32, 255)) >>- {  Gen.pure(Character(UnicodeScalar($0))) }
+//	}
+//
+//	public static func shrink(x : Character) -> [Character] {
+//		return shrinkNone(x)
+//	}
+//}
+
+public func arbitraryArray<A : Arbitrary>() -> Gen<[A]> {
+	return sized({ n in
+		return choose((0, n)) >>- { k in
+			return sequence(Array(1...k).map({ _ in A.arbitrary() }))
+		}
+	})
+}
+
 public func withBounds<A : Bounded>(f : A -> A -> Gen<A>) -> Gen<A> {
 	return f(A.minBound())(A.maxBound())
 }
 
-public func arbitraryBoundedIntegral<A : Bounded where A : IntegerType>() -> Gen<A> {
+public func arbitraryBoundedIntegral<A : Bounded where A : SignedIntegerType>() -> Gen<A> {
 	return withBounds({ (let mn : A) -> A -> Gen<A> in
 		return { (let mx : A) -> Gen<A> in
 			return choose((A(integerLiteral: unsafeCoerce(mn)), A(integerLiteral: unsafeCoerce(mx)))) >>- { n in
@@ -181,45 +229,12 @@ private func bits<N : IntegerType>(n : N) -> Int {
 	return 1 + bits(n / 2)
 }
 
-public func arbitrarySizedBoundedInteger<A : Bounded where A : IntegerType>() -> Gen<A> {
-	return withBounds({ mn in
-		return { mx in
-			return sized({ s in
-				let k = 2 ^ (s * (max(bits(mn), max(bits(mx), 40))) / 100)
-				return choose((max(mn as Int, (0 - k)), min(mx as Int, k))) >>- ({ n in
-					return Gen.pure(A(integerLiteral: unsafeCoerce(n)))
-				})
-			})
-		}
-	})
-}
-
 private func inBounds<A : IntegerType>(fi : (Int -> A)) -> Gen<Int> -> Gen<A> {
 	return { g in
 		return Gen.fmap(fi)(suchThat(g)({ x in
 			return (fi(x) as Int) == x
 		}))
 	}
-}
-
-public func arbitrarySizedInteger<A : IntegerType where A : IntegerLiteralConvertible>() -> Gen<A> {
-	return sized({ (let n : Int) -> Gen<A> in
-		return inBounds({ m in
-			return A(integerLiteral: unsafeCoerce(m))
-		})(choose((0 - n, n)))
-	})
-}
-
-public func arbitrarySizedFloating<A : FloatingPointType>() -> Gen<A> {
-	let precision : Int = 9999999999999
-	return sized({ n in
-		let m = Int(n)
-		return choose((-m * precision, m * precision)) >>- { a in
-			return choose((1, precision)) >>- { b in
-				return Gen.pure(A(a % b))
-			}
-		}
-	})
 }
 
 public func shrinkNone<A>(_ : A) -> [A] {
@@ -230,7 +245,7 @@ private func shrinkOne<A>(shr : A -> [A])(lst : [A]) -> [[[A]]] {
 	switch destruct(lst) {
 		case .Empty():
 			return []
-		case .Destructure(let x, let xs):
+		case .Cons(let x, let xs):
 			return concatMap({ x_ in
 				return [[ (x_ <| xs) ]]
 			})(shr(x)) + concatMap({ xs_ in
@@ -260,21 +275,20 @@ public func shrinkList<A>(shr : A -> [A]) -> [A] -> [[A]] {
 			return [removes(k)(n: n)(xs: xs)]
 		})(takeWhile({ x in
 			return x > 0
-		})(Array(iterate({ x in
+		})(iterate({ x in
 			return x / 2
-		})(x: n)))) + (shrinkOne(shr)(lst: xs))))
+		})(n))) + (shrinkOne(shr)(lst: xs))))
 	}
 }
 
 public func shrinkIntegral<A : IntegerType>(x: A) -> [A] {
-	let z = (x >= 0) ? x : (0 - x)
-	return concatMap({ i in
-		return 0 <| [z - 1]
-	})(nub([z] + (takeWhile({ y in
-		return moralAbs(y, z)
-	})(tail(Array(iterate({ n in
+	let z = (x < 0) ? (0 - x) : x
+	let l = [z] + (takeWhile({ y in
+		return moralAbs(y, x)
+	})(tail(iterate({ n in
 		return n / 2
-	})(x: x)))))))
+	})(x))))
+	return nub(l)
 }
 
 private func moralAbs<A : IntegerType>(a : A, b : A) -> Bool {
@@ -307,18 +321,18 @@ public func shrinkDoubleToInteger(x : Double) -> [Double] {
 }
 
 public func shrinkFloat(x : Float) -> [Float] {
-	let xss = take(20)(Array(iterate({ n in
+	let xss = take(20)(iterate({ n in
 		return n / 2.0
-	})(x: x))).filter({ x2 in
+	})(x)).filter({ x2 in
 		return abs(x - x2) < abs(x)
 	})
 	return nub(shrinkFloatToInteger(x) + xss)
 }
 
 public func shrinkDouble(x : Double) -> [Double] {
-	return nub(shrinkDoubleToInteger(x) + take(20)(Array(iterate({ n in
+	return nub(shrinkDoubleToInteger(x) + take(20)(iterate({ n in
 		return n / 2.0
-	})(x: x))).filter({ x_ in
+	})(x)).filter({ x_ in
 		return abs(x - x_) < abs(x)
 	}))
 }
@@ -441,3 +455,4 @@ private func ^(ba : Int, ex : Int) -> Int {
 
 	return result;
 }
+

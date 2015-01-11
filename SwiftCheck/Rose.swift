@@ -9,17 +9,19 @@
 import Basis
 
 public enum Rose<A> {
-	case MkRose(Box<A>, [Rose<A>])
+	case MkRose(Box<A>, @autoclosure() -> [Rose<A>])
 	case IORose(IO<Rose<A>>)
 }
 
 extension Rose : Functor {
-	typealias B = Any
+	typealias B = Swift.Any
+	typealias FB = Rose<B>
+
 	public static func fmap<B>(f : (A -> B)) -> Rose<A> -> Rose<B> {
 		return {
 			switch $0 {
 				case .MkRose(let root, let children):
-					return .MkRose(Box(f(root.unBox())), children.map() { Rose.fmap(f)($0) })
+					return .MkRose(Box(f(root.unBox())), children().map() { Rose.fmap(f)($0) })
 				case .IORose(let rs):
 					return .IORose(IO.fmap({ Rose.fmap(f)($0) })(rs))
 			}
@@ -36,22 +38,26 @@ public func <%<A, B>(x : A, rs : Rose<B>) -> Rose<A> {
 }
 
 extension Rose : Applicative {
-	public static func pure(a: A) -> Rose<A> {
+	typealias FAB = Rose<A -> B>
+
+	public static func pure(a : A) -> Rose<A> {
 		return .MkRose(Box(a), [])
 	}
 
-	public func ap<B>(fn: Rose<A -> B>) -> Rose<B> {
-		switch fn {
-			case .MkRose(let f, _):
-				return Rose.fmap(f.unBox())(self)
-			case .IORose(let rs):
-				return self.ap(!rs) ///EEWW, EW, EW, EW, EW, EW
+	public static func ap<B>(fn : Rose<A -> B>) -> Rose<A> -> Rose<B> {
+		return { r in
+			switch fn {
+				case .MkRose(let f, _):
+					return Rose.fmap(f.unBox())(r)
+				case .IORose(let rs):
+					return Rose.ap(!rs)(r) ///EEWW, EW, EW, EW, EW, EW
+			}
 		}
 	}
 }
 
 public func <*><A, B>(a : Rose<A -> B> , l : Rose<A>) -> Rose<B> {
-	return l.ap(a)
+	return Rose.ap(a)(l)
 }
 
 public func *><A, B>(a : Rose<A>, b : Rose<B>) -> Rose<B> {
@@ -97,7 +103,7 @@ public func joinRose<A>(rs: Rose<Rose<A>>) -> Rose<A> {
 				case .IORose(let rm):
 					return .IORose(IO.pure(joinRose(.MkRose(Box(!rm), rs))))
 				case .MkRose(let x, let ts):
-					return .MkRose(x, rs.map(joinRose) + ts)
+					return .MkRose(x, rs().map(joinRose) + ts())
 			}
 			
 	}
@@ -115,14 +121,14 @@ public func reduce(rs: Rose<TestResult>) -> IO<Rose<TestResult>> {
 public func onRose<A>(f: (A -> [Rose<A>] -> Rose<A>))(rs: Rose<A>) -> Rose<A> {
 	switch rs {
 		case .MkRose(let x, let rs):
-			return f(x.unBox())(rs)
+			return f(x.unBox())(rs())
 		case .IORose(let m):
 			return .IORose(IO.fmap(onRose(f))(m))
 	}
 }
 
 public func protectRose(x: IO<Rose<TestResult>>) -> IO<Rose<TestResult>> {
-	return protect(IO.pure(Rose.pure(exception("Exception"))))
+	return protect(Rose.pure • exception("Exception"))(x)
 }
 
 public func do_<A>(fn: () -> Rose<A>) -> Rose<A> {
