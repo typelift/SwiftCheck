@@ -165,6 +165,29 @@ extension Double : Arbitrary {
 	}
 }
 
+extension UnicodeScalar : Arbitrary {
+	typealias A = UnicodeScalar
+	public static func arbitrary() -> Gen<UnicodeScalar> {
+		return UInt32.arbitrary() >>- {  Gen.pure(UnicodeScalar($0)) }
+	}
+
+	public static func shrink(x : UnicodeScalar) -> [UnicodeScalar] {
+		return shrinkNone(x)
+	}
+}
+
+/// rdar://19437275
+//extension Character : Arbitrary {
+//	typealias A = Character
+//	public static func arbitrary() -> Gen<Character> {
+//		return choose((32, 255)) >>- {  Gen.pure(Character(UnicodeScalar($0))) }
+//	}
+//
+//	public static func shrink(x : Character) -> [Character] {
+//		return shrinkNone(x)
+//	}
+//}
+
 public func arbitraryArray<A : Arbitrary>() -> Gen<[A]> {
 	return sized({ n in
 		return choose((0, n)) >>- { k in
