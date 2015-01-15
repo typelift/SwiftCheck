@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/CodaFi/SwiftCheck.svg?branch=master)](https://travis-ci.org/CodaFi/SwiftCheck)
+[![Build Status](https://travis-ci.org/typelift/SwiftCheck.svg?branch=master)](https://travis-ci.org/typelift/SwiftCheck)
 
 SwiftCheck
 ==========
@@ -17,7 +17,7 @@ func property<A, B, C ... Z where A, B, C ... Z : Arbitrary>(A, B, C, ..., Z) ->
 ```
 
 For example, if we wanted to test the property that every Float is equat to
-itself of an array is just that same array, we would express it as such:
+itself, we would express it as such:
 
 ```swift
 func testAll() {
