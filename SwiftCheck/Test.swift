@@ -242,7 +242,7 @@ public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> State {
 					return st2
 				case .MkResult(.None, let expect, _, _, _, _):
 					var st2 = st
-					st2.numSuccessTests += 1
+					st2.numDiscardedTests += 1
 					st2.randomSeed = rnd2
 					st2.expectedFailure = expect
 					return st2
@@ -265,7 +265,7 @@ public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> State {
 }
 
 public func summary(s: State) -> [(String, Int)] { 
-	return map({ ss in (head(ss), ss.count * 100 / s.numSuccessTests) }) • group • sort <| [ ]
+	return map({ ss in (head(ss), ss.count * 100 / s.numSuccessTests) }) • group • sort <<| [ ]
 }
 
 

@@ -8,11 +8,6 @@
 
 import Basis
 
-public protocol Testable {
-	func property() -> Property
-	var exhaustive : Bool { get }
-}
-
 public func unProperty(x : Property) -> Gen<Prop> {
 	return x.unProperty
 }
@@ -297,43 +292,4 @@ public enum TestResult {
 	interrupted : Bool,
 	stamp : [(String,Int)],
 	callbacks : [Callback])
-}
-
-public struct Property : Testable {
-	let unProperty : Gen<Prop>
-	public var exhaustive : Bool { return false }
-
-	public init(_ val: Gen<Prop>) {
-		self.unProperty = val;
-	}
-
-	public func property() -> Property {
-		return Property(self.unProperty)
-	}
-}
-
-
-public struct Prop : Testable {
-	var unProp: Rose<TestResult>
-	public var exhaustive : Bool { return false }
-
-	public func property() -> Property {
-		return Property(Gen.pure(Prop(unProp: ioRose(IO.pure(self.unProp)))))
-	}
-}
-
-extension TestResult : Testable {
-	public var exhaustive : Bool { return false }
-
-	public func property() -> Property {
-		return Property(Gen.pure(Prop(unProp: protectResults(Rose.pure(self)))))
-	}
-}
-
-extension Bool : Testable {
-	public var exhaustive : Bool { return false }
-
-	public func property() -> Property {
-		return liftBool(self).property()
-	}
 }

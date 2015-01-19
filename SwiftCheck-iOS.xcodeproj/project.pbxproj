@@ -19,6 +19,10 @@
 		841FAE8D19FB1CEA00AF4EA2 /* Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FAE5619FB1BDB00AF4EA2 /* Test.swift */; };
 		841FAE8F19FB1CF000AF4EA2 /* SwiftCheck.h in Headers */ = {isa = PBXBuildFile; fileRef = 841FAE5519FB1BDB00AF4EA2 /* SwiftCheck.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		841FAE9B19FB1D0A00AF4EA2 /* Basis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 841FAE9619FB1CFE00AF4EA2 /* Basis.framework */; };
+		84572C1E1A6DB9DB00241F68 /* PrimeSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C1D1A6DB9DB00241F68 /* PrimeSpec.swift */; };
+		84572C231A6DBA6D00241F68 /* DiscardSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C221A6DBA6D00241F68 /* DiscardSpec.swift */; };
+		84572C271A6DBAAE00241F68 /* Check.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C261A6DBAAE00241F68 /* Check.swift */; };
+		84572C291A6DBAB600241F68 /* Testable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C281A6DBAB600241F68 /* Testable.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,6 +72,10 @@
 		841FAE6C19FB1C7000AF4EA2 /* SwiftCheck.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCheck.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		841FAE7619FB1C7100AF4EA2 /* SwiftCheckTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftCheckTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		841FAE9019FB1CFE00AF4EA2 /* Basis-iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Basis-iOS.xcodeproj"; path = "External/Basis/Basis-iOS.xcodeproj"; sourceTree = "<group>"; };
+		84572C1D1A6DB9DB00241F68 /* PrimeSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PrimeSpec.swift; path = SwiftCheckTests/PrimeSpec.swift; sourceTree = "<group>"; };
+		84572C221A6DBA6D00241F68 /* DiscardSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DiscardSpec.swift; path = SwiftCheckTests/DiscardSpec.swift; sourceTree = "<group>"; };
+		84572C261A6DBAAE00241F68 /* Check.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Check.swift; path = SwiftCheck/Check.swift; sourceTree = "<group>"; };
+		84572C281A6DBAB600241F68 /* Testable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Testable.swift; path = SwiftCheck/Testable.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +122,7 @@
 			isa = PBXGroup;
 			children = (
 				841FAE4D19FB1BDA00AF4EA2 /* Arbitrary.swift */,
+				84572C261A6DBAAE00241F68 /* Check.swift */,
 				841FAE4E19FB1BDA00AF4EA2 /* Combinators.swift */,
 				841FAE4F19FB1BDA00AF4EA2 /* Gen.swift */,
 				841FAE5119FB1BDA00AF4EA2 /* Property.swift */,
@@ -121,6 +130,7 @@
 				841FAE5319FB1BDB00AF4EA2 /* Rose.swift */,
 				841FAE5419FB1BDB00AF4EA2 /* State.swift */,
 				841FAE5619FB1BDB00AF4EA2 /* Test.swift */,
+				84572C281A6DBAB600241F68 /* Testable.swift */,
 				841FAE3419FB1BA800AF4EA2 /* Supporting Files */,
 			);
 			path = "SwiftCheck-iOS";
@@ -138,6 +148,8 @@
 			isa = PBXGroup;
 			children = (
 				841FAE6419FB1C0A00AF4EA2 /* SimpleSpec.swift */,
+				84572C1D1A6DB9DB00241F68 /* PrimeSpec.swift */,
+				84572C221A6DBA6D00241F68 /* DiscardSpec.swift */,
 				841FAE4119FB1BA800AF4EA2 /* Supporting Files */,
 			);
 			path = "SwiftCheck-iOSTests";
@@ -292,12 +304,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				841FAE8619FB1CEA00AF4EA2 /* Arbitrary.swift in Sources */,
+				84572C231A6DBA6D00241F68 /* DiscardSpec.swift in Sources */,
 				841FAE8719FB1CEA00AF4EA2 /* Combinators.swift in Sources */,
 				841FAE8819FB1CEA00AF4EA2 /* Gen.swift in Sources */,
+				84572C271A6DBAAE00241F68 /* Check.swift in Sources */,
+				84572C291A6DBAB600241F68 /* Testable.swift in Sources */,
 				841FAE8919FB1CEA00AF4EA2 /* Property.swift in Sources */,
 				841FAE8A19FB1CEA00AF4EA2 /* Random.swift in Sources */,
 				841FAE8B19FB1CEA00AF4EA2 /* Rose.swift in Sources */,
 				841FAE8C19FB1CEA00AF4EA2 /* State.swift in Sources */,
+				84572C1E1A6DB9DB00241F68 /* PrimeSpec.swift in Sources */,
 				841FAE8D19FB1CEA00AF4EA2 /* Test.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
