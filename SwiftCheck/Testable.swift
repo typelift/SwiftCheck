@@ -11,7 +11,7 @@ import Basis
 /// The type of things that can be tested.
 ///
 /// A testable type must be able to convert itself to a Property.  That entails being able to create
-/// a Generator out of its encapsulated type. 
+/// a Generator for elements of its encapsulated type.
 ///
 /// An exhaustiveness property is also required.  If true, the property will only be tested once.
 public protocol Testable {
@@ -21,6 +21,7 @@ public protocol Testable {
 	func property() -> Property
 }
 
+/// A property is anything that generates propositions.
 public struct Property : Testable {
 	let unProperty : Gen<Prop>
 	
@@ -35,8 +36,10 @@ public struct Property : Testable {
 	}
 }
 
+/// A proposition.
 public struct Prop : Testable {
 	var unProp: Rose<TestResult>
+	
 	public var exhaustive : Bool { return true }
 
 	public func property() -> Property {
@@ -44,6 +47,7 @@ public struct Prop : Testable {
 	}
 }
 
+/// When returned from a test case, that particular case is discarded.
 public struct Discard : Testable {
 	public var exhaustive : Bool { return true }
 
