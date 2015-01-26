@@ -8,6 +8,31 @@
 
 import XCTest
 import SwiftCheck
+import func Basis.<%>
+
+public struct ArbitraryFoo {
+	let x : Int
+	let y : Int
+	
+	public static func create(x : Int) -> Int -> ArbitraryFoo {
+		return { y in ArbitraryFoo(x: x, y: y) }
+	} 
+	
+	public var description : String {
+		return "Arbitrary Foo!"
+	}
+}
+
+extension ArbitraryFoo : Arbitrary {
+	public static func arbitrary() -> Gen<ArbitraryFoo> {
+		return ArbitraryFoo.create <%> Int.arbitrary() <*> Int.arbitrary()
+	}
+	
+	public static func shrink(x : ArbitraryFoo) -> [ArbitraryFoo] {
+		return shrinkNone(x)
+	}
+}
+
 
 class SimpleSpec : XCTestCase {
 	func testAll() {
@@ -25,6 +50,10 @@ class SimpleSpec : XCTestCase {
 
 		property["Double Equality is Reflexive"] = forAll { (i : Double) in
 			return i == i
+		}
+		
+		property["ArbitraryFoo Properties are Reflexive"] = forAll { (i : ArbitraryFoo) in
+			return i.x == i.x && i.y == i.y
 		}
 	}
 }

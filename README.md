@@ -21,10 +21,9 @@ itself, we would express it as such:
 
 ```swift
 func testAll() {
-    let prop = forAll { (x : Float) in
-        return x == x
+	property["Integer Equality is Reflexive"] = forAll { (i : Int) in
+        return i == i
     }
-	quickCheck(prop)
 }
 ```
 
@@ -70,12 +69,10 @@ extension ArbitraryFoo : Arbitrary {
 }
 
 class SimpleSpec : XCTestCase {
-    
     func testAll() {
-        let reflFoos = forAll { (i : ArbitraryFoo) in
+        property["ArbitraryFoo Properties are Reflexive"] = forAll { (i : ArbitraryFoo) in
             return i.x == i.x && i.y == i.y
         }
-        quickCheck(reflFoos)
     }
 }
 ```
