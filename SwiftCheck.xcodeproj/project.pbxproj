@@ -18,6 +18,10 @@
 		844FCCC7198EFB4700EB242A /* Rose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCC6198EFB4700EB242A /* Rose.swift */; };
 		844FCCC9198EFF9B00EB242A /* SimpleSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCC8198EFF9B00EB242A /* SimpleSpec.swift */; };
 		844FCCCF198F24CF00EB242A /* Combinators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCCE198F24CF00EB242A /* Combinators.swift */; };
+		84572C1B1A6DB9D800241F68 /* PrimeSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C1A1A6DB9D800241F68 /* PrimeSpec.swift */; };
+		84572C211A6DBA1C00241F68 /* DiscardSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C201A6DBA1C00241F68 /* DiscardSpec.swift */; };
+		84572C251A6DBAA800241F68 /* Check.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C241A6DBAA800241F68 /* Check.swift */; };
+		84572C2B1A6DBABA00241F68 /* Testable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C2A1A6DBABA00241F68 /* Testable.swift */; };
 		84BFE0EC19F6FCD4002A8ECE /* Basis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84BFE0E719F6FCC1002A8ECE /* Basis.framework */; };
 /* End PBXBuildFile section */
 
@@ -55,7 +59,7 @@
 /* Begin PBXFileReference section */
 		844FCC8D198B320500EB242A /* SwiftCheck.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCheck.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		844FCC91198B320500EB242A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		844FCC92198B320500EB242A /* SwiftCheck.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftCheck.h; sourceTree = "<group>"; };
+		844FCC92198B320500EB242A /* SwiftCheck.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SwiftCheck.h; path = SwiftCheck/SwiftCheck.h; sourceTree = "<group>"; };
 		844FCC98198B320500EB242A /* SwiftCheckTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftCheckTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		844FCC9E198B320500EB242A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		844FCCA9198B323800EB242A /* Arbitrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Arbitrary.swift; sourceTree = "<group>"; };
@@ -67,6 +71,10 @@
 		844FCCC6198EFB4700EB242A /* Rose.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Rose.swift; sourceTree = "<group>"; };
 		844FCCC8198EFF9B00EB242A /* SimpleSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleSpec.swift; sourceTree = "<group>"; };
 		844FCCCE198F24CF00EB242A /* Combinators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Combinators.swift; sourceTree = "<group>"; };
+		84572C1A1A6DB9D800241F68 /* PrimeSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrimeSpec.swift; sourceTree = "<group>"; };
+		84572C201A6DBA1C00241F68 /* DiscardSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiscardSpec.swift; sourceTree = "<group>"; };
+		84572C241A6DBAA800241F68 /* Check.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Check.swift; sourceTree = "<group>"; };
+		84572C2A1A6DBABA00241F68 /* Testable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Testable.swift; sourceTree = "<group>"; };
 		84BFE0E119F6FCC1002A8ECE /* Basis.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Basis.xcodeproj; path = External/Basis/Basis.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -94,6 +102,7 @@
 			isa = PBXGroup;
 			children = (
 				84BFE0E119F6FCC1002A8ECE /* Basis.xcodeproj */,
+				844FCC92198B320500EB242A /* SwiftCheck.h */,
 				844FCC8F198B320500EB242A /* SwiftCheck */,
 				844FCC9C198B320500EB242A /* SwiftCheckTests */,
 				844FCC8E198B320500EB242A /* Products */,
@@ -112,15 +121,16 @@
 		844FCC8F198B320500EB242A /* SwiftCheck */ = {
 			isa = PBXGroup;
 			children = (
-				844FCC92198B320500EB242A /* SwiftCheck.h */,
-				844FCCAF198B36BE00EB242A /* Test.swift */,
 				844FCCA9198B323800EB242A /* Arbitrary.swift */,
-				844FCCAB198B32DC00EB242A /* Gen.swift */,
+				84572C241A6DBAA800241F68 /* Check.swift */,
 				844FCCCE198F24CF00EB242A /* Combinators.swift */,
+				844FCCAB198B32DC00EB242A /* Gen.swift */,
 				844FCCAD198B367000EB242A /* Property.swift */,
+				844FCCC2198EC4F000EB242A /* Random.swift */,
 				844FCCC6198EFB4700EB242A /* Rose.swift */,
 				844FCCB3198B39F300EB242A /* State.swift */,
-				844FCCC2198EC4F000EB242A /* Random.swift */,
+				844FCCAF198B36BE00EB242A /* Test.swift */,
+				84572C2A1A6DBABA00241F68 /* Testable.swift */,
 				844FCC90198B320500EB242A /* Supporting Files */,
 			);
 			path = SwiftCheck;
@@ -138,6 +148,8 @@
 			isa = PBXGroup;
 			children = (
 				844FCCC8198EFF9B00EB242A /* SimpleSpec.swift */,
+				84572C1A1A6DB9D800241F68 /* PrimeSpec.swift */,
+				84572C201A6DBA1C00241F68 /* DiscardSpec.swift */,
 				844FCC9D198B320500EB242A /* Supporting Files */,
 			);
 			path = SwiftCheckTests;
@@ -294,8 +306,10 @@
 			files = (
 				844FCCAE198B367000EB242A /* Property.swift in Sources */,
 				844FCCB0198B36BE00EB242A /* Test.swift in Sources */,
+				84572C251A6DBAA800241F68 /* Check.swift in Sources */,
 				844FCCC3198EC4F000EB242A /* Random.swift in Sources */,
 				844FCCAC198B32DC00EB242A /* Gen.swift in Sources */,
+				84572C2B1A6DBABA00241F68 /* Testable.swift in Sources */,
 				844FCCAA198B323800EB242A /* Arbitrary.swift in Sources */,
 				844FCCB4198B39F300EB242A /* State.swift in Sources */,
 				844FCCCF198F24CF00EB242A /* Combinators.swift in Sources */,
@@ -307,7 +321,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84572C1B1A6DB9D800241F68 /* PrimeSpec.swift in Sources */,
 				844FCCC9198EFF9B00EB242A /* SimpleSpec.swift in Sources */,
+				84572C211A6DBA1C00241F68 /* DiscardSpec.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

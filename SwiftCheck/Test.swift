@@ -130,9 +130,9 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 
 public func forAllShrink<A : Arbitrary>(gen : Gen<A>, shrinker: A -> [A], f : A -> Testable) -> Property {
 	return Property(gen >>- { (let x : A) in
-		return unProperty(shrinking(shrinker)(x0: x)({ (let xs : A) -> Testable  in
+		return shrinking(shrinker)(x0: x)({ (let xs : A) -> Testable  in
 			return counterexample(xs.description)(p: f(xs))
-		}))
+		}).unProperty
 	})
 }
 
@@ -242,7 +242,7 @@ public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> State {
 					return st2
 				case .MkResult(.None, let expect, _, _, _, _):
 					var st2 = st
-					st2.numSuccessTests += 1
+					st2.numDiscardedTests += 1
 					st2.randomSeed = rnd2
 					st2.expectedFailure = expect
 					return st2
@@ -265,7 +265,7 @@ public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> State {
 }
 
 public func summary(s: State) -> [(String, Int)] { 
-	return map({ ss in (head(ss), ss.count * 100 / s.numSuccessTests) }) • group • sort <| [ ]
+	return map({ ss in (head(ss), ss.count * 100 / s.numSuccessTests) }) • group • sort <<| [ ]
 }
 
 

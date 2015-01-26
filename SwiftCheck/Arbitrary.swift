@@ -242,8 +242,8 @@ public func shrinkNone<A>(_ : A) -> [A] {
 }
 
 private func shrinkOne<A>(shr : A -> [A])(lst : [A]) -> [[[A]]] {
-	switch destruct(lst) {
-		case .Empty():
+	switch match(lst) {
+		case .Nil:
 			return []
 		case .Cons(let x, let xs):
 			return concatMap({ x_ in

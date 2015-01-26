@@ -8,19 +8,6 @@
 
 import Basis
 
-public protocol Testable {
-	func property() -> Property
-	var exhaustive : Bool { get }
-}
-
-public func unProperty(x : Property) -> Gen<Prop> {
-	return x.unProperty
-}
-
-func result(ok: Bool?) -> TestResult {
-	return .MkResult(ok: ok, expect: true, reason: "", interrupted: false, stamp: [], callbacks: [])
-}
-
 public func protectResults(rs: Rose<TestResult>) -> Rose<TestResult> {
 	return onRose({ x in
 		return { rs in
@@ -46,45 +33,44 @@ public func protect<A>(f : Exception -> A) -> IO<A> -> IO<A> {
 	return { x in either(f)(id) <%> tryEvaluateIO(x) }
 }
 
-func succeeded() -> TestResult {
+public func succeeded() -> TestResult {
 	return result(Optional.Some(true))
 }
 
-func failed() -> TestResult {
+public func failed() -> TestResult {
 	return result(Optional.Some(false))
 }
 
-func rejected() -> TestResult {
+public func rejected() -> TestResult {
 	return result(Optional.None)
 }
 
-
-func liftBool(b: Bool) -> TestResult {
+public func liftBool(b: Bool) -> TestResult {
 	if b {
 		return succeeded()
 	}
 	return failed()
 }
 
-func mapResult(f: TestResult -> TestResult)(p: Testable) -> Property {
+public func mapResult(f: TestResult -> TestResult)(p: Testable) -> Property {
 	return mapRoseResult({ rs in
 		return protectResults(Rose.fmap(f)(rs))
 	})(p: p)
 }
 
-func mapTotalResult(f: TestResult -> TestResult)(p: Testable) -> Property {
+public func mapTotalResult(f: TestResult -> TestResult)(p: Testable) -> Property {
 	return mapRoseResult({ rs in
 		return Rose.fmap(f)(rs)
 	})(p: p)
 }
 
-func mapRoseResult(f: Rose<TestResult> -> Rose<TestResult>)(p: Testable) -> Property {
+public func mapRoseResult(f: Rose<TestResult> -> Rose<TestResult>)(p: Testable) -> Property {
 	return mapProp({ t in
 		return Prop(unProp: f(t.unProp))
 	})(p: p)
 }
 
-func mapProp(f: Prop -> Prop)(p: Testable) -> Property {
+public func mapProp(f: Prop -> Prop)(p: Testable) -> Property {
 	return Property(Gen.fmap(f)(p.property().unProperty))
 }
 
@@ -299,41 +285,6 @@ public enum TestResult {
 	callbacks : [Callback])
 }
 
-public struct Property : Testable {
-	let unProperty : Gen<Prop>
-	public var exhaustive : Bool { return false }
-
-	public init(_ val: Gen<Prop>) {
-		self.unProperty = val;
-	}
-
-	public func property() -> Property {
-		return Property(self.unProperty)
-	}
-}
-
-
-public struct Prop : Testable {
-	var unProp: Rose<TestResult>
-	public var exhaustive : Bool { return false }
-
-	public func property() -> Property {
-		return Property(Gen.pure(Prop(unProp: ioRose(IO.pure(self.unProp)))))
-	}
-}
-
-extension TestResult : Testable {
-	public var exhaustive : Bool { return false }
-
-	public func property() -> Property {
-		return Property(Gen.pure(Prop(unProp: protectResults(Rose.pure(self)))))
-	}
-}
-
-extension Bool : Testable {
-	public var exhaustive : Bool { return false }
-
-	public func property() -> Property {
-		return liftBool(self).property()
-	}
+func result(ok: Bool?) -> TestResult {
+	return .MkResult(ok: ok, expect: true, reason: "", interrupted: false, stamp: [], callbacks: [])
 }
