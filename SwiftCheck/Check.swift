@@ -8,7 +8,7 @@
 
 import Basis
 
-public var swiftCheck : QuickCheck = QuickCheck()
+public var property : QuickCheck = QuickCheck()
 
 public struct QuickCheck {
 	public subscript(s : String) -> Testable {

@@ -52,7 +52,7 @@ class PrimeSpec : XCTestCase {
 	}
 
 	func testAll() {
-		swiftCheck["All Prime"] = forAll { (n : Int) in
+		property["All Prime"] = forAll { (n : Int) in
 			return all(self.isPrime)(self.sieve(n))
 		}
 	}

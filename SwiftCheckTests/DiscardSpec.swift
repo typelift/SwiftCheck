@@ -12,7 +12,7 @@ import Basis
 
 class DiscardSpec : XCTestCase {
 	func testDiscardFailure() {
-		swiftCheck["P != NP"] = Discard()
-		swiftCheck["P = NP"] = expectFailure(Discard())
+		property["P != NP"] = Discard()
+		property["P = NP"] = expectFailure(Discard())
 	}
 }
