@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 Robert Widmann. All rights reserved.
 //
 
-import Basis
+import Swiftz
 
 public var property : QuickCheck = QuickCheck()
 

@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Robert Widmann. All rights reserved.
 //
 
-import Basis
+import Swiftz
 
 public struct Gen<A> {
 	var unGen: StdGen -> Int -> A

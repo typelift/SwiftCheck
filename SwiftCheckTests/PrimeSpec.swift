@@ -8,7 +8,7 @@
 
 import XCTest
 import SwiftCheck
-import Basis
+import Swiftz
 
 class PrimeSpec : XCTestCase {
 	func sieve(n : Int) -> [Int] {

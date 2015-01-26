@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Robert Widmann. All rights reserved.
 //
 
-import Basis
+import Swiftz
 
 public enum Rose<A> {
 	case MkRose(Box<A>, @autoclosure() -> [Rose<A>])

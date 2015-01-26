@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Basis
+import Swiftz
 
 /// Shakes up the internal Random Number generator for a given Generator with a seed.
 public func variant<A, S : IntegerType>(seed: S)(m: Gen<A>) -> Gen<A> {
