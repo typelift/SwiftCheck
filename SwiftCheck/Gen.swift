@@ -14,35 +14,19 @@ public struct Gen<A> {
 
 extension Gen : Functor {
 	typealias B = Swift.Any
-	public static func fmap<B>(f: (A -> B)) -> Gen<A> -> Gen<B> {
-		return { g in
-			Gen<B>(unGen: { r in
-				return { n in
-					return f(g.unGen(r)(n))
-				}
-			}) 
-		}
-	}
-
-	public func bind<B>(fn: A -> Gen<B>) -> Gen<B> {
+	
+	public func fmap<B>(f : (A -> B)) -> Gen<B> {
 		return Gen<B>(unGen: { r in
 			return { n in
-				let (r1, r2) = r.split()
-				let m = fn(self.unGen(r1)(n))
-				return m.unGen(r2)(n)
+				return f(self.unGen(r)(n))
 			}
-		})
+		}) 
 	}
 }
 
-public func <%><A, B>(f: A -> B, ar : Gen<A>) -> Gen<B> {
-	return Gen.fmap(f)(ar)
+public func <^><A, B>(f: A -> B, ar : Gen<A>) -> Gen<B> {
+	return ar.fmap(f)
 }
-
-public func <%<A, B>(x : A, l : Gen<B>) -> Gen<A> {
-	return Gen.fmap(const(x))(l)
-}
-
 
 extension Gen : Applicative {
 	typealias FAB = Gen<A -> B>
@@ -55,35 +39,39 @@ extension Gen : Applicative {
 		})
 	}
 
-	public static func ap<B>(fn : Gen<A -> B>) -> Gen<A> -> Gen<B> {
-		return { g in Gen<B>(unGen: { r in
+	public func ap<B>(fn : Gen<A -> B>) -> Gen<B> {
+		return Gen<B>(unGen: { r in
 			return { n in
-				return fn.unGen(r)(n)(g.unGen(r)(n))
+				return fn.unGen(r)(n)(self.unGen(r)(n))
 			}
-		}) }
+		})
 	}
 }
 
 public func <*><A, B>(a : Gen<A -> B> , l : Gen<A>) -> Gen<B> {
-	return Gen.ap(a)(l)
+	return l.ap(a)
 }
 
-public func *><A, B>(a : Gen<A>, b : Gen<B>) -> Gen<B> {
-	return const(id) <%> a <*> b
-}
-
-public func <*<A, B>(a : Gen<A>, b : Gen<B>) -> Gen<A> {
-	return const <%> a <*> b
+extension Gen : Monad {
+	public func bind<B>(fn: A -> Gen<B>) -> Gen<B> {
+		return Gen<B>(unGen: { r in
+			return { n in
+				let (r1, r2) = r.split()
+				let m = fn(self.unGen(r1)(n))
+				return m.unGen(r2)(n)
+			}
+		})
+	}
 }
 
 public func sequence<A>(ms: [Gen<A>]) -> Gen<[A]> {
-	return foldr({ (let x, let y) in
+	return ms.reduce(Gen<[A]>.pure([]), combine: { y, x in
 		return x >>- { x1 in
 			return y >>- { xs in
 				return Gen<[A]>.pure([x1] + xs)
 			}
 		}
-	})(Gen<[A]>.pure([]))(ms)
+	})
 }
 
 public func >>-<A, B>(x : Gen<A>, f : A -> Gen<B>) -> Gen<B> {
@@ -117,7 +105,6 @@ public func promote<A>(x : Rose<Gen<A>>) -> Gen<Rose<A>> {
 		return Gen<Rose<A>>.pure(liftM(eval)(m1: x))
 	})
 }
-
 
 public func delay<A>() -> Gen<Gen<A> -> A> {
 	return Gen(unGen: { r in

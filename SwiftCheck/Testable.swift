@@ -43,7 +43,7 @@ public struct Prop : Testable {
 	public var exhaustive : Bool { return true }
 
 	public func property() -> Property {
-		return Property(Gen.pure(Prop(unProp: ioRose(IO.pure(self.unProp)))))
+		return Property(Gen.pure(Prop(unProp: ioRose(self.unProp))))
 	}
 }
 

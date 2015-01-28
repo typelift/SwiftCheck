@@ -11,26 +11,26 @@ import Swiftz
 public func protectResults(rs: Rose<TestResult>) -> Rose<TestResult> {
 	return onRose({ x in
 		return { rs in
-			let y = !protectResult(IO.pure(x))
+			let y = protectResult(x)
 			return .MkRose(Box(y), rs.map(protectResults))
 		}
 	})(rs: rs)
 }
 
-public func exception(msg: String) -> Exception -> TestResult {
+public func exception(msg: String) -> Printable -> TestResult {
 	return { e in failed() }
 }
 
-public func protectResult(res: IO<TestResult>) -> IO<TestResult> {
+public func protectResult(res: TestResult) -> TestResult {
 	return protect({ e in exception("Exception")(e) })(res)
 }
 
-private func tryEvaluateIO<A>(m : IO<A>) -> IO<Either<Exception, A>> {
-	return IO.fmap({ Either.right($0) })(m)
+private func tryEvaluateIO<A>(m : @autoclosure() -> A) -> Either<Printable, A> {
+	return Either.right(m())
 }
 
-public func protect<A>(f : Exception -> A) -> IO<A> -> IO<A> {
-	return { x in either(f)(id) <%> tryEvaluateIO(x) }
+public func protect<A>(f : Printable -> A) -> A -> A {
+	return { x in tryEvaluateIO(x).either(f, { identity($0)  }) }
 }
 
 public func succeeded() -> TestResult {
@@ -54,13 +54,13 @@ public func liftBool(b: Bool) -> TestResult {
 
 public func mapResult(f: TestResult -> TestResult)(p: Testable) -> Property {
 	return mapRoseResult({ rs in
-		return protectResults(Rose.fmap(f)(rs))
+		return protectResults(rs.fmap(f))
 	})(p: p)
 }
 
 public func mapTotalResult(f: TestResult -> TestResult)(p: Testable) -> Property {
 	return mapRoseResult({ rs in
-		return Rose.fmap(f)(rs)
+		return rs.fmap(f)
 	})(p: p)
 }
 
@@ -71,7 +71,7 @@ public func mapRoseResult(f: Rose<TestResult> -> Rose<TestResult>)(p: Testable) 
 }
 
 public func mapProp(f: Prop -> Prop)(p: Testable) -> Property {
-	return Property(Gen.fmap(f)(p.property().unProperty))
+	return Property(p.property().unProperty.fmap(f))
 }
 
 public func mapSize (f: Int -> Int)(p: Testable) -> Property {
@@ -87,11 +87,11 @@ private func props<A>(shrinker: A -> [A])(x : A)(pf: A -> Testable) -> Rose<Gen<
 }
 
 public func shrinking<A> (shrinker: A -> [A])(x0: A)(pf: A -> Testable) -> Property {
-	return Property(Gen.fmap({ (let rs : Rose<Prop>) in
-		return Prop(unProp: joinRose(Rose.fmap({ (let x : Prop) in
+	return Property(promote(props(shrinker)(x: x0)(pf: pf)).fmap({ (let rs : Rose<Prop>) in
+		return Prop(unProp: joinRose(rs.fmap({ (let x : Prop) in
 			return x.unProp
-		})(rs)))
-	})(promote(props(shrinker)(x: x0)(pf: pf))))
+		})))
+	}))
 }
 
 public func noShrinking(p: Testable) -> Property {
@@ -118,7 +118,7 @@ public func callback(cb: Callback) -> Testable -> Property {
 public func counterexample(s : String)(p: Testable) -> Property {
 	return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { st in
 		return { _ in
-			return putStrLn(s)
+			return println(s)
 		}
 	}))(p)
 }
@@ -135,15 +135,15 @@ public func counterexample(s : String)(p: Testable) -> Property {
 public func printTestCase(s: String)(p: Testable) -> Property {
 	return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { st in
 		return { _ in
-			return putStrLn(s)
+			return println(s)
 		}
 	}))(p)
 }
 
-public func whenFail(m: IO<()>)(p: Testable) -> Property {
+public func whenFail(m: () -> ())(p: Testable) -> Property {
 	return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { st in
 		return { (_) in
-			return m
+			return m()
 		}
 	}))(p)
 }
@@ -266,8 +266,8 @@ public func ===<A where A : Equatable, A : Printable>(x : A, y : A) -> Property 
 }
 
 public enum Callback {
-	case PostTest(kind: CallbackKind, f: State -> Result -> IO<()>)
-	case PostFinalFailure(kind: CallbackKind, f: State -> Result -> IO<()>)
+	case PostTest(kind: CallbackKind, f: State -> Result -> ())
+	case PostFinalFailure(kind: CallbackKind, f: State -> Result -> ())
 }
 
 public enum CallbackKind {

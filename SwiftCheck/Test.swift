@@ -136,21 +136,21 @@ public func forAllShrink<A : Arbitrary>(gen : Gen<A>, shrinker: A -> [A], f : A 
 	})
 }
 
-public func quickCheck(prop : Testable) -> IO<()> {
-	return quickCheckWithResult(stdArgs(), prop) >> IO.pure(())
+public func quickCheck(prop : Testable){
+	quickCheckWithResult(stdArgs(), prop)
 }
 
-public func quickCheckWithResult(args : Arguments, p : Testable) -> IO<Result> {
+public func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 	func roundTo(n : Int)(m : Int) -> Int {
 		return (m / m) * m
 	}
 
-	func rnd() -> IO<StdGen> {
+	func rnd() -> StdGen {
 		switch args.replay {
 			case Optional.None:
 				return newStdGen()
 			case Optional.Some(let (rnd, _)):
-				return IO<StdGen>.pure(rnd)
+				return rnd
 		}
 	}
 	
@@ -189,13 +189,13 @@ public func quickCheckWithResult(args : Arguments, p : Testable) -> IO<Result> {
 					, numDiscardedTests:	0
 					, collected:			[]
 					, expectedFailure:		false
-					, randomSeed:			!rnd()
+					, randomSeed:			rnd()
 					, numSuccessShrinks:	0
 					, numTryShrinks:		0)
 	return test(state)(p.exhaustive ? once(p.property()).unProperty.unGen : p.property().unProperty.unGen)
 }
 
-public func test(st: State)(f: (StdGen -> Int -> Prop)) -> IO<Result> {
+public func test(st: State)(f: (StdGen -> Int -> Prop)) -> Result {
 	var state = st
 	while true {
 		if state.numSuccessTests >= state.maxSuccessTests {
@@ -208,31 +208,31 @@ public func test(st: State)(f: (StdGen -> Int -> Prop)) -> IO<Result> {
 	}
 }
 
-public func doneTesting(st: State)(f: (StdGen -> Int -> Prop)) -> IO<Result> {	
+public func doneTesting(st: State)(f: (StdGen -> Int -> Prop)) -> Result {	
 	if st.expectedFailure {
-		putStrLn("*** Passed " + "\(st.numSuccessTests)" + " tests")
-		return IO<Result>.pure(Result.Success(numTests: st.numSuccessTests, labels: summary(st), output: ""))
+		println("*** Passed " + "\(st.numSuccessTests)" + " tests")
+		return Result.Success(numTests: st.numSuccessTests, labels: summary(st), output: "")
 	} else {
-		putStrLn("*** Failed! ")
-		putStrLn("*** Passed " + "\(st.numSuccessTests)" + " tests")
-		return IO<Result>.pure(Result.NoExpectedFailure(numTests: st.numSuccessTests, labels: summary(st), output: ""))
+		println("*** Failed! ")
+		println("*** Passed " + "\(st.numSuccessTests)" + " tests")
+		return Result.NoExpectedFailure(numTests: st.numSuccessTests, labels: summary(st), output: "")
 	}
 }
 
-public func giveUp(st: State)(f: (StdGen -> Int -> Prop)) -> IO<Result> {
+public func giveUp(st: State)(f: (StdGen -> Int -> Prop)) -> Result {
 	// Gave up
 	
-	return IO<Result>.pure(Result.GaveUp(numTests: st.numSuccessTests, labels: summary(st), output: ""))
+	return Result.GaveUp(numTests: st.numSuccessTests, labels: summary(st), output: "")
 }
 
 public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> State {
 	let size = st.computeSize(st.numSuccessTests)(st.numDiscardedTests)
 	let (rnd1,rnd2) = st.randomSeed.split()
-	let rose : Rose<TestResult> = !protectRose(reduce(f(rnd1)(size).unProp))
+	let rose : Rose<TestResult> = protectRose(reduce(f(rnd1)(size).unProp))
 
 	switch rose {
 		case .MkRose(let res, _):
-			switch res.unBox() {
+			switch res.value {
 				case .MkResult(.Some(true), let expect, _, _, let stamp, _):
 					var st2 = st
 					st2.numSuccessTests += 1
@@ -265,7 +265,9 @@ public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> State {
 }
 
 public func summary(s: State) -> [(String, Int)] { 
-	return map({ ss in (head(ss), ss.count * 100 / s.numSuccessTests) }) • group • sort <<| [ ]
+	let strings : [String] = concat(s.collected.map({ l in l.map({ $0.0 }).filter({ $0.isEmpty }) }))
+	let l = intersperse(",", strings) |> sorted |> group
+	return l.map({ ss in (ss[0], ss.count * 100 / s.numSuccessTests) })
 }
 
 
