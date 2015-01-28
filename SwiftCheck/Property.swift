@@ -12,7 +12,7 @@ public func protectResults(rs: Rose<TestResult>) -> Rose<TestResult> {
 	return onRose({ x in
 		return { rs in
 			let y = protectResult(x)
-			return .MkRose(Box(y), rs.map(protectResults))
+			return .MkRose(y, rs.map(protectResults))
 		}
 	})(rs: rs)
 }
@@ -25,7 +25,7 @@ public func protectResult(res: TestResult) -> TestResult {
 	return protect({ e in exception("Exception")(e) })(res)
 }
 
-private func tryEvaluateIO<A>(m : @autoclosure() -> A) -> Either<Printable, A> {
+internal func tryEvaluateIO<A>(m : @autoclosure() -> A) -> Either<Printable, A> {
 	return Either.right(m())
 }
 
@@ -49,7 +49,7 @@ public func liftBool(b: Bool) -> TestResult {
 	if b {
 		return succeeded()
 	}
-	return failed()
+	return result(Optional.Some(false), reason: "Falsifiable")
 }
 
 public func mapResult(f: TestResult -> TestResult)(p: Testable) -> Property {
@@ -80,14 +80,14 @@ public func mapSize (f: Int -> Int)(p: Testable) -> Property {
 	}))
 }
 
-private func props<A>(shrinker: A -> [A])(x : A)(pf: A -> Testable) -> Rose<Gen<Prop>> {
-	return .MkRose(Box(pf(x).property().unProperty), shrinker(x).map({ x1 in
-		return props(shrinker)(x: x1)(pf: pf)
+private func props<A>(shrinker: A -> [A], #original : A, #pf: A -> Testable) -> Rose<Gen<Prop>> {
+	return .MkRose(pf(original).property().unProperty, shrinker(original).map({ x1 in
+		return props(shrinker, original: x1, pf: pf)
 	}))
 }
 
 public func shrinking<A> (shrinker: A -> [A])(x0: A)(pf: A -> Testable) -> Property {
-	return Property(promote(props(shrinker)(x: x0)(pf: pf)).fmap({ (let rs : Rose<Prop>) in
+	return Property(promote(props(shrinker, original: x0, pf: pf)).fmap({ (let rs : Rose<Prop>) in
 		return Prop(unProp: joinRose(rs.fmap({ (let x : Prop) in
 			return x.unProp
 		})))
@@ -98,7 +98,7 @@ public func noShrinking(p: Testable) -> Property {
 	return mapRoseResult({ rs in
 		return onRose({ res in
 			return { (_) in
-				.MkRose(Box(res), [])
+				return .MkRose(res, [])
 			}
 		})(rs: rs)
 	})(p: p)
@@ -107,10 +107,9 @@ public func noShrinking(p: Testable) -> Property {
 public func callback(cb: Callback) -> Testable -> Property {
 	return { p in 
 		mapTotalResult({ (var res) in
-			switch res {
-				case .MkResult(let ok, let expect, let reason, let interrupted, let stamp, let callbacks):
-					return .MkResult(ok: ok, expect: expect, reason: reason, interrupted: interrupted, stamp: stamp, callbacks: [cb] + callbacks)
-			}
+			var st = res
+			st.callbacks = [cb] + res.callbacks
+			return st
 		})(p: p)
 	}
 }
@@ -154,19 +153,17 @@ public func whenFail(m: () -> ())(p: Testable) -> Property {
 
 public func expectFailure(p : Testable) -> Property {
 	return mapTotalResult({ res in
-		switch res {
-			case .MkResult(let ok, let expect, let reason, let interrupted, let stamp, let callbacks):
-				return TestResult.MkResult(ok: ok, expect: false, reason: reason, interrupted: interrupted, stamp: stamp, callbacks: callbacks)
-		}
+		var st = res
+		st.expect = false
+		return st
 	})(p: p)
 }
 
 public func once(p : Testable) -> Property {
 	return mapTotalResult({ res in
-		switch res {
-			case .MkResult(let ok, let expect, let reason, let interrupted, let stamp, let callbacks):
-				return TestResult.MkResult(ok: ok, expect: expect, reason: reason, interrupted: true, stamp: stamp, callbacks: callbacks)
-		}
+		var st = res
+		st.interrupted = true
+		return st
 	})(p: p)
 }
 
@@ -185,10 +182,9 @@ public func classify(b : Bool)(s : String)(p : Testable) -> Property {
 public func cover(b : Bool)(n : Int)(s : String)(p : Testable) -> Property {
 	if b {
 		return mapTotalResult({ res in
-			switch res {
-				case .MkResult(let ok, let expect, let reason, let interrupted, let stamp, let callbacks):
-					return TestResult.MkResult(ok: ok, expect: expect, reason: reason, interrupted: interrupted, stamp: [(s, n)] + stamp, callbacks: callbacks)
-			}
+			var st = res
+			st.stamp = [(s, n)] + res.stamp
+			return st
 		})(p:p)
 	}
 	return p.property()
@@ -266,8 +262,8 @@ public func ===<A where A : Equatable, A : Printable>(x : A, y : A) -> Property 
 }
 
 public enum Callback {
-	case PostTest(kind: CallbackKind, f: State -> Result -> ())
-	case PostFinalFailure(kind: CallbackKind, f: State -> Result -> ())
+	case PostTest(kind: CallbackKind, f: State -> TestResult -> ())
+	case PostFinalFailure(kind: CallbackKind, f: State -> TestResult -> ())
 }
 
 public enum CallbackKind {
@@ -275,16 +271,30 @@ public enum CallbackKind {
 	case NotCounterexample
 }
 
-public enum TestResult {
-	case MkResult(
-	ok : Optional<Bool>,
-	expect : Bool,
-	reason : String,
-	interrupted : Bool,
-	stamp : [(String,Int)],
-	callbacks : [Callback])
+public enum TestResultMatcher {
+	case MkResult(ok : Optional<Bool>,
+			expect : Bool,
+			reason : String,
+			theException : Optional<String>,
+			interrupted : Bool,
+			stamp : [(String,Int)],
+			callbacks : [Callback])
 }
 
-func result(ok: Bool?) -> TestResult {
-	return .MkResult(ok: ok, expect: true, reason: "", interrupted: false, stamp: [], callbacks: [])
+public struct TestResult {
+	var ok : Optional<Bool>
+	var expect : Bool
+	var reason : String
+	var theException : Optional<String>
+	var interrupted : Bool
+	var stamp : [(String,Int)]
+	var callbacks : [Callback]
+	
+	public func match() -> TestResultMatcher {
+		return TestResultMatcher.MkResult(ok: ok, expect: expect, reason: reason, theException: theException, interrupted: interrupted, stamp: stamp, callbacks: callbacks)
+	}
+}
+
+func result(ok: Bool?, reason : String = "") -> TestResult {
+	return TestResult(ok: ok, expect: true, reason: reason, theException: .None, interrupted: false, stamp: [], callbacks: [])
 }

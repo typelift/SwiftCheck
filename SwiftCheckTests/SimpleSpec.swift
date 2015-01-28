@@ -55,5 +55,9 @@ class SimpleSpec : XCTestCase {
 		property["ArbitraryFoo Properties are Reflexive"] = forAll { (i : ArbitraryFoo) in
 			return i.x == i.x && i.y == i.y
 		}
+		
+		property["Should shrink to zero"] = forAll { (i : Int) in
+			return false
+		}
 	}
 }

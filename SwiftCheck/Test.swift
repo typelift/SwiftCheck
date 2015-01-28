@@ -191,20 +191,26 @@ public func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 					, expectedFailure:		false
 					, randomSeed:			rnd()
 					, numSuccessShrinks:	0
-					, numTryShrinks:		0)
+					, numTryShrinks:		0
+					, numTotTryShrinks:		0)
 	return test(state)(p.exhaustive ? once(p.property()).unProperty.unGen : p.property().unProperty.unGen)
 }
 
 public func test(st: State)(f: (StdGen -> Int -> Prop)) -> Result {
 	var state = st
 	while true {
-		if state.numSuccessTests >= state.maxSuccessTests {
-			return doneTesting(state)(f)
+		switch runATest(state)(f) {
+			case let .Left(fail):
+				return fail.value
+			case let .Right(sta):
+				if sta.value.numSuccessTests >= sta.value.maxSuccessTests {
+					return doneTesting(sta.value)(f)
+				}
+				if sta.value.numDiscardedTests >= sta.value.maxDiscardedTests {
+					return giveUp(sta.value)(f)
+				}
+				state = sta.value
 		}
-		if state.numDiscardedTests >= state.maxDiscardedTests {
-			return giveUp(state)(f)
-		}
-		state = runATest(state)(f)
 	}
 }
 
@@ -225,36 +231,43 @@ public func giveUp(st: State)(f: (StdGen -> Int -> Prop)) -> Result {
 	return Result.GaveUp(numTests: st.numSuccessTests, labels: summary(st), output: "")
 }
 
-public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> State {
+public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> Either<Result, State> {
 	let size = st.computeSize(st.numSuccessTests)(st.numDiscardedTests)
 	let (rnd1,rnd2) = st.randomSeed.split()
 	let rose : Rose<TestResult> = protectRose(reduce(f(rnd1)(size).unProp))
 
 	switch rose {
-		case .MkRose(let res, _):
-			switch res.value {
-				case .MkResult(.Some(true), let expect, _, _, let stamp, _):
+		case .MkRose(let res, let ts):
+			switch res().match() {
+				case .MkResult(.Some(true), let expect, _, _, _, let stamp, _):
 					var st2 = st
 					st2.numSuccessTests += 1
 					st2.randomSeed = rnd2
 					st2.collected = [stamp] + st.collected
 					st2.expectedFailure = expect
-					return st2
-				case .MkResult(.None, let expect, _, _, _, _):
+					return Either.right(st2)
+				case .MkResult(.None, let expect, _, _, _, _, _):
 					var st2 = st
 					st2.numDiscardedTests += 1
 					st2.randomSeed = rnd2
 					st2.expectedFailure = expect
-					return st2
-				case .MkResult(.Some(false), let expect, _, _, _, _):
-					if expect {
-						println("*** Failed! ")
-					} else {
-						println("+++ OK, failed as expected. ")
+					return Either.right(st2)
+				case .MkResult(.Some(false), let expect, _, _, _, _, _):
+					if !expect {
+						print("+++ OK, failed as expected. ")
+						let s = Result.Success(numTests: st.numSuccessTests + 1, labels: summary(st), output: "+++ OK, failed as expected. ")
+						return Either.left(s)
 					}
-					var st2 = st
-					st2.numSuccessTests += 1
-					return st2
+					print("*** Failed! ")
+					let (numShrinks, totFailed, lastFailed) = foundFailure(st, res(), ts())
+					let s = Result.Failure(numTests: st.numSuccessTests + 1, 
+						numShrinks: numShrinks, 
+						usedSeed: st.randomSeed, 
+						usedSize: st.computeSize(st.numSuccessTests)(st.numDiscardedTests), 
+						reason: res().reason, 
+						labels: summary(st), 
+						output: "*** Failed! ")
+					return Either.left(s)
 			default:
 				break
 			}
@@ -264,6 +277,79 @@ public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> State {
 	assert(false, "")
 }
 
+public func foundFailure(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
+	var st2 = st
+	st2.numTryShrinks = 0
+	return localMin(st2, res, res, ts)
+}
+
+public func localMin(st : State, res : TestResult, res2 : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
+	if let e = res2.theException {
+		return undefined()
+	}
+	let r = tryEvaluateIO(ts)
+	switch r {
+	case let .Left(err):
+		return undefined()
+	case let .Right(ts2):
+		return localMinimum(st, res, ts2.value)
+	}
+}
+
+func callbackPostTest(st : State, res : TestResult) {
+	let _ : [()] = res.callbacks.map({ c in
+		switch c {
+			case let .PostTest(_, f):
+				f(st)(res)
+				return ()
+			default:
+				return ()
+		}
+	})
+}
+
+func callbackPostFinalFailure(st : State, res : TestResult) {
+	let _ : [()] = res.callbacks.map({ c in
+		switch c {
+		case let .PostFinalFailure(_, f):
+			f(st)(res)
+			return ()
+		default:
+			return ()
+		}
+	})
+}
+
+public func localMinimum(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
+	if ts.isEmpty {
+		return localMinFound(st, res)
+	}
+	let rose = protectRose(reduce(ts[0]))
+	switch rose {
+	case .IORose(_):
+		return undefined()
+	case .MkRose(let res1, let ts1):
+		callbackPostTest(st, res1())
+		if res1().ok == .Some(false) {
+			var sta = st
+			sta.numSuccessTests = st.numSuccessTests + 1
+			sta.numTryShrinks = 0
+			return localMin(sta, res1(), res, ts1())
+		} else {
+			var sta = st
+			sta.numSuccessTests = st.numSuccessTests + 1
+			sta.numTotTryShrinks = st.numTotTryShrinks + 1
+			return localMin(sta, res, res, ts)
+		}
+	}
+}
+
+public func localMinFound(st : State, res : TestResult) -> (Int, Int, Int) {
+	println(res.reason + " (after \(st.numSuccessTests + 1) test)")
+	callbackPostFinalFailure(st, res)
+	return (st.numSuccessShrinks, st.numTotTryShrinks - st.numTryShrinks, st.numTryShrinks)
+}
+	
 public func summary(s: State) -> [(String, Int)] { 
 	let strings : [String] = concat(s.collected.map({ l in l.map({ $0.0 }).filter({ $0.isEmpty }) }))
 	let l = intersperse(",", strings) |> sorted |> group

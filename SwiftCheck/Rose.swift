@@ -9,7 +9,7 @@
 import Swiftz
 
 public enum Rose<A> {
-	case MkRose(Box<A>, @autoclosure() -> [Rose<A>])
+	case MkRose(@autoclosure() -> A, @autoclosure() -> [Rose<A>])
 	case IORose(@autoclosure() -> Rose<A>)
 }
 
@@ -20,7 +20,7 @@ extension Rose : Functor {
 	public func fmap<B>(f : (A -> B)) -> Rose<B> {
 		switch self {
 			case .MkRose(let root, let children):
-				return .MkRose(Box(f(root.value)), children().map() { $0.fmap(f) })
+				return .MkRose(f(root()), children().map() { $0.fmap(f) })
 			case .IORose(let rs):
 				return .IORose(rs().fmap(f))
 		}
@@ -36,13 +36,13 @@ extension Rose : Applicative {
 	typealias FAB = Rose<A -> B>
 
 	public static func pure(a : A) -> Rose<A> {
-		return .MkRose(Box(a), [])
+		return .MkRose(a, [])
 	}
 
 	public func ap<B>(fn : Rose<A -> B>) -> Rose<B> {
 		switch fn {
 			case .MkRose(let f, _):
-				return self.fmap(f.value)
+				return self.fmap(f())
 			case .IORose(let rs):
 				return self.ap(rs()) ///EEWW, EW, EW, EW, EW, EW
 		}
@@ -84,9 +84,9 @@ public func joinRose<A>(rs: Rose<Rose<A>>) -> Rose<A> {
 		case .IORose(var rs):
 			return .IORose(joinRose(rs()))
 		case .MkRose(let bx , let rs):
-			switch bx.value {
+			switch bx() {
 				case .IORose(let rm):
-					return .IORose(joinRose(.MkRose(Box(rm()), rs)))
+					return .IORose(joinRose(.MkRose(rm, rs)))
 				case .MkRose(let x, let ts):
 					return .MkRose(x, rs().map(joinRose) + ts())
 			}
@@ -106,7 +106,7 @@ public func reduce(rs: Rose<TestResult>) -> Rose<TestResult> {
 public func onRose<A>(f: (A -> [Rose<A>] -> Rose<A>))(rs: Rose<A>) -> Rose<A> {
 	switch rs {
 		case .MkRose(let x, let rs):
-			return f(x.value)(rs())
+			return f(x())(rs())
 		case .IORose(let m):
 			return .IORose(onRose(f)(rs: m()))
 	}

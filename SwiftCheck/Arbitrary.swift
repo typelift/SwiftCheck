@@ -242,20 +242,21 @@ public func shrinkNone<A>(_ : A) -> [A] {
 }
 
 private func unfoldr<A, B>(f : B -> Optional<(A, B)>, #initial : B) -> [A] {
-	switch f(initial) {
-		case let .Some((a, b2)):
-			return [a] + unfoldr(f, initial: b2)
-		case .None:
-			return []
+	var acc = [A]()
+	var ini = initial
+	while let next = f(ini) {
+		acc.insert(next.0, atIndex: 0)
+		ini = next.1
 	}
+	return acc
 }
 
 public func shrinkIntegral<A : IntegerType>(x : A) -> [A] {
 	return unfoldr({ i in
-		if i == 0 {
+		if i <= 0 {
 			return .None
 		}
-		let n = x / 2
+		let n = i / 2
 		return .Some((n, n))
 	}, initial: x)
 }
@@ -265,7 +266,7 @@ public func shrinkFloat(x : Float) -> [Float] {
 		if i == 0.0 {
 			return .None
 		}
-		let n = x / 2.0
+		let n = i / 2.0
 		return .Some((n, n))
 	}, initial: x)
 }
@@ -275,7 +276,7 @@ public func shrinkDouble(x : Double) -> [Double] {
 		if i == 0.0 {
 			return .None
 		}
-		let n = x / 2.0
+		let n = i / 2.0
 		return .Some((n, n))
 	}, initial: x)
 }
