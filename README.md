@@ -29,10 +29,14 @@ func testAll() {
 
 SwiftCheck will handle the rest.  
 
-What makes QuickCheck unique is the notion of *shrinking* test cases.  Where
-most libraries that generate arbitrary data or do fuzz testing will include a 
-massive printout of all the data before the failing test case, SwiftCheck will
-halt immediately on the first failure and print only that failing datum and method.
+Shrinking
+=========
+ 
+What makes QuickCheck unique is the notion of *shrinking* test cases.  When fuzz
+testing with arbitrary data, rather than simply halt on a failing test, SwiftCheck
+will begin whittling the data that causes the test to fail down to a minimal
+counterexample.
+
 
 Custom Types
 ============
