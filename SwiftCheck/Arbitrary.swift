@@ -9,7 +9,7 @@
 import Swiftz
 import Darwin
 
-public protocol Arbitrary : Printable {
+public protocol Arbitrary {
 //	typealias A : Arbitrary
 	class func arbitrary() -> Gen<Self>
 	class func shrink(Self) -> [Self]
