@@ -49,7 +49,7 @@ a list of primes less than some n:
 ///    - for i in [(2 * p) through n by p] {
 ///          mark l[i]
 ///      }
-///    - Remaining unmarked numbers are primes
+///    - Remaining indices of unmarked numbers are primes
 func sieve(n : Int) -> [Int] {
     if n <= 1 {
         return [Int]()
