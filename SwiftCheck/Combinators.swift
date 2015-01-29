@@ -9,13 +9,48 @@
 import Foundation
 import Swiftz
 
-/// Shakes up the internal Random Number generator for a given Generator with a seed.
-public func variant<A, S : IntegerType>(seed: S)(m: Gen<A>) -> Gen<A> {
-	return Gen(unGen: { r in
-		return { n in
-			return m.unGen(vary(seed)(r: r))(n)
-		}
-	})
+extension Gen {
+	/// Shakes up the internal Random Number generator for a given Generator with a seed.
+	public func variant<S : IntegerType>(seed: S) -> Gen<A> {
+		return Gen(unGen: { r in
+			return { n in
+				return self.unGen(vary(seed)(r: r))(n)
+			}
+		})
+	}
+	
+	/// Constructs a generator that always uses a given size.
+	public func resize(n : Int) -> Gen<A> {
+		return Gen(unGen: { r in
+			return { (_) in
+				return self.unGen(r)(n)
+			}
+		})
+	}
+	
+	/// Constructs a Generator that only returns values that satisfy a predicate.
+	public func suchThat(p: (A -> Bool)) -> Gen<A> {
+		return self.suchThatOptional(p) >>- ({ mx in
+			switch mx {
+			case .Some(let x):
+				return Gen.pure(x)
+			case .None:
+				return sized({ n in
+					return self.suchThat(p).resize(n + 1)
+				})
+			}
+		})
+	}
+	
+	/// Constructs a Generator that attempts to generate a values that satisfy a predicate.
+	///
+	/// Passing values are wrapped in `.Some`.  Failing values are `.None`.
+	public func suchThatOptional(p: A -> Bool) -> Gen<Optional<A>> {
+		return sized({ n in
+			return try(self, 0, max(n, 1), p)
+		})
+	}
+
 }
 
 /// Constructs a generator that depends on a size parameter.
@@ -23,15 +58,6 @@ public func sized<A>(f: Int -> Gen<A>) -> Gen<A> {
 	return Gen(unGen:{ r in
 		return { n in
 			return f(n).unGen(r)(n)
-		}
-	})
-}
-
-/// Constructs a generator that always uses a given size.
-public func resize<A>(n : Int)(m: Gen<A>) -> Gen<A> {
-	return Gen(unGen: { r in
-		return { (_) in
-			return m.unGen(r)(n)
 		}
 	})
 }
@@ -46,29 +72,6 @@ public func choose<A : SignedIntegerType>(rng: (A, A)) -> Gen<A> {
 			let y = numericCast(h - l + 1) as A
 			return numericCast(l + x % y)
 		}
-	})
-}
-
-/// Constructs a Generator that only returns values that satisfy a predicate.
-public func suchThat<A>(gen: Gen<A>)(p: (A -> Bool)) -> Gen<A> {
-	return suchThatOptional(gen)(p) >>- ({ mx in
-		switch mx {
-			case .Some(let x):
-				return Gen.pure(x)
-			case .None:
-				return sized({ n in
-					return resize(n + 1)(m: suchThat(gen)(p))
-				})
-		}
-	})
-}
-
-/// Constructs a Generator that attempts to generate a values that satisfy a predicate.
-///
-/// Passing values are wrapped in `.Some`.  Failing values are `.None`.
-public func suchThatOptional<A>(gen: Gen<A>)(p: A -> Bool) -> Gen<Optional<A>> {
-	return sized({ n in
-		return try(gen, 0, max(n, 1), p)
 	})
 }
 
@@ -147,7 +150,7 @@ private func try<A>(gen: Gen<A>, k: Int, n : Int, p: A -> Bool) -> Gen<Optional<
 	if n == 0 {
 		return Gen.pure(.None)
 	}
-	return resize(2 * k + n)(m: gen) >>- ({ (let x : A) -> Gen<Optional<A>> in
+	return gen.resize(2 * k + n) >>- ({ (let x : A) -> Gen<Optional<A>> in
 		if p(x) {
 			return Gen.pure(.Some(x))
 		}

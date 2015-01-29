@@ -231,7 +231,7 @@ private func bits<N : IntegerType>(n : N) -> Int {
 
 private func inBounds<A : IntegerType>(fi : (Int -> A)) -> Gen<Int> -> Gen<A> {
 	return { g in
-		return suchThat(g)({ x in
+		return g.suchThat({ x in
 			return (fi(x) as Int) == x
 		}).fmap(fi)
 	}
@@ -311,15 +311,17 @@ protocol CoArbitrary {
 }
 
 public func coarbitraryIntegral<A : IntegerType, B>(x : A) -> Gen<B> -> Gen<B> {
-	return variant(x)
+	return { $0.variant(x) }
 }
 
 extension Bool : CoArbitrary {
 	public static func coarbitrary<C>(x: Bool) -> Gen<C> -> Gen<C> {
-		if x {
-			return variant(1)
+		return { g in 
+			if x {
+				return g.variant(1)
+			}
+			return g.variant(0)
 		}
-		return variant(0)
 	}
 }
 
