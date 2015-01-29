@@ -56,8 +56,5 @@ class SimpleSpec : XCTestCase {
 			return i.x == i.x && i.y == i.y
 		}
 		
-		property["Should shrink to zero"] = forAll { (i : Int) in
-			return false
-		}
 	}
 }

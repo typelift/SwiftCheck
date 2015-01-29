@@ -339,13 +339,23 @@ public func localMinimum(st : State, res : TestResult, ts : [Rose<TestResult>]) 
 			var sta = st
 			sta.numSuccessTests = st.numSuccessTests + 1
 			sta.numTotTryShrinks = st.numTotTryShrinks + 1
-			return localMin(sta, res, res, ts)
+			return localMin(sta, res, res, Array(ts[1..<ts.count]))
 		}
 	}
 }
 
 public func localMinFound(st : State, res : TestResult) -> (Int, Int, Int) {
-	println(res.reason + " (after \(st.numSuccessTests + 1) test)")
+	let testMsg = " (after \(st.numSuccessTests + 1) test"
+	let shrinkMsg = st.numSuccessShrinks > 1 ? ("and \(st.numSuccessShrinks) shrink") : ""
+	
+	func pluralize(s : String, i : Int) -> String {
+		if i > 1 {
+			return s + "s"
+		}
+		return s
+	}
+	
+	println(res.reason + pluralize(testMsg, st.numSuccessTests) + pluralize(shrinkMsg, st.numSuccessShrinks) + "):")
 	callbackPostFinalFailure(st, res)
 	return (st.numSuccessShrinks, st.numTotTryShrinks - st.numTryShrinks, st.numTryShrinks)
 }

@@ -53,9 +53,7 @@ class PrimeSpec : XCTestCase {
 
 	func testAll() {
 		property["All Prime"] = forAll { (n : Int) in
-			return self.sieve(n).reduce(true, combine: { (r : Bool, p) in
-				return r && self.isPrime(p)
-			})
+			return all(self.sieve(n), self.isPrime)
 		}
 	}
 }
