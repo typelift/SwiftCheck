@@ -98,6 +98,8 @@ We would like to test whether our sieve works properly, so we run it through Swi
 with the following property:
 
 ```swift
+import SwiftCheck
+
 property["All Prime"] = forAll { (n : Int) in
     return all(sieve(n), isPrime)
 }
@@ -136,6 +138,9 @@ means of generating random data and shrinking down to an empty array.
 For example:
 
 ```swift
+import Swiftz
+import SwiftCheck
+
 public struct ArbitraryFoo {
     let x : Int
     let y : Int
@@ -151,7 +156,7 @@ public struct ArbitraryFoo {
 
 extension ArbitraryFoo : Arbitrary {
     public static func arbitrary() -> Gen<ArbitraryFoo> {
-        return ArbitraryFoo.create <%> Int.arbitrary() <*> Int.arbitrary()
+        return ArbitraryFoo.create <^> Int.arbitrary() <*> Int.arbitrary()
     }
 
     public static func shrink(x : ArbitraryFoo) -> [ArbitraryFoo] {
