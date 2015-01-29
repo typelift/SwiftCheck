@@ -17,12 +17,12 @@
 		841FAE8C19FB1CEA00AF4EA2 /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FAE5419FB1BDB00AF4EA2 /* State.swift */; };
 		841FAE8D19FB1CEA00AF4EA2 /* Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FAE5619FB1BDB00AF4EA2 /* Test.swift */; };
 		841FAE8F19FB1CF000AF4EA2 /* SwiftCheck.h in Headers */ = {isa = PBXBuildFile; fileRef = 841FAE5519FB1BDB00AF4EA2 /* SwiftCheck.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		841FAE9B19FB1D0A00AF4EA2 /* Basis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 841FAE9619FB1CFE00AF4EA2 /* Basis.framework */; };
 		84572C291A6DBAB600241F68 /* Testable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C281A6DBAB600241F68 /* Testable.swift */; };
 		84572C311A6DC21100241F68 /* Check.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C301A6DC21100241F68 /* Check.swift */; };
 		84572C381A6DC25000241F68 /* DiscardSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C321A6DC23100241F68 /* DiscardSpec.swift */; };
 		84572C391A6DC25200241F68 /* PrimeSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C331A6DC23100241F68 /* PrimeSpec.swift */; };
 		84572C3A1A6DC25500241F68 /* SimpleSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C341A6DC23100241F68 /* SimpleSpec.swift */; };
+		84DD436D1A7703A200D492C6 /* Swiftz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84DD43681A77038A00D492C6 /* Swiftz.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,26 +33,26 @@
 			remoteGlobalIDString = 841FAE6B19FB1C7000AF4EA2;
 			remoteInfo = SwiftCheck;
 		};
-		841FAE9519FB1CFE00AF4EA2 /* PBXContainerItemProxy */ = {
+		84DD43671A77038A00D492C6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 841FAE9019FB1CFE00AF4EA2 /* Basis-iOS.xcodeproj */;
+			containerPortal = 84DD43621A77038A00D492C6 /* Swiftz-iOS.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = 84922C8419D2375F00AE9A7C;
-			remoteInfo = Basis;
+			remoteGlobalIDString = 84A88D981A70C280003D53CF;
+			remoteInfo = Swiftz;
 		};
-		841FAE9719FB1CFE00AF4EA2 /* PBXContainerItemProxy */ = {
+		84DD43691A77038A00D492C6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 841FAE9019FB1CFE00AF4EA2 /* Basis-iOS.xcodeproj */;
+			containerPortal = 84DD43621A77038A00D492C6 /* Swiftz-iOS.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = 84922C8F19D2375F00AE9A7C;
-			remoteInfo = BasisTests;
+			remoteGlobalIDString = 84A88D5C1A70C23D003D53CF;
+			remoteInfo = "Swiftz-iOSTests";
 		};
-		841FAE9919FB1D0500AF4EA2 /* PBXContainerItemProxy */ = {
+		84DD436B1A77039300D492C6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 841FAE9019FB1CFE00AF4EA2 /* Basis-iOS.xcodeproj */;
+			containerPortal = 84DD43621A77038A00D492C6 /* Swiftz-iOS.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 84922C8319D2375F00AE9A7C;
-			remoteInfo = Basis;
+			remoteGlobalIDString = 84A88D971A70C280003D53CF;
+			remoteInfo = Swiftz;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -70,12 +70,12 @@
 		841FAE6319FB1C0A00AF4EA2 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = SwiftCheckTests/Info.plist; sourceTree = SOURCE_ROOT; };
 		841FAE6C19FB1C7000AF4EA2 /* SwiftCheck.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCheck.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		841FAE7619FB1C7100AF4EA2 /* SwiftCheckTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftCheckTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		841FAE9019FB1CFE00AF4EA2 /* Basis-iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Basis-iOS.xcodeproj"; path = "External/Basis/Basis-iOS.xcodeproj"; sourceTree = "<group>"; };
 		84572C281A6DBAB600241F68 /* Testable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Testable.swift; path = SwiftCheck/Testable.swift; sourceTree = SOURCE_ROOT; };
 		84572C301A6DC21100241F68 /* Check.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Check.swift; path = SwiftCheck/Check.swift; sourceTree = SOURCE_ROOT; };
 		84572C321A6DC23100241F68 /* DiscardSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DiscardSpec.swift; path = SwiftCheckTests/DiscardSpec.swift; sourceTree = SOURCE_ROOT; };
 		84572C331A6DC23100241F68 /* PrimeSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PrimeSpec.swift; path = SwiftCheckTests/PrimeSpec.swift; sourceTree = SOURCE_ROOT; };
 		84572C341A6DC23100241F68 /* SimpleSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SimpleSpec.swift; path = SwiftCheckTests/SimpleSpec.swift; sourceTree = SOURCE_ROOT; };
+		84DD43621A77038A00D492C6 /* Swiftz-iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Swiftz-iOS.xcodeproj"; path = "Carthage/Checkouts/Swiftz/Swiftz-iOS.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,7 +83,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				841FAE9B19FB1D0A00AF4EA2 /* Basis.framework in Frameworks */,
+				84DD436D1A7703A200D492C6 /* Swiftz.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -101,7 +101,7 @@
 		841FAE2719FB1BA800AF4EA2 = {
 			isa = PBXGroup;
 			children = (
-				841FAE9019FB1CFE00AF4EA2 /* Basis-iOS.xcodeproj */,
+				84DD43621A77038A00D492C6 /* Swiftz-iOS.xcodeproj */,
 				841FAE5519FB1BDB00AF4EA2 /* SwiftCheck.h */,
 				841FAE3319FB1BA800AF4EA2 /* SwiftCheck-iOS */,
 				841FAE4019FB1BA800AF4EA2 /* SwiftCheck-iOSTests */,
@@ -163,11 +163,11 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		841FAE9119FB1CFE00AF4EA2 /* Products */ = {
+		84DD43631A77038A00D492C6 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				841FAE9619FB1CFE00AF4EA2 /* Basis.framework */,
-				841FAE9819FB1CFE00AF4EA2 /* BasisTests.xctest */,
+				84DD43681A77038A00D492C6 /* Swiftz.framework */,
+				84DD436A1A77038A00D492C6 /* Swiftz-iOSTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -198,7 +198,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				841FAE9A19FB1D0500AF4EA2 /* PBXTargetDependency */,
+				84DD436C1A77039300D492C6 /* PBXTargetDependency */,
 			);
 			name = SwiftCheck;
 			productName = SwiftCheck;
@@ -252,8 +252,8 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 841FAE9119FB1CFE00AF4EA2 /* Products */;
-					ProjectRef = 841FAE9019FB1CFE00AF4EA2 /* Basis-iOS.xcodeproj */;
+					ProductGroup = 84DD43631A77038A00D492C6 /* Products */;
+					ProjectRef = 84DD43621A77038A00D492C6 /* Swiftz-iOS.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -265,18 +265,18 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		841FAE9619FB1CFE00AF4EA2 /* Basis.framework */ = {
+		84DD43681A77038A00D492C6 /* Swiftz.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
-			path = Basis.framework;
-			remoteRef = 841FAE9519FB1CFE00AF4EA2 /* PBXContainerItemProxy */;
+			path = Swiftz.framework;
+			remoteRef = 84DD43671A77038A00D492C6 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		841FAE9819FB1CFE00AF4EA2 /* BasisTests.xctest */ = {
+		84DD436A1A77038A00D492C6 /* Swiftz-iOSTests.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
-			path = BasisTests.xctest;
-			remoteRef = 841FAE9719FB1CFE00AF4EA2 /* PBXContainerItemProxy */;
+			path = "Swiftz-iOSTests.xctest";
+			remoteRef = 84DD43691A77038A00D492C6 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -334,10 +334,10 @@
 			target = 841FAE6B19FB1C7000AF4EA2 /* SwiftCheck */;
 			targetProxy = 841FAE7819FB1C7100AF4EA2 /* PBXContainerItemProxy */;
 		};
-		841FAE9A19FB1D0500AF4EA2 /* PBXTargetDependency */ = {
+		84DD436C1A77039300D492C6 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = Basis;
-			targetProxy = 841FAE9919FB1D0500AF4EA2 /* PBXContainerItemProxy */;
+			name = Swiftz;
+			targetProxy = 84DD436B1A77039300D492C6 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

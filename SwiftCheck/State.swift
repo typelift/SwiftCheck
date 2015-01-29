@@ -21,4 +21,5 @@ public struct State {
 	var randomSeed			: StdGen
 	var numSuccessShrinks	: Int
 	var numTryShrinks		: Int
+	var numTotTryShrinks	: Int
 }

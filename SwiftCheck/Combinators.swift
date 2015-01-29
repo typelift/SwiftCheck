@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Basis
+import Swiftz
 
 /// Shakes up the internal Random Number generator for a given Generator with a seed.
 public func variant<A, S : IntegerType>(seed: S)(m: Gen<A>) -> Gen<A> {
@@ -86,7 +86,7 @@ public func oneOf<A>(gs : [Gen<A>]) -> Gen<A> {
 public func frequency<A>(xs: [(Int, Gen<A>)]) -> Gen<A> {
 	assert(xs.count != 0, "frequency used with empty list")
 	
-	return choose((1, sum(xs.map() { $0.0 }))) >>- { l in
+	return choose((1, xs.map({ $0.0 }).reduce(0, combine: +))) >>- { l in
 		return pick(l)(lst: xs)
 	}
 }
@@ -95,9 +95,9 @@ public func frequency<A>(xs: [(Int, Gen<A>)]) -> Gen<A> {
 public func elements<A>(xs: [A]) -> Gen<A> {
 	assert(xs.count != 0, "elements used with empty list")
 
-	return Gen.fmap({ i in
+	return choose((0, xs.count - 1)).fmap { i in
 		return xs[i]
-	})(choose((0, xs.count - 1)))
+	}
 }
 
 /// Takes a list of elements of increasing size, and chooses among an initial segment of the list. 
@@ -107,7 +107,8 @@ public func growingElements<A>(xs: [A]) -> Gen<A> {
 
 	let k = Double(xs.count)
 	return sized({ n in
-		return elements(take(max(1, size(k)(m: n)))(xs))
+		let m = max(1, size(k)(m: n))
+		return elements(Array(xs[0 ..< m]))
 	})
 }
 

@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Robert Widmann. All rights reserved.
 //
 
-import Basis
+import Swiftz
 
 public protocol RandonGen {
 	func next() -> (Int, Self)
@@ -15,6 +15,8 @@ public protocol RandonGen {
 	func split() -> (Self, Self)
 }
 
+let theStdGen : StdGen = StdGen(time(nil))
+
 public struct StdGen : RandonGen {
 	let seed: Int
 	
@@ -22,16 +24,10 @@ public struct StdGen : RandonGen {
 		self.seed = seed
 	}
 	
-	private func nextST() -> IO<ST<(), (Int, StdGen)>> {
-		return do_ { () -> ST<(), (Int, StdGen)> in
-			let s = Int(time(nil))
-			let t = (Int(rand()), StdGen(s))
-			return ST<(), (Int, StdGen)>.pure(t)
-		}
-	}
 	
 	public func next() -> (Int, StdGen) {
-		return nextST().unsafePerformIO().runST()
+		let s = Int(time(nil))
+		return (Int(rand()), StdGen(s))
 	}
 	
 	public func split() -> (StdGen, StdGen) {
@@ -43,27 +39,10 @@ public struct StdGen : RandonGen {
 	public func genRange() -> (Int, Int) {
 		return (Int.minBound(), Int.maxBound())
 	}
-
 }
 
-private func stdRange() -> (UInt, UInt) {
-	return (0, UInt.max)
-}
-
-public func setStdGen(g: StdGen) -> IO<()> {
-	return writeIORef(theStdGen())(v: g)
-}
-
-public func getStdGen() -> IO<StdGen> {
-	return readIORef(theStdGen())
-}
-
-public func theStdGen() -> IORef<StdGen> {
-	return !newIORef(mkStdRNG(0))
-}
-
-public func newStdGen() -> IO<StdGen> {
-	return IO.pure(readIORef(theStdGen()).unsafePerformIO().split().1)
+public func newStdGen() -> StdGen {
+	return theStdGen.split().1
 }
 
 private func mkStdRNG(seed : Int) -> StdGen {

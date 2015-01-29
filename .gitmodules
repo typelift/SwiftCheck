@@ -1,3 +1,3 @@
-[submodule "External/Basis"]
-	path = External/Basis
-	url = https://github.com/typelift/Basis.git
+[submodule "Carthage/Checkouts/Swiftz"]
+	path = Carthage/Checkouts/Swiftz
+	url = https://github.com/typelift/Swiftz.git

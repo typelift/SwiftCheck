@@ -8,7 +8,7 @@
 
 import XCTest
 import SwiftCheck
-import func Basis.<%>
+import func Swiftz.<^>
 
 public struct ArbitraryFoo {
 	let x : Int
@@ -25,7 +25,7 @@ public struct ArbitraryFoo {
 
 extension ArbitraryFoo : Arbitrary {
 	public static func arbitrary() -> Gen<ArbitraryFoo> {
-		return ArbitraryFoo.create <%> Int.arbitrary() <*> Int.arbitrary()
+		return ArbitraryFoo.create <^> Int.arbitrary() <*> Int.arbitrary()
 	}
 	
 	public static func shrink(x : ArbitraryFoo) -> [ArbitraryFoo] {
@@ -55,5 +55,6 @@ class SimpleSpec : XCTestCase {
 		property["ArbitraryFoo Properties are Reflexive"] = forAll { (i : ArbitraryFoo) in
 			return i.x == i.x && i.y == i.y
 		}
+		
 	}
 }

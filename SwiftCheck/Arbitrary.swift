@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Robert Widmann. All rights reserved.
 //
 
-import Basis
+import Swiftz
 import Darwin
 
 public protocol Arbitrary : Printable {
@@ -215,7 +215,7 @@ public func withBounds<A : Bounded>(f : A -> A -> Gen<A>) -> Gen<A> {
 public func arbitraryBoundedIntegral<A : Bounded where A : SignedIntegerType>() -> Gen<A> {
 	return withBounds({ (let mn : A) -> A -> Gen<A> in
 		return { (let mx : A) -> Gen<A> in
-			return choose((A(integerLiteral: unsafeCoerce(mn)), A(integerLiteral: unsafeCoerce(mx)))) >>- { n in
+			return choose((A(numericCast(mn)), A(numericCast(mx)))) >>- { n in
 				return Gen<A>.pure(n)
 			}
 		}
@@ -231,9 +231,9 @@ private func bits<N : IntegerType>(n : N) -> Int {
 
 private func inBounds<A : IntegerType>(fi : (Int -> A)) -> Gen<Int> -> Gen<A> {
 	return { g in
-		return Gen.fmap(fi)(suchThat(g)({ x in
+		return suchThat(g)({ x in
 			return (fi(x) as Int) == x
-		}))
+		}).fmap(fi)
 	}
 }
 
@@ -241,100 +241,44 @@ public func shrinkNone<A>(_ : A) -> [A] {
 	return []
 }
 
-private func shrinkOne<A>(shr : A -> [A])(lst : [A]) -> [[[A]]] {
-	switch match(lst) {
-		case .Nil:
-			return []
-		case .Cons(let x, let xs):
-			return concatMap({ x_ in
-				return [[ (x_ <| xs) ]]
-			})(shr(x)) + concatMap({ xs_ in
-				return [ ([x] <| xs_) ]
-			})(shrinkOne(shr)(lst: xs))
+private func unfoldr<A, B>(f : B -> Optional<(A, B)>, #initial : B) -> [A] {
+	var acc = [A]()
+	var ini = initial
+	while let next = f(ini) {
+		acc.insert(next.0, atIndex: 0)
+		ini = next.1
 	}
+	return acc
 }
 
-private func removes<A>(k : Int)(n : Int)(xs : [A]) -> [[A]] {
-	if k > n {
-		return []
-	}
-	let xs1 = take(k)(xs)
-	let xs2 = drop(k)(xs)
-	if xs2.count == 0 {
-		return [[]]
-	}
-	return [xs2] + removes(k)(n: n - k)(xs: xs2).map({ lst in
-		return xs1 + lst
-	})
-}
-
-public func shrinkList<A>(shr : A -> [A]) -> [A] -> [[A]] {
-	return { xs in
-		let n = xs.count
-		return concat((concatMap({ k in
-			return [removes(k)(n: n)(xs: xs)]
-		})(takeWhile({ x in
-			return x > 0
-		})(iterate({ x in
-			return x / 2
-		})(n))) + (shrinkOne(shr)(lst: xs))))
-	}
-}
-
-public func shrinkIntegral<A : IntegerType>(x: A) -> [A] {
-	let z = (x < 0) ? (0 - x) : x
-	let l = [z] + (takeWhile({ y in
-		return moralAbs(y, x)
-	})(tail(iterate({ n in
-		return n / 2
-	})(x))))
-	return nub(l)
-}
-
-private func moralAbs<A : IntegerType>(a : A, b : A) -> Bool {
-	switch (a >= 0, b >= 0) {
-		case (true, true):
-			return a < b
-		case (false, false):
-			return a > b
-		case (true, false):
-			return (a + b) < 0
-		case (false, true):
-			return (a + b) > 0
-		default:
-			assert(false, "Non-exhaustive pattern match performed.")
-	}
-}
-
-public func shrinkFloatToInteger(x : Float) -> [Float] {
-	let y = (x < 0) ? -x : x
-	return nub([y] + shrinkIntegral(Int64(y)).map({ n in
-		return Float(n)
-	}))
-}
-
-public func shrinkDoubleToInteger(x : Double) -> [Double] {
-	let y = (x < 0) ? -x : x
-	return nub([y] + shrinkIntegral(Int64(y)).map({ n in
-		return Double(n)
-	}))
+public func shrinkIntegral<A : IntegerType>(x : A) -> [A] {
+	return unfoldr({ i in
+		if i <= 0 {
+			return .None
+		}
+		let n = i / 2
+		return .Some((n, n))
+	}, initial: x)
 }
 
 public func shrinkFloat(x : Float) -> [Float] {
-	let xss = take(20)(iterate({ n in
-		return n / 2.0
-	})(x)).filter({ x2 in
-		return abs(x - x2) < abs(x)
-	})
-	return nub(shrinkFloatToInteger(x) + xss)
+	return unfoldr({ i in
+		if i == 0.0 {
+			return .None
+		}
+		let n = i / 2.0
+		return .Some((n, n))
+	}, initial: x)
 }
 
 public func shrinkDouble(x : Double) -> [Double] {
-	return nub(shrinkDoubleToInteger(x) + take(20)(iterate({ n in
-		return n / 2.0
-	})(x)).filter({ x_ in
-		return abs(x - x_) < abs(x)
-	}))
+	return unfoldr({ i in
+		if i == 0.0 {
+			return .None
+		}
+		let n = i / 2.0
+		return .Some((n, n))
+	}, initial: x)
 }
 
 //struct OptionalArbitrary<A : Arbitrary> : Arbitrary {
@@ -439,20 +383,4 @@ extension UInt64 : CoArbitrary {
 	}
 }
 
-infix operator ^ {}
-
-private func ^(ba : Int, ex : Int) -> Int {
-	var base = ba
-	var exp = ex
-	var result : Int = 1;
-	while exp >= 0 {
-		if (exp & 1) != 0 {
-			result *= base;
-		}
-		exp >>= 1;
-		base *= base;
-	}
-
-	return result;
-}
 
