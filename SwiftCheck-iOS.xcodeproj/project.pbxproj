@@ -22,7 +22,7 @@
 		84572C381A6DC25000241F68 /* DiscardSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C321A6DC23100241F68 /* DiscardSpec.swift */; };
 		84572C391A6DC25200241F68 /* PrimeSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C331A6DC23100241F68 /* PrimeSpec.swift */; };
 		84572C3A1A6DC25500241F68 /* SimpleSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C341A6DC23100241F68 /* SimpleSpec.swift */; };
-		8480AB301A7B0AA100C6162D /* ModifierSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8480AB2F1A7B0AA100C6162D /* ModifierSpec.swift */; };
+		8480AB401A7B2AA100C6162D /* ModifierSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8480AB3E1A7B2A9A00C6162D /* ModifierSpec.swift */; };
 		84DD436D1A7703A200D492C6 /* Swiftz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84DD43681A77038A00D492C6 /* Swiftz.framework */; };
 		84F2C4F41A7AD43900316E5F /* Modifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F2C4F31A7AD43900316E5F /* Modifiers.swift */; };
 /* End PBXBuildFile section */
@@ -77,7 +77,7 @@
 		84572C321A6DC23100241F68 /* DiscardSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DiscardSpec.swift; path = SwiftCheckTests/DiscardSpec.swift; sourceTree = SOURCE_ROOT; };
 		84572C331A6DC23100241F68 /* PrimeSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PrimeSpec.swift; path = SwiftCheckTests/PrimeSpec.swift; sourceTree = SOURCE_ROOT; };
 		84572C341A6DC23100241F68 /* SimpleSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SimpleSpec.swift; path = SwiftCheckTests/SimpleSpec.swift; sourceTree = SOURCE_ROOT; };
-		8480AB2F1A7B0AA100C6162D /* ModifierSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ModifierSpec.swift; path = SwiftCheckTests/ModifierSpec.swift; sourceTree = "<group>"; };
+		8480AB3E1A7B2A9A00C6162D /* ModifierSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ModifierSpec.swift; path = SwiftCheckTests/ModifierSpec.swift; sourceTree = SOURCE_ROOT; };
 		84DD43621A77038A00D492C6 /* Swiftz-iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Swiftz-iOS.xcodeproj"; path = "Carthage/Checkouts/Swiftz/Swiftz-iOS.xcodeproj"; sourceTree = "<group>"; };
 		84F2C4F31A7AD43900316E5F /* Modifiers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Modifiers.swift; path = SwiftCheck/Modifiers.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -154,8 +154,8 @@
 			children = (
 				84572C321A6DC23100241F68 /* DiscardSpec.swift */,
 				84572C331A6DC23100241F68 /* PrimeSpec.swift */,
+				8480AB3E1A7B2A9A00C6162D /* ModifierSpec.swift */,
 				84572C341A6DC23100241F68 /* SimpleSpec.swift */,
-				8480AB2F1A7B0AA100C6162D /* ModifierSpec.swift */,
 				841FAE4119FB1BA800AF4EA2 /* Supporting Files */,
 			);
 			path = "SwiftCheck-iOSTests";
@@ -312,7 +312,6 @@
 				841FAE8619FB1CEA00AF4EA2 /* Arbitrary.swift in Sources */,
 				84F2C4F41A7AD43900316E5F /* Modifiers.swift in Sources */,
 				841FAE8719FB1CEA00AF4EA2 /* Combinators.swift in Sources */,
-				8480AB301A7B0AA100C6162D /* ModifierSpec.swift in Sources */,
 				84572C311A6DC21100241F68 /* Check.swift in Sources */,
 				841FAE8819FB1CEA00AF4EA2 /* Gen.swift in Sources */,
 				84572C291A6DBAB600241F68 /* Testable.swift in Sources */,
@@ -329,6 +328,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				84572C391A6DC25200241F68 /* PrimeSpec.swift in Sources */,
+				8480AB401A7B2AA100C6162D /* ModifierSpec.swift in Sources */,
 				84572C3A1A6DC25500241F68 /* SimpleSpec.swift in Sources */,
 				84572C381A6DC25000241F68 /* DiscardSpec.swift in Sources */,
 			);
