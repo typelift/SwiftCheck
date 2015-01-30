@@ -54,7 +54,7 @@ extension Gen {
 }
 
 /// Constructs a generator that depends on a size parameter.
-public func sized<A>(f: Int -> Gen<A>) -> Gen<A> {
+public func sized<A>(f : Int -> Gen<A>) -> Gen<A> {
 	return Gen(unGen:{ r in
 		return { n in
 			return f(n).unGen(r)(n)

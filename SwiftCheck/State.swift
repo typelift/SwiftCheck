@@ -10,7 +10,7 @@
 public struct Terminal {}
 
 public struct State {
-	var terminal			: Terminal
+	var name				: String
 	var maxSuccessTests		: Int
 	var maxDiscardedTests	: Int
 	var computeSize			: Int -> Int -> Int
