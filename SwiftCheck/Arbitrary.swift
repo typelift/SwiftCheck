@@ -176,17 +176,17 @@ extension UnicodeScalar : Arbitrary {
 	}
 }
 
-//extension String : Arbitrary {
-//	typealias A = String
-//	public static func arbitrary() -> Gen<String> {
-//		let chars = sized({ n in vectorOf(n)(gen: UnicodeScalar.arbitrary()) })
-//		return chars >>- { ls in Gen<String>.pure(String(ls.map({ x in Character(x) }))) }
-//	}
-//
-//	public static func shrink(x : String) -> [String] {
-//		return shrinkNone(x)
-//	}
-//}
+extension String : Arbitrary {
+	typealias A = String
+	public static func arbitrary() -> Gen<String> {
+		let chars = sized({ n in vectorOf(n)(gen: UnicodeScalar.arbitrary()) })
+		return chars >>- { ls in Gen<String>.pure(String(ls.map({ x in Character(x) }))) }
+	}
+
+	public static func shrink(x : String) -> [String] {
+		return shrinkNone(x)
+	}
+}
 
 /// rdar://19437275
 //extension Character : Arbitrary {
