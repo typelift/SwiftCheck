@@ -52,9 +52,12 @@ class SimpleSpec : XCTestCase {
 			return i == i
 		}
 		
+		property["String Equality is Reflexive"] = forAll { (s : String) in
+			return s == s
+		}
+		
 		property["ArbitraryFoo Properties are Reflexive"] = forAll { (i : ArbitraryFoo) in
 			return i.x == i.x && i.y == i.y
 		}
-		
 	}
 }
