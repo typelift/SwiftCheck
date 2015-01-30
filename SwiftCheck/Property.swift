@@ -81,9 +81,9 @@ public func mapSize (f: Int -> Int)(p: Testable) -> Property {
 }
 
 private func props<A>(shrinker: A -> [A], #original : A, #pf: A -> Testable) -> Rose<Gen<Prop>> {
-	return .MkRose(pf(original).property().unProperty, shrinker(original).map({ x1 in
+	return .MkRose(pf(original).property().unProperty, shrinker(original).map { x1 in
 		return props(shrinker, original: x1, pf: pf)
-	}))
+	})
 }
 
 public func shrinking<A> (shrinker: A -> [A])(x0: A)(pf: A -> Testable) -> Property {
