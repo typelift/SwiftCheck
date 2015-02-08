@@ -20,11 +20,15 @@ class ModifierSpec : XCTestCase {
 		}
 
 		property["Positive propositions only generate positive numbers"] = forAll { (x : Positive<Int>) in
-			return x.getPositive >= 0
+			return x.getPositive > 0
 		}
 		
 		property["NonZero propositions never generate zero"] = forAll { (x : NonZero<Int>) in
 			return x.getNonZero != 0
+		}
+		
+		property["NonNegative propositions only generate non negative numbers"] = forAll { (x : NonNegative<Int>) in
+			return x.getNonNegative >= 0
 		}
 	}
 }
