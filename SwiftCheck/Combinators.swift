@@ -6,7 +6,6 @@
 //  Copyright (c) 2014 Robert Widmann. All rights reserved.
 //
 
-import Foundation
 import Swiftz
 
 extension Gen {
@@ -51,6 +50,28 @@ extension Gen {
 		})
 	}
 
+	/// Generates a list of random length.
+	public func listOf() -> Gen<[A]> {
+		return sized({ n in
+			return choose((0, n)) >>- { k in
+				return self.vectorOf(k)
+			}
+		})
+	}
+	
+	/// Generates a non-empty list of random length.
+	public func listOf1() -> Gen<[A]> {
+		return sized({ n in
+			return choose((1, max(1, n))) >>- { k in
+				return self.vectorOf(k)
+			}
+		})
+	}
+	
+	/// Generates a list of a given length.
+	public func vectorOf(k : Int) -> Gen<[A]> {
+		return sequence(Array<Gen<A>>(count: k, repeatedValue: self))
+	}
 }
 
 /// Constructs a generator that depends on a size parameter.
@@ -63,14 +84,11 @@ public func sized<A>(f : Int -> Gen<A>) -> Gen<A> {
 }
 
 /// Constructs a random element in the range of two Integer Types
-public func choose<A : SignedIntegerType>(rng: (A, A)) -> Gen<A> {
+public func choose<A : RandomType>(rng : (A, A)) -> Gen<A> {
 	return Gen(unGen: { s in
 		return { (_) in
-			let l = rng.0
-			let h = rng.1
-			let x = numericCast(RAND_MAX * rand()) as A
-			let y = numericCast(h - l + 1) as A
-			return numericCast(l + x % y)
+			let (x, _) = A.randomInRange(rng, gen: s)
+			return x
 		}
 	})
 }
@@ -113,29 +131,6 @@ public func growingElements<A>(xs: [A]) -> Gen<A> {
 		let m = max(1, size(k)(m: n))
 		return elements(Array(xs[0 ..< m]))
 	})
-}
-
-/// Generates a list of random length.
-public func listOf<A>(gen: Gen<A>) -> Gen<[A]> {
-	return sized({ n in
-		return choose((0, n)) >>- { k in
-			return vectorOf(k)(gen: gen)
-		}
-	})
-}
-
-/// Generates a non-empty list of random length.
-public func listOf1<A>(gen: Gen<A>) -> Gen<[A]> {
-	return sized({ n in
-		return choose((1, max(1, n))) >>- { k in
-			return vectorOf(k)(gen: gen)
-		}
-	})
-}
-
-/// Generates a list of a given length.
-public func vectorOf<A>(k: Int)(gen : Gen<A>) -> Gen<[A]> {
-	return sequence(Array<Gen<A>>(count: k, repeatedValue: gen))
 }
 
 /// Implementation Details Follow
