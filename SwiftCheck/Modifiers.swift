@@ -120,9 +120,7 @@ public struct NonZero<A : protocol<Arbitrary, IntegerType>> : Arbitrary, Printab
 	}
 	
 	public static func arbitrary() -> Gen<NonZero<A>> {
-		return NonZero.create <^> A.arbitrary().suchThat({ x in 
-			x != 0 
-		})
+		return NonZero.create <^> A.arbitrary().suchThat(!=0)
 	}
 	
 	public static func shrink(bl : NonZero<A>) -> [NonZero<A>] {
