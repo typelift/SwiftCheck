@@ -76,14 +76,14 @@ public func mapProp(f: Prop -> Prop)(p: Testable) -> Property {
 
 public func mapSize (f: Int -> Int)(p: Testable) -> Property {
 	return Property(sized({ n in
-		return resize(f(n))(m: p.property().unProperty)
+		return p.property().unProperty.resize(f(n))
 	}))
 }
 
 private func props<A>(shrinker: A -> [A], #original : A, #pf: A -> Testable) -> Rose<Gen<Prop>> {
-	return .MkRose(pf(original).property().unProperty, shrinker(original).map({ x1 in
+	return .MkRose(pf(original).property().unProperty, shrinker(original).map { x1 in
 		return props(shrinker, original: x1, pf: pf)
-	}))
+	})
 }
 
 public func shrinking<A> (shrinker: A -> [A])(x0: A)(pf: A -> Testable) -> Property {

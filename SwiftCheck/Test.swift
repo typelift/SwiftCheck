@@ -9,6 +9,7 @@
 import Swiftz
 
 public struct Arguments {
+	let name : String
 	let replay : Optional<(StdGen, Int)>
 	let maxSuccess : Int
 	let maxDiscard : Int
@@ -48,8 +49,8 @@ public func isSuccess(r: Result) -> Bool {
 	}
 }
 
-public func stdArgs() -> Arguments{
-	return Arguments(replay: .None, maxSuccess: 100, maxDiscard: 500, maxSize: 100, chatty: true)
+public func stdArgs(name : String = "") -> Arguments{
+	return Arguments(name: name, replay: .None, maxSuccess: 100, maxDiscard: 500, maxSize: 100, chatty: true)
 }
 
 public func forAll<A : Arbitrary>(gen : Gen<A>, pf : (A -> Testable)) -> Property {
@@ -131,13 +132,13 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 public func forAllShrink<A : Arbitrary>(gen : Gen<A>, shrinker: A -> [A], f : A -> Testable) -> Property {
 	return Property(gen >>- { (let x : A) in
 		return shrinking(shrinker)(x0: x)({ (let xs : A) -> Testable  in
-			return counterexample(xs.description)(p: f(xs))
+			return counterexample("\(xs)")(p: f(xs))
 		}).unProperty
 	})
 }
 
-public func quickCheck(prop : Testable){
-	quickCheckWithResult(stdArgs(), prop)
+public func quickCheck(prop : Testable, name : String = "") {
+	quickCheckWithResult(stdArgs(name: name), prop)
 }
 
 public func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
@@ -181,7 +182,7 @@ public func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 	}
 	
 	
-	let state = State(terminal:				Terminal()
+	let state = State(name:					args.name
 					, maxSuccessTests:		args.maxSuccess
 					, maxDiscardedTests:	args.maxDiscard
 					, computeSize:			computeSize
@@ -193,10 +194,10 @@ public func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 					, numSuccessShrinks:	0
 					, numTryShrinks:		0
 					, numTotTryShrinks:		0)
-	return test(state)(p.exhaustive ? once(p.property()).unProperty.unGen : p.property().unProperty.unGen)
+	return test(state, p.exhaustive ? once(p.property()).unProperty.unGen : p.property().unProperty.unGen)
 }
 
-public func test(st: State)(f: (StdGen -> Int -> Prop)) -> Result {
+public func test(st: State, f: (StdGen -> Int -> Prop)) -> Result {
 	var state = st
 	while true {
 		switch runATest(state)(f) {
@@ -355,6 +356,7 @@ public func localMinFound(st : State, res : TestResult) -> (Int, Int, Int) {
 		return s
 	}
 	
+	println("Proposition: " + st.name)
 	println(res.reason + pluralize(testMsg, st.numSuccessTests) + pluralize(shrinkMsg, st.numSuccessShrinks) + "):")
 	callbackPostFinalFailure(st, res)
 	return (st.numSuccessShrinks, st.numTotTryShrinks - st.numTryShrinks, st.numTryShrinks)

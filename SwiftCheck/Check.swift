@@ -16,7 +16,7 @@ public struct QuickCheck {
 			return undefined()
 		}
 		set(test) {
-			quickCheck(test)
+			quickCheck(test, name: s)
 		}
 	}
 }

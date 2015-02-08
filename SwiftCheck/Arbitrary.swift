@@ -9,7 +9,7 @@
 import Swiftz
 import Darwin
 
-public protocol Arbitrary : Printable {
+public protocol Arbitrary {
 //	typealias A : Arbitrary
 	class func arbitrary() -> Gen<Self>
 	class func shrink(Self) -> [Self]
@@ -176,29 +176,28 @@ extension UnicodeScalar : Arbitrary {
 	}
 }
 
-//extension String : Arbitrary {
-//	typealias A = String
-//	public static func arbitrary() -> Gen<String> {
-//		let chars = sized({ n in vectorOf(n)(gen: UnicodeScalar.arbitrary()) })
-//		return chars >>- { ls in Gen<String>.pure(String(ls.map({ x in Character(x) }))) }
-//	}
-//
-//	public static func shrink(x : String) -> [String] {
-//		return shrinkNone(x)
-//	}
-//}
+extension String : Arbitrary {
+	typealias A = String
+	public static func arbitrary() -> Gen<String> {
+		let chars = sized({ n in Character.arbitrary().vectorOf(n) })
+		return chars >>- { ls in Gen<String>.pure(String(ls)) }
+	}
 
-/// rdar://19437275
-//extension Character : Arbitrary {
-//	typealias A = Character
-//	public static func arbitrary() -> Gen<Character> {
-//		return choose((32, 255)) >>- {  Gen.pure(Character(UnicodeScalar($0))) }
-//	}
-//
-//	public static func shrink(x : Character) -> [Character] {
-//		return shrinkNone(x)
-//	}
-//}
+	public static func shrink(x : String) -> [String] {
+		return shrinkNone(x)
+	}
+}
+
+extension Character : Arbitrary {
+	typealias A = Character
+	public static func arbitrary() -> Gen<Character> {
+		return choose((32, 255)) >>- {  Gen.pure(Character(UnicodeScalar($0))) }
+	}
+
+	public static func shrink(x : Character) -> [Character] {
+		return shrinkNone(x)
+	}
+}
 
 public func arbitraryArray<A : Arbitrary>() -> Gen<[A]> {
 	return sized({ n in
@@ -212,16 +211,6 @@ public func withBounds<A : Bounded>(f : A -> A -> Gen<A>) -> Gen<A> {
 	return f(A.minBound())(A.maxBound())
 }
 
-public func arbitraryBoundedIntegral<A : Bounded where A : SignedIntegerType>() -> Gen<A> {
-	return withBounds({ (let mn : A) -> A -> Gen<A> in
-		return { (let mx : A) -> Gen<A> in
-			return choose((A(numericCast(mn)), A(numericCast(mx)))) >>- { n in
-				return Gen<A>.pure(n)
-			}
-		}
-	})
-}
-
 private func bits<N : IntegerType>(n : N) -> Int {
 	if n / 2 == 0 {
 		return 0
@@ -231,7 +220,7 @@ private func bits<N : IntegerType>(n : N) -> Int {
 
 private func inBounds<A : IntegerType>(fi : (Int -> A)) -> Gen<Int> -> Gen<A> {
 	return { g in
-		return suchThat(g)({ x in
+		return g.suchThat({ x in
 			return (fi(x) as Int) == x
 		}).fmap(fi)
 	}
@@ -311,15 +300,17 @@ protocol CoArbitrary {
 }
 
 public func coarbitraryIntegral<A : IntegerType, B>(x : A) -> Gen<B> -> Gen<B> {
-	return variant(x)
+	return { $0.variant(x) }
 }
 
 extension Bool : CoArbitrary {
 	public static func coarbitrary<C>(x: Bool) -> Gen<C> -> Gen<C> {
-		if x {
-			return variant(1)
+		return { g in 
+			if x {
+				return g.variant(1)
+			}
+			return g.variant(0)
 		}
-		return variant(0)
 	}
 }
 

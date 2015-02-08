@@ -22,7 +22,9 @@
 		84572C211A6DBA1C00241F68 /* DiscardSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C201A6DBA1C00241F68 /* DiscardSpec.swift */; };
 		84572C251A6DBAA800241F68 /* Check.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C241A6DBAA800241F68 /* Check.swift */; };
 		84572C2B1A6DBABA00241F68 /* Testable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C2A1A6DBABA00241F68 /* Testable.swift */; };
+		8480AB2D1A7B0A9700C6162D /* ModifierSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8480AB2C1A7B0A9700C6162D /* ModifierSpec.swift */; };
 		84DD439E1A78817100D492C6 /* Swiftz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84DD43991A78816800D492C6 /* Swiftz.framework */; };
+		84F2C4F71A7AD43F00316E5F /* Modifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F2C4F61A7AD43F00316E5F /* Modifiers.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -75,7 +77,9 @@
 		84572C201A6DBA1C00241F68 /* DiscardSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiscardSpec.swift; sourceTree = "<group>"; };
 		84572C241A6DBAA800241F68 /* Check.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Check.swift; sourceTree = "<group>"; };
 		84572C2A1A6DBABA00241F68 /* Testable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Testable.swift; sourceTree = "<group>"; };
+		8480AB2C1A7B0A9700C6162D /* ModifierSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModifierSpec.swift; sourceTree = "<group>"; };
 		84DD43931A78816800D492C6 /* Swiftz.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Swiftz.xcodeproj; path = Carthage/Checkouts/Swiftz/Swiftz.xcodeproj; sourceTree = "<group>"; };
+		84F2C4F61A7AD43F00316E5F /* Modifiers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Modifiers.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +129,7 @@
 				84572C241A6DBAA800241F68 /* Check.swift */,
 				844FCCCE198F24CF00EB242A /* Combinators.swift */,
 				844FCCAB198B32DC00EB242A /* Gen.swift */,
+				84F2C4F61A7AD43F00316E5F /* Modifiers.swift */,
 				844FCCAD198B367000EB242A /* Property.swift */,
 				844FCCC2198EC4F000EB242A /* Random.swift */,
 				844FCCC6198EFB4700EB242A /* Rose.swift */,
@@ -150,6 +155,7 @@
 				844FCCC8198EFF9B00EB242A /* SimpleSpec.swift */,
 				84572C1A1A6DB9D800241F68 /* PrimeSpec.swift */,
 				84572C201A6DBA1C00241F68 /* DiscardSpec.swift */,
+				8480AB2C1A7B0A9700C6162D /* ModifierSpec.swift */,
 				844FCC9D198B320500EB242A /* Supporting Files */,
 			);
 			path = SwiftCheckTests;
@@ -305,6 +311,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				844FCCAE198B367000EB242A /* Property.swift in Sources */,
+				84F2C4F71A7AD43F00316E5F /* Modifiers.swift in Sources */,
 				844FCCB0198B36BE00EB242A /* Test.swift in Sources */,
 				84572C251A6DBAA800241F68 /* Check.swift in Sources */,
 				844FCCC3198EC4F000EB242A /* Random.swift in Sources */,
@@ -324,6 +331,7 @@
 				84572C1B1A6DB9D800241F68 /* PrimeSpec.swift in Sources */,
 				844FCCC9198EFF9B00EB242A /* SimpleSpec.swift in Sources */,
 				84572C211A6DBA1C00241F68 /* DiscardSpec.swift in Sources */,
+				8480AB2D1A7B0A9700C6162D /* ModifierSpec.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
