@@ -15,7 +15,8 @@ public protocol RandomGen {
 	func split() -> (Self, Self)
 }
 
-let theStdGen : StdGen = StdGen(time(nil))
+/// A library-provided standard random number generator.
+let standardRNG : StdGen = StdGen(time(nil))
 
 public struct StdGen : RandomGen {
 	let seed: Int
@@ -23,7 +24,6 @@ public struct StdGen : RandomGen {
 	init(_ seed : Int) {
 		self.seed = seed
 	}
-	
 	
 	public func next() -> (Int, StdGen) {
 		let s = Int(time(nil))
@@ -42,15 +42,21 @@ public struct StdGen : RandomGen {
 }
 
 public func newStdGen() -> StdGen {
-	return theStdGen.split().1
+	return standardRNG.split().1
 }
 
 private func mkStdRNG(seed : Int) -> StdGen {
 	return StdGen(seed)
 }
 
+/// Types that can generate random versions of themselves. 
 public protocol RandomType {
 	class func randomInRange<G : RandomGen>(range : (Self, Self), gen : G) -> (Self, G)
+}
+
+/// Generates a random value from a bounded random type.
+public func random<A : protocol<Bounded, RandomType>, G : RandomGen>(gen : G) -> (A, G) {
+	return A.randomInRange((A.minBound(), A.maxBound()), gen: gen)
 }
 
 extension Int : RandomType {
@@ -152,4 +158,27 @@ extension UInt64 : RandomType {
 		return (result, g);
 	}
 }
+
+extension Float : RandomType {
+	public static func randomInRange<G : RandomGen>(range : (Float, Float), gen : G) -> (Float, G) {
+		let (min, max) = range
+		let (r, g) = gen.next()
+		let fr = Float(r)
+		let result = (fr % ((max + 1) - min)) + min;
+		
+		return (result, g);
+	}
+}
+
+extension Double : RandomType {
+	public static func randomInRange<G : RandomGen>(range : (Double, Double), gen : G) -> (Double, G) {
+		let (min, max) = range
+		let (r, g) = gen.next()
+		let dr = Double(r)
+		let result = (dr % ((max + 1) - min)) + min;
+		
+		return (result, g);
+	}
+}
+
 
