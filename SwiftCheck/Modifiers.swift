@@ -66,6 +66,50 @@ public func == <T : protocol<Arbitrary, Equatable>>(lhs : Static<T>, rhs : Stati
 	return lhs.getStatic == rhs.getStatic
 }
 
+public struct ArrayOf<A : Arbitrary> : Arbitrary, Printable {
+	public let getArray : [A]
+
+	public init(_ array : [A]) {
+		self.getArray = array
+	}
+
+	public var description : String {
+		return "\(self.getArray)"
+	}
+
+	private static func create(array : [A]) -> ArrayOf<A> {
+		return ArrayOf(array)
+	}
+
+	public static func arbitrary() -> Gen<ArrayOf<A>> {
+		return sized { n in
+			return choose((0, n)).bind { k in
+				if k == 0 {
+					return Gen.pure(ArrayOf([]))
+				}
+
+				return sequence(Array((0...k)).map { _ in A.arbitrary() }).fmap(ArrayOf.create)
+			}
+		}
+	}
+
+	public static func shrink(bl : ArrayOf<A>) -> [ArrayOf<A>] {
+		if bl.getArray.count == 0 {
+			return []
+		} else if bl.getArray.count == 1 {
+			let hd = bl.getArray[0]
+			return [ ArrayOf([]) ] + [ ArrayOf(A.shrink(hd)) ]
+		}
+		let x = bl.getArray[0]
+		let xs = Array<A>(bl.getArray[1..<bl.getArray.count])
+		return [ ArrayOf<A>(xs) ] + ArrayOf<A>.shrink(ArrayOf<A>(xs)) + ArrayOf<A>.shrink(ArrayOf<A>(A.shrink(x) + xs))
+	}
+}
+
+public func == <T : protocol<Arbitrary, Equatable>>(lhs : ArrayOf<T>, rhs : ArrayOf<T>) -> Bool {
+	return lhs.getArray == rhs.getArray
+}
+
 /// Guarantees that every generated integer is greater than 0.
 public struct Positive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary, Printable {
 	public let getPositive : A
@@ -83,7 +127,7 @@ public struct Positive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary, P
 	}
 	
 	public static func arbitrary() -> Gen<Positive<A>> {
-		return A.arbitrary().suchThat({ $0 > 0 }).fmap({ Positive.create(abs($0)) })
+		return A.arbitrary().fmap({ Positive.create(abs($0)) }).suchThat({ $0.getPositive > 0 })
 	}
 	
 	public static func shrink(bl : Positive<A>) -> [Positive<A>] {

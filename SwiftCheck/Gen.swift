@@ -6,9 +6,14 @@
 //  Copyright (c) 2014 Robert Widmann. All rights reserved.
 //
 
-
+/// A generator for values of type A.
 public struct Gen<A> {
-	var unGen: StdGen -> Int -> A
+	let unGen : StdGen -> Int -> A
+
+	public var generate : A {
+		let r = newStdGen()
+		return unGen(r)(30)
+	}
 }
 
 extension Gen /*: Functor*/ {
@@ -26,7 +31,7 @@ extension Gen /*: Functor*/ {
 extension Gen /*: Applicative*/ {
 	typealias FAB = Gen<A -> B>
 
-	public static func pure(a: A) -> Gen<A> {
+	public static func pure(a : A) -> Gen<A> {
 		return Gen(unGen: { (_) in
 			return { (_) in
 				return a
@@ -44,7 +49,7 @@ extension Gen /*: Applicative*/ {
 }
 
 extension Gen /*: Monad*/ {
-	public func bind<B>(fn: A -> Gen<B>) -> Gen<B> {
+	public func bind<B>(fn : A -> Gen<B>) -> Gen<B> {
 		return Gen<B>(unGen: { r in
 			return { n in
 				let (r1, r2) = r.split()
@@ -55,7 +60,7 @@ extension Gen /*: Monad*/ {
 	}
 }
 
-public func sequence<A>(ms: [Gen<A>]) -> Gen<[A]> {
+public func sequence<A>(ms : [Gen<A>]) -> Gen<[A]> {
 	return ms.reduce(Gen<[A]>.pure([]), combine: { y, x in
 		return x.bind { x1 in
 			return y.bind { xs in
@@ -65,13 +70,13 @@ public func sequence<A>(ms: [Gen<A>]) -> Gen<[A]> {
 	})
 }
 
-public func join<A>(rs: Gen<Gen<A>>) -> Gen<A> {
+public func join<A>(rs : Gen<Gen<A>>) -> Gen<A> {
 	return rs.bind { x in
 		return x
 	}
 }
 
-public func liftM<A, R>(f: A -> R)(m1 : Gen<A>) -> Gen<R> {
+public func liftM<A, R>(f : A -> R)(m1 : Gen<A>) -> Gen<R> {
 	return m1.bind{ x1 in
 		return Gen.pure(f(x1))
 	}

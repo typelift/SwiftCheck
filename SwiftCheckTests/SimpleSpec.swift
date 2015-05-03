@@ -39,11 +39,11 @@ extension ArbitraryFoo : Arbitrary {
 
 class SimpleSpec : XCTestCase {
 	func testAll() {
-		property["Integer Equality is Reflexive"] = forAll { (i : Int) in
+		property["Integer Equality is Reflexive"] = forAll { (i : Int8) in
 			return i == i
 		}
 
-		property["Unsigned Integer Equality is Reflexive"] = forAll { (i : UInt64) in
+		property["Unsigned Integer Equality is Reflexive"] = forAll { (i : UInt8) in
 			return i == i
 		}
 

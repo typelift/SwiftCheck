@@ -27,7 +27,7 @@ extension Gen {
 	}
 	
 	/// Constructs a Generator that only returns values that satisfy a predicate.
-	public func suchThat(p: (A -> Bool)) -> Gen<A> {
+	public func suchThat(p : (A -> Bool)) -> Gen<A> {
 		return self.suchThatOptional(p).bind { mx in
 			switch mx {
 			case .Some(let x):
@@ -43,7 +43,7 @@ extension Gen {
 	/// Constructs a Generator that attempts to generate a values that satisfy a predicate.
 	///
 	/// Passing values are wrapped in `.Some`.  Failing values are `.None`.
-	public func suchThatOptional(p: A -> Bool) -> Gen<Optional<A>> {
+	public func suchThatOptional(p : A -> Bool) -> Gen<Optional<A>> {
 		return sized({ n in
 			return try(self, 0, max(n, 1), p)
 		})

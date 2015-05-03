@@ -70,11 +70,11 @@ extension Double : LatticeType {
 /// float.h does not export Float80's limits, nor does the Swift STL.
 // rdar://18404510
 //extension Swift.Float80 : LatticeType {
-//	public static func minBound() -> Swift.Float80 {
+//	public static var min : Swift.Float80 {
 //		return LDBL_MIN
 //	}
 //
-//	public static func maxBound() -> Swift.Float80 {
+//	public static var min : Swift.Float80 {
 //		return LDBL_MAX
 //	}
 //}
