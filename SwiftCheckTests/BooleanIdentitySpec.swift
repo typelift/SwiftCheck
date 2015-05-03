@@ -15,7 +15,7 @@ class BooleanIdentitySpec : XCTestCase {
 			return ((x || !x) == true) && ((x && !x) == false)
 		}
 
-		property["Law of excluded middle"] = forAll { (x : Bool) in
+		property["Law of double negation"] = forAll { (x : Bool) in
 			return !(!x) == x
 		}
 
