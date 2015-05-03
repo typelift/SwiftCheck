@@ -6,7 +6,6 @@
 //  Copyright (c) 2015 Robert Widmann. All rights reserved.
 //
 
-import Swiftz
 
 /// The type of things that can be tested.
 ///

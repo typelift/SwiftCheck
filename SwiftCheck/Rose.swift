@@ -6,37 +6,31 @@
 //  Copyright (c) 2014 Robert Widmann. All rights reserved.
 //
 
-import Swiftz
 
 public enum Rose<A> {
-	case MkRose(@autoclosure() -> A, @autoclosure() -> [Rose<A>])
-	case IORose(@autoclosure() -> Rose<A>)
+	case MkRose(() -> A, () -> [Rose<A>])
+	case IORose(() -> Rose<A>)
 }
 
-extension Rose : Functor {
+extension Rose /*: Functor*/ {
 	typealias B = Swift.Any
 	typealias FB = Rose<B>
 
 	public func fmap<B>(f : (A -> B)) -> Rose<B> {
 		switch self {
 			case .MkRose(let root, let children):
-				return .MkRose(f(root()), children().map() { $0.fmap(f) })
+				return .MkRose({ f(root()) }, { children().map() { $0.fmap(f) } })
 			case .IORose(let rs):
-				return .IORose(rs().fmap(f))
+				return .IORose({ rs().fmap(f) })
 		}
 	}
 }
 
-public func <^><A, B>(f: A -> B, ar : Rose<A>) -> Rose<B> {
-	return ar.fmap(f)
-}
-
-
-extension Rose : Applicative {
+extension Rose /*: Applicative*/ {
 	typealias FAB = Rose<A -> B>
 
 	public static func pure(a : A) -> Rose<A> {
-		return .MkRose(a, [])
+		return .MkRose({ a }, { [] })
 	}
 
 	public func ap<B>(fn : Rose<A -> B>) -> Rose<B> {
@@ -49,52 +43,38 @@ extension Rose : Applicative {
 	}
 }
 
-public func <*><A, B>(a : Rose<A -> B> , l : Rose<A>) -> Rose<B> {
-	return l.ap(a)
-}
-
-extension Rose : Monad {
-	public func bind<B>(fn: A -> Rose<B>) -> Rose<B> {
+extension Rose /*: Monad*/ {
+	public func bind<B>(fn : A -> Rose<B>) -> Rose<B> {
 		return joinRose(self.fmap(fn))
 	}
 }
 
-public func >>-<A, B>(x : Rose<A>, f : A -> Rose<B>) -> Rose<B> {
-	return x.bind(f)
+public func ioRose(@autoclosure(escaping) x : () -> Rose<TestResult>) -> Rose<TestResult> {
+	return .IORose(x)
 }
 
-public func >><A, B>(x : Rose<A>, y : Rose<B>) -> Rose<B> {
-	return x.bind({ (_) in
-		return y
-	})
-}
-
-public func ioRose(x: @autoclosure() -> Rose<TestResult>) -> Rose<TestResult> {
-	return .IORose(protectRose(x))
-}
-
-public func liftM<A, R>(f: A -> R)(m1 : Rose<A>) -> Rose<R> {
-	return m1 >>- { x1 in
+public func liftM<A, R>(f : A -> R)(m1 : Rose<A>) -> Rose<R> {
+	return m1.bind { x1 in
 		return Rose.pure(f(x1))
 	}
 }
 
-public func joinRose<A>(rs: Rose<Rose<A>>) -> Rose<A> {
+public func joinRose<A>(rs : Rose<Rose<A>>) -> Rose<A> {
 	switch rs {
 		case .IORose(var rs):
-			return .IORose(joinRose(rs()))
+			return .IORose({ joinRose(rs()) })
 		case .MkRose(let bx , let rs):
 			switch bx() {
 				case .IORose(let rm):
-					return .IORose(joinRose(.MkRose(rm, rs)))
+					return .IORose({ joinRose(.MkRose(rm, rs)) })
 				case .MkRose(let x, let ts):
-					return .MkRose(x, rs().map(joinRose) + ts())
+					return .MkRose(x, { rs().map(joinRose) + ts() })
 			}
 			
 	}
 }
 
-public func reduce(rs: Rose<TestResult>) -> Rose<TestResult> {
+public func reduce(rs : Rose<TestResult>) -> Rose<TestResult> {
 	switch rs {
 		case .MkRose(_, _):
 			return rs
@@ -103,17 +83,13 @@ public func reduce(rs: Rose<TestResult>) -> Rose<TestResult> {
 	}
 }
 
-public func onRose<A>(f: (A -> [Rose<A>] -> Rose<A>))(rs: Rose<A>) -> Rose<A> {
+public func onRose<A>(f : (A -> [Rose<A>] -> Rose<A>))(rs : Rose<A>) -> Rose<A> {
 	switch rs {
 		case .MkRose(let x, let rs):
 			return f(x())(rs())
 		case .IORose(let m):
-			return .IORose(onRose(f)(rs: m()))
+			return .IORose({ onRose(f)(rs: m()) })
 	}
-}
-
-public func protectRose(x: @autoclosure () -> Rose<TestResult>) -> Rose<TestResult> {
-	return protect(Rose.pure • exception("Exception"))(x())
 }
 
 public func do_<A>(fn: () -> Rose<A>) -> Rose<A> {
@@ -122,8 +98,8 @@ public func do_<A>(fn: () -> Rose<A>) -> Rose<A> {
 
 public func sequence<A>(ms : [Rose<A>]) -> Rose<[A]> {
 	return ms.reduce(Rose<[A]>.pure([]), combine: { n, m in
-		return m >>- { x in
-			return n >>- { xs in
+		return m.bind { x in
+			return n.bind { xs in
 				return Rose<[A]>.pure([x] + xs)
 			}
 		}

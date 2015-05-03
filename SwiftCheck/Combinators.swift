@@ -6,7 +6,6 @@
 //  Copyright (c) 2014 Robert Widmann. All rights reserved.
 //
 
-import Swiftz
 
 extension Gen {
 	/// Shakes up the internal Random Number generator for a given Generator with a seed.
@@ -29,16 +28,16 @@ extension Gen {
 	
 	/// Constructs a Generator that only returns values that satisfy a predicate.
 	public func suchThat(p: (A -> Bool)) -> Gen<A> {
-		return self.suchThatOptional(p) >>- ({ mx in
+		return self.suchThatOptional(p).bind { mx in
 			switch mx {
 			case .Some(let x):
 				return Gen.pure(x)
 			case .None:
-				return sized({ n in
+				return sized { n in
 					return self.suchThat(p).resize(n + 1)
-				})
+				}
 			}
-		})
+		}
 	}
 	
 	/// Constructs a Generator that attempts to generate a values that satisfy a predicate.
@@ -53,7 +52,7 @@ extension Gen {
 	/// Generates a list of random length.
 	public func listOf() -> Gen<[A]> {
 		return sized({ n in
-			return choose((0, n)) >>- { k in
+			return choose((0, n)).bind { k in
 				return self.vectorOf(k)
 			}
 		})
@@ -62,7 +61,7 @@ extension Gen {
 	/// Generates a non-empty list of random length.
 	public func listOf1() -> Gen<[A]> {
 		return sized({ n in
-			return choose((1, max(1, n))) >>- { k in
+			return choose((1, max(1, n))).bind { k in
 				return self.vectorOf(k)
 			}
 		})
@@ -97,9 +96,9 @@ public func choose<A : RandomType>(rng : (A, A)) -> Gen<A> {
 public func oneOf<A>(gs : [Gen<A>]) -> Gen<A> {
 	assert(gs.count != 0, "oneOf used with empty list")
 
-	return choose((0, gs.count - 1)) >>- ({ x in
+	return choose((0, gs.count - 1)).bind { x in
 		return gs[x]
-	})
+	}
 }
 
 /// Given a list of Generators and weights associated with them, this function randomly selects and
@@ -107,7 +106,7 @@ public func oneOf<A>(gs : [Gen<A>]) -> Gen<A> {
 public func frequency<A>(xs: [(Int, Gen<A>)]) -> Gen<A> {
 	assert(xs.count != 0, "frequency used with empty list")
 	
-	return choose((1, xs.map({ $0.0 }).reduce(0, combine: +))) >>- { l in
+	return choose((1, xs.map({ $0.0 }).reduce(0, combine: +))).bind { l in
 		return pick(l)(lst: xs)
 	}
 }
@@ -145,12 +144,12 @@ private func try<A>(gen: Gen<A>, k: Int, n : Int, p: A -> Bool) -> Gen<Optional<
 	if n == 0 {
 		return Gen.pure(.None)
 	}
-	return gen.resize(2 * k + n) >>- ({ (let x : A) -> Gen<Optional<A>> in
+	return gen.resize(2 * k + n).bind { (let x : A) -> Gen<Optional<A>> in
 		if p(x) {
 			return Gen.pure(.Some(x))
 		}
 		return try(gen, k + 1, n - 1, p)
-	})
+	}
 }
 
 private func pick<A>(n: Int)(lst: [(Int, Gen<A>)]) -> Gen<A> {

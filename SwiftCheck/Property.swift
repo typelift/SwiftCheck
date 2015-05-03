@@ -6,31 +6,17 @@
 //  Copyright (c) 2014 Robert Widmann. All rights reserved.
 //
 
-import Swiftz
 
 public func protectResults(rs: Rose<TestResult>) -> Rose<TestResult> {
 	return onRose({ x in
 		return { rs in
-			let y = protectResult(x)
-			return .MkRose(y, rs.map(protectResults))
+			return .MkRose({ x }, { rs.map(protectResults) })
 		}
 	})(rs: rs)
 }
 
 public func exception(msg: String) -> Printable -> TestResult {
 	return { e in failed() }
-}
-
-public func protectResult(res: TestResult) -> TestResult {
-	return protect({ e in exception("Exception")(e) })(res)
-}
-
-internal func tryEvaluateIO<A>(m : @autoclosure() -> A) -> Either<Printable, A> {
-	return Either.right(m())
-}
-
-public func protect<A>(f : Printable -> A) -> A -> A {
-	return { x in tryEvaluateIO(x).either(f, { identity($0)  }) }
 }
 
 public func succeeded() -> TestResult {
@@ -80,13 +66,13 @@ public func mapSize (f: Int -> Int)(p: Testable) -> Property {
 	}))
 }
 
-private func props<A>(shrinker: A -> [A], #original : A, #pf: A -> Testable) -> Rose<Gen<Prop>> {
-	return .MkRose(pf(original).property().unProperty, shrinker(original).map { x1 in
+private func props<A>(shrinker : A -> [A], #original : A, #pf: A -> Testable) -> Rose<Gen<Prop>> {
+	return .MkRose({ pf(original).property().unProperty }, { shrinker(original).map { x1 in
 		return props(shrinker, original: x1, pf: pf)
-	})
+	}})
 }
 
-public func shrinking<A> (shrinker: A -> [A])(x0: A)(pf: A -> Testable) -> Property {
+public func shrinking<A> (shrinker : A -> [A])(x0 : A)(pf : A -> Testable) -> Property {
 	return Property(promote(props(shrinker, original: x0, pf: pf)).fmap({ (let rs : Rose<Prop>) in
 		return Prop(unProp: joinRose(rs.fmap({ (let x : Prop) in
 			return x.unProp
@@ -94,11 +80,11 @@ public func shrinking<A> (shrinker: A -> [A])(x0: A)(pf: A -> Testable) -> Prope
 	}))
 }
 
-public func noShrinking(p: Testable) -> Property {
+public func noShrinking(p : Testable) -> Property {
 	return mapRoseResult({ rs in
 		return onRose({ res in
 			return { (_) in
-				return .MkRose(res, [])
+				return .MkRose({ res }, { [] })
 			}
 		})(rs: rs)
 	})(p: p)
@@ -213,7 +199,7 @@ infix operator ^&^ {}
 infix operator ^&&^ {}
 
 public func ^&^(p1 : Testable, p2 : Testable) -> Property {
-	return Property(Bool.arbitrary() >>- { b in
+	return Property(Bool.arbitrary().bind { b in
 		return printTestCase(b ? "LHS" : "RHS")(p: b ? p1 : p2).unProperty
 	})
 }

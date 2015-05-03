@@ -8,7 +8,6 @@
 
 import XCTest
 import SwiftCheck
-import func Swiftz.<^>
 
 public struct ArbitraryFoo {
 	let x : Int
@@ -25,7 +24,11 @@ public struct ArbitraryFoo {
 
 extension ArbitraryFoo : Arbitrary {
 	public static func arbitrary() -> Gen<ArbitraryFoo> {
-		return ArbitraryFoo.create <^> Int.arbitrary() <*> Int.arbitrary()
+		return Int.arbitrary().bind { i in
+			return Int.arbitrary().bind { j in
+				return Gen.pure(ArbitraryFoo(x: i, y: j))
+			}
+		}
 	}
 	
 	public static func shrink(x : ArbitraryFoo) -> [ArbitraryFoo] {
@@ -40,7 +43,7 @@ class SimpleSpec : XCTestCase {
 			return i == i
 		}
 
-		property["Unsigned Integer Equality is Reflexive"] = forAll { (i : UInt) in
+		property["Unsigned Integer Equality is Reflexive"] = forAll { (i : UInt64) in
 			return i == i
 		}
 
