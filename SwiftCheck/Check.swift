@@ -6,14 +6,13 @@
 //  Copyright (c) 2015 Robert Widmann. All rights reserved.
 //
 
-import Swiftz
 
 public var property : QuickCheck = QuickCheck()
 
 public struct QuickCheck {
 	public subscript(s : String) -> Testable {
 		get {
-			return undefined()
+			fatalError("Proposition '\(s)' has an undefined test case")
 		}
 		set(test) {
 			quickCheck(test, name: s)
