@@ -138,7 +138,6 @@ means of generating random data and shrinking down to an empty array.
 For example:
 
 ```swift
-import Swiftz
 import SwiftCheck
 import func Swiftz.<^>
 import func Swiftz.<*>
