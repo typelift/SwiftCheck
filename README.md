@@ -16,7 +16,7 @@ methods prefixed with the word test, now must be of the form:
 func property<A, B, C ... Z where A, B, C ... Z : Arbitrary>(A, B, C, ..., Z) -> Bool
 ```
 
-For example, if we wanted to test the property that every Float is equal to
+For example, if we wanted to test the property that every Integer is equal to
 itself, we would express it as such:
 
 ```swift
@@ -101,7 +101,7 @@ with the following property:
 import SwiftCheck
 
 property["All Prime"] = forAll { (n : Int) in
-    return all(sieve(n), isPrime)
+    return sieve(n).filter(isPrime) == sieve(n)
 }
 ```
 
@@ -140,6 +140,8 @@ For example:
 ```swift
 import Swiftz
 import SwiftCheck
+import func Swiftz.<^>
+import func Swiftz.<*>
 
 public struct ArbitraryFoo {
     let x : Int
