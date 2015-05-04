@@ -66,6 +66,7 @@ public func == <T : protocol<Arbitrary, Equatable>>(lhs : Static<T>, rhs : Stati
 	return lhs.getStatic == rhs.getStatic
 }
 
+/// Generates an array of arbitrary values of type A.
 public struct ArrayOf<A : Arbitrary> : Arbitrary, Printable {
 	public let getArray : [A]
 
@@ -109,6 +110,39 @@ public struct ArrayOf<A : Arbitrary> : Arbitrary, Printable {
 public func == <T : protocol<Arbitrary, Equatable>>(lhs : ArrayOf<T>, rhs : ArrayOf<T>) -> Bool {
 	return lhs.getArray == rhs.getArray
 }
+
+/// Generates an Optional of arbitrary values of type A.
+public struct OptionalOf<A : Arbitrary> : Arbitrary, Printable {
+	public let getOptional : A?
+
+	public init(_ opt : A?) {
+		self.getOptional = opt
+	}
+
+	public var description : String {
+		return "\(self.getOptional)"
+	}
+
+	private static func create(opt : A?) -> OptionalOf<A> {
+		return OptionalOf(opt)
+	}
+
+	public static func arbitrary() -> Gen<OptionalOf<A>> {
+		return frequency([(1, Gen.pure(OptionalOf(Optional<A>.None))), (3, liftM({ OptionalOf(Optional<A>.Some($0)) })(m1: A.arbitrary()))])
+	}
+
+	public static func shrink(bl : OptionalOf<A>) -> [OptionalOf<A>] {
+		if let x = bl.getOptional {
+			return [OptionalOf(Optional<A>.None)] + A.shrink(x).map({ OptionalOf(Optional<A>.Some($0)) })
+		}
+		return []
+	}
+}
+
+public func == <T : protocol<Arbitrary, Equatable>>(lhs : OptionalOf<T>, rhs : OptionalOf<T>) -> Bool {
+	return lhs.getOptional == rhs.getOptional
+}
+
 
 /// Guarantees that every generated integer is greater than 0.
 public struct Positive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary, Printable {
