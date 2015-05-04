@@ -31,36 +31,36 @@ public func rejected() -> TestResult {
 	return result(Optional.None)
 }
 
-public func liftBool(b: Bool) -> TestResult {
+public func liftBool(b : Bool) -> TestResult {
 	if b {
 		return succeeded()
 	}
 	return result(Optional.Some(false), reason: "Falsifiable")
 }
 
-public func mapResult(f: TestResult -> TestResult)(p: Testable) -> Property {
+public func mapResult(f : TestResult -> TestResult)(p: Testable) -> Property {
 	return mapRoseResult({ rs in
 		return protectResults(rs.fmap(f))
 	})(p: p)
 }
 
-public func mapTotalResult(f: TestResult -> TestResult)(p: Testable) -> Property {
+public func mapTotalResult(f : TestResult -> TestResult)(p: Testable) -> Property {
 	return mapRoseResult({ rs in
 		return rs.fmap(f)
 	})(p: p)
 }
 
-public func mapRoseResult(f: Rose<TestResult> -> Rose<TestResult>)(p: Testable) -> Property {
+public func mapRoseResult(f : Rose<TestResult> -> Rose<TestResult>)(p: Testable) -> Property {
 	return mapProp({ t in
 		return Prop(unProp: f(t.unProp))
 	})(p: p)
 }
 
-public func mapProp(f: Prop -> Prop)(p: Testable) -> Property {
+public func mapProp(f : Prop -> Prop)(p: Testable) -> Property {
 	return Property(p.property().unProperty.fmap(f))
 }
 
-public func mapSize (f: Int -> Int)(p: Testable) -> Property {
+public func mapSize (f : Int -> Int)(p: Testable) -> Property {
 	return Property(sized({ n in
 		return p.property().unProperty.resize(f(n))
 	}))
@@ -107,15 +107,6 @@ public func counterexample(s : String)(p: Testable) -> Property {
 		}
 	}))(p)
 }
-
-//public func counterexample(s : String)(p: Testable) -> Testable {
-//	return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { st in
-//		return { _res in
-//			println(s)
-//			return IO.pure(())
-//		}
-//	}))(p)
-//}
 
 public func printTestCase(s: String)(p: Testable) -> Property {
 	return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { st in
@@ -174,77 +165,6 @@ public func cover(b : Bool)(n : Int)(s : String)(p : Testable) -> Property {
 		})(p:p)
 	}
 	return p.property()
-}
-
-infix operator ==> {}
-
-public func ==>(b: Bool, p : Testable) -> Property {
-	if b {
-		return p.property()
-	}
-	return rejected().property()
-}
-
-//public func within(n : Int)(p : Testable) -> Property {
-//	return mapRoseResult({ rose in
-//		return ioRose(do_({
-//			let rs = reduce(rose)
-//
-//		}))
-//	})
-//}
-
-
-infix operator ^&^ {}
-infix operator ^&&^ {}
-
-public func ^&^(p1 : Testable, p2 : Testable) -> Property {
-	return Property(Bool.arbitrary().bind { b in
-		return printTestCase(b ? "LHS" : "RHS")(p: b ? p1 : p2).unProperty
-	})
-}
-//
-//public func ^&&^(p1 : Testable, p2 : Testable) -> Property {
-//	return conjoin([ p1.property(), p2.property() ])
-//}
-//
-//private func conj<Testable : Testable, A>(ps: [TestResult], rs : [Rose<Prop>]) -> Rose<TestResult> {
-//	if rs.count == 0 {
-//		return Rose.MkRose(Box(succeeded()), [])
-//	}
-//	return Rose.IORose(do_({
-//		let rose = reduce(rs[0])
-//		switch rose {
-//			case .MkRose(let result, _): {
-////				if !result.expect {
-////					return (return failed { reason = "expectFailure may not occur inside a conjunction" })
-////				}
-//				switch result.ok {
-//					case .Some(true):
-//						return Rose.pure(conj(cbs +> result.callbacks))
-//					case .Some(false):
-//						return Rose.pure(rose)
-//					case None:
-//
-//				}
-//			}
-//
-//		}
-//	}))
-//}
-//
-//public func conjoin(ps : [Testable]) -> Property {
-//	return Property(Gen<Prop>.pure(Prop(conj([])(mapM({ p in
-//		return unProperty(p.property()).fmap { x in
-//			return x.unProp
-//		}
-//	}, ps)))))
-//}
-
-infix operator === {}
-
-public func ===<A where A : Equatable, A : Printable>(x : A, y : A) -> Property {
-	return counterexample(x.description + "/=" + y.description)(p: x == y)
 }
 
 public enum Callback {

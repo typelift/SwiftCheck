@@ -95,7 +95,7 @@ public struct ArrayOf<A : Arbitrary> : Arbitrary, Printable {
 	}
 
 	public static func shrink(bl : ArrayOf<A>) -> [ArrayOf<A>] {
-		if bl.getArray.count == 0 {
+		if bl.getArray.isEmpty {
 			return []
 		} else if bl.getArray.count == 1 {
 			let hd = bl.getArray[0]
