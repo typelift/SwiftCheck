@@ -8,15 +8,36 @@
 
 import Darwin
 
+/// A type that implements random generation and shrinking of values.
+///
+/// While testing, SwiftCheck will invoke `arbitrary()` a given amount of times (usually 100 if the
+/// default settings are used).  During that time, the Type has an opportunity to call through to
+/// any data or sources of randomness it needs to return what it deems an "Arbitrary" value.
+///
+/// Shrinking is reduction in the complexity of a tested value to remove noise and present a minimal
+/// counterexample when a property fails.  While it may seem counterintuitive, a shrink necessitates
+/// returning a list of all possible "smaller" values for SwiftCheck to run through.  As long as
+/// each individual value in the returned list is less than or equal to the size of the input value
+/// a minimal case should be reached fairly efficiently.
+///
+/// As an example, take the `ArrayOf` implementation of shrink:
+///
+/// shrink(ArrayOf([1, 2, 3]))
+///	> [[], [2,3], [1,3], [1,2], [0,2,3], [1,0,3], [1,1,3], [1,2,0], [1,2,2]]
+///
+/// SwiftCheck will search each case 1 by one and continue shrinking until it has reached a case
+/// it deems minimal enough to present.
+///
+/// SwiftCheck implements a number of generators for common STL types for convenience.  If more fine-
+/// grained testing is required see `Modifiers.swift` for an example of how to define a "Modifier"
+/// type to implement it.
 public protocol Arbitrary {
-//	typealias A : Arbitrary
 	static func arbitrary() -> Gen<Self>
 	static func shrink(Self) -> [Self]
 }
 
 
 extension Bool : Arbitrary {
-	typealias A = Bool
 	public static func arbitrary() -> Gen<Bool> {
 		return Gen.pure((arc4random() % 2) == 1)
 	}
@@ -30,7 +51,6 @@ extension Bool : Arbitrary {
 }
 
 extension Int : Arbitrary {
-	typealias A = Int
 	public static func arbitrary() -> Gen<Int> {
 		let sign = ((arc4random() % 2) == 1)
 		return sized { n in Gen.pure((sign ? 1 : -1) * Int(arc4random_uniform(UInt32(n)))) }
@@ -42,7 +62,6 @@ extension Int : Arbitrary {
 }
 
 extension Int8 : Arbitrary {
-	typealias A = Int8
 	public static func arbitrary() -> Gen<Int8> {
 		let sign = ((arc4random() % 2) == 1)
 		return sized { n in Gen.pure((sign ? 1 : -1) * Int8(arc4random_uniform(UInt32(n)))) }
@@ -54,7 +73,6 @@ extension Int8 : Arbitrary {
 }
 
 extension Int16 : Arbitrary {
-	typealias A = Int16
 	public static func arbitrary() -> Gen<Int16> {
 		let sign = ((arc4random() % 2) == 1)
 		return sized { n in Gen.pure((sign ? 1 : -1) * Int16(arc4random_uniform(UInt32(n)))) }
@@ -66,7 +84,6 @@ extension Int16 : Arbitrary {
 }
 
 extension Int32 : Arbitrary {
-	typealias A = Int32
 	public static func arbitrary() -> Gen<Int32> {
 		let sign = ((arc4random() % 2) == 1)
 		return sized { n in Gen.pure((sign ? 1 : -1) * Int32(arc4random_uniform(UInt32(n)))) }
@@ -78,7 +95,6 @@ extension Int32 : Arbitrary {
 }
 
 extension Int64 : Arbitrary {
-	typealias A = Int64
 	public static func arbitrary() -> Gen<Int64> {
 		let sign = ((arc4random() % 2) == 1)
 		return sized { n in Gen.pure((sign ? 1 : -1) * Int64(arc4random_uniform(UInt32(n)))) }
@@ -90,7 +106,6 @@ extension Int64 : Arbitrary {
 }
 
 extension UInt : Arbitrary {
-	typealias A = UInt
 	public static func arbitrary() -> Gen<UInt> {
 		return sized { n in Gen<UInt>.pure(UInt(arc4random_uniform(UInt32(abs(n))))) }
 	}
@@ -101,7 +116,6 @@ extension UInt : Arbitrary {
 }
 
 extension UInt8 : Arbitrary {
-	typealias A = UInt8
 	public static func arbitrary() -> Gen<UInt8> {
 		return sized({ n in
 			return sized { n in Gen<UInt8>.pure(UInt8(arc4random_uniform(UInt32(abs(n))))) }
@@ -114,7 +128,6 @@ extension UInt8 : Arbitrary {
 }
 
 extension UInt16 : Arbitrary {
-	typealias A = UInt16
 	public static func arbitrary() -> Gen<UInt16> {
 		return sized { n in Gen<UInt16>.pure(UInt16(arc4random_uniform(UInt32(abs(n))))) }
 	}
@@ -125,7 +138,6 @@ extension UInt16 : Arbitrary {
 }
 
 extension UInt32 : Arbitrary {
-	typealias A = UInt32
 	public static func arbitrary() -> Gen<UInt32> {
 		return sized { n in Gen<UInt32>.pure(arc4random_uniform(UInt32(abs(n)))) }
 	}
@@ -136,7 +148,6 @@ extension UInt32 : Arbitrary {
 }
 
 extension UInt64 : Arbitrary {
-	typealias A = UInt64
 	public static func arbitrary() -> Gen<UInt64> {
 		return sized { n in Gen<UInt64>.pure(UInt64(arc4random_uniform(UInt32(abs(n))))) }
 	}
@@ -147,7 +158,6 @@ extension UInt64 : Arbitrary {
 }
 
 extension Float : Arbitrary {
-	typealias A = Float
 	public static func arbitrary() -> Gen<Float> {
 		return sized({ n in
 			return n == 0 ? Gen<Float>.pure(0.0) : Gen<Float>.pure(Float(-n) + Float(arc4random()) / Float(UINT32_MAX / UInt32((n)*2)))
@@ -160,7 +170,6 @@ extension Float : Arbitrary {
 }
 
 extension Double : Arbitrary {
-	typealias A = Double
 	public static func arbitrary() -> Gen<Double> {
 		return sized({ n in
 			return n == 0 ? Gen<Double>.pure(0.0) : Gen<Double>.pure(Double(-n) + Double(arc4random()) / Double(UINT32_MAX / UInt32(n*2)))
@@ -173,7 +182,6 @@ extension Double : Arbitrary {
 }
 
 extension UnicodeScalar : Arbitrary {
-	typealias A = UnicodeScalar
 	public static func arbitrary() -> Gen<UnicodeScalar> {
 		return UInt32.arbitrary().bind { Gen.pure(UnicodeScalar($0)) }
 	}
@@ -184,7 +192,6 @@ extension UnicodeScalar : Arbitrary {
 }
 
 extension String : Arbitrary {
-	typealias A = String
 	public static func arbitrary() -> Gen<String> {
 		let chars = sized({ n in Character.arbitrary().vectorOf(n) })
 		return chars.bind { ls in Gen<String>.pure(String(ls)) }
@@ -196,7 +203,6 @@ extension String : Arbitrary {
 }
 
 extension Character : Arbitrary {
-	typealias A = Character
 	public static func arbitrary() -> Gen<Character> {
 		return choose((32, 255)).bind { Gen.pure(Character(UnicodeScalar($0))) }
 	}
@@ -277,33 +283,14 @@ public func shrinkDouble(x : Double) -> [Double] {
 	}, initial: x)
 }
 
-//struct OptionalArbitrary<A : Arbitrary> : Arbitrary {
-//	typealias A = Optional<A>
-//
-//	public let m : Optional<A>
-//
-//	public init(_ m: Optional<A>) {
-//		self.m = m
-//	}
-//
-//	static func arbitrary() -> Gen<Optional<A>> {
-//		return frequency([(1, Gen<Optional<A>>.pure(Optional.None)), (3, liftM({ x in return Some(x.arbitrary()) }))])
-//	}
-//
-//	func shrink() -> [Optional<A>] {
-//		switch self.m {
-//			case .Some(let x):
-//				return .None +> x.shrink().map() { Some($0) }
-//			default:
-//				return []
-//		}
-//	}
-//}
 
-
-
+/// Coarbitrary types must take a value of themselves and yield a function that transforms any
+/// given generator by returning a new generator that depends on the input value.  
+///
+/// Using Coarbitrary types it is possible to write an Arbitrary instance for `->` (a type that
+/// generates functions).
 protocol CoArbitrary {
-	static func coarbitrary<C>(x: Self) -> Gen<C> -> Gen<C>
+	static func coarbitrary<C>(x : Self) -> (Gen<C> -> Gen<C>)
 }
 
 public func coarbitraryIntegral<A : IntegerType, B>(x : A) -> Gen<B> -> Gen<B> {
@@ -311,7 +298,7 @@ public func coarbitraryIntegral<A : IntegerType, B>(x : A) -> Gen<B> -> Gen<B> {
 }
 
 extension Bool : CoArbitrary {
-	public static func coarbitrary<C>(x: Bool) -> Gen<C> -> Gen<C> {
+	public static func coarbitrary<C>(x : Bool) -> Gen<C> -> Gen<C> {
 		return { g in 
 			if x {
 				return g.variant(1)
@@ -322,61 +309,61 @@ extension Bool : CoArbitrary {
 }
 
 extension Int : CoArbitrary {
-	public static func coarbitrary<C>(x: Int) -> Gen<C> -> Gen<C> {
+	public static func coarbitrary<C>(x : Int) -> Gen<C> -> Gen<C> {
 		return coarbitraryIntegral(x)
 	}
 }
 
 extension Int8 : CoArbitrary {
-	public static func coarbitrary<C>(x: Int8) -> Gen<C> -> Gen<C> {
+	public static func coarbitrary<C>(x : Int8) -> Gen<C> -> Gen<C> {
 		return coarbitraryIntegral(x)
 	}
 }
 
 extension Int16 : CoArbitrary {
-	public static func coarbitrary<C>(x: Int16) -> Gen<C> -> Gen<C> {
+	public static func coarbitrary<C>(x : Int16) -> Gen<C> -> Gen<C> {
 		return coarbitraryIntegral(x)
 	}
 }
 
 extension Int32 : CoArbitrary {
-	public static func coarbitrary<C>(x: Int32) -> Gen<C> -> Gen<C> {
+	public static func coarbitrary<C>(x : Int32) -> Gen<C> -> Gen<C> {
 		return coarbitraryIntegral(x)
 	}
 }
 
 extension Int64 : CoArbitrary {
-	public static func coarbitrary<C>(x: Int64) -> Gen<C> -> Gen<C> {
+	public static func coarbitrary<C>(x : Int64) -> Gen<C> -> Gen<C> {
 		return coarbitraryIntegral(x)
 	}
 }
 
 extension UInt : CoArbitrary {
-	public static func coarbitrary<C>(x: UInt) -> Gen<C> -> Gen<C> {
+	public static func coarbitrary<C>(x : UInt) -> Gen<C> -> Gen<C> {
 		return coarbitraryIntegral(x)
 	}
 }
 
 extension UInt8 : CoArbitrary {
-	public static func coarbitrary<C>(x: UInt8) -> Gen<C> -> Gen<C> {
+	public static func coarbitrary<C>(x : UInt8) -> Gen<C> -> Gen<C> {
 		return coarbitraryIntegral(x)
 	}
 }
 
 extension UInt16 : CoArbitrary {
-	public static func coarbitrary<C>(x: UInt16) -> Gen<C> -> Gen<C> {
+	public static func coarbitrary<C>(x : UInt16) -> Gen<C> -> Gen<C> {
 		return coarbitraryIntegral(x)
 	}
 }
 
 extension UInt32 : CoArbitrary {
-	public static func coarbitrary<C>(x: UInt32) -> Gen<C> -> Gen<C> {
+	public static func coarbitrary<C>(x : UInt32) -> Gen<C> -> Gen<C> {
 		return coarbitraryIntegral(x)
 	}
 }
 
 extension UInt64 : CoArbitrary {
-	public static func coarbitrary<C>(x: UInt64) -> Gen<C> -> Gen<C> {
+	public static func coarbitrary<C>(x : UInt64) -> Gen<C> -> Gen<C> {
 		return coarbitraryIntegral(x)
 	}
 }

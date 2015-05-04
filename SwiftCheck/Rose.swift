@@ -92,10 +92,6 @@ public func onRose<A>(f : (A -> [Rose<A>] -> Rose<A>))(rs : Rose<A>) -> Rose<A> 
 	}
 }
 
-public func do_<A>(fn: () -> Rose<A>) -> Rose<A> {
-	return fn()
-}
-
 public func sequence<A>(ms : [Rose<A>]) -> Rose<[A]> {
 	return ms.reduce(Rose<[A]>.pure([]), combine: { n, m in
 		return m.bind { x in
