@@ -284,20 +284,20 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<Result
 	assert(false, "")
 }
 
-public func foundFailure(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
+internal func foundFailure(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
 	var st2 = st
 	st2.numTryShrinks = 0
 	return localMin(st2, res, res, ts)
 }
 
-public func localMin(st : State, res : TestResult, res2 : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
+internal func localMin(st : State, res : TestResult, res2 : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
 	if let e = res2.theException {
 		fatalError("Test failed due to exception: \(e)")
 	}
 	return localMinimum(st, res, ts)
 }
 
-func callbackPostTest(st : State, res : TestResult) {
+internal func callbackPostTest(st : State, res : TestResult) {
 	let _ : [()] = res.callbacks.map({ c in
 		switch c {
 			case let .PostTest(_, f):
@@ -309,7 +309,7 @@ func callbackPostTest(st : State, res : TestResult) {
 	})
 }
 
-func callbackPostFinalFailure(st : State, res : TestResult) {
+internal func callbackPostFinalFailure(st : State, res : TestResult) {
 	let _ : [()] = res.callbacks.map({ c in
 		switch c {
 		case let .PostFinalFailure(_, f):
@@ -321,7 +321,7 @@ func callbackPostFinalFailure(st : State, res : TestResult) {
 	})
 }
 
-public func localMinimum(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
+internal func localMinimum(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
 	if ts.isEmpty {
 		return localMinFound(st, res)
 	}
@@ -345,7 +345,7 @@ public func localMinimum(st : State, res : TestResult, ts : [Rose<TestResult>]) 
 	}
 }
 
-public func localMinFound(st : State, res : TestResult) -> (Int, Int, Int) {
+internal func localMinFound(st : State, res : TestResult) -> (Int, Int, Int) {
 	let testMsg = " (after \(st.numSuccessTests + 1) test"
 	let shrinkMsg = st.numSuccessShrinks > 1 ? ("and \(st.numSuccessShrinks) shrink") : ""
 	
@@ -362,11 +362,37 @@ public func localMinFound(st : State, res : TestResult) -> (Int, Int, Int) {
 	return (st.numSuccessShrinks, st.numTotTryShrinks - st.numTryShrinks, st.numTryShrinks)
 }
 	
-public func summary(s : State) -> [(String, Int)] {
-//	let strings : [String] = concat(s.collected.map({ l in l.map({ $0.0 }).filter({ $0.isEmpty }) }))
-//	let l =  intersperse(",", strings) |> sorted |> group
-//	return l.map({ ss in (ss[0], ss.count * 100 / s.numSuccessTests) })
-	return[]
+internal func summary(s : State) -> [(String, Int)] {
+	let strings = s.collected.map({ l in l.map({ "," + $0.0 }).filter({ !$0.isEmpty }) }).reduce([], combine: +)
+	let l =  groupBy(sorted(strings), ==)
+	return l.map({ ss in (ss[0], ss.count * 100 / s.numSuccessTests) })
 }
 
+internal func cons<T>(lhs : T, var rhs : [T]) -> [T] {
+	rhs.insert(lhs, atIndex: 0)
+	return rhs
+}
 
+internal func span<A>(list : [A], p : (A -> Bool)) -> ([A], [A]) {
+	if list.isEmpty {
+		return ([], [])
+	} else if let x = list.first {
+		if p (x) {
+			let (ys, zs) = span([A](list[1...list.endIndex]), p)
+			return (cons(x, ys), zs)
+		}
+		return ([], list)
+	}
+	fatalError("span reached a non-empty list that could not produce a first element")
+}
+
+internal func groupBy<A>(list : [A], p : (A , A) -> Bool) -> [[A]] {
+	if list.isEmpty {
+		return []
+	} else if let x = list.first {
+		let (ys, zs) = span([A](list[1...list.endIndex]), { p(x, $0) })
+		let l = cons(x, ys)
+		return cons(l, groupBy(zs, p))
+	}
+	fatalError("groupBy reached a non-empty list that could not produce a first element")
+}
