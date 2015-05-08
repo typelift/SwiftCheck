@@ -6,7 +6,6 @@
 //  Copyright (c) 2015 Robert Widmann. All rights reserved.
 //
 
-import Swiftz
 
 /// The type of things that can be tested.
 ///
@@ -27,7 +26,7 @@ public struct Property : Testable {
 	
 	public var exhaustive : Bool { return false }
 
-	public init(_ val: Gen<Prop>) {
+	public init(_ val : Gen<Prop>) {
 		self.unProperty = val;
 	}
 
@@ -50,8 +49,6 @@ public struct Prop : Testable {
 /// When returned from a test case, that particular case is discarded.
 public struct Discard : Testable {
 	public var exhaustive : Bool { return true }
-
-	public init() { }
 
 	public func property() -> Property {
 		return rejected().property()

@@ -8,7 +8,6 @@
 
 import XCTest
 import SwiftCheck
-import Swiftz
 
 class DiscardSpec : XCTestCase {
 	func testDiscardFailure() {

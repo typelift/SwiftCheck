@@ -6,15 +6,24 @@
 //  Copyright (c) 2014 Robert Widmann. All rights reserved.
 //
 
-import Swiftz
-
+/// A generator for values of type A.
 public struct Gen<A> {
-	var unGen: StdGen -> Int -> A
+	let unGen : StdGen -> Int -> A
+
+	/// Generates a value.
+	///
+	/// This method exists as a convenience mostly to test generators.  It will always generate with
+	/// size 30.
+	public var generate : A {
+		let r = newStdGen()
+		return unGen(r)(30)
+	}
 }
 
-extension Gen : Functor {
+extension Gen /*: Functor*/ {
 	typealias B = Swift.Any
-	
+
+	/// Returns a new generator that applies a given function to any outputs the receiver creates.
 	public func fmap<B>(f : (A -> B)) -> Gen<B> {
 		return Gen<B>(unGen: { r in
 			return { n in
@@ -24,14 +33,11 @@ extension Gen : Functor {
 	}
 }
 
-public func <^><A, B>(f: A -> B, ar : Gen<A>) -> Gen<B> {
-	return ar.fmap(f)
-}
-
-extension Gen : Applicative {
+extension Gen /*: Applicative*/ {
 	typealias FAB = Gen<A -> B>
 
-	public static func pure(a: A) -> Gen<A> {
+	/// Lifts a value into a generator that will only generate that value.
+	public static func pure(a : A) -> Gen<A> {
 		return Gen(unGen: { (_) in
 			return { (_) in
 				return a
@@ -39,6 +45,8 @@ extension Gen : Applicative {
 		})
 	}
 
+	/// Given a generator of functions, applies any generated function to any outputs the receiver
+	/// creates.
 	public func ap<B>(fn : Gen<A -> B>) -> Gen<B> {
 		return Gen<B>(unGen: { r in
 			return { n in
@@ -48,12 +56,10 @@ extension Gen : Applicative {
 	}
 }
 
-public func <*><A, B>(a : Gen<A -> B> , l : Gen<A>) -> Gen<B> {
-	return l.ap(a)
-}
-
-extension Gen : Monad {
-	public func bind<B>(fn: A -> Gen<B>) -> Gen<B> {
+extension Gen /*: Monad*/ {
+	/// Applies the function to any generated values to yield a new generator.  This generator is
+	/// then given a new random seed and returned.
+	public func bind<B>(fn : A -> Gen<B>) -> Gen<B> {
 		return Gen<B>(unGen: { r in
 			return { n in
 				let (r1, r2) = r.split()
@@ -64,49 +70,48 @@ extension Gen : Monad {
 	}
 }
 
-public func sequence<A>(ms: [Gen<A>]) -> Gen<[A]> {
+/// Reduces an array of generators to a generator that returns arrays of the original generators
+/// values in the order given.
+public func sequence<A>(ms : [Gen<A>]) -> Gen<[A]> {
 	return ms.reduce(Gen<[A]>.pure([]), combine: { y, x in
-		return x >>- { x1 in
-			return y >>- { xs in
+		return x.bind { x1 in
+			return y.bind { xs in
 				return Gen<[A]>.pure([x1] + xs)
 			}
 		}
 	})
 }
 
-public func >>-<A, B>(x : Gen<A>, f : A -> Gen<B>) -> Gen<B> {
-	return x.bind(f)
-}
-
-public func >><A, B>(x : Gen<A>, y : Gen<B>) -> Gen<B> {
-	return x.bind({ (_) in
-		return y
-	})
-}
-
-public func join<A>(rs: Gen<Gen<A>>) -> Gen<A> {
-	return rs >>- { x in
+/// Flattens a generator of generators by one level.
+public func join<A>(rs : Gen<Gen<A>>) -> Gen<A> {
+	return rs.bind { x in
 		return x
 	}
 }
 
-public func liftM<A, R>(f: A -> R)(m1 : Gen<A>) -> Gen<R> {
-	return m1 >>- { x1 in
+/// Lifts a function from some A to some R to a function from generators of A to generators of R.
+public func liftM<A, R>(f : A -> R)(m1 : Gen<A>) -> Gen<R> {
+	return m1.bind{ x1 in
 		return Gen.pure(f(x1))
 	}
 }
 
-public func do_<A>(fn: () -> Gen<A>) -> Gen<A> {
-	return fn()
-}
 
+/// Promotes a rose of generators to a generator of rose values.
 public func promote<A>(x : Rose<Gen<A>>) -> Gen<Rose<A>> {
-	return delay() >>- ({ (let eval : Gen<A> -> A) in
+	return delay().bind { (let eval : Gen<A> -> A) in
 		return Gen<Rose<A>>.pure(liftM(eval)(m1: x))
-	})
+	}
 }
 
-public func delay<A>() -> Gen<Gen<A> -> A> {
+/// Promotes a function returning generators to a generator of functions.
+public func promote<A, B>(m : A -> Gen<B>) -> Gen<A -> B> {
+	return delay().bind { (let eval : Gen<B> -> B) in
+		return Gen<A -> B>.pure({ x in eval(m(x)) })
+	}
+}
+
+internal func delay<A>() -> Gen<Gen<A> -> A> {
 	return Gen(unGen: { r in
 		return { n in
 			return { g in

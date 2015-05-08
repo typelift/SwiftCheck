@@ -30,5 +30,9 @@ class ModifierSpec : XCTestCase {
 		property["NonNegative propositions only generate non negative numbers"] = forAll { (x : NonNegative<Int>) in
 			return x.getNonNegative >= 0
 		}
+
+		property["ArrayOf modifiers nest"] = forAll { (xxxs : ArrayOf<ArrayOf<ArrayOf<Int>>>) in
+			return true
+		}
 	}
 }

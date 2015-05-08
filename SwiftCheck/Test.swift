@@ -6,7 +6,15 @@
 //  Copyright (c) 2014 Robert Widmann. All rights reserved.
 //
 
-import Swiftz
+internal class Box<T> {
+	let value : T
+	internal init(_ x : T) { self.value = x }
+}
+
+internal enum Either<L, R> {
+	case Left(Box<L>)
+	case Right(Box<R>)
+}
 
 public struct Arguments {
 	let name : String
@@ -62,27 +70,27 @@ public func forAll<A : Arbitrary, B : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(p
 }
 
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(pf : (A, B, C) -> Testable) -> Property {
-	return forAll(genA, { t in forAll(genB)(genB: genC)({ b, c in pf(t, b, c) }) })
+	return forAll(genA, { t in forAll(genB)(genB: genC)(pf: { b, c in pf(t, b, c) }) })
 }
 
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(genD : Gen<D>)(pf : (A, B, C, D) -> Testable) -> Property {
-	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)({ b, c, d in pf(t, b, c, d) }) })
+	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)(pf: { b, c, d in pf(t, b, c, d) }) })
 }
 
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(genD : Gen<D>)(genE : Gen<E>)(pf : (A, B, C, D, E) -> Testable) -> Property {
-	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)({ b, c, d, e in pf(t, b, c, d, e) }) })
+	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(pf: { b, c, d, e in pf(t, b, c, d, e) }) })
 }
 
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(genD : Gen<D>)(genE : Gen<E>)(genF : Gen<F>)(pf : (A, B, C, D, E, F) -> Testable) -> Property {
-	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)({ b, c, d, e, f in pf(t, b, c, d, e, f) }) })
+	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)(pf: { b, c, d, e, f in pf(t, b, c, d, e, f) }) })
 }
 
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(genD : Gen<D>)(genE : Gen<E>)(genF : Gen<F>)(genG : Gen<G>)(pf : (A, B, C, D, E, F, G) -> Testable) -> Property {
-	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)(genF : genG)({ b, c, d, e, f, g in pf(t, b, c, d, e, f, g) }) })
+	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)(genF : genG)(pf: { b, c, d, e, f, g in pf(t, b, c, d, e, f, g) }) })
 }
 
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary, H : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(genD : Gen<D>)(genE : Gen<E>)(genF : Gen<F>)(genG : Gen<G>)(genH : Gen<H>)(pf : (A, B, C, D, E, F, G, H) -> Testable) -> Property {
-	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)(genF : genG)(genG : genH)({ b, c, d, e, f, g, h in pf(t, b, c, d, e, f, g, h) }) })
+	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)(genF : genG)(genG : genH)(pf: { b, c, d, e, f, g, h in pf(t, b, c, d, e, f, g, h) }) })
 }
 
 public func forAll<A : Arbitrary>(pf : (A -> Testable)) -> Property {
@@ -130,8 +138,8 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 //}
 
 public func forAllShrink<A : Arbitrary>(gen : Gen<A>, shrinker: A -> [A], f : A -> Testable) -> Property {
-	return Property(gen >>- { (let x : A) in
-		return shrinking(shrinker)(x0: x)({ (let xs : A) -> Testable  in
+	return Property(gen.bind { x in
+		return shrinking(shrinker)(x0: x)(pf: { xs  in
 			return counterexample("\(xs)")(p: f(xs))
 		}).unProperty
 	})
@@ -141,7 +149,7 @@ public func quickCheck(prop : Testable, name : String = "") {
 	quickCheckWithResult(stdArgs(name: name), prop)
 }
 
-public func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
+internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 	func roundTo(n : Int)(m : Int) -> Int {
 		return (m / m) * m
 	}
@@ -197,25 +205,25 @@ public func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 	return test(state, p.exhaustive ? once(p.property()).unProperty.unGen : p.property().unProperty.unGen)
 }
 
-public func test(st: State, f: (StdGen -> Int -> Prop)) -> Result {
+internal func test(st: State, f: (StdGen -> Int -> Prop)) -> Result {
 	var state = st
 	while true {
-		switch runATest(state)(f) {
+		switch runATest(state)(f: f) {
 			case let .Left(fail):
 				return fail.value
 			case let .Right(sta):
 				if sta.value.numSuccessTests >= sta.value.maxSuccessTests {
-					return doneTesting(sta.value)(f)
+					return doneTesting(sta.value)(f: f)
 				}
 				if sta.value.numDiscardedTests >= sta.value.maxDiscardedTests {
-					return giveUp(sta.value)(f)
+					return giveUp(sta.value)(f: f)
 				}
 				state = sta.value
 		}
 	}
 }
 
-public func doneTesting(st: State)(f: (StdGen -> Int -> Prop)) -> Result {	
+internal func doneTesting(st : State)(f : (StdGen -> Int -> Prop)) -> Result {
 	if st.expectedFailure {
 		println("*** Passed " + "\(st.numSuccessTests)" + " tests")
 		return Result.Success(numTests: st.numSuccessTests, labels: summary(st), output: "")
@@ -226,16 +234,14 @@ public func doneTesting(st: State)(f: (StdGen -> Int -> Prop)) -> Result {
 	}
 }
 
-public func giveUp(st: State)(f: (StdGen -> Int -> Prop)) -> Result {
-	// Gave up
-	
+internal func giveUp(st: State)(f : (StdGen -> Int -> Prop)) -> Result {
 	return Result.GaveUp(numTests: st.numSuccessTests, labels: summary(st), output: "")
 }
 
-public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> Either<Result, State> {
+internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<Result, State> {
 	let size = st.computeSize(st.numSuccessTests)(st.numDiscardedTests)
 	let (rnd1,rnd2) = st.randomSeed.split()
-	let rose : Rose<TestResult> = protectRose(reduce(f(rnd1)(size).unProp))
+	let rose : Rose<TestResult> = reduce(f(rnd1)(size).unProp)
 
 	switch rose {
 		case .MkRose(let res, let ts):
@@ -246,18 +252,18 @@ public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> Either<Result, St
 					st2.randomSeed = rnd2
 					st2.collected = [stamp] + st.collected
 					st2.expectedFailure = expect
-					return Either.right(st2)
+					return .Right(Box(st2))
 				case .MkResult(.None, let expect, _, _, _, _, _):
 					var st2 = st
 					st2.numDiscardedTests += 1
 					st2.randomSeed = rnd2
 					st2.expectedFailure = expect
-					return Either.right(st2)
+					return .Right(Box(st2))
 				case .MkResult(.Some(false), let expect, _, _, _, _, _):
 					if !expect {
 						print("+++ OK, failed as expected. ")
 						let s = Result.Success(numTests: st.numSuccessTests + 1, labels: summary(st), output: "+++ OK, failed as expected. ")
-						return Either.left(s)
+						return .Left(Box(s))
 					}
 					print("*** Failed! ")
 					let (numShrinks, totFailed, lastFailed) = foundFailure(st, res(), ts())
@@ -268,7 +274,7 @@ public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> Either<Result, St
 						reason: res().reason, 
 						labels: summary(st), 
 						output: "*** Failed! ")
-					return Either.left(s)
+					return .Left(Box(s))
 			default:
 				break
 			}
@@ -278,26 +284,20 @@ public func runATest(st: State)(f: (StdGen -> Int -> Prop)) -> Either<Result, St
 	assert(false, "")
 }
 
-public func foundFailure(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
+internal func foundFailure(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
 	var st2 = st
 	st2.numTryShrinks = 0
 	return localMin(st2, res, res, ts)
 }
 
-public func localMin(st : State, res : TestResult, res2 : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
+internal func localMin(st : State, res : TestResult, res2 : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
 	if let e = res2.theException {
-		return undefined()
+		fatalError("Test failed due to exception: \(e)")
 	}
-	let r = tryEvaluateIO(ts)
-	switch r {
-	case let .Left(err):
-		return undefined()
-	case let .Right(ts2):
-		return localMinimum(st, res, ts2.value)
-	}
+	return localMinimum(st, res, ts)
 }
 
-func callbackPostTest(st : State, res : TestResult) {
+internal func callbackPostTest(st : State, res : TestResult) {
 	let _ : [()] = res.callbacks.map({ c in
 		switch c {
 			case let .PostTest(_, f):
@@ -309,7 +309,7 @@ func callbackPostTest(st : State, res : TestResult) {
 	})
 }
 
-func callbackPostFinalFailure(st : State, res : TestResult) {
+internal func callbackPostFinalFailure(st : State, res : TestResult) {
 	let _ : [()] = res.callbacks.map({ c in
 		switch c {
 		case let .PostFinalFailure(_, f):
@@ -321,14 +321,14 @@ func callbackPostFinalFailure(st : State, res : TestResult) {
 	})
 }
 
-public func localMinimum(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
+internal func localMinimum(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
 	if ts.isEmpty {
 		return localMinFound(st, res)
 	}
-	let rose = protectRose(reduce(ts[0]))
+	let rose = reduce(ts[0])
 	switch rose {
 	case .IORose(_):
-		return undefined()
+		fatalError("Rose should not have reduced to IO")
 	case .MkRose(let res1, let ts1):
 		callbackPostTest(st, res1())
 		if res1().ok == .Some(false) {
@@ -345,7 +345,7 @@ public func localMinimum(st : State, res : TestResult, ts : [Rose<TestResult>]) 
 	}
 }
 
-public func localMinFound(st : State, res : TestResult) -> (Int, Int, Int) {
+internal func localMinFound(st : State, res : TestResult) -> (Int, Int, Int) {
 	let testMsg = " (after \(st.numSuccessTests + 1) test"
 	let shrinkMsg = st.numSuccessShrinks > 1 ? ("and \(st.numSuccessShrinks) shrink") : ""
 	
@@ -362,10 +362,37 @@ public func localMinFound(st : State, res : TestResult) -> (Int, Int, Int) {
 	return (st.numSuccessShrinks, st.numTotTryShrinks - st.numTryShrinks, st.numTryShrinks)
 }
 	
-public func summary(s: State) -> [(String, Int)] { 
-	let strings : [String] = concat(s.collected.map({ l in l.map({ $0.0 }).filter({ $0.isEmpty }) }))
-	let l = intersperse(",", strings) |> sorted |> group
+internal func summary(s : State) -> [(String, Int)] {
+	let strings = s.collected.map({ l in l.map({ "," + $0.0 }).filter({ !$0.isEmpty }) }).reduce([], combine: +)
+	let l =  groupBy(sorted(strings), ==)
 	return l.map({ ss in (ss[0], ss.count * 100 / s.numSuccessTests) })
 }
 
+internal func cons<T>(lhs : T, var rhs : [T]) -> [T] {
+	rhs.insert(lhs, atIndex: 0)
+	return rhs
+}
 
+internal func span<A>(list : [A], p : (A -> Bool)) -> ([A], [A]) {
+	if list.isEmpty {
+		return ([], [])
+	} else if let x = list.first {
+		if p (x) {
+			let (ys, zs) = span([A](list[1...list.endIndex]), p)
+			return (cons(x, ys), zs)
+		}
+		return ([], list)
+	}
+	fatalError("span reached a non-empty list that could not produce a first element")
+}
+
+internal func groupBy<A>(list : [A], p : (A , A) -> Bool) -> [[A]] {
+	if list.isEmpty {
+		return []
+	} else if let x = list.first {
+		let (ys, zs) = span([A](list[1...list.endIndex]), { p(x, $0) })
+		let l = cons(x, ys)
+		return cons(l, groupBy(zs, p))
+	}
+	fatalError("groupBy reached a non-empty list that could not produce a first element")
+}
