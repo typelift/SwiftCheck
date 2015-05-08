@@ -62,7 +62,7 @@ func isPrime(n : Int) -> Bool {
 
 class PrimeSpec : XCTestCase {
 	func testAll() {
-		property["All Prime"] = forAll { (n : Int) in
+		assertProperty["All Prime"] = forAll { (n : Int) in
 			return sieve(n).filter(isPrime) == sieve(n)
 		}
 	}
