@@ -11,7 +11,7 @@
 ///
 /// property["Integer Equality is Reflexive"] = forAll { (i : Int8) in
 ///	    return i == i
-///	}
+/// }
 ///
 public var property : QuickCheck = QuickCheck()
 
