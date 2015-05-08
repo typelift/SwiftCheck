@@ -104,6 +104,13 @@ public func promote<A>(x : Rose<Gen<A>>) -> Gen<Rose<A>> {
 	}
 }
 
+/// Promotes a function returning generators to a generator of functions.
+public func promote<A, B>(m : A -> Gen<B>) -> Gen<A -> B> {
+	return delay().bind { (let eval : Gen<B> -> B) in
+		return Gen<A -> B>.pure({ x in eval(m(x)) })
+	}
+}
+
 internal func delay<A>() -> Gen<Gen<A> -> A> {
 	return Gen(unGen: { r in
 		return { n in

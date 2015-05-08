@@ -143,6 +143,31 @@ public func == <T : protocol<Arbitrary, Equatable>>(lhs : OptionalOf<T>, rhs : O
 	return lhs.getOptional == rhs.getOptional
 }
 
+/// Generates a Swift function from T to U.
+public struct ArrowOf<T : CoArbitrary, U : Arbitrary> : Arbitrary, Printable {
+	public let getArrow : T -> U
+
+	public init(_ arr : (T -> U)) {
+		self.getArrow = arr
+	}
+
+	public var description : String {
+		return "\(self.getArrow)"
+	}
+
+	private static func create(arr : (T -> U)) -> ArrowOf<T, U> {
+		return ArrowOf(arr)
+	}
+
+	public static func arbitrary() -> Gen<ArrowOf<T, U>> {
+		return promote({ T.coarbitrary($0)(U.arbitrary()) }).fmap { ArrowOf($0) }
+	}
+
+	public static func shrink(bl : ArrowOf<T, U>) -> [ArrowOf<T, U>] {
+		return []
+	}
+}
+
 
 /// Guarantees that every generated integer is greater than 0.
 public struct Positive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary, Printable {

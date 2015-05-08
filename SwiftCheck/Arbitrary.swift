@@ -11,8 +11,8 @@ import Darwin
 /// A type that implements random generation and shrinking of values.
 ///
 /// While testing, SwiftCheck will invoke `arbitrary()` a given amount of times (usually 100 if the
-/// default settings are used).  During that time, the Type has an opportunity to call through to
-/// any data or sources of randomness it needs to return what it deems an "Arbitrary" value.
+/// default settings are used).  During that time, the receiver has an opportunity to call through 
+/// to any data or sources of randomness it needs to return what it deems an "Arbitrary" value.
 ///
 /// Shrinking is reduction in the complexity of a tested value to remove noise and present a minimal
 /// counterexample when a property fails.  While it may seem counterintuitive, a shrink necessitates
@@ -284,12 +284,12 @@ public func shrinkDouble(x : Double) -> [Double] {
 }
 
 
-/// Coarbitrary types must take a value of themselves and yield a function that transforms any
-/// given generator by returning a new generator that depends on the input value.  
+/// Coarbitrary types must take an arbitrary value of theit type and yield a function that 
+/// transforms a given generator by returning a new generator that depends on the input value.
 ///
 /// Using Coarbitrary types it is possible to write an Arbitrary instance for `->` (a type that
 /// generates functions).
-protocol CoArbitrary {
+public protocol CoArbitrary {
 	static func coarbitrary<C>(x : Self) -> (Gen<C> -> Gen<C>)
 }
 
