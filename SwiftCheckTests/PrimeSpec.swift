@@ -8,7 +8,6 @@
 
 import XCTest
 import SwiftCheck
-import Swiftz
 
 /// The Sieve of Eratosthenes:
 ///
@@ -24,7 +23,7 @@ func sieve(n : Int) -> [Int] {
 		return [Int]()
 	}
 	
-	var marked : [Bool] = (0...n).map(const(false))
+	var marked : [Bool] = (0...n).map({ _ in false })
 	marked[0] = true
 	marked[1] = true
 	
@@ -64,7 +63,7 @@ func isPrime(n : Int) -> Bool {
 class PrimeSpec : XCTestCase {
 	func testAll() {
 		property["All Prime"] = forAll { (n : Int) in
-			return all(sieve(n), isPrime)
+			return sieve(n).filter(isPrime) == sieve(n)
 		}
 	}
 }
