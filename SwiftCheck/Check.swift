@@ -15,22 +15,9 @@ import XCTest
 ///	    return i == i
 /// }
 ///
-public var property : QuickCheck = QuickCheck()
-
-public struct QuickCheck {
-	public subscript(s : String) -> Testable {
-		get {
-			fatalError("Proposition '\(s)' has an undefined test case")
-		}
-		set(test) {
-			quickCheck(test, name: s)
-		}
-	}
-}
-
-/// The main interface for the Assertive SwiftCheck testing mechanism.  Assertive checks test 
-/// program properties that will fail in XCTest and not just print failures to the console.
-public var assertProperty : AssertiveQuickCheck = AssertiveQuickCheck()
+/// SwiftCheck will report all failures through the XCTest mechanism like a normal testing assert,
+/// but with minimal failing case reported as well.
+public var property : AssertiveQuickCheck = AssertiveQuickCheck()
 
 public struct AssertiveQuickCheck {
 	public subscript(s : String) -> Testable {
@@ -44,6 +31,21 @@ public struct AssertiveQuickCheck {
 			default:
 				return
 			}
+		}
+	}
+}
+
+/// The interface for properties to be run through SwiftCheck without an XCTest assert.  The
+/// property will still generated console output during a test.
+public var reportProperty : ReportiveQuickCheck = ReportiveQuickCheck()
+
+public struct ReportiveQuickCheck {
+	public subscript(s : String) -> Testable {
+		get {
+			fatalError("Proposition '\(s)' has an undefined test case")
+		}
+		set(test) {
+			quickCheck(test, name: s)
 		}
 	}
 }
