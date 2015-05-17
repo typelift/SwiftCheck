@@ -50,6 +50,8 @@ public struct Prop : Testable {
 public struct Discard : Testable {
 	public var exhaustive : Bool { return true }
 
+	public init() { }
+
 	public func property() -> Property {
 		return rejected().property()
 	}

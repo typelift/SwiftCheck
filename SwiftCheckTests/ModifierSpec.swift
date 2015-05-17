@@ -31,7 +31,7 @@ class ModifierSpec : XCTestCase {
 			return x.getNonNegative >= 0
 		}
 
-		property["ArrayOf modifiers nest"] = forAll { (xxxs : ArrayOf<ArrayOf<ArrayOf<Int>>>) in
+		property["ArrayOf modifiers nest"] = forAll { (xxxs : ArrayOf<ArrayOf<Int8>>) in
 			return true
 		}
 	}
