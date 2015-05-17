@@ -22,7 +22,6 @@
 		84572C291A6DBAB600241F68 /* Testable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C281A6DBAB600241F68 /* Testable.swift */; };
 		84572C311A6DC21100241F68 /* Check.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C301A6DC21100241F68 /* Check.swift */; };
 		84572C381A6DC25000241F68 /* DiscardSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C321A6DC23100241F68 /* DiscardSpec.swift */; };
-		84572C391A6DC25200241F68 /* PrimeSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C331A6DC23100241F68 /* PrimeSpec.swift */; };
 		84572C3A1A6DC25500241F68 /* SimpleSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C341A6DC23100241F68 /* SimpleSpec.swift */; };
 		8480AB401A7B2AA100C6162D /* ModifierSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8480AB3E1A7B2A9A00C6162D /* ModifierSpec.swift */; };
 		84F2C4F41A7AD43900316E5F /* Modifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F2C4F31A7AD43900316E5F /* Modifiers.swift */; };
@@ -57,7 +56,6 @@
 		84572C281A6DBAB600241F68 /* Testable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Testable.swift; path = SwiftCheck/Testable.swift; sourceTree = SOURCE_ROOT; };
 		84572C301A6DC21100241F68 /* Check.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Check.swift; path = SwiftCheck/Check.swift; sourceTree = SOURCE_ROOT; };
 		84572C321A6DC23100241F68 /* DiscardSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DiscardSpec.swift; path = SwiftCheckTests/DiscardSpec.swift; sourceTree = SOURCE_ROOT; };
-		84572C331A6DC23100241F68 /* PrimeSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PrimeSpec.swift; path = SwiftCheckTests/PrimeSpec.swift; sourceTree = SOURCE_ROOT; };
 		84572C341A6DC23100241F68 /* SimpleSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SimpleSpec.swift; path = SwiftCheckTests/SimpleSpec.swift; sourceTree = SOURCE_ROOT; };
 		8480AB3E1A7B2A9A00C6162D /* ModifierSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ModifierSpec.swift; path = SwiftCheckTests/ModifierSpec.swift; sourceTree = SOURCE_ROOT; };
 		84F2C4F31A7AD43900316E5F /* Modifiers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Modifiers.swift; path = SwiftCheck/Modifiers.swift; sourceTree = SOURCE_ROOT; };
@@ -134,7 +132,6 @@
 			isa = PBXGroup;
 			children = (
 				84572C321A6DC23100241F68 /* DiscardSpec.swift */,
-				84572C331A6DC23100241F68 /* PrimeSpec.swift */,
 				8480AB3E1A7B2A9A00C6162D /* ModifierSpec.swift */,
 				84572C341A6DC23100241F68 /* SimpleSpec.swift */,
 				841FAE4119FB1BA800AF4EA2 /* Supporting Files */,
@@ -277,7 +274,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				84572C391A6DC25200241F68 /* PrimeSpec.swift in Sources */,
 				8480AB401A7B2AA100C6162D /* ModifierSpec.swift in Sources */,
 				84572C3A1A6DC25500241F68 /* SimpleSpec.swift in Sources */,
 				84572C381A6DC25000241F68 /* DiscardSpec.swift in Sources */,
@@ -387,6 +383,11 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(DEVELOPER_DIR)/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks",
+				);
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -394,6 +395,10 @@
 				INFOPLIST_FILE = SwiftCheck/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				OTHER_LDFLAGS = (
+					"-framework",
+					XCTest,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
@@ -406,9 +411,18 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(DEVELOPER_DIR)/Platforms/iPhoneSimulator.platform/Developer/Library/Frameworks",
+				);
 				INFOPLIST_FILE = SwiftCheck/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				OTHER_LDFLAGS = (
+					"-framework",
+					XCTest,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
