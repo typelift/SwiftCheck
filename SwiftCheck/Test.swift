@@ -26,11 +26,11 @@ public struct Arguments {
 }
 
 public enum Result {
-	case Success( numTests: Int
+	case Success(numTests: Int
 		, labels: [(String, Int)]
 		, output: String
 	)
-	case GaveUp( numTests: Int
+	case GaveUp(numTests: Int
 		, labels: [(String,Int)]
 		, output: String
 	)
@@ -276,12 +276,13 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<Result
 						output: "*** Failed! ")
 					return .Left(Box(s))
 			default:
+				fatalError("Pattern Match Failed: switch on a Result was inexhaustive.")
 				break
 			}
 		default:
+			fatalError("Pattern Match Failed: Rose should have been reduced to MkRose, not IORose.")
 			break
 	}
-	assert(false, "")
 }
 
 internal func foundFailure(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
