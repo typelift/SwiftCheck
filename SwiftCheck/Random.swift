@@ -6,6 +6,8 @@
 //  Copyright (c) 2014 Robert Widmann. All rights reserved.
 //
 
+import func Darwin.time
+import func Darwin.rand
 
 public protocol RandomGen {
 	func next() -> (Int, Self)

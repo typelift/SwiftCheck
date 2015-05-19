@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 Robert Widmann. All rights reserved.
 //
 
+import func Darwin.log
 
 extension Gen {
 	/// Shakes up the internal Random Number generator for a given Generator with a seed.
