@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "84DF75F71B0BD54600C912B0"
-               BuildableName = "SwiftCheck-iOS.framework"
+               BuildableName = "SwiftCheck.framework"
                BlueprintName = "SwiftCheck-iOS"
                ReferencedContainer = "container:SwiftCheck.xcodeproj">
             </BuildableReference>
@@ -57,7 +57,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "84DF75F71B0BD54600C912B0"
-            BuildableName = "SwiftCheck-iOS.framework"
+            BuildableName = "SwiftCheck.framework"
             BlueprintName = "SwiftCheck-iOS"
             ReferencedContainer = "container:SwiftCheck.xcodeproj">
          </BuildableReference>
@@ -76,7 +76,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "84DF75F71B0BD54600C912B0"
-            BuildableName = "SwiftCheck-iOS.framework"
+            BuildableName = "SwiftCheck.framework"
             BlueprintName = "SwiftCheck-iOS"
             ReferencedContainer = "container:SwiftCheck.xcodeproj">
          </BuildableReference>
@@ -94,7 +94,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "84DF75F71B0BD54600C912B0"
-            BuildableName = "SwiftCheck-iOS.framework"
+            BuildableName = "SwiftCheck.framework"
             BlueprintName = "SwiftCheck-iOS"
             ReferencedContainer = "container:SwiftCheck.xcodeproj">
          </BuildableReference>
