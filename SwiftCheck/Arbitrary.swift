@@ -308,6 +308,19 @@ extension Bool : CoArbitrary {
 	}
 }
 
+extension UnicodeScalar : CoArbitrary {
+	public static func coarbitrary<C>(x : UnicodeScalar) -> Gen<C> -> Gen<C> {
+		return UInt32.coarbitrary(x.value)
+	}
+}
+
+extension Character : CoArbitrary {
+	public static func coarbitrary<C>(x : Character) -> (Gen<C> -> Gen<C>) {
+		let ss = String(x).unicodeScalars
+		return UnicodeScalar.coarbitrary(ss[ss.startIndex])
+	}
+}
+
 extension Int : CoArbitrary {
 	public static func coarbitrary<C>(x : Int) -> Gen<C> -> Gen<C> {
 		return coarbitraryIntegral(x)
