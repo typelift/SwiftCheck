@@ -187,7 +187,7 @@ extension UnicodeScalar : Arbitrary {
 	}
 
 	public static func shrink(x : UnicodeScalar) -> [UnicodeScalar] {
-		return shrinkNone(x)
+		return [ "a", "b", "c" ] + [ UnicodeScalar(UInt32(towlower(Int32(x.value)))) ] + [ "A", "B", "C" ] + [ "1", "2", "3" ] + [ "\n", " " ]
 	}
 }
 
@@ -380,5 +380,3 @@ extension UInt64 : CoArbitrary {
 		return coarbitraryIntegral(x)
 	}
 }
-
-
