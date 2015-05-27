@@ -36,6 +36,22 @@ public protocol Arbitrary {
 	static func shrink(Self) -> [Self]
 }
 
+/// The implementation of a shrink that returns no alternatives.
+public func shrinkNone<A>(_ : A) -> [A] {
+	return []
+}
+
+/// Shrinks any IntegerType.
+public func shrinkIntegral<A : IntegerType>(x : A) -> [A] {
+	return unfoldr({ i in
+		if i <= 0 {
+			return .None
+		}
+		let n = i / 2
+		return .Some((n, n))
+	}, initial: x)
+}
+
 
 extension Bool : Arbitrary {
 	public static func arbitrary() -> Gen<Bool> {
@@ -234,18 +250,6 @@ extension Character : Arbitrary {
 	}
 }
 
-public func arbitraryArray<A : Arbitrary>() -> Gen<[A]> {
-	return sized({ n in
-		return choose((0, n)).bind { k in
-			return sequence(Array(1...k).map({ _ in A.arbitrary() }))
-		}
-	})
-}
-
-public func withBounds<A : LatticeType>(f : A -> A -> Gen<A>) -> Gen<A> {
-	return f(A.min)(A.max)
-}
-
 private func bits<N : IntegerType>(n : N) -> Int {
 	if n / 2 == 0 {
 		return 0
@@ -265,10 +269,6 @@ private func nub<A : Hashable>(xs : [A]) -> [A] {
 	return [A](Set(xs))
 }
 
-public func shrinkNone<A>(_ : A) -> [A] {
-	return []
-}
-
 private func unfoldr<A, B>(f : B -> Optional<(A, B)>, #initial : B) -> [A] {
 	var acc = [A]()
 	var ini = initial
@@ -277,36 +277,6 @@ private func unfoldr<A, B>(f : B -> Optional<(A, B)>, #initial : B) -> [A] {
 		ini = next.1
 	}
 	return acc
-}
-
-public func shrinkIntegral<A : IntegerType>(x : A) -> [A] {
-	return unfoldr({ i in
-		if i <= 0 {
-			return .None
-		}
-		let n = i / 2
-		return .Some((n, n))
-	}, initial: x)
-}
-
-public func shrinkFloat(x : Float) -> [Float] {
-	return unfoldr({ i in
-		if i == 0.0 {
-			return .None
-		}
-		let n = i / 2.0
-		return .Some((n, n))
-	}, initial: x)
-}
-
-public func shrinkDouble(x : Double) -> [Double] {
-	return unfoldr({ i in
-		if i == 0.0 {
-			return .None
-		}
-		let n = i / 2.0
-		return .Some((n, n))
-	}, initial: x)
 }
 
 
