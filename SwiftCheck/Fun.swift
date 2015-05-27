@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 Robert Widmann. All rights reserved.
 //
 
-internal class FunProxy<A, B, C> { }
+internal class FunProxy<A : protocol<Arbitrary, CoArbitrary>, B, C : Arbitrary> { }
 
 internal class Pair<A, B, C> : FunProxy<A, B, C> {
 	typealias FunType = Fun<(A, B), C>
@@ -74,7 +74,7 @@ internal class Map<A, B, C> : FunProxy<A, B, C> {
 	}
 }
 
-struct Fun<A, C> {
+struct Fun<A : protocol<Arbitrary, CoArbitrary>, C : Arbitrary> {
 	let p : FunProxy<A, Any, C>
 
 
@@ -84,6 +84,12 @@ struct Fun<A, C> {
 
 }
 
+extension Fun : Arbitrary {
+	internal static func arbitrary() -> Gen<Fun<A, C>> {
+
+	}
+}
+
 extension Fun /*: Functor*/ {
 	typealias B = Swift.Any
 
@@ -91,23 +97,29 @@ extension Fun /*: Functor*/ {
 }
 
 /// Generates a Swift function from T to U.
-public struct ArrowOf<T : CoArbitrary, U : Arbitrary> : Arbitrary, Printable {
+public struct ArrowOf<T : protocol<Arbitrary, CoArbitrary>, U : Arbitrary> : Arbitrary, Printable {
 	public let getArrow : T -> U
+	private let getFun : (Fun<T, U>, U)
 
-	public init(_ arr : (T -> U)) {
+	private init(_ p : Fun<T, U>, _ d : U) {
+		self.init((p, d), abstract(p, d))
+	}
+
+	private init(_ fun : (Fun<T, U>, U), _ arr : (T -> U)) {
 		self.getArrow = arr
+		self.getFun = fun
 	}
 
 	public var description : String {
 		return "\(self.getArrow)"
 	}
 
-	private static func create(arr : (T -> U)) -> ArrowOf<T, U> {
-		return ArrowOf(arr)
-	}
-
 	public static func arbitrary() -> Gen<ArrowOf<T, U>> {
-		return promote({ T.coarbitrary($0)(U.arbitrary()) }).fmap { ArrowOf($0) }
+		return Fun<T, U>.arbitrary().bind { p in
+			return U.arbitrary().bind { d in
+				return ArrowOf(p, d)
+			}
+		}
 	}
 
 	public static func shrink(bl : ArrowOf<T, U>) -> [ArrowOf<T, U>] {
