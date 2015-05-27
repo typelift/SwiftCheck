@@ -24,3 +24,12 @@ infix operator ==== {}
 public func ====<A where A : Equatable, A : Printable>(x : A, y : A) -> Property {
 	return counterexample(x.description + "/=" + y.description)(p: x == y)
 }
+
+infix operator <?> {}
+
+public func <?>(p : Testable, s : String) -> Property {
+	return label(s)(p: p)
+}
+
+
+
