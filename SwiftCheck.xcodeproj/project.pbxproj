@@ -45,7 +45,6 @@
 		84DF76201B0BD58900C912B0 /* ModifierSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8480AB2C1A7B0A9700C6162D /* ModifierSpec.swift */; };
 		84DF76211B0BD58900C912B0 /* BooleanIdentitySpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848076671AF5D6A100CBE3EF /* BooleanIdentitySpec.swift */; };
 		84DF76241B0BD99900C912B0 /* SwiftCheck.h in Headers */ = {isa = PBXBuildFile; fileRef = 844FCC92198B320500EB242A /* SwiftCheck.h */; settings = {ATTRIBUTES = (Public, ); }; };
->>>>>>> upstream/master
 		84F2C4F71A7AD43F00316E5F /* Modifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F2C4F61A7AD43F00316E5F /* Modifiers.swift */; };
 /* End PBXBuildFile section */
 
