@@ -54,7 +54,7 @@ class SimpleSpec : XCTestCase {
 		property["Double Equality is Reflexive"] = forAll { (i : Double) in
 			return i == i
 		}
-		
+
 		property["String Equality is Reflexive"] = forAll { (s : String) in
 			return s == s
 		}
@@ -64,3 +64,4 @@ class SimpleSpec : XCTestCase {
 		}
 	}
 }
+

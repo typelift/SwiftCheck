@@ -36,6 +36,22 @@ public protocol Arbitrary {
 	static func shrink(Self) -> [Self]
 }
 
+/// The implementation of a shrink that returns no alternatives.
+public func shrinkNone<A>(_ : A) -> [A] {
+	return []
+}
+
+/// Shrinks any IntegerType.
+public func shrinkIntegral<A : IntegerType>(x : A) -> [A] {
+	return unfoldr({ i in
+		if i <= 0 {
+			return .None
+		}
+		let n = i / 2
+		return .Some((n, n))
+	}, initial: x)
+}
+
 
 extension Bool : Arbitrary {
 	public static func arbitrary() -> Gen<Bool> {
@@ -165,7 +181,13 @@ extension Float : Arbitrary {
 	}
 
 	public static func shrink(x : Float) -> [Float] {
-		return shrinkFloat(x)
+		return unfoldr({ i in
+			if i == 0.0 {
+				return .None
+			}
+			let n = i / 2.0
+			return .Some((n, n))
+		}, initial: x)
 	}
 }
 
@@ -177,7 +199,13 @@ extension Double : Arbitrary {
 	}
 
 	public static func shrink(x : Double) -> [Double] {
-		return shrinkDouble(x)
+		return unfoldr({ i in
+			if i == 0.0 {
+				return .None
+			}
+			let n = i / 2.0
+			return .Some((n, n))
+		}, initial: x)
 	}
 }
 
@@ -187,7 +215,8 @@ extension UnicodeScalar : Arbitrary {
 	}
 
 	public static func shrink(x : UnicodeScalar) -> [UnicodeScalar] {
-		return shrinkNone(x)
+		let s : UnicodeScalar = UnicodeScalar(UInt32(towlower(Int32(x.value))))
+		return nub([ "a", "b", "c", s, "A", "B", "C", "1", "2", "3", "\n", " " ]).filter { $0 < x }
 	}
 }
 
@@ -197,8 +226,16 @@ extension String : Arbitrary {
 		return chars.bind { ls in Gen<String>.pure(String(ls)) }
 	}
 
-	public static func shrink(x : String) -> [String] {
-		return shrinkNone(x)
+	public static func shrink(s : String) -> [String] {
+		if s.isEmpty {
+			return []
+		} else if count(s) == 1 {
+			let hd = s[s.startIndex]
+			return [ "" ] + [ String(Character.shrink(hd)) ]
+		}
+		let x = s[s.startIndex]
+		let xs = s[advance(s.startIndex, 1)..<s.endIndex]
+		return [ xs ] + String.shrink(xs) + String.shrink(String(Character.shrink(x)) + xs)
 	}
 }
 
@@ -208,20 +245,9 @@ extension Character : Arbitrary {
 	}
 
 	public static func shrink(x : Character) -> [Character] {
-		return shrinkNone(x)
+		let ss = String(x).unicodeScalars
+		return UnicodeScalar.shrink(ss[ss.startIndex]).map { Character($0) }
 	}
-}
-
-public func arbitraryArray<A : Arbitrary>() -> Gen<[A]> {
-	return sized({ n in
-		return choose((0, n)).bind { k in
-			return sequence(Array(1...k).map({ _ in A.arbitrary() }))
-		}
-	})
-}
-
-public func withBounds<A : LatticeType>(f : A -> A -> Gen<A>) -> Gen<A> {
-	return f(A.min)(A.max)
 }
 
 private func bits<N : IntegerType>(n : N) -> Int {
@@ -239,8 +265,8 @@ private func inBounds<A : IntegerType>(fi : (Int -> A)) -> Gen<Int> -> Gen<A> {
 	}
 }
 
-public func shrinkNone<A>(_ : A) -> [A] {
-	return []
+private func nub<A : Hashable>(xs : [A]) -> [A] {
+	return [A](Set(xs))
 }
 
 private func unfoldr<A, B>(f : B -> Optional<(A, B)>, #initial : B) -> [A] {
@@ -251,36 +277,6 @@ private func unfoldr<A, B>(f : B -> Optional<(A, B)>, #initial : B) -> [A] {
 		ini = next.1
 	}
 	return acc
-}
-
-public func shrinkIntegral<A : IntegerType>(x : A) -> [A] {
-	return unfoldr({ i in
-		if i <= 0 {
-			return .None
-		}
-		let n = i / 2
-		return .Some((n, n))
-	}, initial: x)
-}
-
-public func shrinkFloat(x : Float) -> [Float] {
-	return unfoldr({ i in
-		if i == 0.0 {
-			return .None
-		}
-		let n = i / 2.0
-		return .Some((n, n))
-	}, initial: x)
-}
-
-public func shrinkDouble(x : Double) -> [Double] {
-	return unfoldr({ i in
-		if i == 0.0 {
-			return .None
-		}
-		let n = i / 2.0
-		return .Some((n, n))
-	}, initial: x)
 }
 
 
@@ -305,6 +301,19 @@ extension Bool : CoArbitrary {
 			}
 			return g.variant(0)
 		}
+	}
+}
+
+extension UnicodeScalar : CoArbitrary {
+	public static func coarbitrary<C>(x : UnicodeScalar) -> Gen<C> -> Gen<C> {
+		return UInt32.coarbitrary(x.value)
+	}
+}
+
+extension Character : CoArbitrary {
+	public static func coarbitrary<C>(x : Character) -> (Gen<C> -> Gen<C>) {
+		let ss = String(x).unicodeScalars
+		return UnicodeScalar.coarbitrary(ss[ss.startIndex])
 	}
 }
 
@@ -367,5 +376,3 @@ extension UInt64 : CoArbitrary {
 		return coarbitraryIntegral(x)
 	}
 }
-
-
