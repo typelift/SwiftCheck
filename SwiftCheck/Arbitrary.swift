@@ -187,7 +187,8 @@ extension UnicodeScalar : Arbitrary {
 	}
 
 	public static func shrink(x : UnicodeScalar) -> [UnicodeScalar] {
-		return [ "a", "b", "c" ] + [ UnicodeScalar(UInt32(towlower(Int32(x.value)))) ] + [ "A", "B", "C" ] + [ "1", "2", "3" ] + [ "\n", " " ]
+		let s : UnicodeScalar = UnicodeScalar(UInt32(towlower(Int32(x.value))))
+		return nub([ "a", "b", "c", s, "A", "B", "C", "1", "2", "3", "\n", " " ]).filter { $0 < x }
 	}
 }
 
@@ -197,8 +198,16 @@ extension String : Arbitrary {
 		return chars.bind { ls in Gen<String>.pure(String(ls)) }
 	}
 
-	public static func shrink(x : String) -> [String] {
-		return shrinkNone(x)
+	public static func shrink(s : String) -> [String] {
+		if s.isEmpty {
+			return []
+		} else if count(s) == 1 {
+			let hd = s[s.startIndex]
+			return [ "" ] + [ String(Character.shrink(hd)) ]
+		}
+		let x = s[s.startIndex]
+		let xs = s[advance(s.startIndex, 1)..<s.endIndex]
+		return [ xs ] + String.shrink(xs) + String.shrink(String(Character.shrink(x)) + xs)
 	}
 }
 
@@ -208,7 +217,8 @@ extension Character : Arbitrary {
 	}
 
 	public static func shrink(x : Character) -> [Character] {
-		return shrinkNone(x)
+		let ss = String(x).unicodeScalars
+		return UnicodeScalar.shrink(ss[ss.startIndex]).map { Character($0) }
 	}
 }
 
@@ -237,6 +247,10 @@ private func inBounds<A : IntegerType>(fi : (Int -> A)) -> Gen<Int> -> Gen<A> {
 			return (fi(x) as! Int) == x
 		}).fmap(fi)
 	}
+}
+
+private func nub<A : Hashable>(xs : [A]) -> [A] {
+	return [A](Set(xs))
 }
 
 public func shrinkNone<A>(_ : A) -> [A] {
