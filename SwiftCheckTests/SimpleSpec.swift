@@ -62,6 +62,11 @@ class SimpleSpec : XCTestCase {
 		property["ArbitraryFoo Properties are Reflexive"] = forAll { (i : ArbitraryFoo) in
 			return i.x == i.x && i.y == i.y
 		}
+
+		property["complexProp"] = forAll { (m : Int, n : Int) in
+			let res = n * m
+			return (res >= m) <?> "result > #1"
+		}
 	}
 }
 
