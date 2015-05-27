@@ -48,7 +48,7 @@ public enum Result {
 	)
 }
 
-public func isSuccess(r: Result) -> Bool {
+public func isSuccess(r : Result) -> Bool {
 	switch r {
 		case .Success:
 			return true
@@ -196,6 +196,7 @@ internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 					, computeSize:			computeSize
 					, numSuccessTests:		0
 					, numDiscardedTests:	0
+					, labels:				[:]
 					, collected:			[]
 					, expectedFailure:		false
 					, randomSeed:			rnd()
@@ -205,12 +206,12 @@ internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 	return test(state, p.exhaustive ? once(p.property()).unProperty.unGen : p.property().unProperty.unGen)
 }
 
-internal func test(st: State, f: (StdGen -> Int -> Prop)) -> Result {
+internal func test(st : State, f : (StdGen -> Int -> Prop)) -> Result {
 	var state = st
 	while true {
 		switch runATest(state)(f: f) {
 			case let .Left(fail):
-				return fail.value
+				return doneTesting(fail.value.1)(f: f)
 			case let .Right(sta):
 				if sta.value.numSuccessTests >= sta.value.maxSuccessTests {
 					return doneTesting(sta.value)(f: f)
@@ -226,55 +227,79 @@ internal func test(st: State, f: (StdGen -> Int -> Prop)) -> Result {
 internal func doneTesting(st : State)(f : (StdGen -> Int -> Prop)) -> Result {
 	if st.expectedFailure {
 		println("*** Passed " + "\(st.numSuccessTests)" + " tests")
+		success(st)
 		return Result.Success(numTests: st.numSuccessTests, labels: summary(st), output: "")
 	} else {
-		println("*** Failed! ")
-		println("*** Passed " + "\(st.numSuccessTests)" + " tests")
+		success(st)
 		return Result.NoExpectedFailure(numTests: st.numSuccessTests, labels: summary(st), output: "")
 	}
 }
 
 internal func giveUp(st: State)(f : (StdGen -> Int -> Prop)) -> Result {
+	success(st)
 	return Result.GaveUp(numTests: st.numSuccessTests, labels: summary(st), output: "")
 }
 
-internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<Result, State> {
+internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Result, State), State> {
 	let size = st.computeSize(st.numSuccessTests)(st.numDiscardedTests)
-	let (rnd1,rnd2) = st.randomSeed.split()
+	let (rnd1, rnd2) = st.randomSeed.split()
 	let rose : Rose<TestResult> = reduce(f(rnd1)(size).unProp)
 
 	switch rose {
 		case .MkRose(let res, let ts):
 			switch res().match() {
-				case .MkResult(.Some(true), let expect, _, _, _, let stamp, _):
-					var st2 = st
-					st2.numSuccessTests += 1
-					st2.randomSeed = rnd2
-					st2.collected = [stamp] + st.collected
-					st2.expectedFailure = expect
+				case .MkResult(.Some(true), let expect, _, _, _, let labels, let stamp, _):
+					let st2 = State(name: st.name,
+						maxSuccessTests: st.maxSuccessTests,
+						maxDiscardedTests: st.maxDiscardedTests,
+						computeSize: st.computeSize,
+						numSuccessTests: st.numSuccessTests + 1,
+						numDiscardedTests: st.numDiscardedTests,
+						labels: unionWith(max, st.labels, labels),
+						collected: [stamp] + st.collected,
+						expectedFailure: expect,
+						randomSeed: st.randomSeed,
+						numSuccessShrinks: st.numSuccessShrinks,
+						numTryShrinks: st.numTryShrinks,
+						numTotTryShrinks: st.numTotTryShrinks)
 					return .Right(Box(st2))
-				case .MkResult(.None, let expect, _, _, _, _, _):
-					var st2 = st
-					st2.numDiscardedTests += 1
-					st2.randomSeed = rnd2
-					st2.expectedFailure = expect
+				case .MkResult(.None, let expect, _, _, _, let labels, _, _):
+					let st2 = State(name: st.name,
+						maxSuccessTests: st.maxSuccessTests,
+						maxDiscardedTests: st.maxDiscardedTests,
+						computeSize: st.computeSize,
+						numSuccessTests: st.numSuccessTests,
+						numDiscardedTests: st.numDiscardedTests + 1,
+						labels: unionWith(max, st.labels, labels),
+						collected: st.collected,
+						expectedFailure: expect,
+						randomSeed: rnd2,
+						numSuccessShrinks: st.numSuccessShrinks,
+						numTryShrinks: st.numTryShrinks,
+						numTotTryShrinks: st.numTotTryShrinks)
 					return .Right(Box(st2))
-				case .MkResult(.Some(false), let expect, _, _, _, _, _):
+				case .MkResult(.Some(false), let expect, _, _, _, _, _, _):
 					if !expect {
 						print("+++ OK, failed as expected. ")
-						let s = Result.Success(numTests: st.numSuccessTests + 1, labels: summary(st), output: "+++ OK, failed as expected. ")
-						return .Left(Box(s))
+					} else {
+						print("*** Failed! ")
 					}
-					print("*** Failed! ")
+
 					let (numShrinks, totFailed, lastFailed) = foundFailure(st, res(), ts())
+
+					if !expect {
+						let s = Result.Success(numTests: st.numSuccessTests + 1, labels: summary(st), output: "+++ OK, failed as expected. ")
+						return .Left(Box((s, st)))
+					}
+
 					let s = Result.Failure(numTests: st.numSuccessTests + 1, 
-						numShrinks: numShrinks, 
+						numShrinks: numShrinks,
 						usedSeed: st.randomSeed, 
 						usedSize: st.computeSize(st.numSuccessTests)(st.numDiscardedTests), 
 						reason: res().reason, 
 						labels: summary(st), 
 						output: "*** Failed! ")
-					return .Left(Box(s))
+					return .Left(Box((s, st)))
 			default:
 				fatalError("Pattern Match Failed: switch on a Result was inexhaustive.")
 				break
@@ -286,8 +311,19 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<Result
 }
 
 internal func foundFailure(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
-	var st2 = st
-	st2.numTryShrinks = 0
+	let st2 = State(name: st.name,
+		maxSuccessTests: st.maxSuccessTests,
+		maxDiscardedTests: st.maxDiscardedTests,
+		computeSize: st.computeSize,
+		numSuccessTests: st.numSuccessTests,
+		numDiscardedTests: st.numDiscardedTests,
+		labels: st.labels,
+		collected: st.collected,
+		expectedFailure: st.expectedFailure,
+		randomSeed: st.randomSeed,
+		numSuccessShrinks: st.numSuccessShrinks,
+		numTryShrinks: st.numTryShrinks + 1,
+		numTotTryShrinks: st.numTotTryShrinks)
 	return localMin(st2, res, res, ts)
 }
 
@@ -333,14 +369,34 @@ internal func localMinimum(st : State, res : TestResult, ts : [Rose<TestResult>]
 	case .MkRose(let res1, let ts1):
 		callbackPostTest(st, res1())
 		if res1().ok == .Some(false) {
-			var sta = st
-			sta.numSuccessTests = st.numSuccessTests + 1
-			sta.numTryShrinks = 0
+			let sta = State(name: st.name,
+				maxSuccessTests: st.maxSuccessTests,
+				maxDiscardedTests: st.maxDiscardedTests,
+				computeSize: st.computeSize,
+				numSuccessTests: st.numSuccessTests + 1,
+				numDiscardedTests: st.numDiscardedTests,
+				labels: st.labels,
+				collected: st.collected,
+				expectedFailure: st.expectedFailure,
+				randomSeed: st.randomSeed,
+				numSuccessShrinks: st.numSuccessShrinks,
+				numTryShrinks: 0,
+				numTotTryShrinks: st.numTotTryShrinks)
 			return localMin(sta, res1(), res, ts1())
 		} else {
-			var sta = st
-			sta.numSuccessTests = st.numSuccessTests + 1
-			sta.numTotTryShrinks = st.numTotTryShrinks + 1
+			let sta = State(name: st.name,
+				maxSuccessTests: st.maxSuccessTests,
+				maxDiscardedTests: st.maxDiscardedTests,
+				computeSize: st.computeSize,
+				numSuccessTests: st.numSuccessTests + 1,
+				numDiscardedTests: st.numDiscardedTests,
+				labels: st.labels,
+				collected: st.collected,
+				expectedFailure: st.expectedFailure,
+				randomSeed: st.randomSeed,
+				numSuccessShrinks: st.numSuccessShrinks,
+				numTryShrinks: st.numTryShrinks,
+				numTotTryShrinks: st.numTotTryShrinks + 1)
 			return localMin(sta, res, res, Array(ts[1..<ts.count]))
 		}
 	}
@@ -364,9 +420,49 @@ internal func localMinFound(st : State, res : TestResult) -> (Int, Int, Int) {
 }
 	
 internal func summary(s : State) -> [(String, Int)] {
-	let strings = s.collected.map({ l in l.map({ "," + $0.0 }).filter({ !$0.isEmpty }) }).reduce([], combine: +)
+	let strings = s.collected.map({ l in Array(l).map({ "," + $0.0 }).filter({ !$0.isEmpty }) }).reduce([], combine: +)
 	let l =  groupBy(sorted(strings), ==)
 	return l.map({ ss in (ss[0], ss.count * 100 / s.numSuccessTests) })
+}
+
+internal func labelPercentage(l : String, st : State) -> Int {
+	let occur = st.collected.map({ Array($0) }).reduce([], combine: +).filter({ $0 == l }).count
+	return (100 * occur) / st.maxSuccessTests
+}
+
+internal func success(st : State) {
+	func showP(n : Int) -> String {
+		return (n < 10 ? " " : "") + "\(n)" + "% "
+	}
+
+	let gAllLabels = st.collected.map({ s in
+		return Array(s).filter({ t in st.labels[t] == .Some(0) }).reduce("", combine: { (l, r) in l + ", " + r })
+	})
+	let gAll = groupBy(sorted(gAllLabels.filter({ !$0.isEmpty })), ==)
+	let gPrint = gAll.map({ ss in showP((ss.count * 100) / st.numSuccessTests) + ss.first! })
+	let allLabels = sorted(gPrint).reverse()
+
+	var covers = [String]()
+	for (l, reqP) in st.labels {
+		let p = labelPercentage(l, st)
+		if p < reqP {
+			covers += ["only \(p)% " + l + ", not \(reqP)%"]
+		}
+	}
+
+	let all = covers + allLabels
+	if all.isEmpty {
+		println(".")
+	} else if all.count == 1, let pt = all.first {
+		println("(\(pt))")
+	} else {
+		println(":")
+		for pt in all {
+			println(pt)
+		}
+	}
+
+	let cs = allLabels
 }
 
 internal func cons<T>(lhs : T, var rhs : [T]) -> [T] {
@@ -379,7 +475,7 @@ internal func span<A>(list : [A], p : (A -> Bool)) -> ([A], [A]) {
 		return ([], [])
 	} else if let x = list.first {
 		if p (x) {
-			let (ys, zs) = span([A](list[1...list.endIndex]), p)
+			let (ys, zs) = span([A](list[1..<list.endIndex]), p)
 			return (cons(x, ys), zs)
 		}
 		return ([], list)
@@ -391,7 +487,7 @@ internal func groupBy<A>(list : [A], p : (A , A) -> Bool) -> [[A]] {
 	if list.isEmpty {
 		return []
 	} else if let x = list.first {
-		let (ys, zs) = span([A](list[1...list.endIndex]), { p(x, $0) })
+		let (ys, zs) = span([A](list[1..<list.endIndex]), { p(x, $0) })
 		let l = cons(x, ys)
 		return cons(l, groupBy(zs, p))
 	}

@@ -93,9 +93,14 @@ public func noShrinking(p : Testable) -> Property {
 public func callback(cb : Callback) -> Testable -> Property {
 	return { p in 
 		mapTotalResult({ (var res) in
-			var st = res
-			st.callbacks = [cb] + res.callbacks
-			return st
+			return TestResult(ok: res.ok,
+				expect: res.expect,
+				reason: res.reason,
+				theException: res.theException,
+				interrupted: res.interrupted,
+				labels: res.labels,
+				stamp: res.stamp,
+				callbacks: [cb] + res.callbacks)
 		})(p: p)
 	}
 }
@@ -130,17 +135,27 @@ public func whenFail(m : () -> ())(p : Testable) -> Property {
 
 public func expectFailure(p : Testable) -> Property {
 	return mapTotalResult({ res in
-		var st = res
-		st.expect = false
-		return st
+		return TestResult(ok: res.ok,
+			expect: false,
+			reason: res.reason,
+			theException: res.theException,
+			interrupted: res.interrupted,
+			labels: res.labels,
+			stamp: res.stamp,
+			callbacks: res.callbacks)
 	})(p: p)
 }
 
 public func once(p : Testable) -> Property {
 	return mapTotalResult({ res in
-		var st = res
-		st.interrupted = true
-		return st
+		return TestResult(ok: res.ok,
+			expect: res.expect,
+			reason: res.reason,
+			theException: res.theException,
+			interrupted: true,
+			labels: res.labels,
+			stamp: res.stamp,
+			callbacks: res.callbacks)
 	})(p: p)
 }
 
@@ -159,12 +174,38 @@ public func classify(b : Bool)(s : String)(p : Testable) -> Property {
 public func cover(b : Bool)(n : Int)(s : String)(p : Testable) -> Property {
 	if b {
 		return mapTotalResult({ res in
-			var st = res
-			st.stamp = [(s, n)] + res.stamp
-			return st
+			return TestResult(ok: res.ok,
+				expect: res.expect,
+				reason: res.reason,
+				theException: res.theException,
+				interrupted: res.interrupted,
+				labels: insertWith(max, s, n, res.labels),
+				stamp: res.stamp.union([s]),
+				callbacks: res.callbacks)
 		})(p: p)
 	}
 	return p.property()
+}
+
+internal func insertWith<K : Hashable, V>(f : (V, V) -> V, k : K, v : V, var m : Dictionary<K, V>) -> Dictionary<K, V> {
+	let oldV = m[k]
+	if let existV = oldV {
+		m[k] = f(existV, v)
+	} else {
+		m[k] = v
+	}
+	return m
+}
+
+internal func unionWith<K : Hashable, V>(f : (V, V) -> V, l : Dictionary<K, V>, r : Dictionary<K, V>) -> Dictionary<K, V> {
+	var map = l
+	for (k, v) in l {
+		map.updateValue(v, forKey: k)
+	}
+	for (k, v) in r {
+		map.updateValue(v, forKey: k)
+	}
+	return map
 }
 
 public enum Callback {
@@ -183,24 +224,37 @@ public enum TestResultMatcher {
 			reason : String,
 			theException : Optional<String>,
 			interrupted : Bool,
-			stamp : [(String,Int)],
+			labels : Dictionary<String, Int>,
+			stamp : Set<String>,
 			callbacks : [Callback])
 }
 
 public struct TestResult {
-	var ok : Optional<Bool>
-	var expect : Bool
-	var reason : String
-	var theException : Optional<String>
-	var interrupted : Bool
-	var stamp : [(String,Int)]
-	var callbacks : [Callback]
+	let ok : Optional<Bool>
+	let expect : Bool
+	let reason : String
+	let theException : Optional<String>
+	let interrupted : Bool
+	let labels : Dictionary<String, Int>
+	let stamp : Set<String>
+	let callbacks : [Callback]
 	
 	public func match() -> TestResultMatcher {
-		return TestResultMatcher.MkResult(ok: ok, expect: expect, reason: reason, theException: theException, interrupted: interrupted, stamp: stamp, callbacks: callbacks)
+		return TestResultMatcher.MkResult(ok: ok, expect: expect, reason: reason, theException: theException, interrupted: interrupted, labels: labels, stamp: stamp, callbacks: callbacks)
+	}
+
+	public init(ok : Optional<Bool>, expect : Bool, reason : String, theException : Optional<String>, interrupted : Bool, labels : Dictionary<String, Int>, stamp : Set<String>, callbacks : [Callback]) {
+		self.ok = ok
+		self.expect = expect
+		self.reason = reason
+		self.theException = theException
+		self.interrupted = interrupted
+		self.labels = labels
+		self.stamp = stamp
+		self.callbacks = callbacks
 	}
 }
 
 func result(ok: Bool?, reason : String = "") -> TestResult {
-	return TestResult(ok: ok, expect: true, reason: reason, theException: .None, interrupted: false, stamp: [], callbacks: [])
+	return TestResult(ok: ok, expect: true, reason: reason, theException: .None, interrupted: false, labels: [:], stamp: Set(), callbacks: [])
 }
