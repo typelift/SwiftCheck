@@ -165,7 +165,13 @@ extension Float : Arbitrary {
 	}
 
 	public static func shrink(x : Float) -> [Float] {
-		return shrinkFloat(x)
+		return unfoldr({ i in
+			if i == 0.0 {
+				return .None
+			}
+			let n = i / 2.0
+			return .Some((n, n))
+		}, initial: x)
 	}
 }
 
@@ -177,7 +183,13 @@ extension Double : Arbitrary {
 	}
 
 	public static func shrink(x : Double) -> [Double] {
-		return shrinkDouble(x)
+		return unfoldr({ i in
+			if i == 0.0 {
+				return .None
+			}
+			let n = i / 2.0
+			return .Some((n, n))
+		}, initial: x)
 	}
 }
 
