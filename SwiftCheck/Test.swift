@@ -139,7 +139,7 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 
 public func forAllShrink<A : Arbitrary>(gen : Gen<A>, shrinker: A -> [A], f : A -> Testable) -> Property {
 	return Property(gen.bind { x in
-		return shrinking(shrinker)(x0: x)(pf: { xs  in
+		return shrinking(shrinker, x, { xs  in
 			return counterexample("\(xs)")(p: f(xs))
 		}).unProperty
 	})

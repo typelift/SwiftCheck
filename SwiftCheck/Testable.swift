@@ -61,7 +61,7 @@ extension TestResult : Testable {
 	public var exhaustive : Bool { return true }
 
 	public func property() -> Property {
-		return Property(Gen.pure(Prop(unProp: protectResults(Rose.pure(self)))))
+		return Property(Gen.pure(Prop(unProp: Rose.pure(self))))
 	}
 }
 
