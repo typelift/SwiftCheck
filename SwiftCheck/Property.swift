@@ -136,7 +136,34 @@ public func whenFail(m : () -> ())(p : Testable) -> Property {
 	}))(p)
 }
 
+/// Modifies a property so it prints out every generated test case and the result of the property
+/// every time it is tested.
+///
+/// This function maps AfterFinalFailure callbacks that have the .Counterexample kind to AfterTest
+/// callbacks.
 public func verbose(p : Testable) -> Property {
+	func chattyCallbacks(cbs : [Callback]) -> [Callback] {
+		let c = Callback.AfterTest(kind: .Counterexample, f: { (st, res) in
+			switch res.ok {
+			case .Some(true):
+				println("Passed:")
+			case .Some(false):
+				println("Failed:")
+			default:
+				println("Discarded:")
+			}
+		})
+
+		return [c] + cbs.map { (c : Callback) -> Callback in
+			switch c {
+			case let .AfterFinalFailure(.Counterexample, f):
+				return .AfterTest(kind: .Counterexample, f: f)
+			default:
+				return c
+			}
+		}
+	}
+
 	return mapResult({ res in
 		return TestResult(ok: res.ok,
 			expect: res.expect,
@@ -144,8 +171,7 @@ public func verbose(p : Testable) -> Property {
 			theException: res.theException,
 			labels: res.labels,
 			stamp: res.stamp,
-			callbacks: res.callbacks)
-
+			callbacks: res.callbacks + chattyCallbacks(res.callbacks))
 	})(p: p)
 }
 
@@ -153,18 +179,6 @@ public func expectFailure(p : Testable) -> Property {
 	return mapTotalResult({ res in
 		return TestResult(ok: res.ok,
 			expect: false,
-			reason: res.reason,
-			theException: res.theException,
-			labels: res.labels,
-			stamp: res.stamp,
-			callbacks: res.callbacks)
-	})(p: p)
-}
-
-public func once(p : Testable) -> Property {
-	return mapTotalResult({ res in
-		return TestResult(ok: res.ok,
-			expect: res.expect,
 			reason: res.reason,
 			theException: res.theException,
 			labels: res.labels,

@@ -203,7 +203,7 @@ internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 					, numSuccessShrinks:	0
 					, numTryShrinks:		0
 					, numTotTryShrinks:		0)
-	return test(state, p.exhaustive ? once(p.property()).unProperty.unGen : p.property().unProperty.unGen)
+	return test(state, p.property().unProperty.unGen)
 }
 
 internal func test(st : State, f : (StdGen -> Int -> Prop)) -> Result {
@@ -246,8 +246,11 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 	let rose : Rose<TestResult> = reduce(f(rnd1)(size).unProp)
 
 	switch rose {
-		case .MkRose(let res, let ts):
-			switch res().match() {
+		case .MkRose(let resC, let ts):
+			let res = resC()
+			callbackAfterTest(st, res)
+
+			switch res.match() {
 				case .MatchResult(.Some(true), let expect, _, _, let labels, let stamp, _):
 					let st2 = State(name: st.name,
 						maxSuccessTests: st.maxSuccessTests,
@@ -285,7 +288,7 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 						print("*** Failed! ")
 					}
 
-					let (numShrinks, totFailed, lastFailed) = foundFailure(st, res(), ts())
+					let (numShrinks, totFailed, lastFailed) = foundFailure(st, res, ts())
 
 					if !expect {
 						let s = Result.Success(numTests: st.numSuccessTests + 1, labels: summary(st), output: "+++ OK, failed as expected. ")
@@ -296,7 +299,7 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 						numShrinks: numShrinks,
 						usedSeed: st.randomSeed, 
 						usedSize: st.computeSize(st.numSuccessTests)(st.numDiscardedTests), 
-						reason: res().reason, 
+						reason: res.reason, 
 						labels: summary(st), 
 						output: "*** Failed! ")
 					return .Left(Box((s, st)))
