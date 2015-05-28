@@ -31,5 +31,15 @@ public func <?>(p : Testable, s : String) -> Property {
 	return label(s)(p: p)
 }
 
+infix operator ^&&^ {}
+
+public func ^&&^(p1 : Testable, p2 : Testable) -> Property {
+	return conjoin([p1.property(), p2.property()])
+}
 
 
+infix operator ^||^ {}
+
+public func ^||^(p1 : Testable, p2 : Testable) -> Property {
+	return disjoin([p1.property(), p2.property()])
+}
