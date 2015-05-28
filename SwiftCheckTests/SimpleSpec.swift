@@ -43,9 +43,9 @@ class SimpleSpec : XCTestCase {
 			return i == i
 		}
 
-		property["Unsigned Integer Equality is Reflexive"] = verbose(forAll { (i : UInt8) in
+		property["Unsigned Integer Equality is Reflexive"] = forAll { (i : UInt8) in
 			return i == i
-		})
+		}
 
 		property["Float Equality is Reflexive"] = forAll { (i : Float) in
 			return i == i
@@ -62,6 +62,8 @@ class SimpleSpec : XCTestCase {
 		property["ArbitraryFoo Properties are Reflexive"] = forAll { (i : ArbitraryFoo) in
 			return i.x == i.x && i.y == i.y
 		}
+
+
 	}
 }
 

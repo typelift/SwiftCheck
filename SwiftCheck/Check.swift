@@ -11,9 +11,9 @@ import XCTest
 /// The main interface for the SwiftCheck testing mechanism. To test a program property one 
 /// subscripts into this variable with a description of the property being tested like so:
 ///
-/// property["Integer Equality is Reflexive"] = forAll { (i : Int8) in
-///	    return i == i
-/// }
+///     property["Integer Equality is Reflexive"] = forAll { (i : Int8) in
+///	        return i == i
+///     }
 ///
 /// SwiftCheck will report all failures through the XCTest mechanism like a normal testing assert,
 /// but with minimal failing case reported as well.
