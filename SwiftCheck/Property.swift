@@ -11,7 +11,14 @@ infix operator • {
 	associativity right
 }
 
-public func conjoin(ps : [Testable]) -> Property {
+/// Takes the conjunction of multiple properties and reports all successes and failures as one
+/// combined property.  That is, this property holds when all sub-properties hold and fails when one
+/// or more sub-properties fail.
+///
+/// Conjoined properties are each tested normally but are collected and labelled together.  This can
+/// mean multiple failures in distinct sub-properties are masked.  If fine-grained error reporting
+/// is needed, use a combination of `disjoin(_:)` and `verbose(_:)`.
+public func conjoin(ps : Testable...) -> Property {
 	return Property(sequence(ps.map({ (p : Testable) in
 		return p.property().unProperty.fmap({ $0.unProp })
 	})).bind({ roses in
@@ -19,24 +26,18 @@ public func conjoin(ps : [Testable]) -> Property {
 	}))
 }
 
-public func disjoin(ps : [Testable]) -> Property {
+/// Takes the disjunction of multiple properties and reports all successes and failures of each
+/// sub-property distinctly.  That is, this property holds when any one of its sub-properties holds
+/// and fails when all of its sub-properties fail simultaneously.
+///
+/// Disjoined properties, when used in conjunction with labelling, cause SwiftCheck to print a
+/// distribution map of the success rate of each sub-property.
+public func disjoin(ps : Testable...) -> Property {
 	return Property(sequence(ps.map({ (p : Testable) in
 		return p.property().unProperty.fmap({ $0.unProp })
 	})).bind({ roses in
 		return Gen.pure(Prop(unProp: roses.reduce(.MkRose({ failed() }, { [] }), combine: disj)))
 	}))
-}
-
-public func protectResults(rs : Rose<TestResult>) -> Rose<TestResult> {
-	return onRose({ x in
-		return { rs in
-			return .MkRose({ x }, { rs.map(protectResults) })
-		}
-	})(rs: rs)
-}
-
-public func exception(msg : String) -> Printable -> TestResult {
-	return { e in failed() }
 }
 
 public func succeeded() -> TestResult {
@@ -287,6 +288,17 @@ public struct TestResult {
 	}
 }
 
+public func protectResults(rs : Rose<TestResult>) -> Rose<TestResult> {
+	return onRose({ x in
+		return { rs in
+			return .MkRose({ x }, { rs.map(protectResults) })
+		}
+	})(rs: rs)
+}
+
+public func exception(msg : String) -> Printable -> TestResult {
+	return { e in failed() }
+}
 
 /// MARK: Implementation Details
 
