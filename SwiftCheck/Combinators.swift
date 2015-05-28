@@ -9,6 +9,70 @@
 import func Darwin.log
 
 extension Gen {
+	/// Constructs a generator that depends on a size parameter.
+	public static func sized(f : Int -> Gen<A>) -> Gen<A> {
+		return Gen(unGen:{ r in
+			return { n in
+				return f(n).unGen(r)(n)
+			}
+		})
+	}
+
+	/// Constructs a random element in the range of two Integer Types.
+	///
+	/// When using this function, it is necessary to explicitly specialize the generic parameter
+	/// `A`.  For example:
+	///
+	///	    Gen<UInt32>.choose((32, 255)).bind { Gen.pure(Character(UnicodeScalar($0))) }
+	public static func choose<A : RandomType>(rng : (A, A)) -> Gen<A> {
+		return Gen<A>(unGen: { s in
+			return { (_) in
+				let (x, _) = A.randomInRange(rng, gen: s)
+				return x
+			}
+		})
+	}
+
+	/// Randomly selects and uses one of a number of given Generators.
+	public static func oneOf(gs : [Gen<A>]) -> Gen<A> {
+		assert(gs.count != 0, "oneOf used with empty list")
+
+		return choose((0, gs.count - 1)).bind { x in
+			return gs[x]
+		}
+	}
+
+	/// Given a list of Generators and weights associated with them, this function randomly selects and
+	/// uses a Generator.
+	public static func frequency(xs : [(Int, Gen<A>)]) -> Gen<A> {
+		assert(xs.count != 0, "frequency used with empty list")
+
+		return choose((1, xs.map({ $0.0 }).reduce(0, combine: +))).bind { l in
+			return pick(l)(lst: xs)
+		}
+	}
+
+	/// Selects a random value from a list and constructs a Generator that returns only that value.
+	public static func elements(xs : [A]) -> Gen<A> {
+		assert(xs.count != 0, "elements used with empty list")
+
+		return choose((0, xs.count - 1)).fmap { i in
+			return xs[i]
+		}
+	}
+
+	/// Takes a list of elements of increasing size, and chooses among an initial segment of the list.
+	/// The size of this initial segment increases with the size parameter.
+	public static func growingElements(xs : [A]) -> Gen<A> {
+		assert(xs.count != 0, "growingElements used with empty list")
+
+		let k = Double(xs.count)
+		return sized({ n in
+			let m = max(1, size(k)(m: n))
+			return Gen.elements(Array(xs[0 ..< m]))
+		})
+	}
+
 	/// Shakes up the internal Random Number generator for a given Generator with a seed.
 	public func variant<S : IntegerType>(seed: S) -> Gen<A> {
 		return Gen(unGen: { r in
@@ -34,7 +98,7 @@ extension Gen {
 			case .Some(let x):
 				return Gen.pure(x)
 			case .None:
-				return sized { n in
+				return Gen.sized { n in
 					return self.suchThat(p).resize(n + 1)
 				}
 			}
@@ -45,15 +109,15 @@ extension Gen {
 	///
 	/// Passing values are wrapped in `.Some`.  Failing values are `.None`.
 	public func suchThatOptional(p : A -> Bool) -> Gen<Optional<A>> {
-		return sized({ n in
+		return Gen<Optional<A>>.sized({ n in
 			return try(self, 0, max(n, 1), p)
 		})
 	}
 
 	/// Generates a list of random length.
 	public func listOf() -> Gen<[A]> {
-		return sized({ n in
-			return choose((0, n)).bind { k in
+		return Gen<[A]>.sized({ n in
+			return Gen.choose((0, n)).bind { k in
 				return self.vectorOf(k)
 			}
 		})
@@ -61,8 +125,8 @@ extension Gen {
 	
 	/// Generates a non-empty list of random length.
 	public func listOf1() -> Gen<[A]> {
-		return sized({ n in
-			return choose((1, max(1, n))).bind { k in
+		return Gen<[A]>.sized({ n in
+			return Gen.choose((1, max(1, n))).bind { k in
 				return self.vectorOf(k)
 			}
 		})
@@ -72,65 +136,6 @@ extension Gen {
 	public func vectorOf(k : Int) -> Gen<[A]> {
 		return sequence(Array<Gen<A>>(count: k, repeatedValue: self))
 	}
-}
-
-/// Constructs a generator that depends on a size parameter.
-public func sized<A>(f : Int -> Gen<A>) -> Gen<A> {
-	return Gen(unGen:{ r in
-		return { n in
-			return f(n).unGen(r)(n)
-		}
-	})
-}
-
-/// Constructs a random element in the range of two Integer Types
-public func choose<A : RandomType>(rng : (A, A)) -> Gen<A> {
-	return Gen(unGen: { s in
-		return { (_) in
-			let (x, _) = A.randomInRange(rng, gen: s)
-			return x
-		}
-	})
-}
-
-/// Randomly selects and uses one of a number of given Generators.
-public func oneOf<A>(gs : [Gen<A>]) -> Gen<A> {
-	assert(gs.count != 0, "oneOf used with empty list")
-
-	return choose((0, gs.count - 1)).bind { x in
-		return gs[x]
-	}
-}
-
-/// Given a list of Generators and weights associated with them, this function randomly selects and
-/// uses a Generator.
-public func frequency<A>(xs: [(Int, Gen<A>)]) -> Gen<A> {
-	assert(xs.count != 0, "frequency used with empty list")
-	
-	return choose((1, xs.map({ $0.0 }).reduce(0, combine: +))).bind { l in
-		return pick(l)(lst: xs)
-	}
-}
-
-/// Selects a random value from a list and constructs a Generator that returns only that value.
-public func elements<A>(xs: [A]) -> Gen<A> {
-	assert(xs.count != 0, "elements used with empty list")
-
-	return choose((0, xs.count - 1)).fmap { i in
-		return xs[i]
-	}
-}
-
-/// Takes a list of elements of increasing size, and chooses among an initial segment of the list. 
-/// The size of this initial segment increases with the size parameter.
-public func growingElements<A>(xs: [A]) -> Gen<A> {
-	assert(xs.count != 0, "growingElements used with empty list")
-
-	let k = Double(xs.count)
-	return sized({ n in
-		let m = max(1, size(k)(m: n))
-		return elements(Array(xs[0 ..< m]))
-	})
 }
 
 /// Implementation Details Follow

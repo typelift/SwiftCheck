@@ -82,7 +82,7 @@ public func mapProp(f : Prop -> Prop)(p : Testable) -> Property {
 }
 
 public func mapSize(f : Int -> Int)(p : Testable) -> Property {
-	return Property(sized({ n in
+	return Property(Gen.sized({ n in
 		return p.property().unProperty.resize(f(n))
 	}))
 }

@@ -69,7 +69,7 @@ extension Bool : Arbitrary {
 extension Int : Arbitrary {
 	public static func arbitrary() -> Gen<Int> {
 		let sign = ((arc4random() % 2) == 1)
-		return sized { n in Gen.pure((sign ? 1 : -1) * Int(arc4random_uniform(UInt32(n)))) }
+		return Gen.sized { n in Gen.pure((sign ? 1 : -1) * Int(arc4random_uniform(UInt32(n)))) }
 	}
 
 	public static func shrink(x : Int) -> [Int] {
@@ -80,7 +80,7 @@ extension Int : Arbitrary {
 extension Int8 : Arbitrary {
 	public static func arbitrary() -> Gen<Int8> {
 		let sign = ((arc4random() % 2) == 1)
-		return sized { n in Gen.pure((sign ? 1 : -1) * Int8(arc4random_uniform(UInt32(n)))) }
+		return Gen.sized { n in Gen.pure((sign ? 1 : -1) * Int8(arc4random_uniform(UInt32(n)))) }
 	}
 
 	public static func shrink(x : Int8) -> [Int8] {
@@ -91,7 +91,7 @@ extension Int8 : Arbitrary {
 extension Int16 : Arbitrary {
 	public static func arbitrary() -> Gen<Int16> {
 		let sign = ((arc4random() % 2) == 1)
-		return sized { n in Gen.pure((sign ? 1 : -1) * Int16(arc4random_uniform(UInt32(n)))) }
+		return Gen.sized { n in Gen.pure((sign ? 1 : -1) * Int16(arc4random_uniform(UInt32(n)))) }
 	}
 
 	public static func shrink(x : Int16) -> [Int16] {
@@ -102,7 +102,7 @@ extension Int16 : Arbitrary {
 extension Int32 : Arbitrary {
 	public static func arbitrary() -> Gen<Int32> {
 		let sign = ((arc4random() % 2) == 1)
-		return sized { n in Gen.pure((sign ? 1 : -1) * Int32(arc4random_uniform(UInt32(n)))) }
+		return Gen.sized { n in Gen.pure((sign ? 1 : -1) * Int32(arc4random_uniform(UInt32(n)))) }
 	}
 
 	public static func shrink(x : Int32) -> [Int32] {
@@ -113,7 +113,7 @@ extension Int32 : Arbitrary {
 extension Int64 : Arbitrary {
 	public static func arbitrary() -> Gen<Int64> {
 		let sign = ((arc4random() % 2) == 1)
-		return sized { n in Gen.pure((sign ? 1 : -1) * Int64(arc4random_uniform(UInt32(n)))) }
+		return Gen.sized { n in Gen.pure((sign ? 1 : -1) * Int64(arc4random_uniform(UInt32(n)))) }
 	}
 
 	public static func shrink(x : Int64) -> [Int64] {
@@ -123,7 +123,7 @@ extension Int64 : Arbitrary {
 
 extension UInt : Arbitrary {
 	public static func arbitrary() -> Gen<UInt> {
-		return sized { n in Gen<UInt>.pure(UInt(arc4random_uniform(UInt32(abs(n))))) }
+		return Gen.sized { n in Gen<UInt>.pure(UInt(arc4random_uniform(UInt32(abs(n))))) }
 	}
 
 	public static func shrink(x : UInt) -> [UInt] {
@@ -133,8 +133,8 @@ extension UInt : Arbitrary {
 
 extension UInt8 : Arbitrary {
 	public static func arbitrary() -> Gen<UInt8> {
-		return sized({ n in
-			return sized { n in Gen<UInt8>.pure(UInt8(arc4random_uniform(UInt32(abs(n))))) }
+		return Gen.sized({ n in
+			return Gen.sized { n in Gen<UInt8>.pure(UInt8(arc4random_uniform(UInt32(abs(n))))) }
 		})
 	}
 
@@ -145,7 +145,7 @@ extension UInt8 : Arbitrary {
 
 extension UInt16 : Arbitrary {
 	public static func arbitrary() -> Gen<UInt16> {
-		return sized { n in Gen<UInt16>.pure(UInt16(arc4random_uniform(UInt32(abs(n))))) }
+		return Gen.sized { n in Gen<UInt16>.pure(UInt16(arc4random_uniform(UInt32(abs(n))))) }
 	}
 
 	public static func shrink(x : UInt16) -> [UInt16] {
@@ -155,7 +155,7 @@ extension UInt16 : Arbitrary {
 
 extension UInt32 : Arbitrary {
 	public static func arbitrary() -> Gen<UInt32> {
-		return sized { n in Gen<UInt32>.pure(arc4random_uniform(UInt32(abs(n)))) }
+		return Gen.sized { n in Gen<UInt32>.pure(arc4random_uniform(UInt32(abs(n)))) }
 	}
 
 	public static func shrink(x : UInt32) -> [UInt32] {
@@ -165,7 +165,7 @@ extension UInt32 : Arbitrary {
 
 extension UInt64 : Arbitrary {
 	public static func arbitrary() -> Gen<UInt64> {
-		return sized { n in Gen<UInt64>.pure(UInt64(arc4random_uniform(UInt32(abs(n))))) }
+		return Gen.sized { n in Gen<UInt64>.pure(UInt64(arc4random_uniform(UInt32(abs(n))))) }
 	}
 
 	public static func shrink(x : UInt64) -> [UInt64] {
@@ -175,7 +175,7 @@ extension UInt64 : Arbitrary {
 
 extension Float : Arbitrary {
 	public static func arbitrary() -> Gen<Float> {
-		return sized({ n in
+		return Gen.sized({ n in
 			return n == 0 ? Gen<Float>.pure(0.0) : Gen<Float>.pure(Float(-n) + Float(arc4random()) / Float(UINT32_MAX / UInt32((n)*2)))
 		})
 	}
@@ -193,7 +193,7 @@ extension Float : Arbitrary {
 
 extension Double : Arbitrary {
 	public static func arbitrary() -> Gen<Double> {
-		return sized({ n in
+		return Gen.sized({ n in
 			return n == 0 ? Gen<Double>.pure(0.0) : Gen<Double>.pure(Double(-n) + Double(arc4random()) / Double(UINT32_MAX / UInt32(n*2)))
 		})
 	}
@@ -222,7 +222,7 @@ extension UnicodeScalar : Arbitrary {
 
 extension String : Arbitrary {
 	public static func arbitrary() -> Gen<String> {
-		let chars = sized({ n in Character.arbitrary().vectorOf(n) })
+		let chars = Gen.sized({ n in Character.arbitrary().vectorOf(n) })
 		return chars.bind { ls in Gen<String>.pure(String(ls)) }
 	}
 
@@ -241,7 +241,7 @@ extension String : Arbitrary {
 
 extension Character : Arbitrary {
 	public static func arbitrary() -> Gen<Character> {
-		return choose((32, 255)).bind { Gen.pure(Character(UnicodeScalar($0))) }
+		return Gen<UInt32>.choose((32, 255)).bind { Gen.pure(Character(UnicodeScalar($0))) }
 	}
 
 	public static func shrink(x : Character) -> [Character] {

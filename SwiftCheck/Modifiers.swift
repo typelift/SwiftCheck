@@ -83,8 +83,8 @@ public struct ArrayOf<A : Arbitrary> : Arbitrary, Printable {
 	}
 
 	public static func arbitrary() -> Gen<ArrayOf<A>> {
-		return sized { n in
-			return choose((0, n)).bind { k in
+		return Gen.sized { n in
+			return Gen<Int>.choose((0, n)).bind { k in
 				if k == 0 {
 					return Gen.pure(ArrayOf([]))
 				}
@@ -128,7 +128,10 @@ public struct OptionalOf<A : Arbitrary> : Arbitrary, Printable {
 	}
 
 	public static func arbitrary() -> Gen<OptionalOf<A>> {
-		return frequency([(1, Gen.pure(OptionalOf(Optional<A>.None))), (3, liftM({ OptionalOf(Optional<A>.Some($0)) })(m1: A.arbitrary()))])
+		return Gen.frequency([
+			(1, Gen.pure(OptionalOf(Optional<A>.None))),
+			(3, liftM({ OptionalOf(Optional<A>.Some($0)) })(m1: A.arbitrary()))
+		])
 	}
 
 	public static func shrink(bl : OptionalOf<A>) -> [OptionalOf<A>] {
