@@ -6,8 +6,28 @@
 //  Copyright (c) 2014 Robert Widmann. All rights reserved.
 //
 
+infix operator • {
+	precedence 190
+	associativity right
+}
 
-public func protectResults(rs: Rose<TestResult>) -> Rose<TestResult> {
+public func conjoin(ps : [Testable]) -> Property {
+	return Property(sequence(ps.map({ (p : Testable) in
+		return p.property().unProperty.fmap({ $0.unProp })
+	})).bind({ roses in
+		return Gen.pure(Prop(unProp: conj(id, roses)))
+	}))
+}
+
+public func disjoin(ps : [Testable]) -> Property {
+	return Property(sequence(ps.map({ (p : Testable) in
+		return p.property().unProperty.fmap({ $0.unProp })
+	})).bind({ roses in
+		return Gen.pure(Prop(unProp: roses.reduce(.MkRose({ failed() }, { [] }), combine: disj)))
+	}))
+}
+
+public func protectResults(rs : Rose<TestResult>) -> Rose<TestResult> {
 	return onRose({ x in
 		return { rs in
 			return .MkRose({ x }, { rs.map(protectResults) })
@@ -15,7 +35,7 @@ public func protectResults(rs: Rose<TestResult>) -> Rose<TestResult> {
 	})(rs: rs)
 }
 
-public func exception(msg: String) -> Printable -> TestResult {
+public func exception(msg : String) -> Printable -> TestResult {
 	return { e in failed() }
 }
 
@@ -23,8 +43,8 @@ public func succeeded() -> TestResult {
 	return result(Optional.Some(true))
 }
 
-public func failed() -> TestResult {
-	return result(Optional.Some(false))
+public func failed(reason : String = "") -> TestResult {
+	return result(Optional.Some(false), reason: reason)
 }
 
 public func rejected() -> TestResult {
@@ -187,6 +207,14 @@ public func cover(b : Bool)(n : Int)(s : String)(p : Testable) -> Property {
 	return p.property()
 }
 
+private func id<A>(x : A) -> A {
+	return x
+}
+
+private func • <A, B, C>(f : B -> C, g : A -> B) -> A -> C {
+	return { f(g($0)) }
+}
+
 internal func insertWith<K : Hashable, V>(f : (V, V) -> V, k : K, v : V, var m : Dictionary<K, V>) -> Dictionary<K, V> {
 	let oldV = m[k]
 	if let existV = oldV {
@@ -206,6 +234,153 @@ internal func unionWith<K : Hashable, V>(f : (V, V) -> V, l : Dictionary<K, V>, 
 		map.updateValue(v, forKey: k)
 	}
 	return map
+}
+
+private func addCallbacks(result : TestResult) -> TestResult -> TestResult {
+	return { res in
+		return TestResult(ok: res.ok,
+			expect: res.expect,
+			reason: res.reason,
+			theException: res.theException,
+			interrupted: res.interrupted,
+			labels: res.labels,
+			stamp: res.stamp,
+			callbacks: result.callbacks + res.callbacks)
+	}
+}
+
+private func addLabels(result : TestResult) -> TestResult -> TestResult {
+	return { res in
+		return TestResult(ok: res.ok,
+			expect: res.expect,
+			reason: res.reason,
+			theException: res.theException,
+			interrupted: res.interrupted,
+			labels: unionWith(max, res.labels, result.labels),
+			stamp: res.stamp.union(result.stamp),
+			callbacks: res.callbacks)
+	}
+}
+
+private func conj(k : TestResult -> TestResult, xs : [Rose<TestResult>]) -> Rose<TestResult> {
+	if xs.isEmpty {
+		return Rose.MkRose({ k(succeeded()) }, { [] })
+	} else if let p = xs.first {
+		return Rose.IORose({
+			let rose = reduce(p)
+			switch rose {
+			case .MkRose(let result, _):
+				if !result().expect {
+					return Rose.pure(failed(reason: "expectFailure may not occur inside a conjunction"))
+				}
+
+				switch result().ok {
+				case .Some(true):
+					return conj(addLabels(result()) • addCallbacks(result()) • k, [Rose<TestResult>](xs[1..<xs.endIndex]))
+				case .Some(false):
+					return rose
+				case .None:
+					let rose2 = reduce(conj(addCallbacks(result()) • k, [Rose<TestResult>](xs[1..<xs.endIndex])))
+					switch rose2 {
+					case .MkRose(let result2, _):
+						switch result2().ok {
+						case .Some(true):
+							return Rose.MkRose({ rejected() }, { [] })
+						case .Some(false):
+							return rose2
+						case .None:
+							return rose2
+						default:
+							fatalError("Non-exhaustive switch performed")
+						}
+					default:
+						fatalError("Rose should not have reduced to IORose")
+					}
+				default:
+					fatalError("Non-exhaustive switch performed")
+				}
+			default:
+				fatalError("Rose should not have reduced to IORose")
+			}
+		})
+	}
+	fatalError("Non-exhaustive if-else statement reached")
+}
+
+private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult> {
+	func sep(l : String, r : String) -> String {
+		if l.isEmpty {
+			return r
+		}
+
+		if r.isEmpty {
+			return l
+		}
+		return l + ", " + r
+	}
+
+	func mplus(l : Optional<String>, r : Optional<String>) -> Optional<String> {
+		if let ls = l, rs = r {
+			return .Some(ls + rs)
+		}
+
+		if l == nil {
+			return r
+		}
+
+		return l
+	}
+
+	return p.bind({ result1 in
+		if !result1.expect {
+			return Rose.pure(failed(reason: "expectFailure may not occur inside a disjunction"))
+		}
+		switch result1.ok {
+		case .Some(true):
+			return Rose.pure(result1)
+		case .Some(false):
+			return q.bind({ result2 in
+				if !result2.expect {
+					return Rose.pure(failed(reason: "expectFailure may not occur inside a disjunction"))
+				}
+				switch result2.ok {
+				case .Some(true):
+					return Rose.pure(result2)
+				case .Some(false):
+					return Rose.pure(TestResult(ok: .Some(false),
+						expect: true,
+						reason: sep(result1.reason, result2.reason),
+						theException: mplus(result1.theException, result2.theException),
+						interrupted: false,
+						labels: [:],
+						stamp: Set(),
+						callbacks: result1.callbacks + [Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { st_res in
+							return { _ in
+								return println("")
+							}
+						})] + result2.callbacks))
+				case .None:
+					return Rose.pure(result2)
+				default:
+					fatalError("Non-exhaustive if-else statement reached")
+				}
+			})
+		case .None:
+			return q.bind({ result2 in
+				if !result2.expect {
+					return Rose.pure(failed(reason: "expectFailure may not occur inside a disjunction"))
+				}
+				switch result2.ok {
+				case .Some(true):
+					return Rose.pure(result2)
+				default:
+					return Rose.pure(result1)
+				}
+			})
+		default:
+			fatalError("Non-exhaustive if-else statement reached")
+		}
+	})
 }
 
 public enum Callback {
