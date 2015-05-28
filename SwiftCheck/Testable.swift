@@ -72,20 +72,3 @@ extension Bool : Testable {
 		return liftBool(self).property()
 	}
 }
-
-/// The type of testable functions.
-///
-/// TODO: File radar; Cannot use these functions without an explicit closure.
-public struct TestableFunction<T : Arbitrary> : Testable {
-	let f : T -> Testable
-
-	public init(_ f : T -> Testable) {
-		self.f = f
-	}
-
-	public var exhaustive : Bool { return false }
-
-	public func property() -> Property {
-		return forAllShrink(T.arbitrary(), { x in T.shrink(x) }, { x in self.f(x) })
-	}
-}
