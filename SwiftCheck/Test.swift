@@ -3,7 +3,7 @@
 //  SwiftCheck
 //
 //  Created by Robert Widmann on 7/31/14.
-//  Copyright (c) 2014 Robert Widmann. All rights reserved.
+//  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
 /// Converts a function into a universally quantified property using the default shrinker and

@@ -3,7 +3,7 @@
 //  SwiftCheck
 //
 //  Created by Robert Widmann on 8/3/14.
-//  Copyright (c) 2014 Robert Widmann. All rights reserved.
+//  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
 /// A `Rose` is a modified Rose Tree, or multi-way tree, for representing the steps necessary for 

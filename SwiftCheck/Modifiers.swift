@@ -1,6 +1,6 @@
 //
 //  Modifiers.swift
-//  SwiftCheck-iOS
+//  SwiftCheck
 //
 //  Created by Robert Widmann on 1/29/15.
 //  Copyright (c) 2015 CodaFi. All rights reserved.
