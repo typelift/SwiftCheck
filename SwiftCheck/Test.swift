@@ -337,36 +337,38 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 internal func doneTesting(st : State)(f : (StdGen -> Int -> Prop)) -> Result {
 	if st.expectedFailure {
 		println("*** Passed " + "\(st.numSuccessTests)" + " tests")
-		success(st)
+		printDistributionGraph(st)
 		return Result.Success(numTests: st.numSuccessTests, labels: summary(st), output: "")
 	} else {
-		success(st)
+		printDistributionGraph(st)
 		return Result.NoExpectedFailure(numTests: st.numSuccessTests, labels: summary(st), output: "")
 	}
 }
 
 internal func giveUp(st: State)(f : (StdGen -> Int -> Prop)) -> Result {
-	success(st)
+	printDistributionGraph(st)
 	return Result.GaveUp(numTests: st.numSuccessTests, labels: summary(st), output: "")
 }
 
 internal func foundFailure(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
-	let st2 = State(name: st.name,
-		maxSuccessTests: st.maxSuccessTests,
-		maxDiscardedTests: st.maxDiscardedTests,
-		computeSize: st.computeSize,
-		numSuccessTests: st.numSuccessTests,
-		numDiscardedTests: st.numDiscardedTests,
-		labels: st.labels,
-		collected: st.collected,
-		expectedFailure: st.expectedFailure,
-		randomSeed: st.randomSeed,
-		numSuccessShrinks: st.numSuccessShrinks,
-		numTryShrinks: st.numTryShrinks + 1,
-		numTotTryShrinks: st.numTotTryShrinks)
-	return localMin(st2, res, res, ts)
+	let state = State(name: st.name
+					, maxSuccessTests: st.maxSuccessTests
+					, maxDiscardedTests: st.maxDiscardedTests
+					, computeSize: st.computeSize
+					, numSuccessTests: st.numSuccessTests
+					, numDiscardedTests: st.numDiscardedTests
+					, labels: st.labels
+					, collected: st.collected
+					, expectedFailure: st.expectedFailure
+					, randomSeed: st.randomSeed
+					, numSuccessShrinks: st.numSuccessShrinks
+					, numTryShrinks: st.numTryShrinks + 1
+					, numTotTryShrinks: st.numTotTryShrinks)
+	return localMin(state, res, res, ts)
 }
 
+// Interface to shrinking loop.  Returns (number of shrinks performed, number of failed shrinks, 
+// total number of shrinks performed).
 internal func localMin(st : State, res : TestResult, res2 : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
 	if let e = res2.theException {
 		fatalError("Test failed due to exception: \(e)")
@@ -374,69 +376,60 @@ internal func localMin(st : State, res : TestResult, res2 : TestResult, ts : [Ro
 	return localMinimum(st, res, ts)
 }
 
-internal func dispatchAfterTestCallbacks(st : State, res : TestResult) {
-	let _ : [()] = res.callbacks.map({ c in
-		switch c {
-			case let .AfterTest(_, f):
-				f(st, res)
-			default:
-				return
-		}
-	})
-}
-
-internal func callbackAfterFinalFailure(st : State, res : TestResult) {
-	let _ : [()] = res.callbacks.map({ c in
-		switch c {
-		case let .AfterFinalFailure(_, f):
-			f(st, res)
-		default:
-			return
-		}
-	})
-}
-
+// Shrinking Loop:
+//
+// Attempts to calculate a local minimum given state, the result of the last test, and the rest of
+// the Rose Tree for that test.
+//
+// The Rose tree is traversed as deeply as possible looking for a minimal failing case.  It begins
+// by invoking the property test with the first shrunken value.  If the test fails that node is
+// shrunk and its branches run through this process.  If the test is discarded or suceeds, the next
+// shrunken value is tried.  Once the tree has run out of branches, we call the last value totally
+// shrunk.
 internal func localMinimum(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
 	if ts.isEmpty {
 		return localMinFound(st, res)
 	}
-	let rose = reduce(ts[0])
-	switch rose {
-	case .IORose(_):
-		fatalError("Rose should not have reduced to IO")
-	case .MkRose(let res1, let ts1):
-		dispatchAfterTestCallbacks(st, res1())
-		if res1().ok == .Some(false) {
-			let sta = State(name: st.name,
-				maxSuccessTests: st.maxSuccessTests,
-				maxDiscardedTests: st.maxDiscardedTests,
-				computeSize: st.computeSize,
-				numSuccessTests: st.numSuccessTests + 1,
-				numDiscardedTests: st.numDiscardedTests,
-				labels: st.labels,
-				collected: st.collected,
-				expectedFailure: st.expectedFailure,
-				randomSeed: st.randomSeed,
-				numSuccessShrinks: st.numSuccessShrinks,
-				numTryShrinks: 0,
-				numTotTryShrinks: st.numTotTryShrinks)
-			return localMin(sta, res1(), res, ts1())
-		} else {
-			let sta = State(name: st.name,
-				maxSuccessTests: st.maxSuccessTests,
-				maxDiscardedTests: st.maxDiscardedTests,
-				computeSize: st.computeSize,
-				numSuccessTests: st.numSuccessTests + 1,
-				numDiscardedTests: st.numDiscardedTests,
-				labels: st.labels,
-				collected: st.collected,
-				expectedFailure: st.expectedFailure,
-				randomSeed: st.randomSeed,
-				numSuccessShrinks: st.numSuccessShrinks,
-				numTryShrinks: st.numTryShrinks,
-				numTotTryShrinks: st.numTotTryShrinks + 1)
-			return localMin(sta, res, res, Array(ts[1..<ts.count]))
+
+	switch reduce(ts[0]) {
+	case .MkRose(let resC, let ts1):
+		let res1 = resC()
+		dispatchAfterTestCallbacks(st, res1)
+
+		// Did we fail?  Then try the next set of branches.
+		if res1.ok == .Some(false) {
+			let state = State(name: st.name
+							, maxSuccessTests: st.maxSuccessTests
+							, maxDiscardedTests: st.maxDiscardedTests
+							, computeSize: st.computeSize
+							, numSuccessTests: st.numSuccessTests + 1
+							, numDiscardedTests: st.numDiscardedTests
+							, labels: st.labels
+							, collected: st.collected
+							, expectedFailure: st.expectedFailure
+							, randomSeed: st.randomSeed
+							, numSuccessShrinks: st.numSuccessShrinks
+							, numTryShrinks: 0
+							, numTotTryShrinks: st.numTotTryShrinks)
+			return localMin(state, res1, res, ts1())
+		} else { // If not, then try the next shrink value.
+			let state = State(name: st.name
+							, maxSuccessTests: st.maxSuccessTests
+							, maxDiscardedTests: st.maxDiscardedTests
+							, computeSize: st.computeSize
+							, numSuccessTests: st.numSuccessTests + 1
+							, numDiscardedTests: st.numDiscardedTests
+							, labels: st.labels
+							, collected: st.collected
+							, expectedFailure: st.expectedFailure
+							, randomSeed: st.randomSeed
+							, numSuccessShrinks: st.numSuccessShrinks
+							, numTryShrinks: st.numTryShrinks
+							, numTotTryShrinks: st.numTotTryShrinks + 1)
+			return localMin(state, res, res, Array(ts[1..<ts.count]))
 		}
+	default:
+		fatalError("Rose should not have reduced to IO")
 	}
 }
 
@@ -453,10 +446,32 @@ internal func localMinFound(st : State, res : TestResult) -> (Int, Int, Int) {
 	
 	println("Proposition: " + st.name)
 	println(res.reason + pluralize(testMsg, st.numSuccessTests) + pluralize(shrinkMsg, st.numSuccessShrinks) + "):")
-	callbackAfterFinalFailure(st, res)
+	dispatchAfterFinalFailureCallbacks(st, res)
 	return (st.numSuccessShrinks, st.numTotTryShrinks - st.numTryShrinks, st.numTryShrinks)
 }
-	
+
+internal func dispatchAfterTestCallbacks(st : State, res : TestResult) {
+	for c in res.callbacks {
+		switch c {
+		case let .AfterTest(_, f):
+			f(st, res)
+		default:
+			return
+		}
+	}
+}
+
+internal func dispatchAfterFinalFailureCallbacks(st : State, res : TestResult) {
+	for c in res.callbacks {
+		switch c {
+		case let .AfterFinalFailure(_, f):
+			f(st, res)
+		default:
+			return
+		}
+	}
+}
+
 internal func summary(s : State) -> [(String, Int)] {
 	let strings = s.collected.map({ l in Array(l).map({ "," + $0.0 }).filter({ !$0.isEmpty }) }).reduce([], combine: +)
 	let l =  groupBy(sorted(strings), ==)
@@ -468,7 +483,7 @@ internal func labelPercentage(l : String, st : State) -> Int {
 	return (100 * occur) / st.maxSuccessTests
 }
 
-internal func success(st : State) {
+internal func printDistributionGraph(st : State) {
 	func showP(n : Int) -> String {
 		return (n < 10 ? " " : "") + "\(n)" + "% "
 	}
