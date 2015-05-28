@@ -227,6 +227,15 @@ internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 	return test(state, p.property().unProperty.unGen)
 }
 
+// Main Testing Loop:
+//
+// Given an initial state and the inner function that runs the property begins turning a runloop 
+// that starts firing off individual test cases.  Only 3 functions get dispatched from this loop:
+//
+// - runATest: Does what it says; .Left indicates failure, .Right indicates continuation.
+// - doneTesting: Invoked when testing the property fails or succeeds once and for all.
+// - giveUp: When the number of discarded tests exceeds the number given in the arguments we just
+//           give up turning the run loop to prevent excessive generation.
 internal func test(st : State, f : (StdGen -> Int -> Prop)) -> Result {
 	var state = st
 	while true {
@@ -245,6 +254,86 @@ internal func test(st : State, f : (StdGen -> Int -> Prop)) -> Result {
 	}
 }
 
+// Executes a single test of the property given an initial state and the generator function.
+//
+// On success the next state is returned.  On failure the final result and state are returned.
+internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Result, State), State> {
+	let size = st.computeSize(st.numSuccessTests)(st.numDiscardedTests)
+	let (rnd1, rnd2) = st.randomSeed.split()
+
+	// Execute the Rose Tree for the test and reduce to .MkRose.
+	switch reduce(f(rnd1)(size).unProp) {
+		case .MkRose(let resC, let ts):
+			let res = resC() // Force the result only once.
+			dispatchAfterTestCallbacks(st, res) // Then invoke the post-test callbacks
+
+			switch res.match() {
+				// Success
+				case .MatchResult(.Some(true), let expect, _, _, let labels, let stamp, _):
+					let state = State(name: st.name
+									, maxSuccessTests: st.maxSuccessTests
+									, maxDiscardedTests: st.maxDiscardedTests
+									, computeSize: st.computeSize
+									, numSuccessTests: st.numSuccessTests + 1
+									, numDiscardedTests: st.numDiscardedTests
+									, labels: unionWith(max, st.labels, labels)
+									, collected: [stamp] + st.collected
+									, expectedFailure: expect
+									, randomSeed: st.randomSeed
+									, numSuccessShrinks: st.numSuccessShrinks
+									, numTryShrinks: st.numTryShrinks
+									, numTotTryShrinks: st.numTotTryShrinks)
+					return .Right(Box(state))
+				// Discard
+				case .MatchResult(.None, let expect, _, _, let labels, _, _):
+					let state = State(name: st.name
+									, maxSuccessTests: st.maxSuccessTests
+									, maxDiscardedTests: st.maxDiscardedTests
+									, computeSize: st.computeSize
+									, numSuccessTests: st.numSuccessTests
+									, numDiscardedTests: st.numDiscardedTests + 1
+									, labels: unionWith(max, st.labels, labels)
+									, collected: st.collected
+									, expectedFailure: expect
+									, randomSeed: rnd2
+									, numSuccessShrinks: st.numSuccessShrinks
+									, numTryShrinks: st.numTryShrinks
+									, numTotTryShrinks: st.numTotTryShrinks)
+					return .Right(Box(state))
+				// Fail
+				case .MatchResult(.Some(false), let expect, _, _, _, _, _):
+					if !expect {
+						print("+++ OK, failed as expected. ")
+					} else {
+						print("*** Failed! ")
+					}
+
+					// Attempt a shrink.
+					let (numShrinks, totFailed, lastFailed) = foundFailure(st, res, ts())
+
+					if !expect {
+						let s = Result.Success(numTests: st.numSuccessTests + 1, labels: summary(st), output: "+++ OK, failed as expected. ")
+						return .Left(Box((s, st)))
+					}
+
+					let stat = Result.Failure(numTests: st.numSuccessTests + 1
+											, numShrinks: numShrinks
+											, usedSeed: st.randomSeed
+											, usedSize: st.computeSize(st.numSuccessTests)(st.numDiscardedTests)
+											, reason: res.reason
+											, labels: summary(st)
+											, output: "*** Failed! ")
+					return .Left(Box((stat, st)))
+			default:
+				fatalError("Pattern Match Failed: switch on a Result was inexhaustive.")
+				break
+			}
+		default:
+			fatalError("Pattern Match Failed: Rose should have been reduced to MkRose, not IORose.")
+			break
+	}
+}
+
 internal func doneTesting(st : State)(f : (StdGen -> Int -> Prop)) -> Result {
 	if st.expectedFailure {
 		println("*** Passed " + "\(st.numSuccessTests)" + " tests")
@@ -259,79 +348,6 @@ internal func doneTesting(st : State)(f : (StdGen -> Int -> Prop)) -> Result {
 internal func giveUp(st: State)(f : (StdGen -> Int -> Prop)) -> Result {
 	success(st)
 	return Result.GaveUp(numTests: st.numSuccessTests, labels: summary(st), output: "")
-}
-
-internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Result, State), State> {
-	let size = st.computeSize(st.numSuccessTests)(st.numDiscardedTests)
-	let (rnd1, rnd2) = st.randomSeed.split()
-	let rose : Rose<TestResult> = reduce(f(rnd1)(size).unProp)
-
-	switch rose {
-		case .MkRose(let resC, let ts):
-			let res = resC()
-			callbackAfterTest(st, res)
-
-			switch res.match() {
-				case .MatchResult(.Some(true), let expect, _, _, let labels, let stamp, _):
-					let st2 = State(name: st.name,
-						maxSuccessTests: st.maxSuccessTests,
-						maxDiscardedTests: st.maxDiscardedTests,
-						computeSize: st.computeSize,
-						numSuccessTests: st.numSuccessTests + 1,
-						numDiscardedTests: st.numDiscardedTests,
-						labels: unionWith(max, st.labels, labels),
-						collected: [stamp] + st.collected,
-						expectedFailure: expect,
-						randomSeed: st.randomSeed,
-						numSuccessShrinks: st.numSuccessShrinks,
-						numTryShrinks: st.numTryShrinks,
-						numTotTryShrinks: st.numTotTryShrinks)
-					return .Right(Box(st2))
-				case .MatchResult(.None, let expect, _, _, let labels, _, _):
-					let st2 = State(name: st.name,
-						maxSuccessTests: st.maxSuccessTests,
-						maxDiscardedTests: st.maxDiscardedTests,
-						computeSize: st.computeSize,
-						numSuccessTests: st.numSuccessTests,
-						numDiscardedTests: st.numDiscardedTests + 1,
-						labels: unionWith(max, st.labels, labels),
-						collected: st.collected,
-						expectedFailure: expect,
-						randomSeed: rnd2,
-						numSuccessShrinks: st.numSuccessShrinks,
-						numTryShrinks: st.numTryShrinks,
-						numTotTryShrinks: st.numTotTryShrinks)
-					return .Right(Box(st2))
-				case .MatchResult(.Some(false), let expect, _, _, _, _, _):
-					if !expect {
-						print("+++ OK, failed as expected. ")
-					} else {
-						print("*** Failed! ")
-					}
-
-					let (numShrinks, totFailed, lastFailed) = foundFailure(st, res, ts())
-
-					if !expect {
-						let s = Result.Success(numTests: st.numSuccessTests + 1, labels: summary(st), output: "+++ OK, failed as expected. ")
-						return .Left(Box((s, st)))
-					}
-
-					let s = Result.Failure(numTests: st.numSuccessTests + 1, 
-						numShrinks: numShrinks,
-						usedSeed: st.randomSeed, 
-						usedSize: st.computeSize(st.numSuccessTests)(st.numDiscardedTests), 
-						reason: res.reason, 
-						labels: summary(st), 
-						output: "*** Failed! ")
-					return .Left(Box((s, st)))
-			default:
-				fatalError("Pattern Match Failed: switch on a Result was inexhaustive.")
-				break
-			}
-		default:
-			fatalError("Pattern Match Failed: Rose should have been reduced to MkRose, not IORose.")
-			break
-	}
 }
 
 internal func foundFailure(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
@@ -358,7 +374,7 @@ internal func localMin(st : State, res : TestResult, res2 : TestResult, ts : [Ro
 	return localMinimum(st, res, ts)
 }
 
-internal func callbackAfterTest(st : State, res : TestResult) {
+internal func dispatchAfterTestCallbacks(st : State, res : TestResult) {
 	let _ : [()] = res.callbacks.map({ c in
 		switch c {
 			case let .AfterTest(_, f):
@@ -389,7 +405,7 @@ internal func localMinimum(st : State, res : TestResult, ts : [Rose<TestResult>]
 	case .IORose(_):
 		fatalError("Rose should not have reduced to IO")
 	case .MkRose(let res1, let ts1):
-		callbackAfterTest(st, res1())
+		dispatchAfterTestCallbacks(st, res1())
 		if res1().ok == .Some(false) {
 			let sta = State(name: st.name,
 				maxSuccessTests: st.maxSuccessTests,
