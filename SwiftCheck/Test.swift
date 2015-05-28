@@ -248,7 +248,7 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 	switch rose {
 		case .MkRose(let res, let ts):
 			switch res().match() {
-				case .MkResult(.Some(true), let expect, _, _, _, let labels, let stamp, _):
+				case .MatchResult(.Some(true), let expect, _, _, let labels, let stamp, _):
 					let st2 = State(name: st.name,
 						maxSuccessTests: st.maxSuccessTests,
 						maxDiscardedTests: st.maxDiscardedTests,
@@ -263,7 +263,7 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 						numTryShrinks: st.numTryShrinks,
 						numTotTryShrinks: st.numTotTryShrinks)
 					return .Right(Box(st2))
-				case .MkResult(.None, let expect, _, _, _, let labels, _, _):
+				case .MatchResult(.None, let expect, _, _, let labels, _, _):
 					let st2 = State(name: st.name,
 						maxSuccessTests: st.maxSuccessTests,
 						maxDiscardedTests: st.maxDiscardedTests,
@@ -278,7 +278,7 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 						numTryShrinks: st.numTryShrinks,
 						numTotTryShrinks: st.numTotTryShrinks)
 					return .Right(Box(st2))
-				case .MkResult(.Some(false), let expect, _, _, _, _, _, _):
+				case .MatchResult(.Some(false), let expect, _, _, _, _, _):
 					if !expect {
 						print("+++ OK, failed as expected. ")
 					} else {
@@ -334,26 +334,24 @@ internal func localMin(st : State, res : TestResult, res2 : TestResult, ts : [Ro
 	return localMinimum(st, res, ts)
 }
 
-internal func callbackPostTest(st : State, res : TestResult) {
+internal func callbackAfterTest(st : State, res : TestResult) {
 	let _ : [()] = res.callbacks.map({ c in
 		switch c {
-			case let .PostTest(_, f):
-				f(st)(res)
-				return ()
+			case let .AfterTest(_, f):
+				f(st, res)
 			default:
-				return ()
+				return
 		}
 	})
 }
 
-internal func callbackPostFinalFailure(st : State, res : TestResult) {
+internal func callbackAfterFinalFailure(st : State, res : TestResult) {
 	let _ : [()] = res.callbacks.map({ c in
 		switch c {
-		case let .PostFinalFailure(_, f):
-			f(st)(res)
-			return ()
+		case let .AfterFinalFailure(_, f):
+			f(st, res)
 		default:
-			return ()
+			return
 		}
 	})
 }
@@ -367,7 +365,7 @@ internal func localMinimum(st : State, res : TestResult, ts : [Rose<TestResult>]
 	case .IORose(_):
 		fatalError("Rose should not have reduced to IO")
 	case .MkRose(let res1, let ts1):
-		callbackPostTest(st, res1())
+		callbackAfterTest(st, res1())
 		if res1().ok == .Some(false) {
 			let sta = State(name: st.name,
 				maxSuccessTests: st.maxSuccessTests,
@@ -415,7 +413,7 @@ internal func localMinFound(st : State, res : TestResult) -> (Int, Int, Int) {
 	
 	println("Proposition: " + st.name)
 	println(res.reason + pluralize(testMsg, st.numSuccessTests) + pluralize(shrinkMsg, st.numSuccessShrinks) + "):")
-	callbackPostFinalFailure(st, res)
+	callbackAfterFinalFailure(st, res)
 	return (st.numSuccessShrinks, st.numTotTryShrinks - st.numTryShrinks, st.numTryShrinks)
 }
 	

@@ -117,7 +117,6 @@ public func callback(cb : Callback) -> Testable -> Property {
 				expect: res.expect,
 				reason: res.reason,
 				theException: res.theException,
-				interrupted: res.interrupted,
 				labels: res.labels,
 				stamp: res.stamp,
 				callbacks: [cb] + res.callbacks)
@@ -126,32 +125,29 @@ public func callback(cb : Callback) -> Testable -> Property {
 }
 
 public func counterexample(s : String)(p : Testable) -> Property {
-	return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { st in
-		return { _ in
-			return println(s)
-		}
-	}))(p)
-}
-
-public func printTestCase(s : String)(p : Testable) -> Property {
-	return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { st in
-		return { _ in
-			return println(s)
-		}
+	return callback(Callback.AfterFinalFailure(kind: CallbackKind.Counterexample, f: { (st, _) in
+		return println(s)
 	}))(p)
 }
 
 public func whenFail(m : () -> ())(p : Testable) -> Property {
-	return callback(Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { st in
-		return { (_) in
-			return m()
-		}
+	return callback(Callback.AfterFinalFailure(kind: CallbackKind.Counterexample, f: { (st, _) in
+		return m()
 	}))(p)
 }
 
-//public func verbose(p : Testable) -> Property {
-//
-//}
+public func verbose(p : Testable) -> Property {
+	return mapResult({ res in
+		return TestResult(ok: res.ok,
+			expect: res.expect,
+			reason: res.reason,
+			theException: res.theException,
+			labels: res.labels,
+			stamp: res.stamp,
+			callbacks: res.callbacks)
+
+	})(p: p)
+}
 
 public func expectFailure(p : Testable) -> Property {
 	return mapTotalResult({ res in
@@ -159,7 +155,6 @@ public func expectFailure(p : Testable) -> Property {
 			expect: false,
 			reason: res.reason,
 			theException: res.theException,
-			interrupted: res.interrupted,
 			labels: res.labels,
 			stamp: res.stamp,
 			callbacks: res.callbacks)
@@ -172,25 +167,35 @@ public func once(p : Testable) -> Property {
 			expect: res.expect,
 			reason: res.reason,
 			theException: res.theException,
-			interrupted: true,
 			labels: res.labels,
 			stamp: res.stamp,
 			callbacks: res.callbacks)
 	})(p: p)
 }
 
+/// Attaches a label to a property.
+///
+/// Labelled properties aid in testing conjunctions and disjunctions, or any other cases where
+/// test cases need to be distinct from one another.  In addition to shrunken test cases, upon
+/// failure SwiftCheck will print a distribution map for the property that shows a percentage
+/// success rate for the property.
 public func label(s : String)(p : Testable) -> Property {
 	return classify(true)(s: s)(p: p)
 }
 
+/// Labels a property with a printable value.
 public func collect<A : Printable>(x : A)(p : Testable) -> Property {
 	return label(x.description)(p: p)
 }
 
+/// Conditionally labels a property with a value.
 public func classify(b : Bool)(s : String)(p : Testable) -> Property {
 	return cover(b)(n: 0)(s: s)(p:p)
 }
 
+/// Checks that at least the given proportion of successful test cases belong to the given class. 
+///
+/// Discarded tests (i.e. ones with a false precondition) do not affect coverage.
 public func cover(b : Bool)(n : Int)(s : String)(p : Testable) -> Property {
 	if b {
 		return mapTotalResult({ res in
@@ -198,13 +203,81 @@ public func cover(b : Bool)(n : Int)(s : String)(p : Testable) -> Property {
 				expect: res.expect,
 				reason: res.reason,
 				theException: res.theException,
-				interrupted: res.interrupted,
 				labels: insertWith(max, s, n, res.labels),
 				stamp: res.stamp.union([s]),
 				callbacks: res.callbacks)
 		})(p: p)
 	}
 	return p.property()
+}
+
+/// A `Callback` is a block of code that can be run after a test case has finished.  They consist
+/// of a kind and the callback block itself, which is given the state SwiftCheck ran the test case
+/// with and the result of the test to do with as it sees fit.
+public enum Callback {
+	/// A callback that is posted after a test case has completed.
+	case AfterTest(kind : CallbackKind, f : (State, TestResult) -> ())
+	/// The callback is posted after all cases in the test have failed.
+	case AfterFinalFailure(kind : CallbackKind, f : (State, TestResult) -> ())
+}
+
+/// The type of callbacks SwiftCheck can dispatch.
+public enum CallbackKind {
+	///
+	case Counterexample
+	case NotCounterexample
+}
+
+public enum TestResultMatcher {
+	case MatchResult( ok : Optional<Bool>
+					, expect : Bool
+					, reason : String
+					, theException : Optional<String>
+					, labels : Dictionary<String, Int>
+					, stamp : Set<String>
+					, callbacks : [Callback]
+					)
+}
+
+/// A `TestResult` represents the result of performing a single test.
+public struct TestResult {
+	/// The result of executing the test case.  For Discarded test cases the value of this property 
+	/// is .None.
+	let ok				: Optional<Bool>
+	/// Indicates what the expected result of the property is.
+	let expect			: Bool
+	/// A message indicating the reason a test case failed.
+	let reason			: String
+	/// The exception that was thrown if one occured during testing.
+	let theException	: Optional<String>
+	/// All the labels used during the test case.
+	let labels			: Dictionary<String, Int>
+	/// The collected values for the test case.
+	let stamp			: Set<String>
+	/// Callbacks attached to the test case.
+	let callbacks		: [Callback]
+
+	/// Destructures a test case into a matcher that can be used in switch statement.
+	public func match() -> TestResultMatcher {
+		return .MatchResult(ok: ok, expect: expect, reason: reason, theException: theException, labels: labels, stamp: stamp, callbacks: callbacks)
+	}
+
+	public init(ok : Optional<Bool>, expect : Bool, reason : String, theException : Optional<String>, labels : Dictionary<String, Int>, stamp : Set<String>, callbacks : [Callback]) {
+		self.ok = ok
+		self.expect = expect
+		self.reason = reason
+		self.theException = theException
+		self.labels = labels
+		self.stamp = stamp
+		self.callbacks = callbacks
+	}
+}
+
+
+/// MARK: Implementation Details
+
+private func result(ok : Bool?, reason : String = "") -> TestResult {
+	return TestResult(ok: ok, expect: true, reason: reason, theException: .None, labels: [:], stamp: Set(), callbacks: [])
 }
 
 private func id<A>(x : A) -> A {
@@ -242,7 +315,6 @@ private func addCallbacks(result : TestResult) -> TestResult -> TestResult {
 			expect: res.expect,
 			reason: res.reason,
 			theException: res.theException,
-			interrupted: res.interrupted,
 			labels: res.labels,
 			stamp: res.stamp,
 			callbacks: result.callbacks + res.callbacks)
@@ -255,7 +327,6 @@ private func addLabels(result : TestResult) -> TestResult -> TestResult {
 			expect: res.expect,
 			reason: res.reason,
 			theException: res.theException,
-			interrupted: res.interrupted,
 			labels: unionWith(max, res.labels, result.labels),
 			stamp: res.stamp.union(result.stamp),
 			callbacks: res.callbacks)
@@ -351,13 +422,10 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 						expect: true,
 						reason: sep(result1.reason, result2.reason),
 						theException: mplus(result1.theException, result2.theException),
-						interrupted: false,
 						labels: [:],
 						stamp: Set(),
-						callbacks: result1.callbacks + [Callback.PostFinalFailure(kind: CallbackKind.Counterexample, f: { st_res in
-							return { _ in
-								return println("")
-							}
+						callbacks: result1.callbacks + [.AfterFinalFailure(kind: .Counterexample, f: { _ in
+							return println("")
 						})] + result2.callbacks))
 				case .None:
 					return Rose.pure(result2)
@@ -381,55 +449,4 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 			fatalError("Non-exhaustive if-else statement reached")
 		}
 	})
-}
-
-public enum Callback {
-	case PostTest(kind: CallbackKind, f: State -> TestResult -> ())
-	case PostFinalFailure(kind: CallbackKind, f: State -> TestResult -> ())
-}
-
-public enum CallbackKind {
-	case Counterexample
-	case NotCounterexample
-}
-
-public enum TestResultMatcher {
-	case MkResult(ok : Optional<Bool>,
-			expect : Bool,
-			reason : String,
-			theException : Optional<String>,
-			interrupted : Bool,
-			labels : Dictionary<String, Int>,
-			stamp : Set<String>,
-			callbacks : [Callback])
-}
-
-public struct TestResult {
-	let ok : Optional<Bool>
-	let expect : Bool
-	let reason : String
-	let theException : Optional<String>
-	let interrupted : Bool
-	let labels : Dictionary<String, Int>
-	let stamp : Set<String>
-	let callbacks : [Callback]
-	
-	public func match() -> TestResultMatcher {
-		return TestResultMatcher.MkResult(ok: ok, expect: expect, reason: reason, theException: theException, interrupted: interrupted, labels: labels, stamp: stamp, callbacks: callbacks)
-	}
-
-	public init(ok : Optional<Bool>, expect : Bool, reason : String, theException : Optional<String>, interrupted : Bool, labels : Dictionary<String, Int>, stamp : Set<String>, callbacks : [Callback]) {
-		self.ok = ok
-		self.expect = expect
-		self.reason = reason
-		self.theException = theException
-		self.interrupted = interrupted
-		self.labels = labels
-		self.stamp = stamp
-		self.callbacks = callbacks
-	}
-}
-
-func result(ok: Bool?, reason : String = "") -> TestResult {
-	return TestResult(ok: ok, expect: true, reason: reason, theException: .None, interrupted: false, labels: [:], stamp: Set(), callbacks: [])
 }
