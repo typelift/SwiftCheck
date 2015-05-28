@@ -63,9 +63,11 @@ class SimpleSpec : XCTestCase {
 			return i.x == i.x && i.y == i.y
 		}
 
-		property["complexProp"] = forAll { (m : Int, n : Int) in
+		property["Faulty Integer Arithmetic Property"] = forAll { (m : Int, n : Int) in
 			let res = n * m
-			return (res >= m) <?> "result > #1"
+			return
+				((res >= m) <?> "result > #1") ^||^
+				((res >= n) <?> "result > #2")
 		}
 	}
 }

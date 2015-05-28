@@ -37,7 +37,7 @@ public struct Property : Testable {
 
 /// A proposition.
 public struct Prop : Testable {
-	var unProp: Rose<TestResult>
+	var unProp : Rose<TestResult>
 	
 	public var exhaustive : Bool { return true }
 
