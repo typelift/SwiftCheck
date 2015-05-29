@@ -456,7 +456,7 @@ internal func dispatchAfterTestCallbacks(st : State, res : TestResult) {
 		case let .AfterTest(_, f):
 			f(st, res)
 		default:
-			return
+			continue
 		}
 	}
 }
@@ -467,7 +467,7 @@ internal func dispatchAfterFinalFailureCallbacks(st : State, res : TestResult) {
 		case let .AfterFinalFailure(_, f):
 			f(st, res)
 		default:
-			return
+			continue
 		}
 	}
 }
