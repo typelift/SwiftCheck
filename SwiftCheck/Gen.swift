@@ -3,7 +3,7 @@
 //  SwiftCheck
 //
 //  Created by Robert Widmann on 7/31/14.
-//  Copyright (c) 2014 Robert Widmann. All rights reserved.
+//  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
 /// A generator for values of type A.
@@ -17,6 +17,93 @@ public struct Gen<A> {
 	public var generate : A {
 		let r = newStdGen()
 		return unGen(r)(30)
+	}
+
+	/// TODO: File Radar; These must be in here or we get linker errors.
+
+	/// Shakes up the internal Random Number generator for a given Generator with a seed.
+	public func variant<S : IntegerType>(seed: S) -> Gen<A> {
+		return Gen(unGen: { r in
+			return { n in
+				return self.unGen(vary(seed)(r: r))(n)
+			}
+		})
+	}
+
+	/// Constructs a generator that always uses a given size.
+	public func resize(n : Int) -> Gen<A> {
+		return Gen(unGen: { r in
+			return { (_) in
+				return self.unGen(r)(n)
+			}
+		})
+	}
+
+	/// Constructs a Generator that only returns values that satisfy a predicate.
+	public func suchThat(p : (A -> Bool)) -> Gen<A> {
+		return self.suchThatOptional(p).bind { mx in
+			switch mx {
+			case .Some(let x):
+				return Gen.pure(x)
+			case .None:
+				return Gen.sized { n in
+					return self.suchThat(p).resize(n + 1)
+				}
+			}
+		}
+	}
+
+	/// Constructs a Generator that attempts to generate a values that satisfy a predicate.
+	///
+	/// Passing values are wrapped in `.Some`.  Failing values are `.None`.
+	public func suchThatOptional(p : A -> Bool) -> Gen<Optional<A>> {
+		return Gen<Optional<A>>.sized({ n in
+			return try(self, 0, max(n, 1), p)
+		})
+	}
+
+	/// Generates a list of random length.
+	public func listOf() -> Gen<[A]> {
+		return Gen<[A]>.sized({ n in
+			return Gen.choose((0, n)).bind { k in
+				return self.vectorOf(k)
+			}
+		})
+	}
+
+	/// Generates a non-empty list of random length.
+	public func listOf1() -> Gen<[A]> {
+		return Gen<[A]>.sized({ n in
+			return Gen.choose((1, max(1, n))).bind { k in
+				return self.vectorOf(k)
+			}
+		})
+	}
+
+	/// Generates a list of a given length.
+	public func vectorOf(k : Int) -> Gen<[A]> {
+		return sequence(Array<Gen<A>>(count: k, repeatedValue: self))
+	}
+
+	/// Selects a random value from a list and constructs a Generator that returns only that value.
+	public static func elements(xs : [A]) -> Gen<A> {
+		assert(xs.count != 0, "elements used with empty list")
+
+		return choose((0, xs.count - 1)).fmap { i in
+			return xs[i]
+		}
+	}
+
+	/// Takes a list of elements of increasing size, and chooses among an initial segment of the list.
+	/// The size of this initial segment increases with the size parameter.
+	public static func growingElements(xs : [A]) -> Gen<A> {
+		assert(xs.count != 0, "growingElements used with empty list")
+
+		let k = Double(xs.count)
+		return sized({ n in
+			let m = max(1, size(k)(m: n))
+			return Gen.elements(Array(xs[0 ..< m]))
+		})
 	}
 }
 
@@ -119,4 +206,29 @@ internal func delay<A>() -> Gen<Gen<A> -> A> {
 			}
 		}
 	})
+}
+
+/// Implementation Details Follow
+
+private func vary<S : IntegerType>(k : S)(r: StdGen) -> StdGen {
+	let s = r.split()
+	var gen = ((k % 2) == 0) ? s.0 : s.1
+	return (k == (k / 2)) ? gen : vary(k / 2)(r: r)
+}
+
+private func try<A>(gen: Gen<A>, k: Int, n : Int, p: A -> Bool) -> Gen<Optional<A>> {
+	if n == 0 {
+		return Gen.pure(.None)
+	}
+	return gen.resize(2 * k + n).bind { (let x : A) -> Gen<Optional<A>> in
+		if p(x) {
+			return Gen.pure(.Some(x))
+		}
+		return try(gen, k + 1, n - 1, p)
+	}
+}
+
+private func size(k : Double)(m : Int) -> Int {
+	let n = Double(m)
+	return Int((log(n + 1)) * k / log(100))
 }
