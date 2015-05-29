@@ -42,13 +42,6 @@ extension Gen {
 		}
 	}
 
-	/// Randomly selects and uses one of a number of given Generators.
-	public static func oneOf(gs : [A]) -> Gen<A> {
-		assert(gs.count != 0, "oneOf used with empty list")
-
-		return Gen.oneOf(gs.map({ Gen.pure($0) }))
-	}
-
 	/// Given a list of Generators and weights associated with them, this function randomly selects and
 	/// uses a Generator.
 	public static func frequency(xs : [(Int, Gen<A>)]) -> Gen<A> {
