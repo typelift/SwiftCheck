@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/typelift/SwiftCheck.svg?branch=master)](https://travis-ci.org/typelift/SwiftCheck)
-
 SwiftCheck
 ==========
 
