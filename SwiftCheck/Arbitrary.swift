@@ -227,15 +227,7 @@ extension String : Arbitrary {
 	}
 
 	public static func shrink(s : String) -> [String] {
-		if s.isEmpty {
-			return []
-		} else if count(s) == 1 {
-			let hd = s[s.startIndex]
-			return [ "" ] + [ String(Character.shrink(hd)) ]
-		}
-		let x = s[s.startIndex]
-		let xs = s[advance(s.startIndex, 1)..<s.endIndex]
-		return [ xs ] + String.shrink(xs) + String.shrink(String(Character.shrink(x)) + xs)
+		return ArrayOf.shrink(ArrayOf([Character](s))).map({ String($0.getArray) })
 	}
 }
 
