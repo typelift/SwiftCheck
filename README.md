@@ -7,25 +7,67 @@ Introduction
 ============
 
 QuickCheck is a testing library that automatically generates random data for 
-testing of program properties.  Tests, which before were just arbitrary 0-ary 
-methods prefixed with the word test, now must be of the form:
+testing of program properties.  A property is a particular facet of an algorithm
+or data structure that must be invariant under a given set of input data,
+basically an `XCTAssert` on steroids.  Where before all we could do was define
+methods prefixed by `test`, SwiftCheck allows program properties to be treated
+like *data*.
 
-```swift
-func property<A, B, C ... Z where A, B, C ... Z : Arbitrary>(A, B, C, ..., Z) -> Bool
-```
-
-For example, if we wanted to test the property that every Integer is equal to
-itself, we would express it as such:
+To define a program property the `forAll` quantifier is used with a type
+signature like `(A, B, C, ... Z) -> Testable where A : Arbitrary, B : Arbitrary ...
+Z : Arbitrary`.  SwiftCheck implements the `Arbitrary` protocol for most STL types
+and implements the `Testable` protocol for `Bool` and several other related
+types.  For example, if we wanted to test the property that every Integer is
+equal to itself, we would express it as such:
 
 ```swift
 func testAll() {
-	property["Integer Equality is Reflexive"] = forAll { (i : Int) in
+    // 'property' notation allows us to name our tests.  This becomes important
+    // when they fail and SwiftCheck reports it in the console.
+    property["Integer Equality is Reflexive"] = forAll { (i : Int) in
         return i == i
     }
 }
 ```
 
-SwiftCheck will handle the rest.  
+For a less contrived example, here is a program property that tests whether
+Array identity holds under double reversal:
+
+```swift
+// Because Swift doesn't allow us to implement Arbitrary for certain types,
+// SwiftCheck instead implements 'modifier' types that wrap them.  Here,
+// `ArrayOf<T : Arbitrary>` generates random arrays of values of type `T`.
+property["The reverse of the reverse of an array is that array"] = forAll { (xs : ArrayOf<Int>) in 
+    return xs.getArray.reverse().reverse() == xs.getArray
+}
+```
+
+Because SwiftCheck doesn't require tests to return `Bool`, just `Testable`, we
+can produce tests for complex properties with ease:
+
+```swift
+property["Shrunken lists of integers always contain [] or [0]"] = forAll { (l : ArrayOf<Int>) in
+    // Here we use the Implication Operator `==>` to define a precondition for
+    // this test.  If the precondition fails the test is discarded.  If it holds
+    // the test proceeds.
+    return (!l.getArray.isEmpty && l.getArray != [0]) ==> {
+        let ls = self.shrinkArbitrary(l).map { $0.getArray }
+        return (ls.filter({ $0 == [] || $0 == [0] }).count >= 1)
+    }()
+}
+```
+
+Properties can even depend on other properties:
+
+```swift
+property["Gen.oneOf multiple generators picks only given generators"] = forAll { (n1 : Int, n2 : Int) in
+    let g1 = Gen.pure(n1)
+    let g2 = Gen.pure(n2)
+    return forAll(Gen.oneOf([g1, g2])) { $0 == n1 || $0 == n2 }
+}
+```
+
+All you have to figure out is what to test.  SwiftCheck will handle the rest.  
 
 Shrinking
 =========
