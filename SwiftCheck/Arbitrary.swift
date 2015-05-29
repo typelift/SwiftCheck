@@ -17,8 +17,8 @@ import Darwin
 /// Shrinking is reduction in the complexity of a tested value to remove noise and present a minimal
 /// counterexample when a property fails.  While it may seem counterintuitive, a shrink necessitates
 /// returning a list of all possible "smaller" values for SwiftCheck to run through.  As long as
-/// each individual value in the returned list is less than or equal to the size of the input value
-/// a minimal case should be reached fairly efficiently.
+/// each individual value in the returned list is less than or equal to the size of the input value,
+/// and is not a duplicate of the input value, a minimal case should be reached fairly efficiently.
 ///
 /// As an example, take the `ArrayOf` implementation of shrink:
 ///
