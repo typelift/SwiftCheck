@@ -27,15 +27,14 @@ class ShrinkSpec : XCTestCase {
 			return (n != 0) ==> Set(self.shrinkArbitrary(n)).contains(0)
 		}
 
-		/// TODO: These will hold when the shrinker is fixed.
-//		property["list"] = verbose(forAll { (l : ArrayOf<Int8>) in
-//			return ArrayOf.shrink(l).map({ $0.getArray }).filter({ $0 == l.getArray }).isEmpty
-//		})
+		property["Shrinking a list never gives back the original"] = forAll { (l : ArrayOf<Int8>) in
+			return ArrayOf.shrink(l).map({ $0.getArray }).filter({ $0 == l.getArray }).isEmpty
+		}
 
-		reportProperty["Shrunken lists of integers always contain [] and [0]"] = forAll { (l : ArrayOf<Int>) in
+		property["Shrunken lists of integers always contain [] or [0]"] = forAll { (l : ArrayOf<Int>) in
 			return (!l.getArray.isEmpty && l.getArray != [0]) ==> {
 				let ls = self.shrinkArbitrary(l).map { $0.getArray }
-				return (ls.filter({ $0 == [] || $0 == [0] }).count == 2) <?> "\(ls)"
+				return (ls.filter({ $0 == [] || $0 == [0] }).count >= 1)
 			}()
 		}
 	}

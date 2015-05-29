@@ -95,16 +95,43 @@ public struct ArrayOf<A : Arbitrary> : Arbitrary, Printable {
 	}
 
 	public static func shrink(bl : ArrayOf<A>) -> [ArrayOf<A>] {
-		if bl.getArray.isEmpty {
-			return []
-		} else if bl.getArray.count == 1 {
-			let hd = bl.getArray[0]
-			return [ ArrayOf([]) ] + [ ArrayOf(A.shrink(hd)) ]
-		}
-		let x = bl.getArray[0]
-		let xs = Array<A>(bl.getArray[1..<bl.getArray.count])
-		return [ ArrayOf<A>(xs) ] + ArrayOf<A>.shrink(ArrayOf<A>(xs)) + ArrayOf<A>.shrink(ArrayOf<A>(A.shrink(x) + xs))
+		let n = bl.getArray.count
+		let xs = Int.shrink(n).reverse().map({ k in removes(k + 1, n, bl.getArray) }).reduce([], combine: +) + shrinkOne(bl.getArray)
+		return xs.map({ ArrayOf($0) })
 	}
+}
+
+private func removes<A : Arbitrary>(k : Int, n : Int, xs : [A]) -> [[A]] {
+	let xs1 = take(k, xs)
+	let xs2 = drop(k, xs)
+
+	if k > n {
+		return []
+	} else if xs2.isEmpty {
+		return [[]]
+	} else {
+		return [xs2] + removes(k, n - k, xs2).map({ xs1 + $0 })
+	}
+}
+
+private func shrinkOne<A : Arbitrary>(xs : [A]) -> [[A]] {
+	if xs.isEmpty {
+		return []
+	} else if let x = xs.first {
+		let xss = [A](xs[1..<xs.endIndex])
+		return A.shrink(x).map({ [$0] + xss }) + shrinkOne(xss).map({ [x] + $0 })
+	}
+	fatalError("Array could not produce a first element")
+}
+
+func take<T>(num : Int, xs : [T]) -> [T] {
+	let n = (num < xs.count) ? num : xs.count
+	return [T](xs[0..<n])
+}
+
+func drop<T>(num : Int, xs : [T]) -> [T] {
+	let n = (num < xs.count) ? num : xs.count
+	return [T](xs[n..<xs.endIndex])
 }
 
 public func == <T : protocol<Arbitrary, Equatable>>(lhs : ArrayOf<T>, rhs : ArrayOf<T>) -> Bool {
