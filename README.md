@@ -10,8 +10,7 @@ QuickCheck is a testing library that automatically generates random data for
 testing of program properties.  A property is a particular facet of an algorithm
 or data structure that must be invariant under a given set of input data,
 basically an `XCTAssert` on steroids.  Where before all we could do was define
-methods prefixed by `test`, SwiftCheck allows program properties to be treated
-like *data*.
+methods prefixed by `test` and assert, SwiftCheck allows program properties and tests to be treated like *data*.
 
 To define a program property the `forAll` quantifier is used with a type
 signature like `(A, B, C, ... Z) -> Testable where A : Arbitrary, B : Arbitrary ...
