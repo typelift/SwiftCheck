@@ -280,7 +280,7 @@ private func unfoldr<A, B>(f : B -> Optional<(A, B)>, #initial : B) -> [A] {
 }
 
 
-/// Coarbitrary types must take an arbitrary value of theit type and yield a function that 
+/// Coarbitrary types must take an arbitrary value of their type and yield a function that 
 /// transforms a given generator by returning a new generator that depends on the input value.
 ///
 /// Using Coarbitrary types it is possible to write an Arbitrary instance for `->` (a type that
