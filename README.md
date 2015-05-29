@@ -233,7 +233,7 @@ with custom generators as simple as possible:
 ```swift
 let onlyEven = Int.arbitrary().suchThat { $0 % 2 == 0 }
 
-let vowels = Gen.elements(["A", "E", "I", "O", U ])
+let vowels = Gen.elements(["A", "E", "I", "O", "U" ])
 
 let randomHexValue = Gen<UInt>.choose((0, 15))
 
