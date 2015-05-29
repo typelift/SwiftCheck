@@ -33,7 +33,7 @@ For a less contrived example, here is a program property that tests whether
 Array identity holds under double reversal:
 
 ```swift
-// Because Swift doesn't allow us to implement Arbitrary for certain types,
+// Because Swift doesn't allow us to implement `Arbitrary` for certain types,
 // SwiftCheck instead implements 'modifier' types that wrap them.  Here,
 // `ArrayOf<T : Arbitrary>` generates random arrays of values of type `T`.
 property["The reverse of the reverse of an array is that array"] = forAll { (xs : ArrayOf<Int>) in
