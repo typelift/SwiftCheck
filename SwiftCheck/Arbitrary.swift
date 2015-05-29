@@ -49,7 +49,7 @@ public func shrinkIntegral<A : IntegerType>(x : A) -> [A] {
 		}
 		let n = i / 2
 		return .Some((n, n))
-	}, initial: x)
+	}, initial: x < 0 ? (x * -1) : x)
 }
 
 

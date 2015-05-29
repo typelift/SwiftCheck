@@ -36,7 +36,7 @@ public struct AssertiveQuickCheck {
 }
 
 /// The interface for properties to be run through SwiftCheck without an XCTest assert.  The
-/// property will still generated console output during a test.
+/// property will still generate console output during testing.
 public var reportProperty : ReportiveQuickCheck = ReportiveQuickCheck()
 
 public struct ReportiveQuickCheck {
