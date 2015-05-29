@@ -63,7 +63,6 @@ class SimpleSpec : XCTestCase {
 			return i.x == i.x && i.y == i.y
 		}
 
-
 	}
 }
 
