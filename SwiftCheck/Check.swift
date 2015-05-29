@@ -3,7 +3,7 @@
 //  SwiftCheck
 //
 //  Created by Robert Widmann on 1/19/15.
-//  Copyright (c) 2015 Robert Widmann. All rights reserved.
+//  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
 import XCTest
@@ -11,9 +11,9 @@ import XCTest
 /// The main interface for the SwiftCheck testing mechanism. To test a program property one 
 /// subscripts into this variable with a description of the property being tested like so:
 ///
-/// property["Integer Equality is Reflexive"] = forAll { (i : Int8) in
-///	    return i == i
-/// }
+///     property["Integer Equality is Reflexive"] = forAll { (i : Int8) in
+///	        return i == i
+///     }
 ///
 /// SwiftCheck will report all failures through the XCTest mechanism like a normal testing assert,
 /// but with minimal failing case reported as well.
@@ -36,7 +36,7 @@ public struct AssertiveQuickCheck {
 }
 
 /// The interface for properties to be run through SwiftCheck without an XCTest assert.  The
-/// property will still generated console output during a test.
+/// property will still generate console output during testing.
 public var reportProperty : ReportiveQuickCheck = ReportiveQuickCheck()
 
 public struct ReportiveQuickCheck {
