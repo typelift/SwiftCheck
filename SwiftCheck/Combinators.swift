@@ -44,7 +44,8 @@ extension Gen {
 
 	/// Given a list of Generators and weights associated with them, this function randomly selects and
 	/// uses a Generator.
-	public static func frequency(xs : [(Int, Gen<A>)]) -> Gen<A> {
+	public static func frequency<S : SequenceType where S.Generator.Element == (Int, Gen<A>)>(xs : S) -> Gen<A> {
+		let xs: [(Int, Gen<A>)] = Array(xs)
 		assert(xs.count != 0, "frequency used with empty list")
 
 		return choose((1, xs.map({ $0.0 }).reduce(0, combine: +))).bind { l in
