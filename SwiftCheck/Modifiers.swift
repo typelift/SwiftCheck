@@ -69,6 +69,9 @@ public func == <T : protocol<Arbitrary, Equatable>>(lhs : Static<T>, rhs : Stati
 /// Generates an array of arbitrary values of type A.
 public struct ArrayOf<A : Arbitrary> : Arbitrary, Printable {
 	public let getArray : [A]
+	public var getContiguousArray : ContiguousArray<A> {
+		return ContiguousArray(self.getArray)
+	}
 
 	public init(_ array : [A]) {
 		self.getArray = array
