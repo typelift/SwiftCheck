@@ -51,6 +51,12 @@ extension Gen {
 			return pick(l)(lst: xs)
 		}
 	}
+
+	/// Given a list of values and weights associated with them, this function randomly selects and
+	/// uses a Generator wrapping one of the values.
+	public static func weighted(xs : [(Int, A)]) -> Gen<A> {
+		return frequency(xs.map({ ($0, Gen.pure($1)) }))
+	}
 }
 
 /// Implementation Details Follow
