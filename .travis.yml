@@ -1,7 +1,11 @@
 language: objective-c
 osx_image: beta-xcode6.3
 
-script:
-- xctool -project SwiftCheck.xcodeproj -scheme SwiftCheck -sdk macosx ONLY_ACTIVE_ARCH=NO clean build
-- xctool -project SwiftCheck.xcodeproj -scheme SwiftCheck-iOS -sdk macosx ONLY_ACTIVE_ARCH=NO clean build
+install:
+    - brew update
+    - brew install carthage || brew outdated carthage || brew update carthage
 
+script:
+    - xctool -project SwiftCheck.xcodeproj -scheme SwiftCheck -sdk macosx ONLY_ACTIVE_ARCH=NO clean build
+    - xctool -project SwiftCheck.xcodeproj -scheme SwiftCheck-iOS -sdk macosx ONLY_ACTIVE_ARCH=NO clean build
+    - carthage build --no-skip-current
