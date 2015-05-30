@@ -41,5 +41,13 @@ class ModifierSpec : XCTestCase {
 				^&&^
 				(xs.getArray == xs.getArray.reverse().reverse()) <?> "Right identity"
 		}
+
+		property["dictionaryof"] = forAll { (d : DictionaryOf<String, Int>) in
+			return true
+		}
+
+		property["setOf"] = forAll { (s : SetOf<Int>) in
+			return true
+		}
 	}
 }
