@@ -37,5 +37,12 @@ class ShrinkSpec : XCTestCase {
 				return (ls.filter({ $0 == [] || $0 == [0] }).count >= 1)
 			}()
 		}
+
+		property["Shrunken sets of integers always contain [] or [0]"] = forAll { (s : SetOf<Int>) in
+			return (!s.getSet.isEmpty && s.getSet != Set([0])) ==> {
+				let ls = self.shrinkArbitrary(s).map { $0.getSet }
+				return (ls.filter({ $0 == [] || $0 == [0] }).count >= 1)
+			}()
+		}
 	}
 }
