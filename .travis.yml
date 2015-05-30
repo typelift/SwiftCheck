@@ -3,5 +3,5 @@ osx_image: beta-xcode6.3
 
 script:
     - xctool -project SwiftCheck.xcodeproj -scheme SwiftCheck -sdk macosx ONLY_ACTIVE_ARCH=NO clean build test
-    - xctool -project SwiftCheck.xcodeproj -scheme SwiftCheck-iOS -sdk macosx ONLY_ACTIVE_ARCH=NO clean build test
+    - xctool -project SwiftCheck.xcodeproj -scheme SwiftCheck-iOS -sdk iphonesimulator8.3 ONLY_ACTIVE_ARCH=NO clean build test
 
