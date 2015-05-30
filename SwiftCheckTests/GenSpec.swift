@@ -26,6 +26,21 @@ class GenSpec : XCTestCase {
 			return forAll(Gen.frequency(Array(count: n, repeatedValue: (1, Gen.pure(0))))) { $0 == 0 }
 		}
 
+		property["Gen.weighted behaves"] = {
+			let g = Gen.weighted([
+				(10, 0),
+				(5, 1),
+			])
+
+			return forAll(g) { (i : Int) in
+				return true
+			}
+		}()
+
+		property["Gen.weighted with N arguments behaves"] = forAll(Gen<Int>.choose((0, 1000))) { n in
+			return forAll(Gen.weighted(Array(count: n, repeatedValue: (1, 0)))) { $0 == 0 }
+		}
+
 		property["The only value Gen.pure generates is the given value"] = {
 			let g = Gen.pure(0)
 			return forAll(g) { $0 == 0 }
