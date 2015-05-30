@@ -222,6 +222,42 @@ public func == <T : protocol<Arbitrary, Equatable>>(lhs : OptionalOf<T>, rhs : O
 	return lhs.getOptional == rhs.getOptional
 }
 
+public struct SetOf<A : protocol<Hashable, Arbitrary>> : Arbitrary, Printable {
+	public let getSet : Set<A>
+
+	public init(_ set : Set<A>) {
+		self.getSet = set
+	}
+
+	public var description : String {
+		return "\(self.getSet)"
+	}
+
+	private static func create(set : Set<A>) -> SetOf<A>{
+		return SetOf(set)
+	}
+
+	public static func arbitrary() -> Gen<SetOf<A>> {
+		return Gen.sized { n in
+			return Gen<Int>.choose((0, n)).bind { k in
+				if k == 0 {
+					return Gen.pure(SetOf(Set([])))
+				}
+
+				return sequence(Array((0...k)).map { _ in A.arbitrary() }).fmap({ SetOf.create(Set($0)) })
+			}
+		}
+	}
+
+	public static func shrink(s : SetOf<A>) -> [SetOf<A>] {
+		return ArrayOf.shrink(ArrayOf([A](s.getSet))).map({ SetOf(Set($0.getArray)) })
+	}
+}
+
+public func == <T : protocol<Arbitrary, Equatable, Hashable>>(lhs : SetOf<T>, rhs : SetOf<T>) -> Bool {
+	return lhs.getSet == rhs.getSet
+}
+
 /// Generates a Swift function from T to U.
 public struct ArrowOf<T : CoArbitrary, U : Arbitrary> : Arbitrary, Printable {
 	public let getArrow : T -> U
