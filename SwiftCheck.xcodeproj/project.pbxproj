@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		841408BB1B1A85A900BA2B6C /* SwiftCheck.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		842015111AF5C91C00F1F3CD /* Lattice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842015101AF5C91C00F1F3CD /* Lattice.swift */; };
 		8445C4A31B16897200280089 /* DiscardSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C201A6DBA1C00241F68 /* DiscardSpec.swift */; };
 		8445C4A41B16897200280089 /* ModifierSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8480AB2C1A7B0A9700C6162D /* ModifierSpec.swift */; };
@@ -67,6 +68,19 @@
 			remoteInfo = "SwiftCheck-iOS";
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		841408BA1B1A859B00BA2B6C /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				841408BB1B1A85A900BA2B6C /* SwiftCheck.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		842015101AF5C91C00F1F3CD /* Lattice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Lattice.swift; sourceTree = "<group>"; };
@@ -286,6 +300,7 @@
 				84DF75FE1B0BD54600C912B0 /* Sources */,
 				84DF75FF1B0BD54600C912B0 /* Frameworks */,
 				84DF76001B0BD54600C912B0 /* Resources */,
+				841408BA1B1A859B00BA2B6C /* CopyFiles */,
 			);
 			buildRules = (
 			);
