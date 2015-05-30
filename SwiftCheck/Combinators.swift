@@ -54,7 +54,7 @@ extension Gen {
 
 	/// Given a list of values and weights associated with them, this function randomly selects and
 	/// uses a Generator wrapping one of the values.
-	public static func weighted<S: SequenceType where S.Generator.Element == (Int, A)>(xs : S) -> Gen<A> {
+	public static func weighted<S : SequenceType where S.Generator.Element == (Int, A)>(xs : S) -> Gen<A> {
 		return frequency(map(xs, { ($0, Gen.pure($1)) }))
 	}
 }
