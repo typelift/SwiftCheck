@@ -141,6 +141,7 @@ public func == <T : protocol<Arbitrary, Equatable>>(lhs : ArrayOf<T>, rhs : Arra
 	return lhs.getArray == rhs.getArray
 }
 
+/// Generates an dictionary of arbitrary keys and values.
 public struct DictionaryOf<K : protocol<Hashable, Arbitrary>, V : Arbitrary> : Arbitrary, Printable {
 	public let getDictionary : Dictionary<K, V>
 
@@ -222,6 +223,7 @@ public func == <T : protocol<Arbitrary, Equatable>>(lhs : OptionalOf<T>, rhs : O
 	return lhs.getOptional == rhs.getOptional
 }
 
+/// Generates a set of arbitrary values of type A.
 public struct SetOf<A : protocol<Hashable, Arbitrary>> : Arbitrary, Printable {
 	public let getSet : Set<A>
 
