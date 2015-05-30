@@ -141,6 +141,52 @@ public func == <T : protocol<Arbitrary, Equatable>>(lhs : ArrayOf<T>, rhs : Arra
 	return lhs.getArray == rhs.getArray
 }
 
+public struct DictionaryOf<K : protocol<Hashable, Arbitrary>, V : Arbitrary> : Arbitrary, Printable {
+	public let getDictionary : Dictionary<K, V>
+
+	public init(_ dict : Dictionary<K, V>) {
+		self.getDictionary = dict
+	}
+
+	public var description : String {
+		return "\(self.getDictionary)"
+	}
+
+	private static func create(dict : Dictionary<K, V>) -> DictionaryOf<K, V> {
+		return DictionaryOf(dict)
+	}
+
+	public static func arbitrary() -> Gen<DictionaryOf<K, V>> {
+		return ArrayOf<K>.arbitrary().bind { k in
+			return ArrayOf<V>.arbitrary().bind { v in
+				return Gen.pure(DictionaryOf(Dictionary<K, V>(Zip2(k.getArray, v.getArray))))
+			}
+		}
+	}
+
+	public static func shrink(d : DictionaryOf<K, V>) -> [DictionaryOf<K, V>] {
+		var xs = [DictionaryOf<K, V>]()
+		for (k, v) in d.getDictionary {
+			xs.append(DictionaryOf(Dictionary(Zip2(K.shrink(k), V.shrink(v)))))
+		}
+		return xs
+	}
+}
+
+public func == <K : protocol<Arbitrary, Equatable, Hashable>, V : protocol<Equatable, Arbitrary>>(lhs : DictionaryOf<K, V>, rhs : DictionaryOf<K, V>) -> Bool {
+	return lhs.getDictionary == rhs.getDictionary
+}
+
+extension Dictionary {
+	init<S : SequenceType where S.Generator.Element == Element>(_ pairs : S) {
+		self.init()
+		var g = pairs.generate()
+		while let (k : Key, v : Value) = g.next() {
+			self[k] = v
+		}
+	}
+}
+
 /// Generates an Optional of arbitrary values of type A.
 public struct OptionalOf<A : Arbitrary> : Arbitrary, Printable {
 	public let getOptional : A?
