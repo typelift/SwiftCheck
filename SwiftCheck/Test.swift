@@ -488,7 +488,7 @@ internal func printDistributionGraph(st : State) {
 		return (n < 10 ? " " : "") + "\(n)" + "% "
 	}
 
-	let gAllLabels = st.collected.map({ s in
+	let gAllLabels = st.collected.map({ (s: Set<String>) in
 		return Array(s).filter({ t in st.labels[t] == .Some(0) }).reduce("", combine: { (l: String, r: String) in l + ", " + r })
 	})
 	let gAll = groupBy(sorted(gAllLabels.filter({ !$0.isEmpty })), ==)
