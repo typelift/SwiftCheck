@@ -350,23 +350,6 @@ internal func giveUp(st: State)(f : (StdGen -> Int -> Prop)) -> Result {
 	return Result.GaveUp(numTests: st.numSuccessTests, labels: summary(st), output: "")
 }
 
-internal func foundFailure(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
-	let state = State(name: st.name
-					, maxSuccessTests: st.maxSuccessTests
-					, maxDiscardedTests: st.maxDiscardedTests
-					, computeSize: st.computeSize
-					, numSuccessTests: st.numSuccessTests
-					, numDiscardedTests: st.numDiscardedTests
-					, labels: st.labels
-					, collected: st.collected
-					, expectedFailure: st.expectedFailure
-					, randomSeed: st.randomSeed
-					, numSuccessShrinks: st.numSuccessShrinks
-					, numTryShrinks: st.numTryShrinks + 1
-					, numTotTryShrinks: st.numTotTryShrinks)
-	return localMin(state, res, res, ts)
-}
-
 // Interface to shrinking loop.  Returns (number of shrinks performed, number of failed shrinks, 
 // total number of shrinks performed).
 //
@@ -376,15 +359,15 @@ internal func foundFailure(st : State, res : TestResult, ts : [Rose<TestResult>]
 // for complex shrinks (much like `split` in the Swift STL), and was slow as hell.  This way we stay
 // in one stack frame no matter what and give ARC a chance to cleanup after us.  Plus we get to
 // stay within a reasonable ~50-100 megabytes for truly horrendous tests that used to eat 8 gigs.
-internal func localMin(st : State, res : TestResult, res2 : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
-	if let e = res2.theException {
+internal func foundFailure(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
+	if let e = res.theException {
 		fatalError("Test failed due to exception: \(e)")
 	}
 
 	var lastResult = res
 	var branches = ts
 	var numSuccessShrinks = st.numSuccessShrinks
-	var numTryShrinks = st.numTryShrinks
+	var numTryShrinks = st.numTryShrinks + 1
 	var numTotTryShrinks = st.numTotTryShrinks
 
 	// cont is a sanity check so we don't fall into an infinite loop.  It is set to false at each
