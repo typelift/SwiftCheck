@@ -176,7 +176,7 @@ extension UInt64 : Arbitrary {
 extension Float : Arbitrary {
 	public static func arbitrary() -> Gen<Float> {
 		return Gen.sized({ n in
-			return n == 0 ? Gen<Float>.pure(0.0) : Gen<Float>.pure(Float(-n) + Float(arc4random()) / Float(UINT32_MAX / UInt32((n)*2)))
+			return n == 0 ? Gen.pure(0.0) : Gen.pure(Float(-n) + Float(arc4random()) / Float(UINT32_MAX / UInt32((n)*2)))
 		})
 	}
 
