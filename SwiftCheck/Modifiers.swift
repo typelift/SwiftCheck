@@ -119,7 +119,9 @@ private func shrinkOne<A : Arbitrary>(xs : [A]) -> [[A]] {
 		return []
 	} else if let x = xs.first {
 		let xss = [A](xs[1..<xs.endIndex])
-		return A.shrink(x).map({ [$0] + xss }) + shrinkOne(xss).map({ [x] + $0 })
+		let a = A.shrink(x).map({ [$0] + xss })
+		let b = shrinkOne(xss).map({ [x] + $0 })
+		return a + b
 	}
 	fatalError("Array could not produce a first element")
 }
