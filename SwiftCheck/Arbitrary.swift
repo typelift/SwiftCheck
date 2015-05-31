@@ -194,7 +194,7 @@ extension Float : Arbitrary {
 extension Double : Arbitrary {
 	public static func arbitrary() -> Gen<Double> {
 		return Gen.sized({ n in
-			return n == 0 ? Gen<Double>.pure(0.0) : Gen<Double>.pure(Double(-n) + Double(arc4random()) / Double(UINT32_MAX / UInt32(n*2)))
+			return n == 0 ? Gen.pure(0.0) : Gen.pure(Double(-n) + Double(arc4random()) / Double(UINT32_MAX / UInt32(n*2)))
 		})
 	}
 
