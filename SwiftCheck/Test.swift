@@ -446,7 +446,7 @@ internal func localMin(st : State, res : TestResult, res2 : TestResult, ts : [Ro
 
 internal func localMinFound(st : State, res : TestResult) -> (Int, Int, Int) {
 	let testMsg = " (after \(st.numSuccessTests + 1) test"
-	let shrinkMsg = st.numSuccessShrinks > 1 ? ("and \(st.numSuccessShrinks) shrink") : ""
+	let shrinkMsg = st.numSuccessShrinks > 1 ? (" and \(st.numSuccessShrinks) shrink") : ""
 	
 	func pluralize(s : String, i : Int) -> String {
 		if i > 1 {
@@ -456,7 +456,7 @@ internal func localMinFound(st : State, res : TestResult) -> (Int, Int, Int) {
 	}
 	
 	println("Proposition: " + st.name)
-	println(res.reason + pluralize(testMsg, st.numSuccessTests) + pluralize(shrinkMsg, st.numSuccessShrinks) + "):")
+	println(res.reason + pluralize(testMsg, st.numSuccessTests + 1) + pluralize(shrinkMsg, st.numSuccessShrinks) + "):")
 	dispatchAfterFinalFailureCallbacks(st, res)
 	return (st.numSuccessShrinks, st.numTotTryShrinks - st.numTryShrinks, st.numTryShrinks)
 }
