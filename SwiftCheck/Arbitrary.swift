@@ -175,8 +175,8 @@ extension UInt64 : Arbitrary {
 
 extension Float : Arbitrary {
 	public static func arbitrary() -> Gen<Float> {
-		return Gen.sized({ n in
-			return n == 0 ? Gen<Float>.pure(0.0) : Gen<Float>.pure(Float(-n) + Float(arc4random()) / Float(UINT32_MAX / UInt32((n)*2)))
+		return Gen.sized({ (n : Int) in
+			return n == 0 ? Gen.pure(0.0) : Gen.pure(Float(-n) + Float(arc4random()) / Float(UINT32_MAX / UInt32((n)*2)))
 		})
 	}
 
@@ -193,8 +193,8 @@ extension Float : Arbitrary {
 
 extension Double : Arbitrary {
 	public static func arbitrary() -> Gen<Double> {
-		return Gen.sized({ n in
-			return n == 0 ? Gen<Double>.pure(0.0) : Gen<Double>.pure(Double(-n) + Double(arc4random()) / Double(UINT32_MAX / UInt32(n*2)))
+		return Gen.sized({ (n : Int) in
+			return n == 0 ? Gen.pure(0.0) : Gen.pure(Double(-n) + Double(arc4random()) / Double(UINT32_MAX / UInt32(n*2)))
 		})
 	}
 

@@ -33,10 +33,6 @@ public struct Blind<A : Arbitrary> : Arbitrary, Printable {
 	}
 }
 
-public func == <T : protocol<Arbitrary, Equatable>>(lhs : Blind<T>, rhs : Blind<T>) -> Bool {
-	return lhs.getBlind == rhs.getBlind
-}
-
 /// Guarantees test cases for its underlying type will not be shrunk.
 public struct Static<A : Arbitrary> : Arbitrary, Printable {
 	public let getStatic : A
@@ -60,10 +56,6 @@ public struct Static<A : Arbitrary> : Arbitrary, Printable {
 	public static func shrink(bl : Static<A>) -> [Static<A>] {
 		return []
 	}
-}
-
-public func == <T : protocol<Arbitrary, Equatable>>(lhs : Static<T>, rhs : Static<T>) -> Bool {
-	return lhs.getStatic == rhs.getStatic
 }
 
 /// Generates an array of arbitrary values of type A.
@@ -119,7 +111,9 @@ private func shrinkOne<A : Arbitrary>(xs : [A]) -> [[A]] {
 		return []
 	} else if let x = xs.first {
 		let xss = [A](xs[1..<xs.endIndex])
-		return A.shrink(x).map({ [$0] + xss }) + shrinkOne(xss).map({ [x] + $0 })
+		let a = A.shrink(x).map({ [$0] + xss })
+		let b = shrinkOne(xss).map({ [x] + $0 })
+		return a + b
 	}
 	fatalError("Array could not produce a first element")
 }
@@ -132,10 +126,6 @@ func take<T>(num : Int, xs : [T]) -> [T] {
 func drop<T>(num : Int, xs : [T]) -> [T] {
 	let n = (num < xs.count) ? num : xs.count
 	return [T](xs[n..<xs.endIndex])
-}
-
-public func == <T : protocol<Arbitrary, Equatable>>(lhs : ArrayOf<T>, rhs : ArrayOf<T>) -> Bool {
-	return lhs.getArray == rhs.getArray
 }
 
 /// Generates an Optional of arbitrary values of type A.
@@ -167,10 +157,6 @@ public struct OptionalOf<A : Arbitrary> : Arbitrary, Printable {
 		}
 		return []
 	}
-}
-
-public func == <T : protocol<Arbitrary, Equatable>>(lhs : OptionalOf<T>, rhs : OptionalOf<T>) -> Bool {
-	return lhs.getOptional == rhs.getOptional
 }
 
 /// Generates a Swift function from T to U.
@@ -224,10 +210,6 @@ public struct Positive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary, P
 	}
 }
 
-public func == <T : protocol<Arbitrary, SignedNumberType>>(lhs : Positive<T>, rhs : Positive<T>) -> Bool {
-	return lhs.getPositive == rhs.getPositive
-}
-
 /// Guarantees that every generated integer is never 0.
 public struct NonZero<A : protocol<Arbitrary, IntegerType>> : Arbitrary, Printable {
 	public let getNonZero : A
@@ -253,10 +235,6 @@ public struct NonZero<A : protocol<Arbitrary, IntegerType>> : Arbitrary, Printab
 	}
 }
 
-public func == <T : protocol<Arbitrary, IntegerType>>(lhs : NonZero<T>, rhs : NonZero<T>) -> Bool {
-	return lhs.getNonZero == rhs.getNonZero
-}
-
 /// Guarantees that every generated integer is greater than or equal to 0.
 public struct NonNegative<A : protocol<Arbitrary, IntegerType>> : Arbitrary, Printable {
 	public let getNonNegative : A
@@ -280,8 +258,4 @@ public struct NonNegative<A : protocol<Arbitrary, IntegerType>> : Arbitrary, Pri
 	public static func shrink(bl : NonNegative<A>) -> [NonNegative<A>] {
 		return A.shrink(bl.getNonNegative).filter({ $0 >= 0 }).map({ NonNegative($0) })
 	}
-}
-
-public func == <T : protocol<Arbitrary, IntegerType>>(lhs : NonNegative<T>, rhs : NonNegative<T>) -> Bool {
-	return lhs.getNonNegative == rhs.getNonNegative
 }
