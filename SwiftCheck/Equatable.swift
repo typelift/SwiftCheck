@@ -18,8 +18,16 @@ public func == <T : protocol<Arbitrary, Equatable>>(lhs : ArrayOf<T>, rhs : Arra
 	return lhs.getArray == rhs.getArray
 }
 
+public func == <K : protocol<Arbitrary, Equatable, Hashable>, V : protocol<Equatable, Arbitrary>>(lhs : DictionaryOf<K, V>, rhs : DictionaryOf<K, V>) -> Bool {
+	return lhs.getDictionary == rhs.getDictionary
+}
+
 public func == <T : protocol<Arbitrary, Equatable>>(lhs : OptionalOf<T>, rhs : OptionalOf<T>) -> Bool {
 	return lhs.getOptional == rhs.getOptional
+}
+
+public func == <T : protocol<Arbitrary, Equatable, Hashable>>(lhs : SetOf<T>, rhs : SetOf<T>) -> Bool {
+	return lhs.getSet == rhs.getSet
 }
 
 public func == <T : protocol<Arbitrary, SignedNumberType>>(lhs : Positive<T>, rhs : Positive<T>) -> Bool {

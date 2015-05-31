@@ -61,6 +61,9 @@ public struct Static<A : Arbitrary> : Arbitrary, Printable {
 /// Generates an array of arbitrary values of type A.
 public struct ArrayOf<A : Arbitrary> : Arbitrary, Printable {
 	public let getArray : [A]
+	public var getContiguousArray : ContiguousArray<A> {
+		return ContiguousArray(self.getArray)
+	}
 
 	public init(_ array : [A]) {
 		self.getArray = array
@@ -128,6 +131,49 @@ func drop<T>(num : Int, xs : [T]) -> [T] {
 	return [T](xs[n..<xs.endIndex])
 }
 
+/// Generates an dictionary of arbitrary keys and values.
+public struct DictionaryOf<K : protocol<Hashable, Arbitrary>, V : Arbitrary> : Arbitrary, Printable {
+	public let getDictionary : Dictionary<K, V>
+
+	public init(_ dict : Dictionary<K, V>) {
+		self.getDictionary = dict
+	}
+
+	public var description : String {
+		return "\(self.getDictionary)"
+	}
+
+	private static func create(dict : Dictionary<K, V>) -> DictionaryOf<K, V> {
+		return DictionaryOf(dict)
+	}
+
+	public static func arbitrary() -> Gen<DictionaryOf<K, V>> {
+		return ArrayOf<K>.arbitrary().bind { k in
+			return ArrayOf<V>.arbitrary().bind { v in
+				return Gen.pure(DictionaryOf(Dictionary<K, V>(Zip2(k.getArray, v.getArray))))
+			}
+		}
+	}
+
+	public static func shrink(d : DictionaryOf<K, V>) -> [DictionaryOf<K, V>] {
+		var xs = [DictionaryOf<K, V>]()
+		for (k, v) in d.getDictionary {
+			xs.append(DictionaryOf(Dictionary(Zip2(K.shrink(k), V.shrink(v)))))
+		}
+		return xs
+	}
+}
+
+extension Dictionary {
+	init<S : SequenceType where S.Generator.Element == Element>(_ pairs : S) {
+		self.init()
+		var g = pairs.generate()
+		while let (k : Key, v : Value) = g.next() {
+			self[k] = v
+		}
+	}
+}
+
 /// Generates an Optional of arbitrary values of type A.
 public struct OptionalOf<A : Arbitrary> : Arbitrary, Printable {
 	public let getOptional : A?
@@ -159,6 +205,39 @@ public struct OptionalOf<A : Arbitrary> : Arbitrary, Printable {
 	}
 }
 
+/// Generates a set of arbitrary values of type A.
+public struct SetOf<A : protocol<Hashable, Arbitrary>> : Arbitrary, Printable {
+	public let getSet : Set<A>
+
+	public init(_ set : Set<A>) {
+		self.getSet = set
+	}
+
+	public var description : String {
+		return "\(self.getSet)"
+	}
+
+	private static func create(set : Set<A>) -> SetOf<A>{
+		return SetOf(set)
+	}
+
+	public static func arbitrary() -> Gen<SetOf<A>> {
+		return Gen.sized { n in
+			return Gen<Int>.choose((0, n)).bind { k in
+				if k == 0 {
+					return Gen.pure(SetOf(Set([])))
+				}
+
+				return sequence(Array((0...k)).map { _ in A.arbitrary() }).fmap({ SetOf.create(Set($0)) })
+			}
+		}
+	}
+
+	public static func shrink(s : SetOf<A>) -> [SetOf<A>] {
+		return ArrayOf.shrink(ArrayOf([A](s.getSet))).map({ SetOf(Set($0.getArray)) })
+	}
+}
+
 /// Generates a Swift function from T to U.
 public struct ArrowOf<T : CoArbitrary, U : Arbitrary> : Arbitrary, Printable {
 	public let getArrow : T -> U
@@ -183,7 +262,6 @@ public struct ArrowOf<T : CoArbitrary, U : Arbitrary> : Arbitrary, Printable {
 		return []
 	}
 }
-
 
 /// Guarantees that every generated integer is greater than 0.
 public struct Positive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary, Printable {
