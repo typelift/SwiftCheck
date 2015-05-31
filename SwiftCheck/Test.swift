@@ -489,7 +489,7 @@ internal func printDistributionGraph(st : State) {
 	}
 
 	let gAllLabels = st.collected.map({ s in
-		return Array(s).filter({ t in st.labels[t] == .Some(0) }).reduce("", combine: { (l, r) in l + ", " + r })
+		return Array(s).filter({ t in st.labels[t] == .Some(0) }).reduce("", combine: { (l: String, r: String) in l + ", " + r })
 	})
 	let gAll = groupBy(sorted(gAllLabels.filter({ !$0.isEmpty })), ==)
 	let gPrint = gAll.map({ ss in showP((ss.count * 100) / st.numSuccessTests) + ss.first! })
