@@ -309,7 +309,7 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 					}
 
 					// Attempt a shrink.
-					let (numShrinks, totFailed, lastFailed) = foundFailure(st, res, ts())
+					let (numShrinks, totFailed, lastFailed) = findMinimalFailingTestCase(st, res, ts())
 
 					if !expect {
 						let s = Result.Success(numTests: st.numSuccessTests + 1, labels: summary(st), output: "+++ OK, failed as expected. ")
@@ -359,7 +359,7 @@ internal func giveUp(st: State)(f : (StdGen -> Int -> Prop)) -> Result {
 // for complex shrinks (much like `split` in the Swift STL), and was slow as hell.  This way we stay
 // in one stack frame no matter what and give ARC a chance to cleanup after us.  Plus we get to
 // stay within a reasonable ~50-100 megabytes for truly horrendous tests that used to eat 8 gigs.
-internal func foundFailure(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
+internal func findMinimalFailingTestCase(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
 	if let e = res.theException {
 		fatalError("Test failed due to exception: \(e)")
 	}
@@ -424,10 +424,10 @@ internal func foundFailure(st : State, res : TestResult, ts : [Rose<TestResult>]
 					, numSuccessShrinks: numSuccessShrinks
 					, numTryShrinks: numTryShrinks
 					, numTotTryShrinks: numTotTryShrinks)
-	return localMinFound(state, lastResult)
+	return reportMinimumCaseFound(state, lastResult)
 }
 
-internal func localMinFound(st : State, res : TestResult) -> (Int, Int, Int) {
+internal func reportMinimumCaseFound(st : State, res : TestResult) -> (Int, Int, Int) {
 	let testMsg = " (after \(st.numSuccessTests + 1) test"
 	let shrinkMsg = st.numSuccessShrinks > 1 ? (" and \(st.numSuccessShrinks) shrink") : ""
 	
