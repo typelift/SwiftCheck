@@ -55,7 +55,7 @@ extension Gen {
 
 /// Implementation Details Follow
 
-private func pick<A>(n: Int)(lst: [(Int, Gen<A>)]) -> Gen<A> {
+private func pick<A>(n : Int)(lst : [(Int, Gen<A>)]) -> Gen<A> {
 	let (k, x) = lst[0]
 	let tl = Array<(Int, Gen<A>)>(lst[1..<lst.count])
 	if n <= k {
