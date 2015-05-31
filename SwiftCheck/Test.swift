@@ -369,68 +369,79 @@ internal func foundFailure(st : State, res : TestResult, ts : [Rose<TestResult>]
 
 // Interface to shrinking loop.  Returns (number of shrinks performed, number of failed shrinks, 
 // total number of shrinks performed).
+//
+// This ridiculously stateful looping nonsense is due to limitations of the Swift unroller and, more
+// importantly, ARC.  This has been written with recursion in the past, and it was fabulous and
+// beautiful, but it generated useless objects that ARC couldn't release on the order of Gigabytes
+// for complex shrinks (much like `split` in the Swift STL), and was slow as hell.  This way we stay
+// in one stack frame no matter what and give ARC a chance to cleanup after us.  Plus we get to
+// stay within a reasonable ~50-100 megabytes for truly horrendous tests that used to eat 8 gigs.
 internal func localMin(st : State, res : TestResult, res2 : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
 	if let e = res2.theException {
 		fatalError("Test failed due to exception: \(e)")
 	}
-	return localMinimum(st, res, ts)
-}
 
-// Shrinking Loop:
-//
-// Attempts to calculate a local minimum given state, the result of the last test, and the rest of
-// the Rose Tree for that test.
-//
-// The Rose tree is traversed as deeply as possible looking for a minimal failing case.  It begins
-// by invoking the property test with the first shrunken value.  If the test fails that node is
-// shrunk and its branches run through this process.  If the test is discarded or suceeds, the next
-// shrunken value is tried.  Once the tree has run out of branches, we call the last value totally
-// shrunk.
-internal func localMinimum(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
-	if ts.isEmpty {
-		return localMinFound(st, res)
-	}
+	var lastResult = res
+	var branches = ts
+	var numSuccessShrinks = st.numSuccessShrinks
+	var numTryShrinks = st.numTryShrinks
+	var numTotTryShrinks = st.numTotTryShrinks
 
-	switch reduce(ts[0]) {
-	case .MkRose(let resC, let ts1):
-		let res1 = resC()
-		dispatchAfterTestCallbacks(st, res1)
-
-		// Did we fail?  Then try the next set of branches.
-		if res1.ok == .Some(false) {
-			let state = State(name: st.name
-							, maxSuccessTests: st.maxSuccessTests
-							, maxDiscardedTests: st.maxDiscardedTests
-							, computeSize: st.computeSize
-							, numSuccessTests: st.numSuccessTests + 1
-							, numDiscardedTests: st.numDiscardedTests
-							, labels: st.labels
-							, collected: st.collected
-							, expectedFailure: st.expectedFailure
-							, randomSeed: st.randomSeed
-							, numSuccessShrinks: st.numSuccessShrinks
-							, numTryShrinks: 0
-							, numTotTryShrinks: st.numTotTryShrinks)
-			return localMin(state, res1, res, ts1())
-		} else { // If not, then try the next shrink value.
-			let state = State(name: st.name
-							, maxSuccessTests: st.maxSuccessTests
-							, maxDiscardedTests: st.maxDiscardedTests
-							, computeSize: st.computeSize
-							, numSuccessTests: st.numSuccessTests + 1
-							, numDiscardedTests: st.numDiscardedTests
-							, labels: st.labels
-							, collected: st.collected
-							, expectedFailure: st.expectedFailure
-							, randomSeed: st.randomSeed
-							, numSuccessShrinks: st.numSuccessShrinks
-							, numTryShrinks: st.numTryShrinks
-							, numTotTryShrinks: st.numTotTryShrinks + 1)
-			return localMin(state, res, res, Array(ts[1..<ts.count]))
+	// cont is a sanity check so we don't fall into an infinite loop.  It is set to false at each
+	// new iteration and true when we select a new set of branches to test.  If the branch
+	// selection doesn't change then we have exhausted our possibilities and so must have reached a
+	// minimal case.
+	var cont = true
+	while cont {
+		/// If we're out of branches we're out of options.
+		if branches.isEmpty {
+			break;
 		}
-	default:
-		fatalError("Rose should not have reduced to IO")
+
+		cont = false
+		numTryShrinks = 0
+
+		// Try all possible courses of action in this Rose Tree
+		for r in branches {
+			switch reduce(r) {
+			case .MkRose(let resC, let ts1):
+				let res1 = resC()
+				dispatchAfterTestCallbacks(st, res1)
+
+				// Did we fail?  Good!  Failure is healthy.  
+				// Try the next set of branches.
+				if res1.ok == .Some(false) {
+					lastResult = res1
+					branches = ts1()
+					cont = true
+					break;
+				}
+
+				// Otherwise increment the tried shrink counter and the failed shrink counter.
+				numTryShrinks++
+				numTotTryShrinks++
+			default:
+				fatalError("Rose should not have reduced to IO")
+			}
+		}
+
+		numSuccessShrinks++
 	}
+
+	let state = State(name: st.name
+					, maxSuccessTests: st.maxSuccessTests
+					, maxDiscardedTests: st.maxDiscardedTests
+					, computeSize: st.computeSize
+					, numSuccessTests: st.numSuccessTests
+					, numDiscardedTests: st.numDiscardedTests
+					, labels: st.labels
+					, collected: st.collected
+					, expectedFailure: st.expectedFailure
+					, randomSeed: st.randomSeed
+					, numSuccessShrinks: numSuccessShrinks
+					, numTryShrinks: numTryShrinks
+					, numTotTryShrinks: numTotTryShrinks)
+	return localMinFound(state, lastResult)
 }
 
 internal func localMinFound(st : State, res : TestResult) -> (Int, Int, Int) {
