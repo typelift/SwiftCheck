@@ -241,8 +241,10 @@ internal func test(st : State, f : (StdGen -> Int -> Prop)) -> Result {
 	while true {
 		switch runATest(state)(f: f) {
 			case let .Left(fail):
-				switch doneTesting(fail.value.1)(f: f) {
-				case let .NoExpectedFailure(numTests, labels, output):
+				switch (fail.value.0, doneTesting(fail.value.1)(f: f)) {
+				case let (.Success(_, _, _), _):
+					return fail.value.0
+				case let (_, .NoExpectedFailure(numTests, labels, output)):
 					return .NoExpectedFailure(numTests: numTests, labels: labels, output: output)
 				default:
 					return fail.value.0
