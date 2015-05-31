@@ -19,7 +19,7 @@ public struct Gen<A> {
 		return unGen(r)(30)
 	}
 
-	/// TODO: File Radar; These must be in here or we get linker errors.
+	/// These must be in here or we get linker errors; rdar://21172325
 
 	/// Shakes up the internal Random Number generator for a given Generator with a seed.
 	public func variant<S : IntegerType>(seed: S) -> Gen<A> {
