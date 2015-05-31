@@ -25,9 +25,12 @@ public struct AssertiveQuickCheck {
 			fatalError("Assertive proposition '\(s)' has an undefined test case")
 		}
 		set(test) {
-			switch quickCheckWithResult(stdArgs(name: s), test) {
+			let r = quickCheckWithResult(stdArgs(name: s), test)
+			switch r {
 			case let .Failure(numTests, numShrinks, usedSeed, usedSize, reason, labels, output):
 				XCTFail(reason)
+			case let .NoExpectedFailure(numTests, labels, output):
+				XCTFail("Expected property to fail but it didn't.")
 			default:
 				return
 			}
