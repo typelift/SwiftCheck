@@ -241,7 +241,12 @@ internal func test(st : State, f : (StdGen -> Int -> Prop)) -> Result {
 	while true {
 		switch runATest(state)(f: f) {
 			case let .Left(fail):
-				return doneTesting(fail.value.1)(f: f)
+				switch doneTesting(fail.value.1)(f: f) {
+				case let .NoExpectedFailure(numTests, labels, output):
+					return .NoExpectedFailure(numTests: numTests, labels: labels, output: output)
+				default:
+					return fail.value.0
+				}
 			case let .Right(sta):
 				if sta.value.numSuccessTests >= sta.value.maxSuccessTests {
 					return doneTesting(sta.value)(f: f)
@@ -323,7 +328,22 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 											, reason: res.reason
 											, labels: summary(st)
 											, output: "*** Failed! ")
-					return .Left(Box((stat, st)))
+
+					let state = State(name: st.name
+									, maxSuccessTests: st.maxSuccessTests
+									, maxDiscardedTests: st.maxDiscardedTests
+									, computeSize: st.computeSize
+									, numSuccessTests: st.numSuccessTests
+									, numDiscardedTests: st.numDiscardedTests + 1
+									, labels: st.labels
+									, collected: st.collected
+									, expectedFailure: res.expect
+									, randomSeed: rnd2
+									, numSuccessShrinks: st.numSuccessShrinks
+									, numTryShrinks: st.numTryShrinks
+									, numTotTryShrinks: st.numTotTryShrinks)
+
+					return .Left(Box((stat, state)))
 			default:
 				fatalError("Pattern Match Failed: switch on a Result was inexhaustive.")
 				break
@@ -338,10 +358,10 @@ internal func doneTesting(st : State)(f : (StdGen -> Int -> Prop)) -> Result {
 	if st.expectedFailure {
 		println("*** Passed " + "\(st.numSuccessTests)" + " tests")
 		printDistributionGraph(st)
-		return Result.Success(numTests: st.numSuccessTests, labels: summary(st), output: "")
+		return .Success(numTests: st.numSuccessTests, labels: summary(st), output: "")
 	} else {
 		printDistributionGraph(st)
-		return Result.NoExpectedFailure(numTests: st.numSuccessTests, labels: summary(st), output: "")
+		return .NoExpectedFailure(numTests: st.numSuccessTests, labels: summary(st), output: "")
 	}
 }
 
