@@ -13,7 +13,7 @@ class ShrinkSpec : XCTestCase {
 	func shrinkArbitrary<A : Arbitrary>(x : A) -> [A] {
 		let xs = A.shrink(x)
 		if let x = xs.first {
-			return xs + [x].map({ self.shrinkArbitrary($0) }).reduce([], combine: +)
+			return xs + [x].flatMap({ self.shrinkArbitrary($0) })
 		}
 		return xs
 	}

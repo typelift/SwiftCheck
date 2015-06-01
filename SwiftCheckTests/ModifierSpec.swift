@@ -41,5 +41,14 @@ class ModifierSpec : XCTestCase {
 				^&&^
 				(xs.getArray == xs.getArray.reverse().reverse()) <?> "Right identity"
 		}
+
+		property["map behaves"] = forAll { (xs : ArrayOf<Int>, f : ArrowOf<Int, Int>) in
+			return xs.getArray.map(f.getArrow) == xs.getArray.map(f.getArrow)
+		}
+
+		property["filter behaves"] = forAll { (xs : ArrayOf<Int>, pred : ArrowOf<Int, Bool>) in
+			let f = pred.getArrow
+			return (xs.getArray.filter(f).reduce(true, combine: { $0.0 && f($0.1) }) as Bool)
+		}
 	}
 }
