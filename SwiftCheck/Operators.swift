@@ -13,13 +13,21 @@ infix operator ==> {
 
 /// Models implication for properties.  That is, the property holds if the first argument is false
 /// (in which case the test case is discarded), or if the given property holds.
-public func ==>(b : Bool, p : Testable) -> Property {
+public func ==>(b : Bool, @autoclosure p : () -> Testable) -> Property {
 	if b {
-		return p.property()
+		return p().property()
 	}
 	return Discard().property()
 }
 
+/// Models implication for properties.  That is, the property holds if the first argument is false
+/// (in which case the test case is discarded), or if the given property holds.
+public func ==>(b : Bool, p : () -> Testable) -> Property {
+	if b {
+		return p().property()
+	}
+	return Discard().property()
+}
 
 infix operator ==== {
 	precedence 140
