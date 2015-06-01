@@ -7,7 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		841408BB1B1A85A900BA2B6C /* SwiftCheck.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		842015111AF5C91C00F1F3CD /* Lattice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842015101AF5C91C00F1F3CD /* Lattice.swift */; };
+		8445C4A31B16897200280089 /* DiscardSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C201A6DBA1C00241F68 /* DiscardSpec.swift */; };
+		8445C4A41B16897200280089 /* ModifierSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8480AB2C1A7B0A9700C6162D /* ModifierSpec.swift */; };
+		8445C4A51B16897200280089 /* BooleanIdentitySpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848076671AF5D6A100CBE3EF /* BooleanIdentitySpec.swift */; };
+		8445C4AA1B16D37800280089 /* GenSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8445C4A91B16D37800280089 /* GenSpec.swift */; };
+		8445C4AB1B16D37800280089 /* GenSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8445C4A91B16D37800280089 /* GenSpec.swift */; };
+		8445C4AD1B17E48300280089 /* ShrinkSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8445C4AC1B17E48300280089 /* ShrinkSpec.swift */; };
+		8445C4AE1B17E48300280089 /* ShrinkSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8445C4AC1B17E48300280089 /* ShrinkSpec.swift */; };
 		844FCC93198B320500EB242A /* SwiftCheck.h in Headers */ = {isa = PBXBuildFile; fileRef = 844FCC92198B320500EB242A /* SwiftCheck.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		844FCC99198B320500EB242A /* SwiftCheck.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 844FCC8D198B320500EB242A /* SwiftCheck.framework */; };
 		844FCCAA198B323800EB242A /* Arbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCA9198B323800EB242A /* Arbitrary.swift */; };
@@ -20,7 +28,6 @@
 		844FCCC9198EFF9B00EB242A /* SimpleSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCC8198EFF9B00EB242A /* SimpleSpec.swift */; };
 		844FCCCF198F24CF00EB242A /* Combinators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCCE198F24CF00EB242A /* Combinators.swift */; };
 		8450D24A1AF8003800095EF6 /* Operators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8450D2491AF8003700095EF6 /* Operators.swift */; };
-		84572C211A6DBA1C00241F68 /* DiscardSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C201A6DBA1C00241F68 /* DiscardSpec.swift */; };
 		84572C251A6DBAA800241F68 /* Check.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C241A6DBAA800241F68 /* Check.swift */; };
 		84572C2B1A6DBABA00241F68 /* Testable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C2A1A6DBABA00241F68 /* Testable.swift */; };
 		848076681AF5D6A100CBE3EF /* BooleanIdentitySpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848076671AF5D6A100CBE3EF /* BooleanIdentitySpec.swift */; };
@@ -46,6 +53,8 @@
 		84DF76211B0BD58900C912B0 /* BooleanIdentitySpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848076671AF5D6A100CBE3EF /* BooleanIdentitySpec.swift */; };
 		84DF76241B0BD99900C912B0 /* SwiftCheck.h in Headers */ = {isa = PBXBuildFile; fileRef = 844FCC92198B320500EB242A /* SwiftCheck.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84F2C4F71A7AD43F00316E5F /* Modifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F2C4F61A7AD43F00316E5F /* Modifiers.swift */; };
+		D46395B61B1A94D200AA1B65 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46395B51B1A94D200AA1B65 /* Equatable.swift */; };
+		D46395B71B1A94D200AA1B65 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46395B51B1A94D200AA1B65 /* Equatable.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,8 +74,23 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		841408BA1B1A859B00BA2B6C /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				841408BB1B1A85A900BA2B6C /* SwiftCheck.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		842015101AF5C91C00F1F3CD /* Lattice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Lattice.swift; sourceTree = "<group>"; };
+		8445C4A91B16D37800280089 /* GenSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GenSpec.swift; sourceTree = "<group>"; };
+		8445C4AC1B17E48300280089 /* ShrinkSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShrinkSpec.swift; sourceTree = "<group>"; };
 		844FCC8D198B320500EB242A /* SwiftCheck.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCheck.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		844FCC91198B320500EB242A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		844FCC92198B320500EB242A /* SwiftCheck.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SwiftCheck.h; path = SwiftCheck/SwiftCheck.h; sourceTree = "<group>"; };
@@ -91,6 +115,7 @@
 		84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCheck.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		84DF76021B0BD54600C912B0 /* SwiftCheck-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SwiftCheck-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		84F2C4F61A7AD43F00316E5F /* Modifiers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Modifiers.swift; sourceTree = "<group>"; };
+		D46395B51B1A94D200AA1B65 /* Equatable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Equatable.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -165,6 +190,7 @@
 				844FCCB3198B39F300EB242A /* State.swift */,
 				844FCCAF198B36BE00EB242A /* Test.swift */,
 				84572C2A1A6DBABA00241F68 /* Testable.swift */,
+				D46395B51B1A94D200AA1B65 /* Equatable.swift */,
 				844FCC90198B320500EB242A /* Supporting Files */,
 			);
 			path = SwiftCheck;
@@ -181,10 +207,12 @@
 		844FCC9C198B320500EB242A /* SwiftCheckTests */ = {
 			isa = PBXGroup;
 			children = (
-				844FCCC8198EFF9B00EB242A /* SimpleSpec.swift */,
-				84572C201A6DBA1C00241F68 /* DiscardSpec.swift */,
-				8480AB2C1A7B0A9700C6162D /* ModifierSpec.swift */,
 				848076671AF5D6A100CBE3EF /* BooleanIdentitySpec.swift */,
+				84572C201A6DBA1C00241F68 /* DiscardSpec.swift */,
+				8445C4A91B16D37800280089 /* GenSpec.swift */,
+				8480AB2C1A7B0A9700C6162D /* ModifierSpec.swift */,
+				8445C4AC1B17E48300280089 /* ShrinkSpec.swift */,
+				844FCCC8198EFF9B00EB242A /* SimpleSpec.swift */,
 				844FCC9D198B320500EB242A /* Supporting Files */,
 			);
 			path = SwiftCheckTests;
@@ -281,6 +309,7 @@
 				84DF75FE1B0BD54600C912B0 /* Sources */,
 				84DF75FF1B0BD54600C912B0 /* Frameworks */,
 				84DF76001B0BD54600C912B0 /* Resources */,
+				841408BA1B1A859B00BA2B6C /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -379,6 +408,7 @@
 				84572C251A6DBAA800241F68 /* Check.swift in Sources */,
 				844FCCC3198EC4F000EB242A /* Random.swift in Sources */,
 				844FCCAC198B32DC00EB242A /* Gen.swift in Sources */,
+				D46395B61B1A94D200AA1B65 /* Equatable.swift in Sources */,
 				842015111AF5C91C00F1F3CD /* Lattice.swift in Sources */,
 				84572C2B1A6DBABA00241F68 /* Testable.swift in Sources */,
 				844FCCAA198B323800EB242A /* Arbitrary.swift in Sources */,
@@ -393,10 +423,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8445C4A31B16897200280089 /* DiscardSpec.swift in Sources */,
+				8445C4AD1B17E48300280089 /* ShrinkSpec.swift in Sources */,
+				8445C4AA1B16D37800280089 /* GenSpec.swift in Sources */,
+				8445C4A41B16897200280089 /* ModifierSpec.swift in Sources */,
+				8445C4A51B16897200280089 /* BooleanIdentitySpec.swift in Sources */,
 				844FCCC9198EFF9B00EB242A /* SimpleSpec.swift in Sources */,
-				848076681AF5D6A100CBE3EF /* BooleanIdentitySpec.swift in Sources */,
-				84572C211A6DBA1C00241F68 /* DiscardSpec.swift in Sources */,
-				8480AB2D1A7B0A9700C6162D /* ModifierSpec.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -410,6 +442,7 @@
 				84DF76141B0BD58100C912B0 /* Gen.swift in Sources */,
 				84DF76151B0BD58100C912B0 /* Lattice.swift in Sources */,
 				84DF76161B0BD58100C912B0 /* Modifiers.swift in Sources */,
+				D46395B71B1A94D200AA1B65 /* Equatable.swift in Sources */,
 				84DF76171B0BD58100C912B0 /* Operators.swift in Sources */,
 				84DF76181B0BD58100C912B0 /* Property.swift in Sources */,
 				84DF76191B0BD58100C912B0 /* Random.swift in Sources */,
@@ -425,6 +458,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				84DF761E1B0BD58900C912B0 /* SimpleSpec.swift in Sources */,
+				8445C4AE1B17E48300280089 /* ShrinkSpec.swift in Sources */,
+				8445C4AB1B16D37800280089 /* GenSpec.swift in Sources */,
 				84DF761F1B0BD58900C912B0 /* DiscardSpec.swift in Sources */,
 				84DF76201B0BD58900C912B0 /* ModifierSpec.swift in Sources */,
 				84DF76211B0BD58900C912B0 /* BooleanIdentitySpec.swift in Sources */,
@@ -685,7 +720,7 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = SwiftCheckTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -703,7 +738,7 @@
 				);
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = SwiftCheckTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;

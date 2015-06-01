@@ -3,7 +3,7 @@
 //  SwiftCheck
 //
 //  Created by Robert Widmann on 1/29/15.
-//  Copyright (c) 2015 Robert Widmann. All rights reserved.
+//  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
 import XCTest
@@ -33,6 +33,13 @@ class ModifierSpec : XCTestCase {
 
 		property["ArrayOf modifiers nest"] = forAll { (xxxs : ArrayOf<ArrayOf<Int8>>) in
 			return true
+		}
+
+		property["The reverse of the reverse of an array is that array"] = forAll { (xs : ArrayOf<Int>) in
+			return
+				(xs.getArray.reverse().reverse() == xs.getArray) <?> "Left identity"
+				^&&^
+				(xs.getArray == xs.getArray.reverse().reverse()) <?> "Right identity"
 		}
 	}
 }

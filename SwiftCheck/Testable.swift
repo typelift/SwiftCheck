@@ -3,7 +3,7 @@
 //  SwiftCheck
 //
 //  Created by Robert Widmann on 1/18/15.
-//  Copyright (c) 2015 Robert Widmann. All rights reserved.
+//  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
 
@@ -37,12 +37,12 @@ public struct Property : Testable {
 
 /// A proposition.
 public struct Prop : Testable {
-	var unProp: Rose<TestResult>
+	var unProp : Rose<TestResult>
 	
 	public var exhaustive : Bool { return true }
 
 	public func property() -> Property {
-		return Property(Gen.pure(Prop(unProp: ioRose(self.unProp))))
+		return Property(Gen.pure(Prop(unProp: .IORose({ self.unProp }))))
 	}
 }
 
@@ -61,7 +61,7 @@ extension TestResult : Testable {
 	public var exhaustive : Bool { return true }
 
 	public func property() -> Property {
-		return Property(Gen.pure(Prop(unProp: protectResults(Rose.pure(self)))))
+		return Property(Gen.pure(Prop(unProp: Rose.pure(self))))
 	}
 }
 
@@ -70,22 +70,5 @@ extension Bool : Testable {
 
 	public func property() -> Property {
 		return liftBool(self).property()
-	}
-}
-
-/// The type of testable functions.
-///
-/// TODO: File radar; Cannot use these functions without an explicit closure.
-public struct TestableFunction<T : Arbitrary> : Testable {
-	let f : T -> Testable
-
-	public init(_ f : T -> Testable) {
-		self.f = f
-	}
-
-	public var exhaustive : Bool { return false }
-
-	public func property() -> Property {
-		return forAllShrink(T.arbitrary(), { x in T.shrink(x) }, { x in self.f(x) })
 	}
 }

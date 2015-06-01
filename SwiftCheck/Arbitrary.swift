@@ -3,7 +3,7 @@
 //  SwiftCheck
 //
 //  Created by Robert Widmann on 7/31/14.
-//  Copyright (c) 2014 Robert Widmann. All rights reserved.
+//  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
 import Darwin
@@ -17,8 +17,8 @@ import Darwin
 /// Shrinking is reduction in the complexity of a tested value to remove noise and present a minimal
 /// counterexample when a property fails.  While it may seem counterintuitive, a shrink necessitates
 /// returning a list of all possible "smaller" values for SwiftCheck to run through.  As long as
-/// each individual value in the returned list is less than or equal to the size of the input value
-/// a minimal case should be reached fairly efficiently.
+/// each individual value in the returned list is less than or equal to the size of the input value,
+/// and is not a duplicate of the input value, a minimal case should be reached fairly efficiently.
 ///
 /// As an example, take the `ArrayOf` implementation of shrink:
 ///
@@ -49,7 +49,7 @@ public func shrinkIntegral<A : IntegerType>(x : A) -> [A] {
 		}
 		let n = i / 2
 		return .Some((n, n))
-	}, initial: x)
+	}, initial: x < 0 ? (x * -1) : x)
 }
 
 
@@ -69,7 +69,7 @@ extension Bool : Arbitrary {
 extension Int : Arbitrary {
 	public static func arbitrary() -> Gen<Int> {
 		let sign = ((arc4random() % 2) == 1)
-		return sized { n in Gen.pure((sign ? 1 : -1) * Int(arc4random_uniform(UInt32(n)))) }
+		return Gen.sized { n in Gen.pure((sign ? 1 : -1) * Int(arc4random_uniform(UInt32(n)))) }
 	}
 
 	public static func shrink(x : Int) -> [Int] {
@@ -80,7 +80,7 @@ extension Int : Arbitrary {
 extension Int8 : Arbitrary {
 	public static func arbitrary() -> Gen<Int8> {
 		let sign = ((arc4random() % 2) == 1)
-		return sized { n in Gen.pure((sign ? 1 : -1) * Int8(arc4random_uniform(UInt32(n)))) }
+		return Gen.sized { n in Gen.pure((sign ? 1 : -1) * Int8(arc4random_uniform(UInt32(n)))) }
 	}
 
 	public static func shrink(x : Int8) -> [Int8] {
@@ -91,7 +91,7 @@ extension Int8 : Arbitrary {
 extension Int16 : Arbitrary {
 	public static func arbitrary() -> Gen<Int16> {
 		let sign = ((arc4random() % 2) == 1)
-		return sized { n in Gen.pure((sign ? 1 : -1) * Int16(arc4random_uniform(UInt32(n)))) }
+		return Gen.sized { n in Gen.pure((sign ? 1 : -1) * Int16(arc4random_uniform(UInt32(n)))) }
 	}
 
 	public static func shrink(x : Int16) -> [Int16] {
@@ -102,7 +102,7 @@ extension Int16 : Arbitrary {
 extension Int32 : Arbitrary {
 	public static func arbitrary() -> Gen<Int32> {
 		let sign = ((arc4random() % 2) == 1)
-		return sized { n in Gen.pure((sign ? 1 : -1) * Int32(arc4random_uniform(UInt32(n)))) }
+		return Gen.sized { n in Gen.pure((sign ? 1 : -1) * Int32(arc4random_uniform(UInt32(n)))) }
 	}
 
 	public static func shrink(x : Int32) -> [Int32] {
@@ -113,7 +113,7 @@ extension Int32 : Arbitrary {
 extension Int64 : Arbitrary {
 	public static func arbitrary() -> Gen<Int64> {
 		let sign = ((arc4random() % 2) == 1)
-		return sized { n in Gen.pure((sign ? 1 : -1) * Int64(arc4random_uniform(UInt32(n)))) }
+		return Gen.sized { n in Gen.pure((sign ? 1 : -1) * Int64(arc4random_uniform(UInt32(n)))) }
 	}
 
 	public static func shrink(x : Int64) -> [Int64] {
@@ -123,7 +123,7 @@ extension Int64 : Arbitrary {
 
 extension UInt : Arbitrary {
 	public static func arbitrary() -> Gen<UInt> {
-		return sized { n in Gen<UInt>.pure(UInt(arc4random_uniform(UInt32(abs(n))))) }
+		return Gen.sized { n in Gen<UInt>.pure(UInt(arc4random_uniform(UInt32(abs(n))))) }
 	}
 
 	public static func shrink(x : UInt) -> [UInt] {
@@ -133,8 +133,8 @@ extension UInt : Arbitrary {
 
 extension UInt8 : Arbitrary {
 	public static func arbitrary() -> Gen<UInt8> {
-		return sized({ n in
-			return sized { n in Gen<UInt8>.pure(UInt8(arc4random_uniform(UInt32(abs(n))))) }
+		return Gen.sized({ n in
+			return Gen.sized { n in Gen<UInt8>.pure(UInt8(arc4random_uniform(UInt32(abs(n))))) }
 		})
 	}
 
@@ -145,7 +145,7 @@ extension UInt8 : Arbitrary {
 
 extension UInt16 : Arbitrary {
 	public static func arbitrary() -> Gen<UInt16> {
-		return sized { n in Gen<UInt16>.pure(UInt16(arc4random_uniform(UInt32(abs(n))))) }
+		return Gen.sized { n in Gen<UInt16>.pure(UInt16(arc4random_uniform(UInt32(abs(n))))) }
 	}
 
 	public static func shrink(x : UInt16) -> [UInt16] {
@@ -155,7 +155,7 @@ extension UInt16 : Arbitrary {
 
 extension UInt32 : Arbitrary {
 	public static func arbitrary() -> Gen<UInt32> {
-		return sized { n in Gen<UInt32>.pure(arc4random_uniform(UInt32(abs(n)))) }
+		return Gen.sized { n in Gen<UInt32>.pure(arc4random_uniform(UInt32(abs(n)))) }
 	}
 
 	public static func shrink(x : UInt32) -> [UInt32] {
@@ -165,7 +165,7 @@ extension UInt32 : Arbitrary {
 
 extension UInt64 : Arbitrary {
 	public static func arbitrary() -> Gen<UInt64> {
-		return sized { n in Gen<UInt64>.pure(UInt64(arc4random_uniform(UInt32(abs(n))))) }
+		return Gen.sized { n in Gen<UInt64>.pure(UInt64(arc4random_uniform(UInt32(abs(n))))) }
 	}
 
 	public static func shrink(x : UInt64) -> [UInt64] {
@@ -175,8 +175,11 @@ extension UInt64 : Arbitrary {
 
 extension Float : Arbitrary {
 	public static func arbitrary() -> Gen<Float> {
-		return sized({ n in
-			return n == 0 ? Gen<Float>.pure(0.0) : Gen<Float>.pure(Float(-n) + Float(arc4random()) / Float(UINT32_MAX / UInt32((n)*2)))
+		return Gen.sized({ n in
+			if n == 0 {
+				return Gen<Float>.pure(0.0)
+			}
+			return Gen<Float>.pure(Float(-n) + Float(arc4random()) / Float(UINT32_MAX / UInt32((n)*2)))
 		})
 	}
 
@@ -193,8 +196,11 @@ extension Float : Arbitrary {
 
 extension Double : Arbitrary {
 	public static func arbitrary() -> Gen<Double> {
-		return sized({ n in
-			return n == 0 ? Gen<Double>.pure(0.0) : Gen<Double>.pure(Double(-n) + Double(arc4random()) / Double(UINT32_MAX / UInt32(n*2)))
+		return Gen.sized({ n in
+			if n == 0 {
+				return Gen<Double>.pure(0.0)
+			}
+			return Gen<Double>.pure(Double(-n) + Double(arc4random()) / Double(UINT32_MAX / UInt32(n*2)))
 		})
 	}
 
@@ -222,26 +228,18 @@ extension UnicodeScalar : Arbitrary {
 
 extension String : Arbitrary {
 	public static func arbitrary() -> Gen<String> {
-		let chars = sized({ n in Character.arbitrary().vectorOf(n) })
+		let chars = Gen.sized({ n in Character.arbitrary().vectorOf(n) })
 		return chars.bind { ls in Gen<String>.pure(String(ls)) }
 	}
 
 	public static func shrink(s : String) -> [String] {
-		if s.isEmpty {
-			return []
-		} else if count(s) == 1 {
-			let hd = s[s.startIndex]
-			return [ "" ] + [ String(Character.shrink(hd)) ]
-		}
-		let x = s[s.startIndex]
-		let xs = s[advance(s.startIndex, 1)..<s.endIndex]
-		return [ xs ] + String.shrink(xs) + String.shrink(String(Character.shrink(x)) + xs)
+		return ArrayOf.shrink(ArrayOf([Character](s))).map({ String($0.getArray) })
 	}
 }
 
 extension Character : Arbitrary {
 	public static func arbitrary() -> Gen<Character> {
-		return choose((32, 255)).bind { Gen.pure(Character(UnicodeScalar($0))) }
+		return Gen<UInt32>.choose((32, 255)).bind { Gen.pure(Character(UnicodeScalar($0))) }
 	}
 
 	public static func shrink(x : Character) -> [Character] {
@@ -280,7 +278,7 @@ private func unfoldr<A, B>(f : B -> Optional<(A, B)>, #initial : B) -> [A] {
 }
 
 
-/// Coarbitrary types must take an arbitrary value of theit type and yield a function that 
+/// Coarbitrary types must take an arbitrary value of their type and yield a function that 
 /// transforms a given generator by returning a new generator that depends on the input value.
 ///
 /// Using Coarbitrary types it is possible to write an Arbitrary instance for `->` (a type that
