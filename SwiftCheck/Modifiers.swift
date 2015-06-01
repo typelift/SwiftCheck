@@ -33,6 +33,13 @@ public struct Blind<A : Arbitrary> : Arbitrary, Printable {
 	}
 }
 
+extension Blind : CoArbitrary {
+	// Take the lazy way out.
+	public static func coarbitrary<C>(x : Blind) -> (Gen<C> -> Gen<C>) {
+		return coarbitraryPrintable(x)
+	}
+}
+
 /// Guarantees test cases for its underlying type will not be shrunk.
 public struct Static<A : Arbitrary> : Arbitrary, Printable {
 	public let getStatic : A
@@ -55,6 +62,13 @@ public struct Static<A : Arbitrary> : Arbitrary, Printable {
 	
 	public static func shrink(bl : Static<A>) -> [Static<A>] {
 		return []
+	}
+}
+
+extension Static : CoArbitrary {
+	// Take the lazy way out.
+	public static func coarbitrary<C>(x : Static) -> (Gen<C> -> Gen<C>) {
+		return coarbitraryPrintable(x)
 	}
 }
 
@@ -93,6 +107,16 @@ public struct ArrayOf<A : Arbitrary> : Arbitrary, Printable {
 		let n = bl.getArray.count
 		let xs = Int.shrink(n).reverse().flatMap({ k in removes(k + 1, n, bl.getArray) }) + shrinkOne(bl.getArray)
 		return xs.map({ ArrayOf($0) })
+	}
+}
+
+extension ArrayOf : CoArbitrary {
+	public static func coarbitrary<C>(x : ArrayOf) -> (Gen<C> -> Gen<C>) {
+		let a = x.getArray
+		if a.isEmpty {
+			return { $0.variant(0) }
+		}
+		return { $0.variant(1) } • ArrayOf.coarbitrary(ArrayOf([A](a[1..<a.endIndex])))
 	}
 }
 
@@ -164,6 +188,15 @@ public struct DictionaryOf<K : protocol<Hashable, Arbitrary>, V : Arbitrary> : A
 	}
 }
 
+extension DictionaryOf : CoArbitrary {
+	public static func coarbitrary<C>(x : DictionaryOf) -> (Gen<C> -> Gen<C>) {
+		if x.getDictionary.isEmpty {
+			return { $0.variant(0) }
+		}
+		return { $0.variant(1) }
+	}
+}
+
 extension Dictionary {
 	init<S : SequenceType where S.Generator.Element == Element>(_ pairs : S) {
 		self.init()
@@ -205,6 +238,15 @@ public struct OptionalOf<A : Arbitrary> : Arbitrary, Printable {
 	}
 }
 
+extension OptionalOf : CoArbitrary {
+	public static func coarbitrary<C>(x : OptionalOf) -> (Gen<C> -> Gen<C>) {
+		if let _ = x.getOptional {
+			return { $0.variant(0) }
+		}
+		return { $0.variant(1) }
+	}
+}
+
 /// Generates a set of arbitrary values of type A.
 public struct SetOf<A : protocol<Hashable, Arbitrary>> : Arbitrary, Printable {
 	public let getSet : Set<A>
@@ -235,6 +277,15 @@ public struct SetOf<A : protocol<Hashable, Arbitrary>> : Arbitrary, Printable {
 
 	public static func shrink(s : SetOf<A>) -> [SetOf<A>] {
 		return ArrayOf.shrink(ArrayOf([A](s.getSet))).map({ SetOf(Set($0.getArray)) })
+	}
+}
+
+extension SetOf : CoArbitrary {
+	public static func coarbitrary<C>(x : SetOf) -> (Gen<C> -> Gen<C>) {
+		if x.getSet.isEmpty {
+			return { $0.variant(0) }
+		}
+		return { $0.variant(1) }
 	}
 }
 
@@ -323,6 +374,13 @@ public struct Positive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary, P
 	}
 }
 
+extension Positive : CoArbitrary {
+	// Take the lazy way out.
+	public static func coarbitrary<C>(x : Positive) -> (Gen<C> -> Gen<C>) {
+		return coarbitraryPrintable(x)
+	}
+}
+
 /// Guarantees that every generated integer is never 0.
 public struct NonZero<A : protocol<Arbitrary, IntegerType>> : Arbitrary, Printable {
 	public let getNonZero : A
@@ -348,6 +406,12 @@ public struct NonZero<A : protocol<Arbitrary, IntegerType>> : Arbitrary, Printab
 	}
 }
 
+extension NonZero : CoArbitrary {
+	public static func coarbitrary<C>(x : NonZero) -> (Gen<C> -> Gen<C>) {
+		return coarbitraryIntegral(x.getNonZero)
+	}
+}
+
 /// Guarantees that every generated integer is greater than or equal to 0.
 public struct NonNegative<A : protocol<Arbitrary, IntegerType>> : Arbitrary, Printable {
 	public let getNonNegative : A
@@ -370,5 +434,11 @@ public struct NonNegative<A : protocol<Arbitrary, IntegerType>> : Arbitrary, Pri
 	
 	public static func shrink(bl : NonNegative<A>) -> [NonNegative<A>] {
 		return A.shrink(bl.getNonNegative).filter({ $0 >= 0 }).map({ NonNegative($0) })
+	}
+}
+
+extension NonNegative : CoArbitrary {
+	public static func coarbitrary<C>(x : NonNegative) -> (Gen<C> -> Gen<C>) {
+		return coarbitraryIntegral(x.getNonNegative)
 	}
 }

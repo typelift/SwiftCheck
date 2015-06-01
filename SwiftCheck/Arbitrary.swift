@@ -288,8 +288,15 @@ public protocol CoArbitrary {
 	static func coarbitrary<C>(x : Self) -> (Gen<C> -> Gen<C>)
 }
 
+/// A corarbitrary implementation for any IntegerType
 public func coarbitraryIntegral<A : IntegerType, B>(x : A) -> Gen<B> -> Gen<B> {
 	return { $0.variant(x) }
+}
+
+/// A coarbitrary implementation for any Printable type.  Avoid using this function if you can, it
+/// can be quite an expensive operation given a detailed enough description.
+public func coarbitraryPrintable<A : Printable, B>(x : A) -> Gen<B> -> Gen<B> {
+	return String.coarbitrary(x.description)
 }
 
 extension Bool : CoArbitrary {
