@@ -325,7 +325,7 @@ private func id<A>(x : A) -> A {
 	return x
 }
 
-private func • <A, B, C>(f : B -> C, g : A -> B) -> A -> C {
+internal func • <A, B, C>(f : B -> C, g : A -> B) -> A -> C {
 	return { f(g($0)) }
 }
 

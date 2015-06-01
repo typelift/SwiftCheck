@@ -279,7 +279,8 @@ private func unfoldr<A, B>(f : B -> Optional<(A, B)>, #initial : B) -> [A] {
 
 
 /// Coarbitrary types must take an arbitrary value of their type and yield a function that 
-/// transforms a given generator by returning a new generator that depends on the input value.
+/// transforms a given generator by returning a new generator that depends on the input value.  Put
+/// simply, the function should perturb the given generator (more than likely using `Gen.variant()`.
 ///
 /// Using Coarbitrary types it is possible to write an Arbitrary instance for `->` (a type that
 /// generates functions).
@@ -287,8 +288,15 @@ public protocol CoArbitrary {
 	static func coarbitrary<C>(x : Self) -> (Gen<C> -> Gen<C>)
 }
 
+/// A corarbitrary implementation for any IntegerType
 public func coarbitraryIntegral<A : IntegerType, B>(x : A) -> Gen<B> -> Gen<B> {
 	return { $0.variant(x) }
+}
+
+/// A coarbitrary implementation for any Printable type.  Avoid using this function if you can, it
+/// can be quite an expensive operation given a detailed enough description.
+public func coarbitraryPrintable<A : Printable, B>(x : A) -> Gen<B> -> Gen<B> {
+	return String.coarbitrary(x.description)
 }
 
 extension Bool : CoArbitrary {
@@ -312,6 +320,15 @@ extension Character : CoArbitrary {
 	public static func coarbitrary<C>(x : Character) -> (Gen<C> -> Gen<C>) {
 		let ss = String(x).unicodeScalars
 		return UnicodeScalar.coarbitrary(ss[ss.startIndex])
+	}
+}
+
+extension String : CoArbitrary {
+	public static func coarbitrary<C>(x : String) -> (Gen<C> -> Gen<C>) {
+		if x.isEmpty {
+			return { $0.variant(0) }
+		}
+		return Character.coarbitrary(x[x.startIndex]) • String.coarbitrary(x[advance(x.startIndex, 1)..<x.endIndex])
 	}
 }
 
@@ -372,5 +389,18 @@ extension UInt32 : CoArbitrary {
 extension UInt64 : CoArbitrary {
 	public static func coarbitrary<C>(x : UInt64) -> Gen<C> -> Gen<C> {
 		return coarbitraryIntegral(x)
+	}
+}
+
+// In future, implement these with Ratios like QuickCheck.
+extension Float : CoArbitrary {
+	public static func coarbitrary<C>(x : Float) -> (Gen<C> -> Gen<C>) {
+		return coarbitraryIntegral(Int64(x))
+	}
+}
+
+extension Double : CoArbitrary {
+	public static func coarbitrary<C>(x : Double) -> (Gen<C> -> Gen<C>) {
+		return coarbitraryIntegral(Int64(x))
 	}
 }

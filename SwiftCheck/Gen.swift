@@ -22,7 +22,7 @@ public struct Gen<A> {
 	/// These must be in here or we get linker errors; rdar://21172325
 
 	/// Shakes up the internal Random Number generator for a given Generator with a seed.
-	public func variant<S : IntegerType>(seed: S) -> Gen<A> {
+	public func variant<S : IntegerType>(seed : S) -> Gen<A> {
 		return Gen(unGen: { r in
 			return { n in
 				return self.unGen(vary(seed)(r: r))(n)

@@ -489,13 +489,13 @@ internal func dispatchAfterFinalFailureCallbacks(st : State, res : TestResult) {
 }
 
 internal func summary(s : State) -> [(String, Int)] {
-	let strings = s.collected.map({ l in Array(l).map({ "," + $0.0 }).filter({ !$0.isEmpty }) }).reduce([], combine: +)
+	let strings = s.collected.flatMap({ l in Array(l).map({ "," + $0.0 }).filter({ !$0.isEmpty }) })
 	let l =  groupBy(sorted(strings), ==)
 	return l.map({ ss in (ss[0], ss.count * 100 / s.numSuccessTests) })
 }
 
 internal func labelPercentage(l : String, st : State) -> Int {
-	let occur = st.collected.map({ Array($0) }).reduce([], combine: +).filter({ $0 == l }).count
+	let occur = st.collected.flatMap({ Array($0) }).filter({ $0 == l }).count
 	return (100 * occur) / st.maxSuccessTests
 }
 
