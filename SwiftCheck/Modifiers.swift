@@ -91,7 +91,7 @@ public struct ArrayOf<A : Arbitrary> : Arbitrary, Printable {
 
 	public static func shrink(bl : ArrayOf<A>) -> [ArrayOf<A>] {
 		let n = bl.getArray.count
-		let xs = Int.shrink(n).reverse().map({ k in removes(k + 1, n, bl.getArray) }).reduce([], combine: +) + shrinkOne(bl.getArray)
+		let xs = Int.shrink(n).reverse().flatMap({ k in removes(k + 1, n, bl.getArray) }) + shrinkOne(bl.getArray)
 		return xs.map({ ArrayOf($0) })
 	}
 }
@@ -239,15 +239,33 @@ public struct SetOf<A : protocol<Hashable, Arbitrary>> : Arbitrary, Printable {
 }
 
 /// Generates a Swift function from T to U.
-public struct ArrowOf<T : CoArbitrary, U : Arbitrary> : Arbitrary, Printable {
-	public let getArrow : T -> U
+public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbitrary, Printable {
+	private var table : Dictionary<T, U>
+	private var arr : T -> U
+	public var getArrow : T -> U {
+		return self.arr
+	}
+
+	private init (_ table : Dictionary<T, U>, _ arr : (T -> U)) {
+		self.table = table
+		self.arr = arr
+	}
 
 	public init(_ arr : (T -> U)) {
-		self.getArrow = arr
+		self.init(Dictionary(), { (_ : T) -> U in return undefined() })
+		
+		self.arr = { x in
+			if let v = self.table[x] {
+				return v
+			}
+			let y = arr(x)
+			self.table[x] = y
+			return y
+		}
 	}
 
 	public var description : String {
-		return "\(self.getArrow)"
+		return "\(T.self) -> \(U.self)"
 	}
 
 	private static func create(arr : (T -> U)) -> ArrowOf<T, U> {
@@ -255,12 +273,29 @@ public struct ArrowOf<T : CoArbitrary, U : Arbitrary> : Arbitrary, Printable {
 	}
 
 	public static func arbitrary() -> Gen<ArrowOf<T, U>> {
-		return promote({ T.coarbitrary($0)(U.arbitrary()) }).fmap { ArrowOf($0) }
+		return promote({ a in
+			return T.coarbitrary(a)(U.arbitrary())
+		}).fmap({ ArrowOf($0) })
 	}
 
-	public static func shrink(bl : ArrowOf<T, U>) -> [ArrowOf<T, U>] {
-		return []
+	public static func shrink(f : ArrowOf<T, U>) -> [ArrowOf<T, U>] {
+		var xxs : [ArrowOf<T, U>] = []
+		for (x, y) in f.table {
+			xxs += U.shrink(y).map({ (y2 : U) -> ArrowOf<T, U> in
+				return ArrowOf<T, U>({ (z : T) -> U in
+					if x == z {
+						return y2
+					}
+					return f.arr(z)
+				})
+			})
+		}
+		return xxs
 	}
+}
+
+private func undefined<A>() -> A {
+	fatalError("")
 }
 
 /// Guarantees that every generated integer is greater than 0.
