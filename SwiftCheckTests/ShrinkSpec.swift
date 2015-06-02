@@ -35,7 +35,7 @@ class ShrinkSpec : XCTestCase {
 			return (!l.getArray.isEmpty && l.getArray != [0]) ==> {
 				let ls = self.shrinkArbitrary(l).map { $0.getArray }
 				return (ls.filter({ $0 == [] || $0 == [0] }).count >= 1)
-			}()
+			}
 		}
 
 		// This should not hold because eventually you'll get to [0, 0] which gets shrunk from
@@ -44,7 +44,7 @@ class ShrinkSpec : XCTestCase {
 			return (!s.getSet.isEmpty && s.getSet != Set([0])) ==> {
 				let ls = self.shrinkArbitrary(s).map { $0.getSet }
 				return (ls.filter({ $0 == [] || $0 == [0] }).count >= 1)
-			}()
+			}
 		})
 	}
 }
