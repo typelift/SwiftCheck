@@ -8,47 +8,61 @@
 
 import XCTest
 
-/// The main interface for the SwiftCheck testing mechanism. To test a program property one 
+/// The main interface for the SwiftCheck testing mechanism. To test a program property one
 /// subscripts into this variable with a description of the property being tested like so:
 ///
-///     property["Integer Equality is Reflexive"] = forAll { (i : Int8) in
+///     property("") += forAll { (i : Int8) in
 ///	        return i == i
 ///     }
 ///
 /// SwiftCheck will report all failures through the XCTest mechanism like a normal testing assert,
 /// but with minimal failing case reported as well.
-public var property : AssertiveQuickCheck = AssertiveQuickCheck()
+public func property(msg : String, file : String = __FILE__, line : UInt = __LINE__) -> AssertiveQuickCheck {
+	return AssertiveQuickCheck(msg: msg, file: file, line: line)
+}
 
 public struct AssertiveQuickCheck {
-	public subscript(s : String) -> Testable {
-		get {
-			fatalError("Assertive proposition '\(s)' has an undefined test case")
-		}
-		set(test) {
-			let r = quickCheckWithResult(stdArgs(name: s), test)
-			switch r {
-			case let .Failure(numTests, numShrinks, usedSeed, usedSize, reason, labels, output):
-				XCTFail(reason)
-			case let .NoExpectedFailure(numTests, labels, output):
-				XCTFail("Expected property to fail but it didn't.")
-			default:
-				return
-			}
-		}
+	let msg : String
+	let file : String
+	let line : UInt
+
+	private init(msg : String, file : String, line : UInt) {
+		self.msg = msg
+		self.file = file
+		self.line = line
+	}
+}
+
+public func +=(checker : AssertiveQuickCheck, test : Testable) {
+	let r = quickCheckWithResult(stdArgs(name: checker.msg), test)
+	switch r {
+	case let .Failure(numTests, numShrinks, usedSeed, usedSize, reason, labels, output):
+		XCTFail(reason, file: checker.file, line: checker.line)
+	case let .NoExpectedFailure(numTests, labels, output):
+		XCTFail("Expected property to fail but it didn't.", file: checker.file, line: checker.line)
+	default:
+		return
 	}
 }
 
 /// The interface for properties to be run through SwiftCheck without an XCTest assert.  The
 /// property will still generate console output during testing.
-public var reportProperty : ReportiveQuickCheck = ReportiveQuickCheck()
+public func reportProperty(msg : String, file : String = __FILE__, line : UInt = __LINE__) -> ReportiveQuickCheck {
+	return ReportiveQuickCheck(msg: msg, file: file, line: line)
+}
 
 public struct ReportiveQuickCheck {
-	public subscript(s : String) -> Testable {
-		get {
-			fatalError("Proposition '\(s)' has an undefined test case")
-		}
-		set(test) {
-			quickCheck(test, name: s)
-		}
+	let msg : String
+	let file : String
+	let line : UInt
+
+	private init(msg : String, file : String, line : UInt) {
+		self.msg = msg
+		self.file = file
+		self.line = line
 	}
+}
+
+public func +=(checker : ReportiveQuickCheck, test : Testable) {
+	quickCheckWithResult(stdArgs(name: checker.msg), test)
 }
