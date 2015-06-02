@@ -11,7 +11,7 @@ import SwiftCheck
 
 class DiscardSpec : XCTestCase {
 	func testDiscardFailure() {
-		property("P != NP") += Discard()
-		property("P = NP") += expectFailure(Discard())
+		property("P != NP") <- Discard()
+		property("P = NP") <- expectFailure(Discard())
 	}
 }

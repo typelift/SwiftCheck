@@ -8,10 +8,12 @@
 
 import XCTest
 
+infix operator <- {}
+
 /// The main interface for the SwiftCheck testing mechanism. To test a program property one
 /// subscripts into this variable with a description of the property being tested like so:
 ///
-///     property("") += forAll { (i : Int8) in
+///     property("") <- forAll { (i : Int8) in
 ///	        return i == i
 ///     }
 ///
@@ -33,7 +35,7 @@ public struct AssertiveQuickCheck {
 	}
 }
 
-public func +=(checker : AssertiveQuickCheck, test : Testable) {
+public func <-(checker : AssertiveQuickCheck, test : Testable) {
 	let r = quickCheckWithResult(stdArgs(name: checker.msg), test)
 	switch r {
 	case let .Failure(numTests, numShrinks, usedSeed, usedSize, reason, labels, output):
@@ -63,6 +65,6 @@ public struct ReportiveQuickCheck {
 	}
 }
 
-public func +=(checker : ReportiveQuickCheck, test : Testable) {
+public func <-(checker : ReportiveQuickCheck, test : Testable) {
 	quickCheckWithResult(stdArgs(name: checker.msg), test)
 }
