@@ -54,6 +54,23 @@ public func <?>(p : Testable, s : String) -> Property {
 	return label(s)(p: p)
 }
 
+infix operator ^&^ {
+	associativity right
+	precedence 110
+}
+
+/// Takes the nondeterministic conjunction of two properties and treats them as a single large
+/// property.
+///
+/// The resulting property makes 100 random choices to test either the left or right property.  Thus,
+/// running multiple test cases will result in distinct arbitrary sequences of each property being
+/// tested.
+public func ^&^(p1 : Testable, p2 : Testable) -> Property {
+	return Property(Bool.arbitrary().bind { b in
+		return counterexample(b ? "LHS" : "RHS")(p: b ? p1.property() : p2.property()).unProperty
+	})
+}
+
 infix operator ^&&^ {
 	associativity right
 	precedence 110
