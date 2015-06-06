@@ -274,13 +274,28 @@ internal func test(st : State, f : (StdGen -> Int -> Prop)) -> Result {
 	while true {
 		switch runATest(state)(f: f) {
 			case let .Left(fail):
-				switch (fail.value.0, doneTesting(fail.value.1)(f: f)) {
-				case let (.Success(_, _, _), _):
-					return fail.value.0
-				case let (_, .NoExpectedFailure(numTests, labels, output)):
-					return .NoExpectedFailure(numTests: numTests, labels: labels, output: output)
-				default:
-					return fail.value.0
+				switch fail.value {
+					// Success and Failure simply fallthrough to doneTesting which will catch them
+					// and finish reporting for the test.
+					case let (.Success(_, _, _), _):
+						fallthrough
+					case let (.NoExpectedFailure(_, _, _), _):
+						return doneTesting(fail.value.1)
+					// Existential Failures need explicit propagation.  Existentials increment the
+					// discard count so we check if it has been surpassed.  If it has with any kind
+					// of success we're done.  If no successes are found we've failed checking the
+					// existential and report it as such.  Otherwise turn the testing loop.
+					case let (.ExistentialFailure(_, _, _, _, _, _, _), lsta):
+						if lsta.numDiscardedTests >= lsta.maxDiscardedTests && lsta.numSuccessTests == 0 {
+							return reportExistentialFailure(fail.value.1, fail.value.0)
+						} else if lsta.numDiscardedTests >= lsta.maxDiscardedTests {
+							return doneTesting(lsta)
+						} else {
+							state = lsta
+							break
+						}
+					default:
+						return fail.value.0
 				}
 			case let .Right(sta):
 				let lsta = sta.value // Local copy so I don't have to keep unwrapping.
