@@ -44,7 +44,7 @@ public func disjoin(ps : Testable...) -> Property {
 	}))
 }
 
-/// Inverts the result of a test.  That is, tests cases that would pass now fail and vice versa.
+/// Inverts the result of a test.  That is, test cases that would pass now fail and vice versa.
 ///
 /// Discarded tests remain discarded under inversion.
 public func invert(p : Testable) -> Property {
