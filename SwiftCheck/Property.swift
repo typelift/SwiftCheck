@@ -117,7 +117,7 @@ public func withCallback(cb : Callback)(p : Testable) -> Property {
 			labels: res.labels,
 			stamp: res.stamp,
 			callbacks: [cb] + res.callbacks,
-			abort: false)
+			abort: res.abort)
 	})(p: p)
 }
 
@@ -183,7 +183,7 @@ public func verbose(p : Testable) -> Property {
 			labels: res.labels,
 			stamp: res.stamp,
 			callbacks: res.callbacks + chattyCallbacks(res.callbacks),
-			abort: false)
+			abort: res.abort)
 	})(p: p)
 }
 
@@ -199,7 +199,7 @@ public func expectFailure(p : Testable) -> Property {
 			labels: res.labels,
 			stamp: res.stamp,
 			callbacks: res.callbacks,
-			abort: false)
+			abort: res.abort)
 	})(p: p)
 }
 
@@ -236,7 +236,7 @@ public func cover(b : Bool)(n : Int)(s : String)(p : Testable) -> Property {
 				labels: insertWith(max, s, n, res.labels),
 				stamp: res.stamp.union([s]),
 				callbacks: res.callbacks,
-				abort: false)
+				abort: res.abort)
 		})(p: p)
 	}
 	return p.property()
@@ -381,7 +381,7 @@ private func addCallbacks(result : TestResult) -> TestResult -> TestResult {
 			labels: res.labels,
 			stamp: res.stamp,
 			callbacks: result.callbacks + res.callbacks,
-			abort: false)
+			abort: res.abort)
 	}
 }
 
@@ -394,7 +394,7 @@ private func addLabels(result : TestResult) -> TestResult -> TestResult {
 			labels: unionWith(max, res.labels, result.labels),
 			stamp: res.stamp.union(result.stamp),
 			callbacks: res.callbacks,
-			abort: false)
+			abort: res.abort)
 	}
 }
 
