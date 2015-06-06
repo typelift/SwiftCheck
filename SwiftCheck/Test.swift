@@ -325,7 +325,7 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 
 			switch res.match() {
 				// Success
-				case .MatchResult(.Some(true), let expect, _, _, let labels, let stamp, _, let abort):
+				case .MatchResult(.Some(true), let expect, _, _, let labels, let stamp, _, let abort, let quantifier):
 					let state = State(name: st.name
 									, maxSuccessTests: st.maxSuccessTests
 									, maxDiscardedTests: st.maxDiscardedTests
@@ -339,10 +339,12 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 									, numSuccessShrinks: st.numSuccessShrinks
 									, numTryShrinks: st.numTryShrinks
 									, numTotTryShrinks: st.numTotTryShrinks
-									, shouldAbort: abort)
+									// Existentials break on success
+									, shouldAbort: abort || (quantifier == .Existential)
+									, quantifier: quantifier)
 					return .Right(Box(state))
 				// Discard
-				case .MatchResult(.None, let expect, _, _, let labels, _, _, let abort):
+				case .MatchResult(.None, let expect, _, _, let labels, _, _, let abort, let quantifier):
 					let state = State(name: st.name
 									, maxSuccessTests: st.maxSuccessTests
 									, maxDiscardedTests: st.maxDiscardedTests
@@ -356,14 +358,46 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 									, numSuccessShrinks: st.numSuccessShrinks
 									, numTryShrinks: st.numTryShrinks
 									, numTotTryShrinks: st.numTotTryShrinks
-									, shouldAbort: abort)
+									, shouldAbort: abort
+									, quantifier: quantifier)
 					return .Right(Box(state))
 				// Fail
-				case .MatchResult(.Some(false), let expect, _, _, _, _, _, let abort):
-					if !expect {
+				case .MatchResult(.Some(false), let expect, _, _, _, _, _, let abort, let quantifier):
+					if quantifier == .Existential {
+						print("")
+					} else if !expect {
 						print("+++ OK, failed as expected. ")
 					} else {
 						print("*** Failed! ")
+					}
+
+					let state = State(name: st.name
+									, maxSuccessTests: st.maxSuccessTests
+									, maxDiscardedTests: st.maxDiscardedTests
+									, computeSize: st.computeSize
+									, numSuccessTests: st.numSuccessTests
+									, numDiscardedTests: st.numDiscardedTests + 1
+									, labels: st.labels
+									, collected: st.collected
+									, expectedFailure: res.expect
+									, randomSeed: rnd2
+									, numSuccessShrinks: st.numSuccessShrinks
+									, numTryShrinks: st.numTryShrinks
+									, numTotTryShrinks: st.numTotTryShrinks
+									, shouldAbort: abort
+									, quantifier: quantifier)
+
+					// Failure of an existential is not necessarily failure of the whole test case,
+					// so treat this like a discard.
+					if quantifier == .Existential {
+						let resul = Result.ExistentialFailure(numTests: st.numSuccessTests + 1
+															, usedSeed: st.randomSeed
+															, usedSize: st.computeSize(st.numSuccessTests)(st.numDiscardedTests)
+															, reason: "Could not satisfy existential"
+															, labels: summary(st)
+															, output: "*** Failed! "
+															, lastResult: res)
+						return .Left(Box((resul, state)))
 					}
 
 					// Attempt a shrink.
@@ -382,21 +416,8 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 											, labels: summary(st)
 											, output: "*** Failed! ")
 
-					let state = State(name: st.name
-									, maxSuccessTests: st.maxSuccessTests
-									, maxDiscardedTests: st.maxDiscardedTests
-									, computeSize: st.computeSize
-									, numSuccessTests: st.numSuccessTests
-									, numDiscardedTests: st.numDiscardedTests + 1
-									, labels: st.labels
-									, collected: st.collected
-									, expectedFailure: res.expect
-									, randomSeed: rnd2
-									, numSuccessShrinks: st.numSuccessShrinks
-									, numTryShrinks: st.numTryShrinks
-									, numTotTryShrinks: st.numTotTryShrinks
-									, shouldAbort: abort)
 					return .Left(Box((stat, state)))
+
 			default:
 				fatalError("Pattern Match Failed: switch on a Result was inexhaustive.")
 				break
@@ -409,7 +430,6 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 
 internal func doneTesting(st : State) -> Result {
 	if st.expectedFailure {
-		println("*** Passed " + "\(st.numSuccessTests)" + " tests")
 		println("*** Passed " + "\(st.numSuccessTests)" + pluralize(" test", st.numSuccessTests))
 		printDistributionGraph(st)
 		return .Success(numTests: st.numSuccessTests, labels: summary(st), output: "")
@@ -498,7 +518,8 @@ internal func findMinimalFailingTestCase(st : State, res : TestResult, ts : [Ros
 					, numSuccessShrinks: numSuccessShrinks
 					, numTryShrinks: numTryShrinks
 					, numTotTryShrinks: numTotTryShrinks
-					, shouldAbort: st.shouldAbort)
+					, shouldAbort: st.shouldAbort
+					, quantifier: st.quantifier)
 	return reportMinimumCaseFound(state, lastResult)
 }
 
