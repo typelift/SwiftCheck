@@ -111,7 +111,17 @@ public func exists<A : Arbitrary>(pf : A -> Testable) -> Property {
 /// Given an explicit generator, converts a function to an existentially quantified property using 
 /// the default shrinker for that type.
 public func exists<A : Arbitrary>(gen : Gen<A>, pf : A -> Testable) -> Property {
-	return invert(forAllShrink(gen, { A.shrink($0) }, { (invert • pf)($0) }))
+	return mapResult({ res in
+		return TestResult(ok: res.ok,
+			expect: res.expect,
+			reason: res.reason,
+			theException: res.theException,
+			labels: res.labels,
+			stamp: res.stamp,
+			callbacks: res.callbacks,
+			abort: res.abort,
+			quantifier: .Existential)
+	})(p: invert(forAllShrink(A.arbitrary(), { A.shrink($0) }, { (invert • pf)($0) })))
 }
 
 /// Given an explicit generator and shrinker, converts a function to a universally quantified
