@@ -102,6 +102,18 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)(genF : genG)(genG : genH)(pf: { b, c, d, e, f, g, h in pf(t, b, c, d, e, f, g, h) }) })
 }
 
+/// Converts a function into an existentially quantified property using the default shrinker and
+/// generator for that type.
+public func exists<A : Arbitrary>(pf : A -> Testable) -> Property {
+	return invert(forAllShrink(A.arbitrary(), { A.shrink($0) }, { (invert • pf)($0) }))
+}
+
+/// Given an explicit generator, converts a function to an existentially quantified property using 
+/// the default shrinker for that type.
+public func exists<A : Arbitrary>(gen : Gen<A>, pf : A -> Testable) -> Property {
+	return invert(forAllShrink(gen, { A.shrink($0) }, { (invert • pf)($0) }))
+}
+
 /// Given an explicit generator and shrinker, converts a function to a universally quantified
 /// property.
 public func forAllShrink<A>(gen : Gen<A>, shrinker: A -> [A], f : A -> Testable) -> Property {
