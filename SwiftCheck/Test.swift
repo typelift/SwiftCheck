@@ -128,7 +128,7 @@ public func exists<A : Arbitrary>(gen : Gen<A>, pf : A -> Testable) -> Property 
 			callbacks: res.callbacks,
 			abort: res.abort,
 			quantifier: .Existential)
-	})(p: invert(forAllShrink(A.arbitrary(), { A.shrink($0) }, { (invert • pf)($0) })))
+	})(p: invert(forAllShrink(A.arbitrary(), shrinkNone, { (invert • pf)($0) })))
 }
 
 /// Given an explicit generator and shrinker, converts a function to a universally quantified
