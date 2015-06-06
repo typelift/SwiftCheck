@@ -343,7 +343,7 @@ private func result(ok : Bool?, reason : String = "") -> TestResult {
 	return TestResult(ok: ok, expect: true, reason: reason, theException: .None, labels: [:], stamp: Set(), callbacks: [], abort: false)
 }
 
-internal func id<A>(x : A) -> A {
+private func id<A>(x : A) -> A {
 	return x
 }
 
