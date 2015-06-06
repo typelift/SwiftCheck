@@ -19,5 +19,18 @@ class PropertySpec : XCTestCase {
 				return b == n
 			})
 		}
+
+		property["Conjamb randomly picks from multiple generators"] = forAll { (n : Int, m : Int, o : Int) in
+			return conjamb({
+				println("picked 1")
+				return true
+				}(), {
+					println("picked 2")
+					return true
+					}(), {
+						println("picked 3")
+						return true
+						}())
+		}
 	}
 }
