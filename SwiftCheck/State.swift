@@ -6,9 +6,6 @@
 //  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
-
-public struct Terminal {}
-
 public struct State {
 	let name				: String
 	let maxSuccessTests		: Int
@@ -24,8 +21,9 @@ public struct State {
 	let numTryShrinks		: Int
 	let numTotTryShrinks	: Int
 	let shouldAbort			: Bool
+	let quantifier			: Quantification
 
-	public init(name : String, maxSuccessTests : Int, maxDiscardedTests : Int, computeSize : Int -> Int -> Int, numSuccessTests : Int, numDiscardedTests : Int, labels : Dictionary<String, Int>, collected : [Set<String>], expectedFailure : Bool, randomSeed : StdGen, numSuccessShrinks : Int, numTryShrinks : Int, numTotTryShrinks : Int, shouldAbort : Bool) {
+	public init(name : String, maxSuccessTests : Int, maxDiscardedTests : Int, computeSize : Int -> Int -> Int, numSuccessTests : Int, numDiscardedTests : Int, labels : Dictionary<String, Int>, collected : [Set<String>], expectedFailure : Bool, randomSeed : StdGen, numSuccessShrinks : Int, numTryShrinks : Int, numTotTryShrinks : Int, shouldAbort : Bool, quantifier : Quantification) {
 		self.name = name
 		self.maxSuccessTests = maxSuccessTests
 		self.maxDiscardedTests = maxDiscardedTests
@@ -40,5 +38,6 @@ public struct State {
 		self.numTryShrinks = numTryShrinks
 		self.numTotTryShrinks = numTotTryShrinks
 		self.shouldAbort = shouldAbort
+		self.quantifier = quantifier
 	}
 }
