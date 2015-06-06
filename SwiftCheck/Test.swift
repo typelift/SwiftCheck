@@ -111,6 +111,11 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 /// to computationally questionable behavior (infinite loops and the like), SwiftCheck instead
 /// interprets `exists` as a finite search over arbitrarily many values (around 500).  No shrinking
 /// is performed during the search.
+///
+/// It is recommended that you avoid existential quantification and instead reduce your property to
+/// `Skolem Normal Form <https://en.wikipedia.org/wiki/Skolem_normal_form/>`_.  `SNF` involves 
+/// turning every `exists` into a function returning the existential value, taking any other 
+/// parameters being quantified over as needed.
 public func exists<A : Arbitrary>(pf : A -> Testable) -> Property {
 	return exists(A.arbitrary(), pf)
 }
