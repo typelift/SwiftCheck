@@ -19,5 +19,21 @@ class PropertySpec : XCTestCase {
 				return b == n
 			})
 		}
+
+		property["Invert turns passing properties to failing properties"] = expectFailure(invert(forAll { (n : Int) in
+			return n == n
+		}))
+
+		property["Invert turns failing properties to passing properties"] = invert(forAll { (n : Int) in
+			return n != n
+		})
+
+		property["Invert does not affect discards"] = invert(forAll { (n : Int) in
+			return Discard()
+		})
+
+		property["Existential Quantification works"] = exists { (x : Int) in
+			return true
+		}
 	}
 }

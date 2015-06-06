@@ -275,10 +275,10 @@ internal func test(st : State, f : (StdGen -> Int -> Prop)) -> Result {
 		switch runATest(state)(f: f) {
 			case let .Left(fail):
 				switch fail.value {
-					// Success and Failure simply fallthrough to doneTesting which will catch them
-					// and finish reporting for the test.
+					// Succeed at all costs!
 					case let (.Success(_, _, _), _):
-						fallthrough
+						doneTesting(fail.value.1)
+						return fail.value.0
 					case let (.NoExpectedFailure(_, _, _), _):
 						return doneTesting(fail.value.1)
 					// Existential Failures need explicit propagation.  Existentials increment the
