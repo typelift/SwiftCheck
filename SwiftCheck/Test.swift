@@ -105,7 +105,7 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 /// Converts a function into an existentially quantified property using the default shrinker and
 /// generator for that type.
 public func exists<A : Arbitrary>(pf : A -> Testable) -> Property {
-	return invert(forAllShrink(A.arbitrary(), { A.shrink($0) }, { (invert • pf)($0) }))
+	return exists(A.arbitrary(), pf)
 }
 
 /// Given an explicit generator, converts a function to an existentially quantified property using 
