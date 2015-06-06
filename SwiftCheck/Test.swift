@@ -407,9 +407,10 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 	}
 }
 
-internal func doneTesting(st : State)(f : (StdGen -> Int -> Prop)) -> Result {
+internal func doneTesting(st : State) -> Result {
 	if st.expectedFailure {
 		println("*** Passed " + "\(st.numSuccessTests)" + " tests")
+		println("*** Passed " + "\(st.numSuccessTests)" + pluralize(" test", st.numSuccessTests))
 		printDistributionGraph(st)
 		return .Success(numTests: st.numSuccessTests, labels: summary(st), output: "")
 	} else {
@@ -504,13 +505,6 @@ internal func findMinimalFailingTestCase(st : State, res : TestResult, ts : [Ros
 internal func reportMinimumCaseFound(st : State, res : TestResult) -> (Int, Int, Int) {
 	let testMsg = " (after \(st.numSuccessTests + 1) test"
 	let shrinkMsg = st.numSuccessShrinks > 1 ? (" and \(st.numSuccessShrinks) shrink") : ""
-	
-	func pluralize(s : String, i : Int) -> String {
-		if i > 1 {
-			return s + "s"
-		}
-		return s
-	}
 	
 	println("Proposition: " + st.name)
 	println(res.reason + pluralize(testMsg, st.numSuccessTests + 1) + pluralize(shrinkMsg, st.numSuccessShrinks) + "):")
@@ -628,4 +622,11 @@ internal func groupBy<A>(list : [A], p : (A , A) -> Bool) -> [[A]] {
 		return cons(l, groupBy(zs, p))
 	}
 	fatalError("groupBy reached a non-empty list that could not produce a first element")
+}
+
+private func pluralize(s : String, i : Int) -> String {
+	if i == 1 {
+		return s
+	}
+	return s + "s"
 }
