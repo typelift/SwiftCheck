@@ -27,11 +27,13 @@ public struct AssertiveQuickCheck {
 		set(test) {
 			let r = quickCheckWithResult(stdArgs(name: s), test)
 			switch r {
+			case .Success(_, _, _):
+				return
 			case let .Failure(_, _, _, _, reason, _, _):
 				XCTFail(reason)
 			case let .ExistentialFailure(_, _, _, reason, _, _, _):
 				XCTFail(reason)
-			case let .NoExpectedFailure(numTests, labels, output):
+			case let .NoExpectedFailure(_, _, _):
 				XCTFail("Expected property to fail but it didn't.")
 			default:
 				return
