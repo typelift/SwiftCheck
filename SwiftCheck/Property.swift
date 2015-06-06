@@ -97,6 +97,20 @@ public func shrinking<A>(shrinker : A -> [A], initial : A, prop : A -> Testable)
 	})
 }
 
+/// Modifies a property so that it only will be tested once. 
+public func once(p : Testable) -> Property {
+	return mapResult({ (var res) in
+		return TestResult(ok: res.ok,
+			expect: res.expect,
+			reason: res.reason,
+			theException: res.theException,
+			labels: res.labels,
+			stamp: res.stamp,
+			callbacks: res.callbacks,
+			abort: true)
+	})(p: p)
+}
+
 /// Modifies a property so it will not shrink when it fails.
 public func noShrinking(p : Testable) -> Property {
 	return mapRoseResult({ rs in
@@ -117,7 +131,8 @@ public func withCallback(cb : Callback)(p : Testable) -> Property {
 			theException: res.theException,
 			labels: res.labels,
 			stamp: res.stamp,
-			callbacks: [cb] + res.callbacks)
+			callbacks: [cb] + res.callbacks,
+			abort: res.abort)
 	})(p: p)
 }
 
@@ -182,7 +197,8 @@ public func verbose(p : Testable) -> Property {
 			theException: res.theException,
 			labels: res.labels,
 			stamp: res.stamp,
-			callbacks: res.callbacks + chattyCallbacks(res.callbacks))
+			callbacks: res.callbacks + chattyCallbacks(res.callbacks),
+			abort: res.abort)
 	})(p: p)
 }
 
@@ -197,7 +213,8 @@ public func expectFailure(p : Testable) -> Property {
 			theException: res.theException,
 			labels: res.labels,
 			stamp: res.stamp,
-			callbacks: res.callbacks)
+			callbacks: res.callbacks,
+			abort: res.abort)
 	})(p: p)
 }
 
@@ -233,7 +250,8 @@ public func cover(b : Bool)(n : Int)(s : String)(p : Testable) -> Property {
 				theException: res.theException,
 				labels: insertWith(max, s, n, res.labels),
 				stamp: res.stamp.union([s]),
-				callbacks: res.callbacks)
+				callbacks: res.callbacks,
+				abort: res.abort)
 		})(p: p)
 	}
 	return p.property()
@@ -264,6 +282,7 @@ public enum TestResultMatcher {
 					, labels : Dictionary<String, Int>
 					, stamp : Set<String>
 					, callbacks : [Callback]
+					, abort : Bool
 					)
 }
 
@@ -284,13 +303,15 @@ public struct TestResult {
 	let stamp			: Set<String>
 	/// Callbacks attached to the test case.
 	let callbacks		: [Callback]
+	/// Indicates that any further testing of the property should cease.
+	let abort			: Bool
 
 	/// Destructures a test case into a matcher that can be used in switch statement.
 	public func match() -> TestResultMatcher {
-		return .MatchResult(ok: ok, expect: expect, reason: reason, theException: theException, labels: labels, stamp: stamp, callbacks: callbacks)
+		return .MatchResult(ok: ok, expect: expect, reason: reason, theException: theException, labels: labels, stamp: stamp, callbacks: callbacks, abort: abort)
 	}
 
-	public init(ok : Optional<Bool>, expect : Bool, reason : String, theException : Optional<String>, labels : Dictionary<String, Int>, stamp : Set<String>, callbacks : [Callback]) {
+	public init(ok : Optional<Bool>, expect : Bool, reason : String, theException : Optional<String>, labels : Dictionary<String, Int>, stamp : Set<String>, callbacks : [Callback], abort : Bool) {
 		self.ok = ok
 		self.expect = expect
 		self.reason = reason
@@ -298,6 +319,7 @@ public struct TestResult {
 		self.labels = labels
 		self.stamp = stamp
 		self.callbacks = callbacks
+		self.abort = abort
 	}
 }
 ///
@@ -333,7 +355,7 @@ private func props<A>(shrinker : A -> [A], #original : A, #pf: A -> Testable) ->
 }
 
 private func result(ok : Bool?, reason : String = "") -> TestResult {
-	return TestResult(ok: ok, expect: true, reason: reason, theException: .None, labels: [:], stamp: Set(), callbacks: [])
+	return TestResult(ok: ok, expect: true, reason: reason, theException: .None, labels: [:], stamp: Set(), callbacks: [], abort: false)
 }
 
 private func id<A>(x : A) -> A {
@@ -373,7 +395,8 @@ private func addCallbacks(result : TestResult) -> TestResult -> TestResult {
 			theException: res.theException,
 			labels: res.labels,
 			stamp: res.stamp,
-			callbacks: result.callbacks + res.callbacks)
+			callbacks: result.callbacks + res.callbacks,
+			abort: res.abort)
 	}
 }
 
@@ -385,7 +408,8 @@ private func addLabels(result : TestResult) -> TestResult -> TestResult {
 			theException: res.theException,
 			labels: unionWith(max, res.labels, result.labels),
 			stamp: res.stamp.union(result.stamp),
-			callbacks: res.callbacks)
+			callbacks: res.callbacks,
+			abort: res.abort)
 	}
 }
 
@@ -482,7 +506,8 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 						stamp: Set(),
 						callbacks: result1.callbacks + [.AfterFinalFailure(kind: .Counterexample, f: { _ in
 							return println("")
-						})] + result2.callbacks))
+						})] + result2.callbacks,
+						abort: false))
 				case .None:
 					return Rose.pure(result2)
 				default:
