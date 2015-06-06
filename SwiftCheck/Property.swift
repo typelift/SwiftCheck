@@ -276,15 +276,22 @@ public enum Callback {
 
 /// The type of callbacks SwiftCheck can dispatch.
 public enum CallbackKind {
-	///
+	/// The callback is invoked after a counterexample is displayed.
 	case Counterexample
+	/// The callback is invoked after every test.
 	case NotCounterexample
 }
 
+/// The types of quantification SwiftCheck can perform.
 public enum Quantification {
+	/// Universal Quantification ("for all").
 	case Universal
+	/// Existential Quanfication ("there exists").
 	case Existential
-	case Uniqueness
+	/// Uniqueness Quantification ("there exists one and only one")
+	// case Uniqueness
+	/// Counting Quantification ("there exist exactly k")
+	// case Counting
 }
 
 internal enum TestResultMatcher {
@@ -340,7 +347,6 @@ public struct TestResult {
 	}
 }
 
-///
 public func succeeded() -> TestResult {
 	return result(Optional.Some(true))
 }
