@@ -300,10 +300,10 @@ internal func test(st : State, f : (StdGen -> Int -> Prop)) -> Result {
 			case let .Right(sta):
 				let lsta = sta.value // Local copy so I don't have to keep unwrapping.
 				if lsta.numSuccessTests >= lsta.maxSuccessTests || lsta.shouldAbort {
-					return doneTesting(lsta)(f: f)
+					return doneTesting(lsta)
 				}
 				if lsta.numDiscardedTests >= lsta.maxDiscardedTests || lsta.shouldAbort {
-					return giveUp(lsta)(f: f)
+					return giveUp(lsta)
 				}
 				state = lsta
 		}
@@ -418,7 +418,7 @@ internal func doneTesting(st : State)(f : (StdGen -> Int -> Prop)) -> Result {
 	}
 }
 
-internal func giveUp(st: State)(f : (StdGen -> Int -> Prop)) -> Result {
+internal func giveUp(st : State) -> Result {
 	printDistributionGraph(st)
 	return Result.GaveUp(numTests: st.numSuccessTests, labels: summary(st), output: "")
 }
@@ -516,6 +516,21 @@ internal func reportMinimumCaseFound(st : State, res : TestResult) -> (Int, Int,
 	println(res.reason + pluralize(testMsg, st.numSuccessTests + 1) + pluralize(shrinkMsg, st.numSuccessShrinks) + "):")
 	dispatchAfterFinalFailureCallbacks(st, res)
 	return (st.numSuccessShrinks, st.numTotTryShrinks - st.numTryShrinks, st.numTryShrinks)
+}
+
+internal func reportExistentialFailure(st : State, res : Result) -> Result {
+	switch res {
+	case let .ExistentialFailure(_, _, _, reason, _, _, lastTest):
+		let testMsg = " (after \(st.numDiscardedTests) test"
+
+		print("*** Failed! ")
+		println("Proposition: " + st.name)
+		println(reason + pluralize(testMsg, st.numDiscardedTests) + "):")
+		dispatchAfterFinalFailureCallbacks(st, lastTest)
+		return res
+	default:
+		fatalError("Cannot report existential failure on non-failure type \(res)")
+	}
 }
 
 internal func dispatchAfterTestCallbacks(st : State, res : TestResult) {
