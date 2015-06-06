@@ -49,13 +49,14 @@ public func disjoin(ps : Testable...) -> Property {
 /// Discarded tests remain discarded under inversion.
 public func invert(p : Testable) -> Property {
 	return mapResult({ res in
-		return TestResult(ok: res.ok.map({ !$0 }),
+		return TestResult(ok: res.ok.map(!),
 						expect: res.expect,
 						reason: res.reason,
 						theException: res.theException,
 						labels: res.labels,
 						stamp: res.stamp,
-						callbacks: res.callbacks)
+						callbacks: res.callbacks,
+						abort: res.abort)
 	})(p: p)
 }
 
