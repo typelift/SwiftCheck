@@ -103,7 +103,14 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 }
 
 /// Converts a function into an existentially quantified property using the default shrinker and
-/// generator for that type.
+/// generator for that type to search for a passing case.  SwiftCheck only runs a limited number of
+/// trials before giving up and failing.
+///
+/// The nature of Existential Quantification means we have to enumerate over the entire domain of 
+/// `A` in order to return a proper value.  Because such a traversal is both impractical and leads 
+/// to computationally questionable behavior (infinite loops and the like), SwiftCheck instead
+/// interprets `exists` as a finite search over arbitrarily many values (around 500).  No shrinking
+/// is performed during the search.
 public func exists<A : Arbitrary>(pf : A -> Testable) -> Property {
 	return exists(A.arbitrary(), pf)
 }
