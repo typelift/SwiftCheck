@@ -148,24 +148,32 @@ public func quickCheck(prop : Testable, name : String = "") {
 
 internal enum Result {
 	case Success(numTests: Int
-		, labels: [(String, Int)]
-		, output: String
+		, labels : [(String, Int)]
+		, output : String
 	)
 	case GaveUp(numTests: Int
-		, labels: [(String,Int)]
-		, output: String
+		, labels : [(String,Int)]
+		, output : String
 	)
 	case Failure(numTests: Int
-		, numShrinks: Int
-		, usedSeed: StdGen
-		, usedSize: Int
-		, reason: String
-		, labels: [(String,Int)]
-		, output: String
+		, numShrinks : Int
+		, usedSeed : StdGen
+		, usedSize : Int
+		, reason : String
+		, labels : [(String,Int)]
+		, output : String
 	)
-	case  NoExpectedFailure(numTests: Int
-		, labels: [(String,Int)]
-		, output: String
+	case ExistentialFailure(numTests: Int
+		, usedSeed : StdGen
+		, usedSize : Int
+		, reason : String
+		, labels : [(String,Int)]
+		, output : String
+		, lastResult : TestResult
+	)
+	case NoExpectedFailure(numTests: Int
+		, labels : [(String,Int)]
+		, output : String
 	)
 }
 
@@ -246,7 +254,8 @@ internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 					, numSuccessShrinks:	0
 					, numTryShrinks:		0
 					, numTotTryShrinks:		0
-					, shouldAbort:			false)
+					, shouldAbort:			false
+					, quantifier:			.Universal)
 	let modP : Property = (p.exhaustive ? once(p.property()) : p.property())
 	return test(state, modP.unProperty.unGen)
 }
