@@ -537,10 +537,10 @@ internal func findMinimalFailingTestCase(st : State, res : TestResult, ts : [Ros
 
 internal func reportMinimumCaseFound(st : State, res : TestResult) -> (Int, Int, Int) {
 	let testMsg = " (after \(st.numSuccessTests + 1) test"
-	let shrinkMsg = st.numSuccessShrinks > 1 ? (" and \(st.numSuccessShrinks) shrink") : ""
+	let shrinkMsg = st.numSuccessShrinks > 1 ? pluralize(" and \(st.numSuccessShrinks) shrink", st.numSuccessShrinks) : ""
 	
 	println("Proposition: " + st.name)
-	println(res.reason + pluralize(testMsg, st.numSuccessTests + 1) + pluralize(shrinkMsg, st.numSuccessShrinks) + "):")
+	println(res.reason + pluralize(testMsg, st.numSuccessTests + 1) + shrinkMsg + "):")
 	dispatchAfterFinalFailureCallbacks(st, res)
 	return (st.numSuccessShrinks, st.numTotTryShrinks - st.numTryShrinks, st.numTryShrinks)
 }
