@@ -44,6 +44,21 @@ public func disjoin(ps : Testable...) -> Property {
 	}))
 }
 
+/// Inverts the result of a test.  That is, tests cases that would pass now fail and vice versa.
+///
+/// Discarded tests remain discarded under inversion.
+public func invert(p : Testable) -> Property {
+	return mapResult({ res in
+		return TestResult(ok: res.ok.map({ !$0 }),
+						expect: res.expect,
+						reason: res.reason,
+						theException: res.theException,
+						labels: res.labels,
+						stamp: res.stamp,
+						callbacks: res.callbacks)
+	})(p: p)
+}
+
 /// Applies a function that modifies the property generator's inner `Prop`.
 public func mapProp(f : Prop -> Prop)(p : Testable) -> Property {
 	return Property(p.property().unProperty.fmap(f))
