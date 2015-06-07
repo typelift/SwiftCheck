@@ -35,7 +35,7 @@ infix operator ==== {
 
 /// Like equality but prints a verbose description when it fails.
 public func ====<A where A : Equatable, A : Printable>(x : A, y : A) -> Property {
-	return counterexample(x.description + "/=" + y.description)(p: x == y)
+	return counterexample(toDebugString(x) + "/=" + toDebugString(y))(p: x == y)
 }
 
 
