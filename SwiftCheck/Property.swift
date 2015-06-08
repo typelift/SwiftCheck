@@ -96,7 +96,7 @@ public func once(p : Testable) -> Property {
 	})(p: p)
 }
 
-///
+/// Modifies a property by requiring it to complete before a timeout (in milliseconds).
 public func within(n : Int64, p : Testable) -> Property {
 	return mapRoseResult(withinF(n))(p: p)
 }
