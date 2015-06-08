@@ -96,6 +96,14 @@ public func once(p : Testable) -> Property {
 	})(p: p)
 }
 
+/// Modifies a property by requiring it to complete before a timeout (in nanoseconds).
+///
+/// Long-running operations that do not complete are subject to cancellation any time after the
+/// timeout period.
+public func within(n : Int64, p : Testable) -> Property {
+	return mapRoseResult(withinF(n))(p: p)
+}
+
 /// Modifies a property so it will not shrink when it fails.
 public func noShrinking(p : Testable) -> Property {
 	return mapRoseResult({ rs in
@@ -307,6 +315,7 @@ public struct TestResult {
 		self.abort = abort
 	}
 }
+
 ///
 public func succeeded() -> TestResult {
 	return result(Optional.Some(true))
@@ -370,6 +379,43 @@ internal func unionWith<K : Hashable, V>(f : (V, V) -> V, l : Dictionary<K, V>, 
 		map.updateValue(v, forKey: k)
 	}
 	return map
+}
+
+private let swiftCheckTimeoutQueue : NSOperationQueue = {
+	let queue = NSOperationQueue()
+	queue.name = "com.typelift.SwiftCheck.TimeoutQueue"
+	return queue
+}()
+
+private func timeout<A>(t : Int64, @autoclosure(escaping) block : () -> A) -> Optional<A> {
+	let semaphore = dispatch_semaphore_create(0);
+	var val : A? = nil
+
+	swiftCheckTimeoutQueue.addOperationWithBlock({
+		val = block()
+		dispatch_semaphore_signal(semaphore);
+	})
+
+	let timeoutTime = dispatch_time(DISPATCH_TIME_NOW, t);
+	if dispatch_semaphore_wait(semaphore, timeoutTime) != 0 {
+		swiftCheckTimeoutQueue.cancelAllOperations()
+		return nil
+	}
+	return val
+}
+
+private func withinF(n : Int64)(rose : Rose<TestResult>) -> Rose<TestResult> {
+	return .IORose({
+		if let res = timeout(n, reduce(rose)) {
+			switch res {
+			case .IORose(_):
+				fatalError("Rose should not have reduced to .IORose")
+			case let .MkRose(res, roses):
+				return .MkRose(res, { roses().map(withinF(n)) })
+			}
+		}
+		return Rose.pure(failed(reason: "Property did not complete before timeout (\(n) ns)"))
+	})
 }
 
 private func addCallbacks(result : TestResult) -> TestResult -> TestResult {
