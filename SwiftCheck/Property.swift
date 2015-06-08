@@ -96,7 +96,7 @@ public func once(p : Testable) -> Property {
 	})(p: p)
 }
 
-/// Modifies a property by requiring it to complete before a timeout (in milliseconds).
+/// Modifies a property by requiring it to complete before a timeout (in nanoseconds).
 ///
 /// Long-running operations that do not complete are subject to cancellation any time after the
 /// timeout period.
