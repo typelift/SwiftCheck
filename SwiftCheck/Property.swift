@@ -97,6 +97,9 @@ public func once(p : Testable) -> Property {
 }
 
 /// Modifies a property by requiring it to complete before a timeout (in milliseconds).
+///
+/// Long-running operations that do not complete are subject to cancellation any time after the
+/// timeout period.
 public func within(n : Int64, p : Testable) -> Property {
 	return mapRoseResult(withinF(n))(p: p)
 }
@@ -378,18 +381,24 @@ internal func unionWith<K : Hashable, V>(f : (V, V) -> V, l : Dictionary<K, V>, 
 	return map
 }
 
+private let swiftCheckTimeoutQueue : NSOperationQueue = {
+	let queue = NSOperationQueue()
+	queue.name = "com.typelift.SwiftCheck.TimeoutQueue"
+	return queue
+}()
+
 private func timeout<A>(t : Int64, @autoclosure(escaping) block : () -> A) -> Optional<A> {
 	let semaphore = dispatch_semaphore_create(0);
-	let queue = dispatch_get_global_queue(0, 0)
-
 	var val : A? = nil
-	dispatch_async(queue, {
+
+	swiftCheckTimeoutQueue.addOperationWithBlock({
 		val = block()
 		dispatch_semaphore_signal(semaphore);
 	})
 
 	let timeoutTime = dispatch_time(DISPATCH_TIME_NOW, t);
 	if dispatch_semaphore_wait(semaphore, timeoutTime) != 0 {
+		swiftCheckTimeoutQueue.cancelAllOperations()
 		return nil
 	}
 	return val
