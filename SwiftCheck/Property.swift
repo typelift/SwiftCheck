@@ -96,6 +96,11 @@ public func once(p : Testable) -> Property {
 	})(p: p)
 }
 
+///
+public func within(n : Int64, p : Testable) -> Property {
+	return mapRoseResult(withinF(n))(p: p)
+}
+
 /// Modifies a property so it will not shrink when it fails.
 public func noShrinking(p : Testable) -> Property {
 	return mapRoseResult({ rs in
@@ -307,6 +312,7 @@ public struct TestResult {
 		self.abort = abort
 	}
 }
+
 ///
 public func succeeded() -> TestResult {
 	return result(Optional.Some(true))
@@ -370,6 +376,37 @@ internal func unionWith<K : Hashable, V>(f : (V, V) -> V, l : Dictionary<K, V>, 
 		map.updateValue(v, forKey: k)
 	}
 	return map
+}
+
+private func timeout<A>(t : Int64, @autoclosure(escaping) block : () -> A) -> Optional<A> {
+	let semaphore = dispatch_semaphore_create(0);
+	let queue = dispatch_get_global_queue(0, 0)
+
+	var val : A? = nil
+	dispatch_async(queue, {
+		val = block()
+		dispatch_semaphore_signal(semaphore);
+	})
+
+	let timeoutTime = dispatch_time(DISPATCH_TIME_NOW, t);
+	if dispatch_semaphore_wait(semaphore, timeoutTime) != 0 {
+		return nil
+	}
+	return val
+}
+
+private func withinF(n : Int64)(rose : Rose<TestResult>) -> Rose<TestResult> {
+	return .IORose({
+		if let res = timeout(n, reduce(rose)) {
+			switch res {
+			case .IORose(_):
+				fatalError("Rose should not have reduced to .IORose")
+			case let .MkRose(res, roses):
+				return .MkRose(res, { roses().map(withinF(n)) })
+			}
+		}
+		return Rose.pure(failed(reason: "Property did not complete before timeout (\(n) ns)"))
+	})
 }
 
 private func addCallbacks(result : TestResult) -> TestResult -> TestResult {

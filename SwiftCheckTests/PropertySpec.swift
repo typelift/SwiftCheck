@@ -19,5 +19,10 @@ class PropertySpec : XCTestCase {
 				return b == n
 			})
 		}
+
+		property["within works"] = expectFailure(within(1000, {
+			sleep(1)
+			return true
+		}()))
 	}
 }
