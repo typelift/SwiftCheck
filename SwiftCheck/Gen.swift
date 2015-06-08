@@ -58,7 +58,7 @@ public struct Gen<A> {
 	/// Passing values are wrapped in `.Some`.  Failing values are `.None`.
 	public func suchThatOptional(p : A -> Bool) -> Gen<Optional<A>> {
 		return Gen<Optional<A>>.sized({ n in
-			return try(self, 0, max(n, 1), p)
+			return `try`(self, k: 0, n: max(n, 1), p: p)
 		})
 	}
 
@@ -212,11 +212,11 @@ internal func delay<A>() -> Gen<Gen<A> -> A> {
 
 private func vary<S : IntegerType>(k : S)(r: StdGen) -> StdGen {
 	let s = r.split()
-	var gen = ((k % 2) == 0) ? s.0 : s.1
+	let gen = ((k % 2) == 0) ? s.0 : s.1
 	return (k == (k / 2)) ? gen : vary(k / 2)(r: r)
 }
 
-private func try<A>(gen: Gen<A>, k: Int, n : Int, p: A -> Bool) -> Gen<Optional<A>> {
+private func `try`<A>(gen: Gen<A>, k: Int, n : Int, p: A -> Bool) -> Gen<Optional<A>> {
 	if n == 0 {
 		return Gen.pure(.None)
 	}
@@ -224,7 +224,7 @@ private func try<A>(gen: Gen<A>, k: Int, n : Int, p: A -> Bool) -> Gen<Optional<
 		if p(x) {
 			return Gen.pure(.Some(x))
 		}
-		return try(gen, k + 1, n - 1, p)
+		return `try`(gen, k: k + 1, n: n - 1, p: p)
 	}
 }
 

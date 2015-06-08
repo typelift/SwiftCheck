@@ -233,7 +233,7 @@ extension String : Arbitrary {
 	}
 
 	public static func shrink(s : String) -> [String] {
-		return ArrayOf.shrink(ArrayOf([Character](s))).map({ String($0.getArray) })
+		return ArrayOf.shrink(ArrayOf([Character](s.characters))).map({ String($0.getArray) })
 	}
 }
 
@@ -267,7 +267,7 @@ private func nub<A : Hashable>(xs : [A]) -> [A] {
 	return [A](Set(xs))
 }
 
-private func unfoldr<A, B>(f : B -> Optional<(A, B)>, #initial : B) -> [A] {
+private func unfoldr<A, B>(f : B -> Optional<(A, B)>, initial : B) -> [A] {
 	var acc = [A]()
 	var ini = initial
 	while let next = f(ini) {
@@ -295,7 +295,7 @@ public func coarbitraryIntegral<A : IntegerType, B>(x : A) -> Gen<B> -> Gen<B> {
 
 /// A coarbitrary implementation for any Printable type.  Avoid using this function if you can, it
 /// can be quite an expensive operation given a detailed enough description.
-public func coarbitraryPrintable<A : Printable, B>(x : A) -> Gen<B> -> Gen<B> {
+public func coarbitraryPrintable<A : CustomStringConvertible, B>(x : A) -> Gen<B> -> Gen<B> {
 	return String.coarbitrary(x.description)
 }
 

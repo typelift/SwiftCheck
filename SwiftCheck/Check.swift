@@ -36,11 +36,10 @@ public struct AssertiveQuickCheck {
 }
 
 public func <-(checker : AssertiveQuickCheck, test : Testable) {
-	let r = quickCheckWithResult(stdArgs(name: checker.msg), test)
-	switch r {
-	case let .Failure(numTests, numShrinks, usedSeed, usedSize, reason, labels, output):
+	switch quickCheckWithResult(stdArgs(checker.msg), p: test) {
+	case let .Failure(_, _, _, _, reason, _, _):
 		XCTFail(reason, file: checker.file, line: checker.line)
-	case let .NoExpectedFailure(numTests, labels, output):
+	case .NoExpectedFailure(_, _, _):
 		XCTFail("Expected property to fail but it didn't.", file: checker.file, line: checker.line)
 	default:
 		return
@@ -66,5 +65,5 @@ public struct ReportiveQuickCheck {
 }
 
 public func <-(checker : ReportiveQuickCheck, test : Testable) {
-	quickCheckWithResult(stdArgs(name: checker.msg), test)
+	quickCheckWithResult(stdArgs(checker.msg), p: test)
 }

@@ -34,8 +34,8 @@ infix operator ==== {
 }
 
 /// Like equality but prints a verbose description when it fails.
-public func ====<A where A : Equatable, A : Printable>(x : A, y : A) -> Property {
-	return counterexample(x.description + "/=" + y.description)(p: x == y)
+public func ====<A where A : Equatable, A : CustomStringConvertible>(x : A, y : A) -> Property {
+	return (x == y).counterexample(x.description + "/=" + y.description)
 }
 
 
@@ -51,7 +51,7 @@ infix operator <?> {
 /// failure SwiftCheck will print a distribution map for the property that shows a percentage
 /// success rate for the property.
 public func <?>(p : Testable, s : String) -> Property {
-	return label(s)(p: p)
+	return p.label(s)
 }
 
 infix operator ^&&^ {
