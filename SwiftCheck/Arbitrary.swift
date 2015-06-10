@@ -295,8 +295,8 @@ public func coarbitraryIntegral<A : IntegerType, B>(x : A) -> Gen<B> -> Gen<B> {
 
 /// A coarbitrary implementation for any Printable type.  Avoid using this function if you can, it
 /// can be quite an expensive operation given a detailed enough description.
-public func coarbitraryPrintable<A : CustomStringConvertible, B>(x : A) -> Gen<B> -> Gen<B> {
-	return String.coarbitrary(x.description)
+public func coarbitraryPrintable<A, B>(x : A) -> Gen<B> -> Gen<B> {
+	return String.coarbitrary(String(x))
 }
 
 extension Bool : CoArbitrary {

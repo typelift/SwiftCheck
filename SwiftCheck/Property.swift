@@ -187,8 +187,8 @@ extension Testable {
 	}
 
 	/// Labels a property with a printable value.
-	public func collect<A : CustomStringConvertible>(x : A) -> Property {
-		return self.label(x.description)
+	public func collect<A>(x : A) -> Property {
+		return self.label(String(x))
 	}
 
 	/// Conditionally labels a property with a value.

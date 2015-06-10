@@ -34,8 +34,8 @@ infix operator ==== {
 }
 
 /// Like equality but prints a verbose description when it fails.
-public func ====<A where A : Equatable, A : CustomStringConvertible>(x : A, y : A) -> Property {
-	return (x == y).counterexample(x.description + "/=" + y.description)
+public func ====<A where A : Equatable>(x : A, y : A) -> Property {
+	return (x == y).counterexample(String(x) + "/=" + String(y))
 }
 
 
