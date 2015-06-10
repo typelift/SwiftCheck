@@ -35,6 +35,10 @@ public struct Property : Testable {
 	}
 }
 
+internal func protectedIORose(f : () throws -> Rose<TestResult>) -> Rose<TestResult> {
+	return .IORose(protectRose(f))
+}
+
 /// A proposition.
 public struct Prop : Testable {
 	var unProp : Rose<TestResult>
@@ -42,7 +46,7 @@ public struct Prop : Testable {
 	public var exhaustive : Bool { return true }
 
 	public func property() -> Property {
-		return Property(Gen.pure(Prop(unProp: .IORose({ self.unProp }))))
+		return Property(Gen.pure(Prop(unProp: .IORose(protectRose({ self.unProp })))))
 	}
 }
 
