@@ -107,7 +107,7 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 public func forAllShrink<A>(gen : Gen<A>, shrinker: A -> [A], f : A -> Testable) -> Property {
 	return Property(gen.bind { x in
 		return shrinking(shrinker, initial: x, prop: { xs  in
-			return f(xs).counterexample("\(xs)")
+			return f(xs).counterexample(String(xs))
 		}).unProperty
 	})
 }
@@ -223,8 +223,10 @@ internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 					, randomSeed:			rnd()
 					, numSuccessShrinks:	0
 					, numTryShrinks:		0
-					, numTotTryShrinks:		0)
-	return test(state, f: p.property().unProperty.unGen)
+					, numTotTryShrinks:		0
+					, shouldAbort:			false)
+	let modP : Property = (p.exhaustive ? p.property().once : p.property())
+	return test(state, f: modP.unProperty.unGen)
 }
 
 // Main Testing Loop:
@@ -250,13 +252,14 @@ internal func test(st : State, f : (StdGen -> Int -> Prop)) -> Result {
 					return fail.value.0
 				}
 			case let .Right(sta):
-				if sta.value.numSuccessTests >= sta.value.maxSuccessTests {
-					return doneTesting(sta.value)(f: f)
+				let lsta = sta.value // Local copy so I don't have to keep unwrapping.
+				if lsta.numSuccessTests >= lsta.maxSuccessTests || lsta.shouldAbort {
+					return doneTesting(lsta)(f: f)
 				}
-				if sta.value.numDiscardedTests >= sta.value.maxDiscardedTests {
-					return giveUp(sta.value)(f: f)
+				if lsta.numDiscardedTests >= lsta.maxDiscardedTests || lsta.shouldAbort {
+					return giveUp(lsta)(f: f)
 				}
-				state = sta.value
+				state = lsta
 		}
 	}
 }
@@ -276,7 +279,7 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 
 			switch res.match() {
 				// Success
-				case .MatchResult(.Some(true), let expect, _, _, let labels, let stamp, _):
+				case .MatchResult(.Some(true), let expect, _, _, let labels, let stamp, _, let abort):
 					let state = State(name: st.name
 									, maxSuccessTests: st.maxSuccessTests
 									, maxDiscardedTests: st.maxDiscardedTests
@@ -289,10 +292,11 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 									, randomSeed: st.randomSeed
 									, numSuccessShrinks: st.numSuccessShrinks
 									, numTryShrinks: st.numTryShrinks
-									, numTotTryShrinks: st.numTotTryShrinks)
+									, numTotTryShrinks: st.numTotTryShrinks
+									, shouldAbort: abort)
 					return .Right(Box(state))
 				// Discard
-				case .MatchResult(.None, let expect, _, _, let labels, _, _):
+				case .MatchResult(.None, let expect, _, _, let labels, _, _, let abort):
 					let state = State(name: st.name
 									, maxSuccessTests: st.maxSuccessTests
 									, maxDiscardedTests: st.maxDiscardedTests
@@ -305,10 +309,11 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 									, randomSeed: rnd2
 									, numSuccessShrinks: st.numSuccessShrinks
 									, numTryShrinks: st.numTryShrinks
-									, numTotTryShrinks: st.numTotTryShrinks)
+									, numTotTryShrinks: st.numTotTryShrinks
+									, shouldAbort: abort)
 					return .Right(Box(state))
 				// Fail
-				case .MatchResult(.Some(false), let expect, _, _, _, _, _):
+				case .MatchResult(.Some(false), let expect, _, _, _, _, _, let abort):
 					if !expect {
 						print("+++ OK, failed as expected. ", appendNewline: false)
 					} else {
@@ -343,8 +348,8 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 									, randomSeed: rnd2
 									, numSuccessShrinks: st.numSuccessShrinks
 									, numTryShrinks: st.numTryShrinks
-									, numTotTryShrinks: st.numTotTryShrinks)
-
+									, numTotTryShrinks: st.numTotTryShrinks
+									, shouldAbort: abort)
 					return .Left(Box((stat, state)))
 			default:
 				fatalError("Pattern Match Failed: switch on a Result was inexhaustive.")
@@ -445,7 +450,8 @@ internal func findMinimalFailingTestCase(st : State, res : TestResult, ts : [Ros
 					, randomSeed: st.randomSeed
 					, numSuccessShrinks: numSuccessShrinks
 					, numTryShrinks: numTryShrinks
-					, numTotTryShrinks: numTotTryShrinks)
+					, numTotTryShrinks: numTotTryShrinks
+					, shouldAbort: st.shouldAbort)
 	return reportMinimumCaseFound(state, res: lastResult)
 }
 

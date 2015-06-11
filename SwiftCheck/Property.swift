@@ -89,16 +89,31 @@ extension Testable {
 		})
 	}
 
+	/// Modifies a property so that it only will be tested once.
+	public var once : Property {
+		return self.mapResult({ res in
+			return TestResult(ok: res.ok,
+							expect: res.expect,
+							reason: res.reason,
+							theException: res.theException,
+							labels: res.labels,
+							stamp: res.stamp,
+							callbacks: res.callbacks,
+							abort: true)
+		})
+	}
+
 	/// Attaches a callback to a test case.
 	public func withCallback(cb : Callback) -> Property {
 		return self.mapResult({ (res) in
 			return TestResult(ok: res.ok,
-								expect: res.expect,
-								reason: res.reason,
-								theException: res.theException,
-								labels: res.labels,
-								stamp: res.stamp,
-								callbacks: [cb] + res.callbacks)
+							expect: res.expect,
+							reason: res.reason,
+							theException: res.theException,
+							labels: res.labels,
+							stamp: res.stamp,
+							callbacks: [cb] + res.callbacks,
+							abort: res.abort)
 		})
 	}
 
@@ -158,12 +173,13 @@ extension Testable {
 
 		return self.mapResult({ res in
 			return TestResult(ok: res.ok,
-				expect: res.expect,
-				reason: res.reason,
-				theException: res.theException,
-				labels: res.labels,
-				stamp: res.stamp,
-				callbacks: res.callbacks + chattyCallbacks(res.callbacks))
+						expect: res.expect,
+						reason: res.reason,
+						theException: res.theException,
+						labels: res.labels,
+						stamp: res.stamp,
+						callbacks: res.callbacks + chattyCallbacks(res.callbacks),
+						abort: res.abort)
 		})
 	}
 
@@ -173,12 +189,13 @@ extension Testable {
 	public var expectFailure : Property {
 		return self.mapTotalResult({ res in
 			return TestResult(ok: res.ok,
-				expect: false,
-				reason: res.reason,
-				theException: res.theException,
-				labels: res.labels,
-				stamp: res.stamp,
-				callbacks: res.callbacks)
+						expect: false,
+						reason: res.reason,
+						theException: res.theException,
+						labels: res.labels,
+						stamp: res.stamp,
+						callbacks: res.callbacks,
+						abort: res.abort)
 		})
 	}
 
@@ -209,12 +226,13 @@ extension Testable {
 		if b {
 			return self.mapResult({ res in
 				return TestResult(ok: res.ok,
-					expect: res.expect,
-					reason: res.reason,
-					theException: res.theException,
-					labels: insertWith(max, k: s, v: n, m: res.labels),
-					stamp: res.stamp.union([s]),
-					callbacks: res.callbacks)
+							expect: res.expect,
+							reason: res.reason,
+							theException: res.theException,
+							labels: insertWith(max, k: s, v: n, m: res.labels),
+							stamp: res.stamp.union([s]),
+							callbacks: res.callbacks,
+							abort: res.abort)
 			})
 		}
 		return self.property()
@@ -232,7 +250,6 @@ public func shrinking<A>(shrinker : A -> [A], initial : A, prop : A -> Testable)
 		}))
 	})
 }
-
 
 /// A `Callback` is a block of code that can be run after a test case has finished.  They consist
 /// of a kind and the callback block itself, which is given the state SwiftCheck ran the test case
@@ -259,6 +276,7 @@ public enum TestResultMatcher {
 					, labels : Dictionary<String, Int>
 					, stamp : Set<String>
 					, callbacks : [Callback]
+					, abort : Bool
 					)
 }
 
@@ -279,13 +297,15 @@ public struct TestResult {
 	let stamp			: Set<String>
 	/// Callbacks attached to the test case.
 	let callbacks		: [Callback]
+	/// Indicates that any further testing of the property should cease.
+	let abort			: Bool
 
 	/// Destructures a test case into a matcher that can be used in switch statement.
 	public func match() -> TestResultMatcher {
-		return .MatchResult(ok: ok, expect: expect, reason: reason, theException: theException, labels: labels, stamp: stamp, callbacks: callbacks)
+		return .MatchResult(ok: ok, expect: expect, reason: reason, theException: theException, labels: labels, stamp: stamp, callbacks: callbacks, abort: abort)
 	}
 
-	public init(ok : Optional<Bool>, expect : Bool, reason : String, theException : Optional<String>, labels : Dictionary<String, Int>, stamp : Set<String>, callbacks : [Callback]) {
+	public init(ok : Optional<Bool>, expect : Bool, reason : String, theException : Optional<String>, labels : Dictionary<String, Int>, stamp : Set<String>, callbacks : [Callback], abort : Bool) {
 		self.ok = ok
 		self.expect = expect
 		self.reason = reason
@@ -293,6 +313,7 @@ public struct TestResult {
 		self.labels = labels
 		self.stamp = stamp
 		self.callbacks = callbacks
+		self.abort = abort
 	}
 }
 ///
@@ -328,7 +349,7 @@ private func props<A>(shrinker : A -> [A], original : A, pf: A -> Testable) -> R
 }
 
 private func result(ok : Bool?, reason : String = "") -> TestResult {
-	return TestResult(ok: ok, expect: true, reason: reason, theException: .None, labels: [:], stamp: Set(), callbacks: [])
+	return TestResult(ok: ok, expect: true, reason: reason, theException: .None, labels: [:], stamp: Set(), callbacks: [], abort: false)
 }
 
 private func protectResults(rs : Rose<TestResult>) -> Rose<TestResult> {
@@ -394,7 +415,8 @@ private func addCallbacks(result : TestResult) -> TestResult -> TestResult {
 			theException: res.theException,
 			labels: res.labels,
 			stamp: res.stamp,
-			callbacks: result.callbacks + res.callbacks)
+			callbacks: result.callbacks + res.callbacks,
+			abort: res.abort)
 	}
 }
 
@@ -406,7 +428,8 @@ private func addLabels(result : TestResult) -> TestResult -> TestResult {
 			theException: res.theException,
 			labels: unionWith(max, l: res.labels, r: result.labels),
 			stamp: res.stamp.union(result.stamp),
-			callbacks: res.callbacks)
+			callbacks: res.callbacks,
+			abort: res.abort)
 	}
 }
 
@@ -503,7 +526,8 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 						stamp: Set(),
 						callbacks: result1.callbacks + [.AfterFinalFailure(kind: .Counterexample, f: { _ in
 							return print("")
-						})] + result2.callbacks))
+						})] + result2.callbacks,
+						abort: false))
 				case .None:
 					return Rose.pure(result2)
 				default:
