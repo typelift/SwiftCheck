@@ -40,7 +40,7 @@ public func disjoin(ps : Testable...) -> Property {
 	return Property(sequence(ps.map({ (p : Testable) in
 		return p.property().unProperty.fmap({ $0.unProp })
 	})).bind({ roses in
-		return Gen.pure(Prop(unProp: roses.reduce(.MkRose({ failed() }, { [] }), combine: disj)))
+		return Gen.pure(Prop(unProp: roses.reduce(.MkRose({ TestResult.failed() }, { [] }), combine: disj)))
 	}))
 }
 
@@ -315,32 +315,37 @@ public struct TestResult {
 		self.callbacks = callbacks
 		self.abort = abort
 	}
-}
-///
-public func succeeded() -> TestResult {
-	return result(Optional.Some(true))
-}
 
-public func failed(reason : String = "") -> TestResult {
-	return result(Optional.Some(false), reason: reason)
-}
-
-public func rejected() -> TestResult {
-	return result(Optional.None)
-}
-
-public func liftBool(b : Bool) -> TestResult {
-	if b {
-		return succeeded()
+	/// Convenience constructor for a passing `TestResult`.
+	public static var succeeded : TestResult {
+		return result(Optional.Some(true))
 	}
-	return result(Optional.Some(false), reason: "Falsifiable")
-}
 
-public func exception(msg : String) -> ErrorType -> TestResult {
-	return { e in failed(String(e)) }
+	/// Convenience constructor for a failing `TestResult`.
+	public static func failed(reason : String = "") -> TestResult {
+		return result(Optional.Some(false), reason: reason)
+	}
+
+	/// Convenience constructor for a discarded `TestResult`.
+	public static var rejected : TestResult {
+		return result(Optional.None)
+	}
+
+	/// Lifts a `Bool`ean value to a TestResult by mapping true to `TestResult.suceeded` and false
+	/// to `TestResult.failed`.
+	public static func liftBool(b : Bool) -> TestResult {
+		if b {
+			return TestResult.succeeded
+		}
+		return result(Optional.Some(false), reason: "Falsifiable")
+	}
 }
 
 /// MARK: Implementation Details
+
+private func exception(msg : String) -> ErrorType -> TestResult {
+	return { e in TestResult.failed(String(e)) }
+}
 
 private func props<A>(shrinker : A -> [A], original : A, pf: A -> Testable) -> Rose<Gen<Prop>> {
 	return .MkRose({ pf(original).property().unProperty }, { shrinker(original).map { x1 in
@@ -435,14 +440,14 @@ private func addLabels(result : TestResult) -> TestResult -> TestResult {
 
 private func conj(k : TestResult -> TestResult, xs : [Rose<TestResult>]) -> Rose<TestResult> {
 	if xs.isEmpty {
-		return Rose.MkRose({ k(succeeded()) }, { [] })
+		return Rose.MkRose({ k(TestResult.succeeded) }, { [] })
 	} else if let p = xs.first {
 		return .IORose(protectRose({
 			let rose = reduce(p)
 			switch rose {
 			case .MkRose(let result, _):
 				if !result().expect {
-					return Rose.pure(failed("expectFailure may not occur inside a conjunction"))
+					return Rose.pure(TestResult.failed("expectFailure may not occur inside a conjunction"))
 				}
 
 				switch result().ok {
@@ -456,7 +461,7 @@ private func conj(k : TestResult -> TestResult, xs : [Rose<TestResult>]) -> Rose
 					case .MkRose(let result2, _):
 						switch result2().ok {
 						case .Some(true):
-							return Rose.MkRose({ rejected() }, { [] })
+							return Rose.MkRose({ TestResult.rejected }, { [] })
 						case .Some(false):
 							return rose2
 						case .None:
@@ -504,7 +509,7 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 
 	return p.bind({ result1 in
 		if !result1.expect {
-			return Rose.pure(failed("expectFailure may not occur inside a disjunction"))
+			return Rose.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 		}
 		switch result1.ok {
 		case .Some(true):
@@ -512,7 +517,7 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 		case .Some(false):
 			return q.bind({ result2 in
 				if !result2.expect {
-					return Rose.pure(failed("expectFailure may not occur inside a disjunction"))
+					return Rose.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 				}
 				switch result2.ok {
 				case .Some(true):
@@ -537,7 +542,7 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 		case .None:
 			return q.bind({ result2 in
 				if !result2.expect {
-					return Rose.pure(failed("expectFailure may not occur inside a disjunction"))
+					return Rose.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 				}
 				switch result2.ok {
 				case .Some(true):
