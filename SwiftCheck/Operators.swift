@@ -6,6 +6,42 @@
 //  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
+infix operator <- {}
+
+/// Binds a Testable value to a property.
+public func <-(checker : AssertiveQuickCheck, @autoclosure(escaping) test : () -> Testable) {
+	switch quickCheckWithResult(stdArgs(checker.msg), p: test()) {
+	case let .Failure(_, _, _, _, reason, _, _):
+		XCTFail(reason, file: checker.file, line: checker.line)
+	case .NoExpectedFailure(_, _, _):
+		XCTFail("Expected property to fail but it didn't.", file: checker.file, line: checker.line)
+	default:
+		return
+	}
+}
+
+/// Binds a Testable value to a property.
+public func <-(checker : AssertiveQuickCheck, test : () -> Testable) {
+	switch quickCheckWithResult(stdArgs(checker.msg), p: test()) {
+	case let .Failure(_, _, _, _, reason, _, _):
+		XCTFail(reason, file: checker.file, line: checker.line)
+	case .NoExpectedFailure(_, _, _):
+		XCTFail("Expected property to fail but it didn't.", file: checker.file, line: checker.line)
+	default:
+		return
+	}
+}
+
+/// Binds a Testable value to a property.
+public func <-(checker : ReportiveQuickCheck, test : () -> Testable) {
+	quickCheckWithResult(stdArgs(checker.msg), p: test())
+}
+
+/// Binds a Testable value to a property.
+public func <-(checker : ReportiveQuickCheck, @autoclosure(escaping) test : () -> Testable) {
+	quickCheckWithResult(stdArgs(checker.msg), p: test())
+}
+
 infix operator ==> {
 	associativity right
 	precedence 100
@@ -80,3 +116,6 @@ infix operator ^||^ {
 public func ^||^(p1 : Testable, p2 : Testable) -> Property {
 	return disjoin(p1.property(), p2.property())
 }
+
+import func XCTest.XCTFail
+

@@ -20,7 +20,7 @@ class GenSpec : XCTestCase {
 			return forAll(g) { (i : Int) in
 				return true
 			}
-		}()
+		}
 
 		property("Gen.frequency with N arguments behaves") <- forAll(Gen<Int>.choose((0, 1000))) { n in
 			return forAll(Gen.frequency(Array(count: n, repeatedValue: (1, Gen.pure(0))))) { $0 == 0 }
@@ -35,7 +35,7 @@ class GenSpec : XCTestCase {
 			return forAll(g) { (i : Int) in
 				return true
 			}
-		}()
+		}
 
 		property("Gen.weighted with N arguments behaves") <- forAll(Gen<Int>.choose((0, 1000))) { n in
 			return forAll(Gen.weighted(Array(count: n, repeatedValue: (1, 0)))) { $0 == 0 }
@@ -44,7 +44,7 @@ class GenSpec : XCTestCase {
 		property("The only value Gen.pure generates is the given value") <- {
 			let g = Gen.pure(0)
 			return forAll(g) { $0 == 0 }
-		}()
+		}
 
 		property("Gen.elements only generates the elements of the given array") <- forAll { (xss : ArrayOf<Int>) in
 			if xss.getArray.isEmpty {
@@ -86,20 +86,20 @@ class GenSpec : XCTestCase {
 			return forAll(g) { str in
 				return !(str.isEmpty || str.rangeOfString(",") != nil)
 			}
-		}()
+		}
 
 		property("Gen.suchThat in series obeys its first property") <- {
 			let g = String.arbitrary().suchThat({ !$0.isEmpty }).suchThat({ $0.rangeOfString(",") == nil })
 			return forAll(g) { str in
 				return !str.isEmpty
 			}
-		}()
+		}
 
 		property("Gen.suchThat in series obeys its last property") <- {
 			let g = String.arbitrary().suchThat({ !$0.isEmpty }).suchThat({ $0.rangeOfString(",") == nil })
 			return forAll(g) { str in
 				return str.rangeOfString(",") == nil
 			}
-		}()
+		}
 	}
 }

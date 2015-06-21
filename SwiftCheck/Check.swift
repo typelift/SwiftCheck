@@ -6,10 +6,6 @@
 //  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
-import XCTest
-
-infix operator <- {}
-
 /// The main interface for the SwiftCheck testing mechanism.  `property` notation is used to define
 /// a property that SwiftCheck can generate test cases for and a human-readable label for debugging
 /// output.  A simple property test might look like the following:
@@ -36,17 +32,6 @@ public struct AssertiveQuickCheck {
 	}
 }
 
-public func <-(checker : AssertiveQuickCheck, test : Testable) {
-	switch quickCheckWithResult(stdArgs(checker.msg), p: test) {
-	case let .Failure(_, _, _, _, reason, _, _):
-		XCTFail(reason, file: checker.file, line: checker.line)
-	case .NoExpectedFailure(_, _, _):
-		XCTFail("Expected property to fail but it didn't.", file: checker.file, line: checker.line)
-	default:
-		return
-	}
-}
-
 /// The interface for properties to be run through SwiftCheck without an XCTest assert.  The
 /// property will still generate console output during testing.
 public func reportProperty(msg : String, file : String = __FILE__, line : UInt = __LINE__) -> ReportiveQuickCheck {
@@ -63,8 +48,4 @@ public struct ReportiveQuickCheck {
 		self.file = file
 		self.line = line
 	}
-}
-
-public func <-(checker : ReportiveQuickCheck, test : Testable) {
-	quickCheckWithResult(stdArgs(checker.msg), p: test)
 }
