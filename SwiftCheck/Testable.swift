@@ -35,10 +35,6 @@ public struct Property : Testable {
 	}
 }
 
-internal func protectedIORose(f : () throws -> Rose<TestResult>) -> Rose<TestResult> {
-	return .IORose(protectRose(f))
-}
-
 /// A proposition.
 public struct Prop : Testable {
 	var unProp : Rose<TestResult>

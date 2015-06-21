@@ -10,8 +10,9 @@ import XCTest
 
 infix operator <- {}
 
-/// The main interface for the SwiftCheck testing mechanism. To test a program property one
-/// subscripts into this variable with a description of the property being tested like so:
+/// The main interface for the SwiftCheck testing mechanism.  `property` notation is used to define
+/// a property that SwiftCheck can generate test cases for and a human-readable label for debugging
+/// output.  A simple property test might look like the following:
 ///
 ///     property("reflexitivity") <- forAll { (i : Int8) in
 ///	        return i == i

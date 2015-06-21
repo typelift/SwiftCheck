@@ -85,7 +85,7 @@ public struct Gen<A> {
 		})
 	}
 
-	/// Randomly selects and uses one of a number of given Generators.
+	/// Constructs a Generator that randomly selects and uses one of a number of given Generators.
 	public static func oneOf(gs : [Gen<A>]) -> Gen<A> {
 		assert(gs.count != 0, "oneOf used with empty list")
 
