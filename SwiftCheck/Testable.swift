@@ -42,7 +42,8 @@ public struct Prop : Testable {
 	public var exhaustive : Bool { return true }
 
 	public func property() -> Property {
-		return Property(Gen.pure(Prop(unProp: .IORose(protectRose({ self.unProp })))))
+//		return Property(Gen.pure(Prop(unProp: .IORose(protectRose({ self.unProp })))))
+		return Property(Gen.pure(Prop(unProp: .IORose({ self.unProp }))))
 	}
 }
 

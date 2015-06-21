@@ -58,11 +58,11 @@ extension Testable {
 	}
 
 	/// Applies a function that modifies the result of a test case.
-	public func mapTotalResult(f : TestResult -> TestResult) -> Property {
-		return self.mapRoseResult({ rs in
-			return protectResults(rs.fmap(f))
-		})
-	}
+//	public func mapTotalResult(f : TestResult -> TestResult) -> Property {
+//		return self.mapRoseResult({ rs in
+//			return protectResults(rs.fmap(f))
+//		})
+//	}
 
 	/// Applies a function that modifies the result of a test case.
 	public func mapResult(f : TestResult -> TestResult) -> Property {
@@ -187,7 +187,8 @@ extension Testable {
 	///
 	/// If the property does not fail, SwiftCheck will report an error.
 	public var expectFailure : Property {
-		return self.mapTotalResult({ res in
+		// return self.mapTotalResult({ res in
+		return self.mapResult({ res in
 			return TestResult(ok: res.ok,
 						expect: false,
 						reason: res.reason,
@@ -357,31 +358,31 @@ private func result(ok : Bool?, reason : String = "") -> TestResult {
 	return TestResult(ok: ok, expect: true, reason: reason, theException: .None, labels: [:], stamp: Set(), callbacks: [], abort: false)
 }
 
-private func protectResults(rs : Rose<TestResult>) -> Rose<TestResult> {
-	return onRose({ x in
-		return { rs in
-			return .IORose({
-				return .MkRose(protectResult({ x }), { rs.map(protectResults) })
-			})
-		}
-	})(rs: rs)
-}
-
-internal func protectRose(f : () throws -> Rose<TestResult>) -> (() -> Rose<TestResult>) {
-	return { protect(Rose.pure • exception("Exception"))(x: f) }
-}
-
-internal func protect<A>(f : ErrorType -> A)(x : () throws -> A) -> A {
-	do {
-		return try x()
-	} catch let e {
-		return f(e)
-	}
-}
-
-private func protectResult(r : () throws -> TestResult) -> (() -> TestResult) {
-	return { protect(exception("Exception"))(x: r) }
-}
+//private func protectResults(rs : Rose<TestResult>) -> Rose<TestResult> {
+//	return onRose({ x in
+//		return { rs in
+//			return .IORose({
+//				return .MkRose(protectResult({ x }), { rs.map(protectResults) })
+//			})
+//		}
+//	})(rs: rs)
+//}
+//
+//internal func protectRose(f : () throws -> Rose<TestResult>) -> (() -> Rose<TestResult>) {
+//	return { protect(Rose.pure • exception("Exception"))(x: f) }
+//}
+//
+//internal func protect<A>(f : ErrorType -> A)(x : () throws -> A) -> A {
+//	do {
+//		return try x()
+//	} catch let e {
+//		return f(e)
+//	}
+//}
+//
+//private func protectResult(r : () throws -> TestResult) -> (() -> TestResult) {
+//	return { protect(exception("Exception"))(x: r) }
+//}
 
 private func id<A>(x : A) -> A {
 	return x
@@ -442,7 +443,7 @@ private func conj(k : TestResult -> TestResult, xs : [Rose<TestResult>]) -> Rose
 	if xs.isEmpty {
 		return Rose.MkRose({ k(TestResult.succeeded) }, { [] })
 	} else if let p = xs.first {
-		return .IORose(protectRose({
+		return .IORose(/*protectRose*/({
 			let rose = reduce(p)
 			switch rose {
 			case .MkRose(let result, _):
