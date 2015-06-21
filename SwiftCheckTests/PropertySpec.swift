@@ -11,13 +11,13 @@ import SwiftCheck
 
 class PropertySpec : XCTestCase {
 	func testAll() {
-		property["Once really only tests a property once"] = forAll { (n : Int) in
+		property("Once really only tests a property once") <- forAll { (n : Int) in
 			var bomb : Optional<Int> = .Some(n)
-			return once(forAll { (_ : Int) in
+			return forAll { (_ : Int) in
 				let b = bomb! // Will explode if we test more than once
 				bomb = nil
 				return b == n
-			})
+			}.once
 		}
 	}
 }
