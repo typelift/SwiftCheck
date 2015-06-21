@@ -248,6 +248,24 @@ extension Character : Arbitrary {
 	}
 }
 
+//extension Array : Arbitrary where T : Arbitrary {
+//	public static func arbitrary() -> Gen<Array<T>> {
+//		return Gen.sized { n in
+//			return Gen<Int>.choose((0, n)).bind { k in
+//				if k == 0 {
+//					return Gen.pure([])
+//				}
+//
+//				return sequence(Array((0...k)).map { _ in T.arbitrary() })
+//			}
+//		}
+//	}
+//
+//	public static func shrink(bl : Array<T>) -> [[T]] {
+//		return Array(Int.shrink(n).reverse()).flatMap({ k in removes(k + 1, n: bl.count, xs: bl) }) + shrinkOne(bl)
+//	}
+//}
+
 private func bits<N : IntegerType>(n : N) -> Int {
 	if n / 2 == 0 {
 		return 0
