@@ -81,7 +81,7 @@ public func liftM<A, R>(f : A -> R)(m1 : Rose<A>) -> Rose<R> {
 /// tree to its sub-trees.
 public func joinRose<A>(rs : Rose<Rose<A>>) -> Rose<A> {
 	switch rs {
-		case .IORose(var rs):
+		case .IORose(let rs):
 			return .IORose({ joinRose(rs()) })
 		case .MkRose(let bx , let rs):
 			switch bx() {

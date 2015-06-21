@@ -9,7 +9,7 @@
 
 /// For types that either do not have a Printable instance or that wish to have no description to
 /// print, Blind will create a default description for them.
-public struct Blind<A : Arbitrary> : Arbitrary, Printable {
+public struct Blind<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 	public let getBlind : A
 	
 	public init(_ blind : A) {
@@ -41,7 +41,7 @@ extension Blind : CoArbitrary {
 }
 
 /// Guarantees test cases for its underlying type will not be shrunk.
-public struct Static<A : Arbitrary> : Arbitrary, Printable {
+public struct Static<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 	public let getStatic : A
 	
 	public init(_ fixed : A) {
@@ -73,7 +73,7 @@ extension Static : CoArbitrary {
 }
 
 /// Generates an array of arbitrary values of type A.
-public struct ArrayOf<A : Arbitrary> : Arbitrary, Printable {
+public struct ArrayOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 	public let getArray : [A]
 	public var getContiguousArray : ContiguousArray<A> {
 		return ContiguousArray(self.getArray)
@@ -105,7 +105,7 @@ public struct ArrayOf<A : Arbitrary> : Arbitrary, Printable {
 
 	public static func shrink(bl : ArrayOf<A>) -> [ArrayOf<A>] {
 		let n = bl.getArray.count
-		let xs = Int.shrink(n).reverse().flatMap({ k in removes(k + 1, n, bl.getArray) }) + shrinkOne(bl.getArray)
+		let xs = Array(Int.shrink(n).reverse()).flatMap({ k in removes(k + 1, n: n, xs: bl.getArray) }) + shrinkOne(bl.getArray)
 		return xs.map({ ArrayOf($0) })
 	}
 }
@@ -121,15 +121,15 @@ extension ArrayOf : CoArbitrary {
 }
 
 private func removes<A : Arbitrary>(k : Int, n : Int, xs : [A]) -> [[A]] {
-	let xs1 = take(k, xs)
-	let xs2 = drop(k, xs)
+	let xs1 = take(k, xs: xs)
+	let xs2 = drop(k, xs: xs)
 
 	if k > n {
 		return []
 	} else if xs2.isEmpty {
 		return [[]]
 	} else {
-		return [xs2] + removes(k, n - k, xs2).map({ xs1 + $0 })
+		return [xs2] + removes(k, n: n - k, xs: xs2).map({ xs1 + $0 })
 	}
 }
 
@@ -156,7 +156,7 @@ func drop<T>(num : Int, xs : [T]) -> [T] {
 }
 
 /// Generates an dictionary of arbitrary keys and values.
-public struct DictionaryOf<K : protocol<Hashable, Arbitrary>, V : Arbitrary> : Arbitrary, Printable {
+public struct DictionaryOf<K : protocol<Hashable, Arbitrary>, V : Arbitrary> : Arbitrary, CustomStringConvertible {
 	public let getDictionary : Dictionary<K, V>
 
 	public init(_ dict : Dictionary<K, V>) {
@@ -201,14 +201,14 @@ extension Dictionary {
 	init<S : SequenceType where S.Generator.Element == Element>(_ pairs : S) {
 		self.init()
 		var g = pairs.generate()
-		while let (k : Key, v : Value) = g.next() {
+		while let (k, v): (Key, Value) = g.next() {
 			self[k] = v
 		}
 	}
 }
 
 /// Generates an Optional of arbitrary values of type A.
-public struct OptionalOf<A : Arbitrary> : Arbitrary, Printable {
+public struct OptionalOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 	public let getOptional : A?
 
 	public init(_ opt : A?) {
@@ -248,7 +248,7 @@ extension OptionalOf : CoArbitrary {
 }
 
 /// Generates a set of arbitrary values of type A.
-public struct SetOf<A : protocol<Hashable, Arbitrary>> : Arbitrary, Printable {
+public struct SetOf<A : protocol<Hashable, Arbitrary>> : Arbitrary, CustomStringConvertible {
 	public let getSet : Set<A>
 
 	public init(_ set : Set<A>) {
@@ -290,7 +290,7 @@ extension SetOf : CoArbitrary {
 }
 
 /// Generates a Swift function from T to U.
-public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbitrary, Printable {
+public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbitrary, CustomStringConvertible {
 	private var table : Dictionary<T, U>
 	private var arr : T -> U
 	public var getArrow : T -> U {
@@ -350,7 +350,7 @@ private func undefined<A>() -> A {
 }
 
 /// Guarantees that every generated integer is greater than 0.
-public struct Positive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary, Printable {
+public struct Positive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary, CustomStringConvertible {
 	public let getPositive : A
 	
 	public init(_ pos : A) {
@@ -382,7 +382,7 @@ extension Positive : CoArbitrary {
 }
 
 /// Guarantees that every generated integer is never 0.
-public struct NonZero<A : protocol<Arbitrary, IntegerType>> : Arbitrary, Printable {
+public struct NonZero<A : protocol<Arbitrary, IntegerType>> : Arbitrary, CustomStringConvertible {
 	public let getNonZero : A
 	
 	public init(_ non : A) {
@@ -413,7 +413,7 @@ extension NonZero : CoArbitrary {
 }
 
 /// Guarantees that every generated integer is greater than or equal to 0.
-public struct NonNegative<A : protocol<Arbitrary, IntegerType>> : Arbitrary, Printable {
+public struct NonNegative<A : protocol<Arbitrary, IntegerType>> : Arbitrary, CustomStringConvertible {
 	public let getNonNegative : A
 	
 	public init(_ non : A) {

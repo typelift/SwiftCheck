@@ -25,7 +25,7 @@ equal to itself, we would express it as such:
 func testAll() {
     // 'property' notation allows us to name our tests.  This becomes important
     // when they fail and SwiftCheck reports it in the console.
-    property["Integer Equality is Reflexive"] = forAll { (i : Int) in
+    property("Integer Equality is Reflexive") <- forAll { (i : Int) in
         return i == i
     }
 }
@@ -38,7 +38,7 @@ Array identity holds under double reversal:
 // Because Swift doesn't allow us to implement `Arbitrary` for certain types,
 // SwiftCheck instead implements 'modifier' types that wrap them.  Here,
 // `ArrayOf<T : Arbitrary>` generates random arrays of values of type `T`.
-property["The reverse of the reverse of an array is that array"] = forAll { (xs : ArrayOf<Int>) in
+property("The reverse of the reverse of an array is that array") <- forAll { (xs : ArrayOf<Int>) in
     // This property is using a number of SwiftCheck's more interesting 
     // features.  `^&&^` is the conjunction operator for properties that turns
     // both properties into a larger property that only holds when both sub-properties
@@ -58,7 +58,7 @@ Because SwiftCheck doesn't require tests to return `Bool`, just `Testable`, we
 can produce tests for complex properties with ease:
 
 ```swift
-property["Shrunken lists of integers always contain [] or [0]"] = forAll { (l : ArrayOf<Int>) in
+property("Shrunken lists of integers always contain [] or [0]") <- forAll { (l : ArrayOf<Int>) in
     // Here we use the Implication Operator `==>` to define a precondition for
     // this test.  If the precondition fails the test is discarded.  If it holds
     // the test proceeds.
@@ -72,7 +72,7 @@ property["Shrunken lists of integers always contain [] or [0]"] = forAll { (l : 
 Properties can even depend on other properties:
 
 ```swift
-property["Gen.oneOf multiple generators picks only given generators"] = forAll { (n1 : Int, n2 : Int) in
+property("Gen.oneOf multiple generators picks only given generators") <- forAll { (n1 : Int, n2 : Int) in
     let g1 = Gen.pure(n1)
     let g2 = Gen.pure(n2)
     // Here we give `forAll` an explicit generator.  Before SwiftCheck was using
@@ -155,7 +155,7 @@ with the following property:
 ```swift
 import SwiftCheck
 
-property["All Prime"] = forAll { (n : Int) in
+property("All Prime") <- forAll { (n : Int) in
     return sieve(n).filter(isPrime) == sieve(n)
 }
 ```
@@ -222,7 +222,7 @@ extension ArbitraryFoo : Arbitrary {
 
 class SimpleSpec : XCTestCase {
     func testAll() {
-        property["ArbitraryFoo Properties are Reflexive"] = forAll { (i : ArbitraryFoo) in
+        property("ArbitraryFoo Properties are Reflexive") <- forAll { (i : ArbitraryFoo) in
             return i.x == i.x && i.y == i.y
         }
     }
