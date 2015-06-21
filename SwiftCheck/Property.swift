@@ -89,6 +89,28 @@ extension Testable {
 		})
 	}
 
+	/// Modifies a property by requiring it to complete before a timeout (in nanoseconds).
+	///
+	/// Long-running operations that do not complete are subject to cancellation any time after the
+	/// timeout period.
+	public func within(n : Int64) -> Property {
+		func withinF(n : Int64)(rose : Rose<TestResult>) -> Rose<TestResult> {
+			return .IORose({
+				if let res = timeout(n, block: reduce(rose)) {
+					switch res {
+					case .IORose(_):
+						fatalError("Rose should not have reduced to .IORose")
+					case let .MkRose(res, roses):
+						return .MkRose(res, { roses().map(withinF(n)) })
+					}
+				}
+				return Rose.pure(TestResult.failed("Property did not complete before timeout (\(n) ns)"))
+			})
+		}
+
+		return self.mapRoseResult(withinF(n))
+	}
+
 	/// Modifies a property so that it only will be tested once.
 	public var once : Property {
 		return self.mapResult({ res in
@@ -383,6 +405,29 @@ private func result(ok : Bool?, reason : String = "") -> TestResult {
 //private func protectResult(r : () throws -> TestResult) -> (() -> TestResult) {
 //	return { protect(exception("Exception"))(x: r) }
 //}
+
+private let swiftCheckTimeoutQueue : NSOperationQueue = {
+	let queue = NSOperationQueue()
+	queue.name = "com.typelift.SwiftCheck.TimeoutQueue"
+	return queue
+}()
+
+private func timeout<A>(t : Int64, @autoclosure(escaping) block : () -> A) -> Optional<A> {
+	let semaphore = dispatch_semaphore_create(0);
+	var val : A? = nil
+
+	swiftCheckTimeoutQueue.addOperationWithBlock({
+		val = block()
+		dispatch_semaphore_signal(semaphore);
+	})
+
+	let timeoutTime = dispatch_time(DISPATCH_TIME_NOW, t);
+	if dispatch_semaphore_wait(semaphore, timeoutTime) != 0 {
+		swiftCheckTimeoutQueue.cancelAllOperations()
+		return nil
+	}
+	return val
+}
 
 private func id<A>(x : A) -> A {
 	return x

@@ -19,5 +19,10 @@ class PropertySpec : XCTestCase {
 				return b == n
 			}.once
 		}
+
+		property("within works") <- { () -> Testable in
+			sleep(1)
+			return true
+		}().within(1000).expectFailure
 	}
 }
