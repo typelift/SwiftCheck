@@ -13,7 +13,7 @@ infix operator <- {}
 /// The main interface for the SwiftCheck testing mechanism. To test a program property one
 /// subscripts into this variable with a description of the property being tested like so:
 ///
-///     property("") <- forAll { (i : Int8) in
+///     property("reflexitivity") <- forAll { (i : Int8) in
 ///	        return i == i
 ///     }
 ///

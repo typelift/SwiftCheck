@@ -228,7 +228,7 @@ extension UnicodeScalar : Arbitrary {
 
 extension String : Arbitrary {
 	public static func arbitrary() -> Gen<String> {
-		let chars = Gen.sized({ n in Character.arbitrary().vectorOf(n) })
+		let chars = Gen.sized({ n in Character.arbitrary().proliferateSized(n) })
 		return chars.bind { ls in Gen<String>.pure(String(ls)) }
 	}
 

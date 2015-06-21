@@ -51,11 +51,11 @@ class GenSpec : XCTestCase {
 				return Discard()
 			}
 			let l = Set(xss.getArray)
-			return forAll(Gen.elements(xss.getArray)) { l.contains($0) }
+			return forAll(Gen.fromElementsOf(xss.getArray)) { l.contains($0) }
 		}
 
 		property("Gen.elements only generates the elements of the given array") <- forAll { (n1 : Int, n2 : Int) in
-			return forAll(Gen.elements([n1, n2])) { $0 == n1 || $0 == n2 }
+			return forAll(Gen.fromElementsOf([n1, n2])) { $0 == n1 || $0 == n2 }
 		}
 
 		property("oneOf n") <- forAll { (xss : ArrayOf<Int>) in
@@ -72,12 +72,12 @@ class GenSpec : XCTestCase {
 			return forAll(Gen.oneOf([g1, g2])) { $0 == n1 || $0 == n2 }
 		}
 
-		property("Gen.vectorOf n generates arrays of length n") <- forAll(Gen<Int>.choose((0, 100))) { n in
-			let g = Int.arbitrary().vectorOf(n).fmap({ ArrayOf($0) })
+		property("Gen.proliferateSized n generates arrays of length n") <- forAll(Gen<Int>.choose((0, 100))) { n in
+			let g = Int.arbitrary().proliferateSized(n).fmap({ ArrayOf($0) })
 			return forAll(g) { $0.getArray.count == n }
 		}
 
-		property("Gen.vectorOf 0 generates only empty arrays") <- forAll(Int.arbitrary().vectorOf(0).fmap({ ArrayOf($0) })) {
+		property("Gen.proliferateSized 0 generates only empty arrays") <- forAll(Int.arbitrary().proliferateSized(0).fmap({ ArrayOf($0) })) {
 			return $0.getArray.isEmpty
 		}
 
