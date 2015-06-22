@@ -44,6 +44,17 @@ public func disjoin(ps : Testable...) -> Property {
 	}))
 }
 
+/// Takess the nondeterministic conjunction of multiple properties and treats them as a single large
+/// property.
+///
+/// The resulting property makes 100 random choices to test any of the given properties.  Thus,
+/// running multiple test cases will result in distinct arbitrary sequences of each property being
+/// tested.
+public func conjamb(ps : Testable...) -> Property {
+	let ls = ps.map({ $0.property().unProperty })
+	return Property(Gen.oneOf(ls))
+}
+
 /// Applies a function that modifies the property generator's inner `Prop`.
 public func mapProp(f : Prop -> Prop)(p : Testable) -> Property {
 	return Property(p.property().unProperty.fmap(f))
