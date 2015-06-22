@@ -7,10 +7,6 @@
 //
 
 /// A generator for values of type A.
-///
-/// `Gen` wraps a function that, when given a random number generator and a size, can be used to
-/// control the distribution of resultant values.  A generator relies on its size to help control
-/// aspects like the length of generated arrays and the magnitude of integral values.
 public struct Gen<A> {
 	let unGen : StdGen -> Int -> A
 
@@ -23,99 +19,9 @@ public struct Gen<A> {
 		return unGen(r)(30)
 	}
 
-	/// Constructs a Generator that selects a random value from the given list and produces only 
-	/// that value.
-	///
-	/// The input array is required to be non-empty.
-	public static func fromElementsOf(xs : [A]) -> Gen<A> {
-		assert(xs.count != 0, "Gen.fromElementsOf used with empty list")
+	/// These must be in here or we get linker errors; rdar://21172325
 
-		return choose((0, xs.count - 1)).fmap { i in
-			return xs[i]
-		}
-	}
-
-	/// Constructs a Generator that uses a given array to produce smaller arrays composed of its 
-	/// initial segments.  The size of each initial segment increases with the receiver's size 
-	/// parameter.
-	///
-	/// The input array is required to be non-empty.
-	public static func fromInitialSegmentsOf(xs : [A]) -> Gen<A> {
-		assert(xs.count != 0, "Gen.fromInitialSegmentsOf used with empty list")
-
-		let k = Double(xs.count)
-		return sized({ n in
-			let m = max(1, size(k)(m: n))
-			return Gen.fromElementsOf(Array(xs[0 ..< m]))
-		})
-	}
-
-	/// Constructs a Generator that produces permutations of a given array.
-	public static func fromShufflingElementsOf(xs : [A]) -> Gen<[A]> {
-		if xs.isEmpty {
-			return Gen<[A]>.pure([])
-		}
-
-		return Gen<(A, [A])>.fromElementsOf(selectOne(xs)).bind { (y, ys) in
-			return Gen.fromShufflingElementsOf(ys).fmap({ [y] + $0 })
-		}
-	}
-
-	/// Constructs a generator that depends on a size parameter.
-	public static func sized(f : Int -> Gen<A>) -> Gen<A> {
-		return Gen(unGen:{ r in
-			return { n in
-				return f(n).unGen(r)(n)
-			}
-		})
-	}
-
-	/// Constructs a random element in the range of two Integer Types.
-	///
-	/// When using this function, it is necessary to explicitly specialize the generic parameter
-	/// `A`.  For example:
-	///
-	///	    Gen<UInt32>.choose((32, 255)).bind { Gen.pure(Character(UnicodeScalar($0))) }
-	public static func choose<A : RandomType>(rng : (A, A)) -> Gen<A> {
-		return Gen<A>(unGen: { s in
-			return { (_) in
-				let (x, _) = A.randomInRange(rng, gen: s)
-				return x
-			}
-		})
-	}
-
-	/// Constructs a Generator that randomly selects and uses one of a number of given Generators.
-	public static func oneOf(gs : [Gen<A>]) -> Gen<A> {
-		assert(gs.count != 0, "oneOf used with empty list")
-
-		return choose((0, gs.count - 1)).bind { x in
-			return gs[x]
-		}
-	}
-
-	/// Given a list of Generators and weights associated with them, this function randomly selects and
-	/// uses a Generator.
-	public static func frequency<S : SequenceType where S.Generator.Element == (Int, Gen<A>)>(xs : S) -> Gen<A> {
-		let xs: [(Int, Gen<A>)] = Array(xs)
-		assert(xs.count != 0, "frequency used with empty list")
-
-		return choose((1, xs.map({ $0.0 }).reduce(0, combine: +))).bind { l in
-			return pick(l)(lst: xs)
-		}
-	}
-
-	/// Given a list of values and weights associated with them, this function randomly selects and
-	/// uses a Generator wrapping one of the values.
-	public static func weighted<S : SequenceType where S.Generator.Element == (Int, A)>(xs : S) -> Gen<A> {
-		return frequency(xs.map { ($0, Gen.pure($1)) })
-	}
-}
-
-/// MARK: Generator Modifiers
-
-extension Gen {
-	/// Shakes up the receiver's internal Random Number Generator with a seed.
+	/// Shakes up the internal Random Number generator for a given Generator with a seed.
 	public func variant<S : IntegerType>(seed : S) -> Gen<A> {
 		return Gen(unGen: { r in
 			return { n in
@@ -124,7 +30,7 @@ extension Gen {
 		})
 	}
 
-	/// Modifies a Generator to always use a given size.
+	/// Constructs a generator that always uses a given size.
 	public func resize(n : Int) -> Gen<A> {
 		return Gen(unGen: { r in
 			return { (_) in
@@ -133,13 +39,8 @@ extension Gen {
 		})
 	}
 
-	/// Modifies a Generator such that it only returns values that satisfy a predicate.  When the
-	/// predicate fails the test case is treated as though it never occured.
-	///
-	/// Because the Generator will spin until it reaches a non-failing case, executing a condition
-	/// that fails more often than it succeeds may result in a space leak.  At that point, it is
-	/// better to use `suchThatOptional` or `.invert` the test case.
-	public func suchThat(p : A -> Bool) -> Gen<A> {
+	/// Constructs a Generator that only returns values that satisfy a predicate.
+	public func suchThat(p : (A -> Bool)) -> Gen<A> {
 		return self.suchThatOptional(p).bind { mx in
 			switch mx {
 			case .Some(let x):
@@ -152,42 +53,59 @@ extension Gen {
 		}
 	}
 
-	/// Modifies a Generator such that it attempts to generate values that satisfy a predicate.  All
-	/// attempts are encoded in the form of an `Optional` where values satisfying the predicate are
-	/// wrapped in `.Some` and failing values are `.None`.
+	/// Constructs a Generator that attempts to generate a values that satisfy a predicate.
+	///
+	/// Passing values are wrapped in `.Some`.  Failing values are `.None`.
 	public func suchThatOptional(p : A -> Bool) -> Gen<Optional<A>> {
 		return Gen<Optional<A>>.sized({ n in
-			return attemptBoundedTry(self, k: 0, n: max(n, 1), p: p)
+			return try(self, 0, max(n, 1), p)
 		})
 	}
 
-	/// Modifies a Generator such that it produces arrays with a length determined by the receiver's
-	/// size parameter.
-	public func proliferate() -> Gen<[A]> {
+	/// Generates a list of random length.
+	public func listOf() -> Gen<[A]> {
 		return Gen<[A]>.sized({ n in
 			return Gen.choose((0, n)).bind { k in
-				return self.proliferateSized(k)
+				return self.vectorOf(k)
 			}
 		})
 	}
 
-	/// Modifies a Generator such that it produces non-empty arrays with a length determined by the
-	/// receiver's size parameter.
-	public func proliferateNonEmpty() -> Gen<[A]> {
+	/// Generates a non-empty list of random length.
+	public func listOf1() -> Gen<[A]> {
 		return Gen<[A]>.sized({ n in
 			return Gen.choose((1, max(1, n))).bind { k in
-				return self.proliferateSized(k)
+				return self.vectorOf(k)
 			}
 		})
 	}
 
-	/// Modifies a Generator such that it only produces arrays of a given length.
-	public func proliferateSized(k : Int) -> Gen<[A]> {
+	/// Generates a list of a given length.
+	public func vectorOf(k : Int) -> Gen<[A]> {
 		return sequence(Array<Gen<A>>(count: k, repeatedValue: self))
 	}
-}
 
-/// MARK: Instances
+	/// Selects a random value from a list and constructs a Generator that returns only that value.
+	public static func elements(xs : [A]) -> Gen<A> {
+		assert(xs.count != 0, "elements used with empty list")
+
+		return choose((0, xs.count - 1)).fmap { i in
+			return xs[i]
+		}
+	}
+
+	/// Takes a list of elements of increasing size, and chooses among an initial segment of the list.
+	/// The size of this initial segment increases with the size parameter.
+	public static func growingElements(xs : [A]) -> Gen<A> {
+		assert(xs.count != 0, "growingElements used with empty list")
+
+		let k = Double(xs.count)
+		return sized({ n in
+			let m = max(1, size(k)(m: n))
+			return Gen.elements(Array(xs[0 ..< m]))
+		})
+	}
+}
 
 extension Gen /*: Functor*/ {
 	typealias B = Swift.Any
@@ -228,10 +146,6 @@ extension Gen /*: Applicative*/ {
 extension Gen /*: Monad*/ {
 	/// Applies the function to any generated values to yield a new generator.  This generator is
 	/// then given a new random seed and returned.
-	///
-	/// Bind allows for the creation of Generators that depend on other generators.  One might, for
-	/// example, use a Generator of integers to control the length of a Generator of strings, or use
-	/// it to choose a random index into a Generator of arrays.
 	public func bind<B>(fn : A -> Gen<B>) -> Gen<B> {
 		return Gen<B>(unGen: { r in
 			return { n in
@@ -296,15 +210,13 @@ internal func delay<A>() -> Gen<Gen<A> -> A> {
 
 /// Implementation Details Follow
 
-import func Darwin.log
-
 private func vary<S : IntegerType>(k : S)(r: StdGen) -> StdGen {
 	let s = r.split()
-	let gen = ((k % 2) == 0) ? s.0 : s.1
+	var gen = ((k % 2) == 0) ? s.0 : s.1
 	return (k == (k / 2)) ? gen : vary(k / 2)(r: r)
 }
 
-private func attemptBoundedTry<A>(gen: Gen<A>, k: Int, n : Int, p: A -> Bool) -> Gen<Optional<A>> {
+private func try<A>(gen: Gen<A>, k: Int, n : Int, p: A -> Bool) -> Gen<Optional<A>> {
 	if n == 0 {
 		return Gen.pure(.None)
 	}
@@ -312,29 +224,11 @@ private func attemptBoundedTry<A>(gen: Gen<A>, k: Int, n : Int, p: A -> Bool) ->
 		if p(x) {
 			return Gen.pure(.Some(x))
 		}
-		return attemptBoundedTry(gen, k: k + 1, n: n - 1, p: p)
+		return try(gen, k + 1, n - 1, p)
 	}
 }
 
 private func size(k : Double)(m : Int) -> Int {
 	let n = Double(m)
 	return Int((log(n + 1)) * k / log(100))
-}
-
-private func selectOne<A>(xs : [A]) -> [(A, [A])] {
-	if xs.isEmpty {
-		return []
-	}
-	let y = xs.first!
-	let ys = Array(xs[1..<xs.endIndex])
-	return [(y, ys)] + selectOne(ys).map({ t in (t.0, [y] + t.1) })
-}
-
-private func pick<A>(n : Int)(lst : [(Int, Gen<A>)]) -> Gen<A> {
-	let (k, x) = lst[0]
-	let tl = Array<(Int, Gen<A>)>(lst[1..<lst.count])
-	if n <= k {
-		return x
-	}
-	return pick(n - k)(lst: tl)
 }
