@@ -9,7 +9,7 @@
 /// Converts a function into a universally quantified property using the default shrinker and
 /// generator for that type.
 public func forAll<A : Arbitrary>(pf : (A -> Testable)) -> Property {
-	return forAllShrink(A.arbitrary(), shrinker: { A.shrink($0) }, f: pf)
+	return forAllShrink(A.arbitrary(), { A.shrink($0) }, pf)
 }
 
 /// Converts a function into a universally quantified property using the default shrinker and
@@ -57,57 +57,57 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 /// Given an explicit generator, converts a function to a universally quantified property using the
 /// default shrinker for that type.
 public func forAll<A : Arbitrary>(gen : Gen<A>, pf : (A -> Testable)) -> Property {
-	return forAllShrink(gen, shrinker: { A.shrink($0) }, f: pf)
+	return forAllShrink(gen, { A.shrink($0) }, pf)
 }
 
 /// Given 2 explicit generators, converts a function to a universally quantified property using the
 /// default shrinkers for those 2 types.
 public func forAll<A : Arbitrary, B : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(pf : (A, B) -> Testable) -> Property {
-	return forAll(genA, pf: { t in forAll(genB, pf: { b in pf(t, b) }) })
+	return forAll(genA, { t in forAll(genB, { b in pf(t, b) }) })
 }
 
 /// Given 3 explicit generators, converts a function to a universally quantified property using the
 /// default shrinkers for those 3 types.
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(pf : (A, B, C) -> Testable) -> Property {
-	return forAll(genA, pf: { t in forAll(genB)(genB: genC)(pf: { b, c in pf(t, b, c) }) })
+	return forAll(genA, { t in forAll(genB)(genB: genC)(pf: { b, c in pf(t, b, c) }) })
 }
 
 /// Given 4 explicit generators, converts a function to a universally quantified property using the
 /// default shrinkers for those 4 types.
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(genD : Gen<D>)(pf : (A, B, C, D) -> Testable) -> Property {
-	return forAll(genA, pf: { t in forAll(genB)(genB: genC)(genC: genD)(pf: { b, c, d in pf(t, b, c, d) }) })
+	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)(pf: { b, c, d in pf(t, b, c, d) }) })
 }
 
 /// Given 5 explicit generators, converts a function to a universally quantified property using the
 /// default shrinkers for those 5 types.
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(genD : Gen<D>)(genE : Gen<E>)(pf : (A, B, C, D, E) -> Testable) -> Property {
-	return forAll(genA, pf: { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(pf: { b, c, d, e in pf(t, b, c, d, e) }) })
+	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(pf: { b, c, d, e in pf(t, b, c, d, e) }) })
 }
 
 /// Given 6 explicit generators, converts a function to a universally quantified property using the
 /// default shrinkers for those 6 types.
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(genD : Gen<D>)(genE : Gen<E>)(genF : Gen<F>)(pf : (A, B, C, D, E, F) -> Testable) -> Property {
-	return forAll(genA, pf: { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)(pf: { b, c, d, e, f in pf(t, b, c, d, e, f) }) })
+	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)(pf: { b, c, d, e, f in pf(t, b, c, d, e, f) }) })
 }
 
 /// Given 7 explicit generators, converts a function to a universally quantified property using the
 /// default shrinkers for those 7 types.
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(genD : Gen<D>)(genE : Gen<E>)(genF : Gen<F>)(genG : Gen<G>)(pf : (A, B, C, D, E, F, G) -> Testable) -> Property {
-	return forAll(genA, pf: { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)(genF : genG)(pf: { b, c, d, e, f, g in pf(t, b, c, d, e, f, g) }) })
+	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)(genF : genG)(pf: { b, c, d, e, f, g in pf(t, b, c, d, e, f, g) }) })
 }
 
 /// Given 8 explicit generators, converts a function to a universally quantified property using the
 /// default shrinkers for those 8 types.
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary, H : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(genD : Gen<D>)(genE : Gen<E>)(genF : Gen<F>)(genG : Gen<G>)(genH : Gen<H>)(pf : (A, B, C, D, E, F, G, H) -> Testable) -> Property {
-	return forAll(genA, pf: { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)(genF : genG)(genG : genH)(pf: { b, c, d, e, f, g, h in pf(t, b, c, d, e, f, g, h) }) })
+	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)(genF : genG)(genG : genH)(pf: { b, c, d, e, f, g, h in pf(t, b, c, d, e, f, g, h) }) })
 }
 
 /// Given an explicit generator and shrinker, converts a function to a universally quantified
 /// property.
 public func forAllShrink<A>(gen : Gen<A>, shrinker: A -> [A], f : A -> Testable) -> Property {
 	return Property(gen.bind { x in
-		return shrinking(shrinker, initial: x, prop: { xs  in
-			return f(xs).counterexample(String(xs))
+		return shrinking(shrinker, x, { xs  in
+			return counterexample(toDebugString(xs))(p: f(xs))
 		}).unProperty
 	})
 }
@@ -119,7 +119,7 @@ public func forAllShrink<A>(gen : Gen<A>, shrinker: A -> [A], f : A -> Testable)
 //}
 
 public func quickCheck(prop : Testable, name : String = "") {
-	quickCheckWithResult(stdArgs(name), p: prop)
+	quickCheckWithResult(stdArgs(name: name), prop)
 }
 
 /// MARK: Implementation Details
@@ -225,8 +225,8 @@ internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 					, numTryShrinks:		0
 					, numTotTryShrinks:		0
 					, shouldAbort:			false)
-	let modP : Property = (p.exhaustive ? p.property().once : p.property())
-	return test(state, f: modP.unProperty.unGen)
+	let modP : Property = (p.exhaustive ? once(p.property()) : p.property())
+	return test(state, modP.unProperty.unGen)
 }
 
 // Main Testing Loop:
@@ -244,7 +244,7 @@ internal func test(st : State, f : (StdGen -> Int -> Prop)) -> Result {
 		switch runATest(state)(f: f) {
 			case let .Left(fail):
 				switch (fail.value.0, doneTesting(fail.value.1)(f: f)) {
-				case (.Success(_, _, _), _):
+				case let (.Success(_, _, _), _):
 					return fail.value.0
 				case let (_, .NoExpectedFailure(numTests, labels, output)):
 					return .NoExpectedFailure(numTests: numTests, labels: labels, output: output)
@@ -275,7 +275,7 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 	switch reduce(f(rnd1)(size).unProp) {
 		case .MkRose(let resC, let ts):
 			let res = resC() // Force the result only once.
-			dispatchAfterTestCallbacks(st, res: res) // Then invoke the post-test callbacks
+			dispatchAfterTestCallbacks(st, res) // Then invoke the post-test callbacks
 
 			switch res.match() {
 				// Success
@@ -286,7 +286,7 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 									, computeSize: st.computeSize
 									, numSuccessTests: st.numSuccessTests + 1
 									, numDiscardedTests: st.numDiscardedTests
-									, labels: unionWith(max, l: st.labels, r: labels)
+									, labels: unionWith(max, st.labels, labels)
 									, collected: [stamp] + st.collected
 									, expectedFailure: expect
 									, randomSeed: st.randomSeed
@@ -303,7 +303,7 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 									, computeSize: st.computeSize
 									, numSuccessTests: st.numSuccessTests
 									, numDiscardedTests: st.numDiscardedTests + 1
-									, labels: unionWith(max, l: st.labels, r: labels)
+									, labels: unionWith(max, st.labels, labels)
 									, collected: st.collected
 									, expectedFailure: expect
 									, randomSeed: rnd2
@@ -315,13 +315,13 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 				// Fail
 				case .MatchResult(.Some(false), let expect, _, _, _, _, _, let abort):
 					if !expect {
-						print("+++ OK, failed as expected. ", appendNewline: false)
+						print("+++ OK, failed as expected. ")
 					} else {
-						print("*** Failed! ", appendNewline: false)
+						print("*** Failed! ")
 					}
 
 					// Attempt a shrink.
-					let (numShrinks, _, _) = findMinimalFailingTestCase(st, res: res, ts: ts())
+					let (numShrinks, totFailed, lastFailed) = findMinimalFailingTestCase(st, res, ts())
 
 					if !expect {
 						let s = Result.Success(numTests: st.numSuccessTests + 1, labels: summary(st), output: "+++ OK, failed as expected. ")
@@ -363,7 +363,7 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 
 internal func doneTesting(st : State)(f : (StdGen -> Int -> Prop)) -> Result {
 	if st.expectedFailure {
-		print("*** Passed " + "\(st.numSuccessTests)" + " tests")
+		println("*** Passed " + "\(st.numSuccessTests)" + " tests")
 		printDistributionGraph(st)
 		return .Success(numTests: st.numSuccessTests, labels: summary(st), output: "")
 	} else {
@@ -416,7 +416,7 @@ internal func findMinimalFailingTestCase(st : State, res : TestResult, ts : [Ros
 			switch reduce(r) {
 			case .MkRose(let resC, let ts1):
 				let res1 = resC()
-				dispatchAfterTestCallbacks(st, res: res1)
+				dispatchAfterTestCallbacks(st, res1)
 
 				// Did we fail?  Good!  Failure is healthy.  
 				// Try the next set of branches.
@@ -452,7 +452,7 @@ internal func findMinimalFailingTestCase(st : State, res : TestResult, ts : [Ros
 					, numTryShrinks: numTryShrinks
 					, numTotTryShrinks: numTotTryShrinks
 					, shouldAbort: st.shouldAbort)
-	return reportMinimumCaseFound(state, res: lastResult)
+	return reportMinimumCaseFound(state, lastResult)
 }
 
 internal func reportMinimumCaseFound(st : State, res : TestResult) -> (Int, Int, Int) {
@@ -466,9 +466,9 @@ internal func reportMinimumCaseFound(st : State, res : TestResult) -> (Int, Int,
 		return s
 	}
 	
-	print("Proposition: " + st.name)
-	print(res.reason + pluralize(testMsg, i: st.numSuccessTests + 1) + pluralize(shrinkMsg, i: st.numSuccessShrinks) + "):")
-	dispatchAfterFinalFailureCallbacks(st, res: res)
+	println("Proposition: " + st.name)
+	println(res.reason + pluralize(testMsg, st.numSuccessTests + 1) + pluralize(shrinkMsg, st.numSuccessShrinks) + "):")
+	dispatchAfterFinalFailureCallbacks(st, res)
 	return (st.numSuccessShrinks, st.numTotTryShrinks - st.numTryShrinks, st.numTryShrinks)
 }
 
@@ -496,7 +496,7 @@ internal func dispatchAfterFinalFailureCallbacks(st : State, res : TestResult) {
 
 internal func summary(s : State) -> [(String, Int)] {
 	let strings = s.collected.flatMap({ l in Array(l).map({ "," + $0.0 }).filter({ !$0.isEmpty }) })
-	let l = strings.sort().groupBy(==)
+	let l =  groupBy(sorted(strings), ==)
 	return l.map({ ss in (ss[0], ss.count * 100 / s.numSuccessTests) })
 }
 
@@ -513,13 +513,13 @@ internal func printDistributionGraph(st : State) {
 	let gAllLabels = st.collected.map({ (s : Set<String>) in
 		return Array(s).filter({ t in st.labels[t] == .Some(0) }).reduce("", combine: { (l : String, r : String) in l + ", " + r })
 	})
-	let gAll = gAllLabels.filter({ !$0.isEmpty }).sort().groupBy(==)
+	let gAll = groupBy(sorted(gAllLabels.filter({ !$0.isEmpty })), ==)
 	let gPrint = gAll.map({ ss in showP((ss.count * 100) / st.numSuccessTests) + ss.first! })
-	let allLabels = Array(gPrint.sort().reverse())
+	let allLabels = sorted(gPrint).reverse()
 
 	var covers = [String]()
 	for (l, reqP) in st.labels {
-		let p = labelPercentage(l, st: st)
+		let p = labelPercentage(l, st)
 		if p < reqP {
 			covers += ["only \(p)% " + l + ", not \(reqP)%"]
 		}
@@ -527,46 +527,44 @@ internal func printDistributionGraph(st : State) {
 
 	let all = covers + allLabels
 	if all.isEmpty {
-		print(".")
+		println(".")
 	} else if all.count == 1, let pt = all.first {
-		print("(\(pt))")
+		println("(\(pt))")
 	} else {
-		print(":")
+		println(":")
 		for pt in all {
-			print(pt)
+			println(pt)
 		}
 	}
+
+	let cs = allLabels
 }
 
-internal func cons<T>(lhs : T, var _ rhs : [T]) -> [T] {
+internal func cons<T>(lhs : T, var rhs : [T]) -> [T] {
 	rhs.insert(lhs, atIndex: 0)
 	return rhs
 }
 
-extension Array {
-	internal func groupBy(p : (T , T) -> Bool) -> [[T]] {
-		func span(list : [T], p : (T -> Bool)) -> ([T], [T]) {
-			if list.isEmpty {
-				return ([], [])
-			} else if let x = list.first {
-				if p (x) {
-					let (ys, zs) = span([T](list[1..<list.endIndex]), p: p)
-					return (cons(x, ys), zs)
-				}
-				return ([], list)
-			}
-			fatalError("span reached a non-empty list that could not produce a first element")
+internal func span<A>(list : [A], p : (A -> Bool)) -> ([A], [A]) {
+	if list.isEmpty {
+		return ([], [])
+	} else if let x = list.first {
+		if p (x) {
+			let (ys, zs) = span([A](list[1..<list.endIndex]), p)
+			return (cons(x, ys), zs)
 		}
-
-		if self.isEmpty {
-			return []
-		} else if let x = self.first {
-			let (ys, zs) = span([T](self[1..<self.endIndex]), p: { p(x, $0) })
-			let l = cons(x, ys)
-			return cons(l, zs.groupBy(p))
-		}
-		fatalError("groupBy reached a non-empty list that could not produce a first element")
+		return ([], list)
 	}
+	fatalError("span reached a non-empty list that could not produce a first element")
 }
 
-
+internal func groupBy<A>(list : [A], p : (A , A) -> Bool) -> [[A]] {
+	if list.isEmpty {
+		return []
+	} else if let x = list.first {
+		let (ys, zs) = span([A](list[1..<list.endIndex]), { p(x, $0) })
+		let l = cons(x, ys)
+		return cons(l, groupBy(zs, p))
+	}
+	fatalError("groupBy reached a non-empty list that could not produce a first element")
+}

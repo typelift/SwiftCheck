@@ -42,7 +42,6 @@ public struct Prop : Testable {
 	public var exhaustive : Bool { return true }
 
 	public func property() -> Property {
-//		return Property(Gen.pure(Prop(unProp: .IORose(protectRose({ self.unProp })))))
 		return Property(Gen.pure(Prop(unProp: .IORose({ self.unProp }))))
 	}
 }
@@ -54,7 +53,7 @@ public struct Discard : Testable {
 	public init() { }
 
 	public func property() -> Property {
-		return TestResult.rejected.property()
+		return rejected().property()
 	}
 }
 
@@ -70,6 +69,6 @@ extension Bool : Testable {
 	public var exhaustive : Bool { return true }
 
 	public func property() -> Property {
-		return TestResult.liftBool(self).property()
+		return liftBool(self).property()
 	}
 }
