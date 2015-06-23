@@ -233,7 +233,7 @@ extension String : Arbitrary {
 	}
 
 	public static func shrink(s : String) -> [String] {
-		return ArrayOf.shrink(ArrayOf([Character](s.characters))).map({ String($0.getArray) })
+		return [Character].shrink([Character](s.characters)).map({ String($0) })
 	}
 }
 
@@ -248,51 +248,83 @@ extension Character : Arbitrary {
 	}
 }
 
-//extension Array : Arbitrary where T : Arbitrary {
-//	public static func arbitrary() -> Gen<Array<T>> {
-//		return Gen.sized { n in
-//			return Gen<Int>.choose((0, n)).bind { k in
-//				if k == 0 {
-//					return Gen.pure([])
-//				}
-//
-//				return sequence(Array((0...k)).map { _ in T.arbitrary() })
-//			}
-//		}
-//	}
-//
-//	public static func shrink(bl : Array<T>) -> [[T]] {
-//		return Array(Int.shrink(n).reverse()).flatMap({ k in removes(k + 1, n: bl.count, xs: bl) }) + shrinkOne(bl)
-//	}
-//}
-
-private func bits<N : IntegerType>(n : N) -> Int {
-	if n / 2 == 0 {
-		return 0
+/// Generates an Optional of arbitrary values of type A.
+extension Optional where T : Arbitrary {
+	public static func arbitrary() -> Gen<Optional<T>> {
+		return Gen.frequency([
+			(1, Gen.pure(.None)),
+			(3, liftM({ .Some($0) })(m1: T.arbitrary())),
+		])
 	}
-	return 1 + bits(n / 2)
-}
 
-private func inBounds<A : IntegerType>(fi : (Int -> A)) -> Gen<Int> -> Gen<A> {
-	return { g in
-		return g.suchThat({ x in
-			return (fi(x) as! Int) == x
-		}).fmap(fi)
+	public static func shrink(bl : Optional<T>) -> [Optional<T>] {
+		if let x = bl {
+			return [.None] + T.shrink(x).map { .Some($0) }
+		}
+		return []
 	}
 }
 
-private func nub<A : Hashable>(xs : [A]) -> [A] {
-	return [A](Set(xs))
+extension Array where T : Arbitrary {
+	public static func arbitrary() -> Gen<Array<T>> {
+		return Gen.sized { n in
+			return Gen<Int>.choose((0, n)).bind { k in
+				if k == 0 {
+					return Gen.pure([])
+				}
+
+				return sequence((0...k).map { _ in T.arbitrary() })
+			}
+		}
+	}
+
+	public static func shrink(bl : Array<T>) -> [[T]] {
+		return Int.shrink(bl.count).reverse().flatMap({ k in removes(k + 1, n: bl.count, xs: bl) }) + shrinkOne(bl)
+	}
 }
 
-private func unfoldr<A, B>(f : B -> Optional<(A, B)>, initial : B) -> [A] {
-	var acc = [A]()
-	var ini = initial
-	while let next = f(ini) {
-		acc.insert(next.0, atIndex: 0)
-		ini = next.1
+/// Generates an dictionary of arbitrary keys and values.
+extension Dictionary where Key : Arbitrary, Value : Arbitrary {
+	public static func arbitrary() -> Gen<Dictionary<Key, Value>> {
+		return [Key].arbitrary().bind { k in
+			return [Value].arbitrary().bind { v in
+				return Gen.pure(Dictionary(Zip2(k, v)))
+			}
+		}
 	}
-	return acc
+
+	public static func shrink(d : Dictionary<Key, Value>) -> [Dictionary<Key, Value>] {
+		return d.map { Dictionary(Zip2(Key.shrink($0), Value.shrink($1))) }
+	}
+}
+
+
+extension Dictionary {
+	init<S : SequenceType where S.Generator.Element == Element>(_ pairs : S) {
+		self.init()
+		var g = pairs.generate()
+		while let (k, v): (Key, Value) = g.next() {
+			self[k] = v
+		}
+	}
+}
+
+extension Set where T : protocol<Arbitrary, Hashable> {
+	public static func arbitrary() -> Gen<Set<T>> {
+		return Gen.sized { n in
+			return Gen<Int>.choose((0, n)).bind { k in
+				if k == 0 {
+					return Gen.pure(Set([]))
+				}
+
+				return sequence(Array((0...k)).map { _ in T.arbitrary() }).fmap({ Set($0) })
+			}
+		}
+	}
+
+	public static func shrink(s : Set<T>) -> [Set<T>] {
+		return [T].shrink([T](s)).map { Set($0) }
+	}
 }
 
 
@@ -422,3 +454,106 @@ extension Double : CoArbitrary {
 		return coarbitraryIntegral(Int64(x))
 	}
 }
+
+extension Array : CoArbitrary {
+	public static func coarbitrary<C>(a : [T]) -> (Gen<C> -> Gen<C>) {
+		if a.isEmpty {
+			return { $0.variant(0) }
+		}
+		return { $0.variant(1) } • [T].coarbitrary([T](a[1..<a.endIndex]))
+	}
+}
+
+extension Dictionary : CoArbitrary {
+	public static func coarbitrary<C>(x : Dictionary<Key, Value>) -> (Gen<C> -> Gen<C>) {
+		if x.isEmpty {
+			return { $0.variant(0) }
+		}
+		return { $0.variant(1) }
+	}
+}
+
+extension Optional : CoArbitrary {
+	public static func coarbitrary<C>(x : Optional<T>) -> (Gen<C> -> Gen<C>) {
+		if let _ = x {
+			return { $0.variant(0) }
+		}
+		return { $0.variant(1) }
+	}
+}
+
+extension Set : CoArbitrary {
+	public static func coarbitrary<C>(x : Set<T>) -> (Gen<C> -> Gen<C>) {
+		if x.isEmpty {
+			return { $0.variant(0) }
+		}
+		return { $0.variant(1) }
+	}
+}
+
+/// MARK: Implementation Details
+
+private func bits<N : IntegerType>(n : N) -> Int {
+	if n / 2 == 0 {
+		return 0
+	}
+	return 1 + bits(n / 2)
+}
+
+private func inBounds<A : IntegerType>(fi : (Int -> A)) -> Gen<Int> -> Gen<A> {
+	return { g in
+		return g.suchThat({ x in
+			return (fi(x) as! Int) == x
+		}).fmap(fi)
+	}
+}
+
+private func nub<A : Hashable>(xs : [A]) -> [A] {
+	return [A](Set(xs))
+}
+
+private func unfoldr<A, B>(f : B -> Optional<(A, B)>, initial : B) -> [A] {
+	var acc = [A]()
+	var ini = initial
+	while let next = f(ini) {
+		acc.insert(next.0, atIndex: 0)
+		ini = next.1
+	}
+	return acc
+}
+
+private func removes<A : Arbitrary>(k : Int, n : Int, xs : [A]) -> [[A]] {
+	let xs1 = take(k, xs: xs)
+	let xs2 = drop(k, xs: xs)
+
+	if k > n {
+		return []
+	} else if xs2.isEmpty {
+		return [[]]
+	} else {
+		return [xs2] + removes(k, n: n - k, xs: xs2).map({ xs1 + $0 })
+	}
+}
+
+private func take<T>(num : Int, xs : [T]) -> [T] {
+	let n = (num < xs.count) ? num : xs.count
+	return [T](xs[0..<n])
+}
+
+private func drop<T>(num : Int, xs : [T]) -> [T] {
+	let n = (num < xs.count) ? num : xs.count
+	return [T](xs[n..<xs.endIndex])
+}
+
+private func shrinkOne<A : Arbitrary>(xs : [A]) -> [[A]] {
+	if xs.isEmpty {
+		return []
+	} else if let x = xs.first {
+		let xss = [A](xs[1..<xs.endIndex])
+		let a = A.shrink(x).map({ [$0] + xss })
+		let b = shrinkOne(xss).map({ [x] + $0 })
+		return a + b
+	}
+	fatalError("Array could not produce a first element")
+}
+
