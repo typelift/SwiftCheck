@@ -104,19 +104,13 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 
 /// Given an explicit generator and shrinker, converts a function to a universally quantified
 /// property.
-public func forAllShrink<A>(gen : Gen<A>, shrinker: A -> [A], f : A -> Testable) -> Property {
+public func forAllShrink<A>(gen : Gen<A>, shrinker : A -> [A], f : A -> Testable) -> Property {
 	return Property(gen.bind { x in
 		return shrinking(shrinker, initial: x, prop: { xs  in
 			return f(xs).counterexample(String(xs))
 		}).unProperty
 	})
 }
-
-//public func forAll<A : Arbitrary>(pf : ([A] -> Testable)) -> Property {
-//	return forAllShrink(ArrayOf<A>.arbitrary().fmap({ $0.getArray }), { (x : [A]) -> [[A]] in
-//		return ArrayOf<A>.shrink(ArrayOf<A>(x)).map({ $0.getArray })
-//	}, pf)
-//}
 
 public func quickCheck(prop : Testable, name : String = "") {
 	quickCheckWithResult(stdArgs(name), p: prop)
@@ -351,9 +345,6 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 									, numTotTryShrinks: st.numTotTryShrinks
 									, shouldAbort: abort)
 					return .Left(Box((stat, state)))
-			default:
-				fatalError("Pattern Match Failed: switch on a Result was inexhaustive.")
-				break
 			}
 		default:
 			fatalError("Pattern Match Failed: Rose should have been reduced to MkRose, not IORose.")

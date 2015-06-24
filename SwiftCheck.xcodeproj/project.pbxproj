@@ -29,6 +29,8 @@
 		8450D24A1AF8003800095EF6 /* Operators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8450D2491AF8003700095EF6 /* Operators.swift */; };
 		84572C251A6DBAA800241F68 /* Check.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C241A6DBAA800241F68 /* Check.swift */; };
 		84572C2B1A6DBABA00241F68 /* Testable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C2A1A6DBABA00241F68 /* Testable.swift */; };
+		84B9E4A71B3A0EB900C8739E /* TestSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B9E4A61B3A0EB900C8739E /* TestSpec.swift */; };
+		84B9E4A81B3A0EB900C8739E /* TestSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B9E4A61B3A0EB900C8739E /* TestSpec.swift */; };
 		84DF76031B0BD54600C912B0 /* SwiftCheck.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */; };
 		84DF76111B0BD58100C912B0 /* Arbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCA9198B323800EB242A /* Arbitrary.swift */; };
 		84DF76121B0BD58100C912B0 /* Check.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C241A6DBAA800241F68 /* Check.swift */; };
@@ -107,6 +109,7 @@
 		84572C2A1A6DBABA00241F68 /* Testable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Testable.swift; sourceTree = "<group>"; };
 		848076671AF5D6A100CBE3EF /* BooleanIdentitySpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BooleanIdentitySpec.swift; sourceTree = "<group>"; };
 		8480AB2C1A7B0A9700C6162D /* ModifierSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModifierSpec.swift; sourceTree = "<group>"; };
+		84B9E4A61B3A0EB900C8739E /* TestSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestSpec.swift; sourceTree = "<group>"; };
 		84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCheck.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		84DF76021B0BD54600C912B0 /* SwiftCheck-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SwiftCheck-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		84EA2C381B2287200001FB3F /* PropertySpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertySpec.swift; sourceTree = "<group>"; };
@@ -208,6 +211,7 @@
 				8480AB2C1A7B0A9700C6162D /* ModifierSpec.swift */,
 				8445C4AC1B17E48300280089 /* ShrinkSpec.swift */,
 				844FCCC8198EFF9B00EB242A /* SimpleSpec.swift */,
+				84B9E4A61B3A0EB900C8739E /* TestSpec.swift */,
 				844FCC9D198B320500EB242A /* Supporting Files */,
 			);
 			path = SwiftCheckTests;
@@ -420,6 +424,7 @@
 				8445C4A31B16897200280089 /* DiscardSpec.swift in Sources */,
 				8445C4AD1B17E48300280089 /* ShrinkSpec.swift in Sources */,
 				8445C4AA1B16D37800280089 /* GenSpec.swift in Sources */,
+				84B9E4A71B3A0EB900C8739E /* TestSpec.swift in Sources */,
 				8445C4A41B16897200280089 /* ModifierSpec.swift in Sources */,
 				8445C4A51B16897200280089 /* BooleanIdentitySpec.swift in Sources */,
 				844FCCC9198EFF9B00EB242A /* SimpleSpec.swift in Sources */,
@@ -454,6 +459,7 @@
 				84DF761E1B0BD58900C912B0 /* SimpleSpec.swift in Sources */,
 				8445C4AE1B17E48300280089 /* ShrinkSpec.swift in Sources */,
 				8445C4AB1B16D37800280089 /* GenSpec.swift in Sources */,
+				84B9E4A81B3A0EB900C8739E /* TestSpec.swift in Sources */,
 				84DF761F1B0BD58900C912B0 /* DiscardSpec.swift in Sources */,
 				84DF76201B0BD58900C912B0 /* ModifierSpec.swift in Sources */,
 				84DF76211B0BD58900C912B0 /* BooleanIdentitySpec.swift in Sources */,

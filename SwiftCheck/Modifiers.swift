@@ -92,21 +92,11 @@ public struct ArrayOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 	}
 
 	public static func arbitrary() -> Gen<ArrayOf<A>> {
-		return Gen.sized { n in
-			return Gen<Int>.choose((0, n)).bind { k in
-				if k == 0 {
-					return Gen.pure(ArrayOf([]))
-				}
-
-				return sequence(Array((0...k)).map { _ in A.arbitrary() }).fmap(ArrayOf.create)
-			}
-		}
+		return Array<A>.arbitrary().fmap(ArrayOf.init)
 	}
 
 	public static func shrink(bl : ArrayOf<A>) -> [ArrayOf<A>] {
-		let n = bl.getArray.count
-		let xs = Array(Int.shrink(n).reverse()).flatMap({ k in removes(k + 1, n: n, xs: bl.getArray) }) + shrinkOne(bl.getArray)
-		return xs.map({ ArrayOf($0) })
+		return Array<A>.shrink(bl.getArray).map(ArrayOf.init)
 	}
 }
 
@@ -118,41 +108,6 @@ extension ArrayOf : CoArbitrary {
 		}
 		return { $0.variant(1) } • ArrayOf.coarbitrary(ArrayOf([A](a[1..<a.endIndex])))
 	}
-}
-
-private func removes<A : Arbitrary>(k : Int, n : Int, xs : [A]) -> [[A]] {
-	let xs1 = take(k, xs: xs)
-	let xs2 = drop(k, xs: xs)
-
-	if k > n {
-		return []
-	} else if xs2.isEmpty {
-		return [[]]
-	} else {
-		return [xs2] + removes(k, n: n - k, xs: xs2).map({ xs1 + $0 })
-	}
-}
-
-private func shrinkOne<A : Arbitrary>(xs : [A]) -> [[A]] {
-	if xs.isEmpty {
-		return []
-	} else if let x = xs.first {
-		let xss = [A](xs[1..<xs.endIndex])
-		let a = A.shrink(x).map({ [$0] + xss })
-		let b = shrinkOne(xss).map({ [x] + $0 })
-		return a + b
-	}
-	fatalError("Array could not produce a first element")
-}
-
-func take<T>(num : Int, xs : [T]) -> [T] {
-	let n = (num < xs.count) ? num : xs.count
-	return [T](xs[0..<n])
-}
-
-func drop<T>(num : Int, xs : [T]) -> [T] {
-	let n = (num < xs.count) ? num : xs.count
-	return [T](xs[n..<xs.endIndex])
 }
 
 /// Generates an dictionary of arbitrary keys and values.
@@ -172,38 +127,17 @@ public struct DictionaryOf<K : protocol<Hashable, Arbitrary>, V : Arbitrary> : A
 	}
 
 	public static func arbitrary() -> Gen<DictionaryOf<K, V>> {
-		return ArrayOf<K>.arbitrary().bind { k in
-			return ArrayOf<V>.arbitrary().bind { v in
-				return Gen.pure(DictionaryOf(Dictionary<K, V>(Zip2(k.getArray, v.getArray))))
-			}
-		}
+		return Dictionary<K, V>.arbitrary().fmap(DictionaryOf.init)
 	}
 
 	public static func shrink(d : DictionaryOf<K, V>) -> [DictionaryOf<K, V>] {
-		var xs = [DictionaryOf<K, V>]()
-		for (k, v) in d.getDictionary {
-			xs.append(DictionaryOf(Dictionary(Zip2(K.shrink(k), V.shrink(v)))))
-		}
-		return xs
+		return Dictionary.shrink(d.getDictionary).map(DictionaryOf.init)
 	}
 }
 
 extension DictionaryOf : CoArbitrary {
 	public static func coarbitrary<C>(x : DictionaryOf) -> (Gen<C> -> Gen<C>) {
-		if x.getDictionary.isEmpty {
-			return { $0.variant(0) }
-		}
-		return { $0.variant(1) }
-	}
-}
-
-extension Dictionary {
-	init<S : SequenceType where S.Generator.Element == Element>(_ pairs : S) {
-		self.init()
-		var g = pairs.generate()
-		while let (k, v): (Key, Value) = g.next() {
-			self[k] = v
-		}
+		return Dictionary.coarbitrary(x.getDictionary)
 	}
 }
 
@@ -224,17 +158,11 @@ public struct OptionalOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 	}
 
 	public static func arbitrary() -> Gen<OptionalOf<A>> {
-		return Gen.frequency([
-			(1, Gen.pure(OptionalOf(Optional<A>.None))),
-			(3, liftM({ OptionalOf(Optional<A>.Some($0)) })(m1: A.arbitrary()))
-		])
+		return Optional<A>.arbitrary().fmap(OptionalOf.init)
 	}
 
 	public static func shrink(bl : OptionalOf<A>) -> [OptionalOf<A>] {
-		if let x = bl.getOptional {
-			return [OptionalOf(Optional<A>.None)] + A.shrink(x).map({ OptionalOf(Optional<A>.Some($0)) })
-		}
-		return []
+		return Optional<A>.shrink(bl.getOptional).map(OptionalOf.init)
 	}
 }
 

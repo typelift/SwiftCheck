@@ -181,5 +181,3 @@ extension Double : RandomType {
 		return (result, g);
 	}
 }
-
-

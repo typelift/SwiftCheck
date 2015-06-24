@@ -23,6 +23,14 @@ public struct Gen<A> {
 		return unGen(r)(30)
 	}
 
+	public static func zip<A, B>(gen1 : Gen<A>, _ gen2 : Gen<B>) -> Gen<(A, B)> {
+		return gen1.bind { l in
+			return gen2.bind { r in
+				return Gen<(A, B)>.pure(l, r)
+			}
+		}
+	}
+
 	/// Constructs a Generator that selects a random value from the given list and produces only 
 	/// that value.
 	///
@@ -70,7 +78,7 @@ public struct Gen<A> {
 		})
 	}
 
-	/// Constructs a random element in the range of two Integer Types.
+	/// Constructs a random element in the range of two `RandomType`s.
 	///
 	/// When using this function, it is necessary to explicitly specialize the generic parameter
 	/// `A`.  For example:
