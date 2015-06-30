@@ -6,10 +6,7 @@
 //  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
-
-public struct Terminal {}
-
-public struct State {
+public struct CheckerState {
 	let name				: String
 	let maxSuccessTests		: Int
 	let maxDiscardedTests	: Int

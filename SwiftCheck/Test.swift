@@ -205,20 +205,20 @@ internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 	}
 	
 	
-	let state = State(name:					args.name
-					, maxSuccessTests:		args.maxSuccess
-					, maxDiscardedTests:	args.maxDiscard
-					, computeSize:			computeSize
-					, numSuccessTests:		0
-					, numDiscardedTests:	0
-					, labels:				[:]
-					, collected:			[]
-					, expectedFailure:		false
-					, randomSeed:			rnd()
-					, numSuccessShrinks:	0
-					, numTryShrinks:		0
-					, numTotTryShrinks:		0
-					, shouldAbort:			false)
+	let state = CheckerState( name: args.name
+                            , maxSuccessTests:		args.maxSuccess
+                            , maxDiscardedTests:	args.maxDiscard
+                            , computeSize:			computeSize
+                            , numSuccessTests:		0
+                            , numDiscardedTests:	0
+                            , labels:				[:]
+                            , collected:			[]
+                            , expectedFailure:		false
+                            , randomSeed:			rnd()
+                            , numSuccessShrinks:	0
+                            , numTryShrinks:		0
+                            , numTotTryShrinks:		0
+                            , shouldAbort:			false)
 	let modP : Property = (p.exhaustive ? p.property().once : p.property())
 	return test(state, f: modP.unProperty.unGen)
 }
@@ -232,7 +232,7 @@ internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 // - doneTesting: Invoked when testing the property fails or succeeds once and for all.
 // - giveUp: When the number of discarded tests exceeds the number given in the arguments we just
 //           give up turning the run loop to prevent excessive generation.
-internal func test(st : State, f : (StdGen -> Int -> Prop)) -> Result {
+internal func test(st : CheckerState, f : (StdGen -> Int -> Prop)) -> Result {
 	var state = st
 	while true {
 		switch runATest(state)(f: f) {
@@ -261,7 +261,7 @@ internal func test(st : State, f : (StdGen -> Int -> Prop)) -> Result {
 // Executes a single test of the property given an initial state and the generator function.
 //
 // On success the next state is returned.  On failure the final result and state are returned.
-internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Result, State), State> {
+internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either<(Result, CheckerState), CheckerState> {
 	let size = st.computeSize(st.numSuccessTests)(st.numDiscardedTests)
 	let (rnd1, rnd2) = st.randomSeed.split()
 
@@ -274,38 +274,38 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 			switch res.match() {
 				// Success
 				case .MatchResult(.Some(true), let expect, _, _, let labels, let stamp, _, let abort):
-					let state = State(name: st.name
-									, maxSuccessTests: st.maxSuccessTests
-									, maxDiscardedTests: st.maxDiscardedTests
-									, computeSize: st.computeSize
-									, numSuccessTests: st.numSuccessTests + 1
-									, numDiscardedTests: st.numDiscardedTests
-									, labels: unionWith(max, l: st.labels, r: labels)
-									, collected: [stamp] + st.collected
-									, expectedFailure: expect
-									, randomSeed: st.randomSeed
-									, numSuccessShrinks: st.numSuccessShrinks
-									, numTryShrinks: st.numTryShrinks
-									, numTotTryShrinks: st.numTotTryShrinks
+					let nstate = CheckerState(name: st.name
+                                            , maxSuccessTests: st.maxSuccessTests
+                                            , maxDiscardedTests: st.maxDiscardedTests
+                                            , computeSize: st.computeSize
+                                            , numSuccessTests: st.numSuccessTests + 1
+                                            , numDiscardedTests: st.numDiscardedTests
+                                            , labels: unionWith(max, l: st.labels, r: labels)
+                                            , collected: [stamp] + st.collected
+                                            , expectedFailure: expect
+                                            , randomSeed: st.randomSeed
+                                            , numSuccessShrinks: st.numSuccessShrinks
+                                            , numTryShrinks: st.numTryShrinks
+                                            , numTotTryShrinks: st.numTotTryShrinks
 									, shouldAbort: abort)
-					return .Right(Box(state))
+					return .Right(Box(nstate))
 				// Discard
 				case .MatchResult(.None, let expect, _, _, let labels, _, _, let abort):
-					let state = State(name: st.name
-									, maxSuccessTests: st.maxSuccessTests
-									, maxDiscardedTests: st.maxDiscardedTests
-									, computeSize: st.computeSize
-									, numSuccessTests: st.numSuccessTests
-									, numDiscardedTests: st.numDiscardedTests + 1
-									, labels: unionWith(max, l: st.labels, r: labels)
-									, collected: st.collected
-									, expectedFailure: expect
-									, randomSeed: rnd2
-									, numSuccessShrinks: st.numSuccessShrinks
-									, numTryShrinks: st.numTryShrinks
-									, numTotTryShrinks: st.numTotTryShrinks
-									, shouldAbort: abort)
-					return .Right(Box(state))
+					let nstate = CheckerState(name: st.name
+                                            , maxSuccessTests: st.maxSuccessTests
+                                            , maxDiscardedTests: st.maxDiscardedTests
+                                            , computeSize: st.computeSize
+                                            , numSuccessTests: st.numSuccessTests
+                                            , numDiscardedTests: st.numDiscardedTests + 1
+                                            , labels: unionWith(max, l: st.labels, r: labels)
+                                            , collected: st.collected
+                                            , expectedFailure: expect
+                                            , randomSeed: rnd2
+                                            , numSuccessShrinks: st.numSuccessShrinks
+                                            , numTryShrinks: st.numTryShrinks
+                                            , numTotTryShrinks: st.numTotTryShrinks
+                                            , shouldAbort: abort)
+					return .Right(Box(nstate))
 				// Fail
 				case .MatchResult(.Some(false), let expect, _, _, _, _, _, let abort):
 					if !expect {
@@ -330,7 +330,7 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 											, labels: summary(st)
 											, output: "*** Failed! ")
 
-					let state = State(name: st.name
+					let state = CheckerState(name: st.name
 									, maxSuccessTests: st.maxSuccessTests
 									, maxDiscardedTests: st.maxDiscardedTests
 									, computeSize: st.computeSize
@@ -352,7 +352,7 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 	}
 }
 
-internal func doneTesting(st : State)(f : (StdGen -> Int -> Prop)) -> Result {
+internal func doneTesting(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Result {
 	if st.expectedFailure {
 		print("*** Passed " + "\(st.numSuccessTests)" + " tests")
 		printDistributionGraph(st)
@@ -363,7 +363,7 @@ internal func doneTesting(st : State)(f : (StdGen -> Int -> Prop)) -> Result {
 	}
 }
 
-internal func giveUp(st: State)(f : (StdGen -> Int -> Prop)) -> Result {
+internal func giveUp(st: CheckerState)(f : (StdGen -> Int -> Prop)) -> Result {
 	printDistributionGraph(st)
 	return Result.GaveUp(numTests: st.numSuccessTests, labels: summary(st), output: "")
 }
@@ -377,7 +377,7 @@ internal func giveUp(st: State)(f : (StdGen -> Int -> Prop)) -> Result {
 // for complex shrinks (much like `split` in the Swift STL), and was slow as hell.  This way we stay
 // in one stack frame no matter what and give ARC a chance to cleanup after us.  Plus we get to
 // stay within a reasonable ~50-100 megabytes for truly horrendous tests that used to eat 8 gigs.
-internal func findMinimalFailingTestCase(st : State, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
+internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
 	if let e = res.theException {
 		fatalError("Test failed due to exception: \(e)")
 	}
@@ -429,7 +429,7 @@ internal func findMinimalFailingTestCase(st : State, res : TestResult, ts : [Ros
 		numSuccessShrinks++
 	}
 
-	let state = State(name: st.name
+	let state = CheckerState(name: st.name
 					, maxSuccessTests: st.maxSuccessTests
 					, maxDiscardedTests: st.maxDiscardedTests
 					, computeSize: st.computeSize
@@ -446,7 +446,7 @@ internal func findMinimalFailingTestCase(st : State, res : TestResult, ts : [Ros
 	return reportMinimumCaseFound(state, res: lastResult)
 }
 
-internal func reportMinimumCaseFound(st : State, res : TestResult) -> (Int, Int, Int) {
+internal func reportMinimumCaseFound(st : CheckerState, res : TestResult) -> (Int, Int, Int) {
 	let testMsg = " (after \(st.numSuccessTests + 1) test"
 	let shrinkMsg = st.numSuccessShrinks > 1 ? (" and \(st.numSuccessShrinks) shrink") : ""
 	
@@ -463,7 +463,7 @@ internal func reportMinimumCaseFound(st : State, res : TestResult) -> (Int, Int,
 	return (st.numSuccessShrinks, st.numTotTryShrinks - st.numTryShrinks, st.numTryShrinks)
 }
 
-internal func dispatchAfterTestCallbacks(st : State, res : TestResult) {
+internal func dispatchAfterTestCallbacks(st : CheckerState, res : TestResult) {
 	for c in res.callbacks {
 		switch c {
 		case let .AfterTest(_, f):
@@ -474,7 +474,7 @@ internal func dispatchAfterTestCallbacks(st : State, res : TestResult) {
 	}
 }
 
-internal func dispatchAfterFinalFailureCallbacks(st : State, res : TestResult) {
+internal func dispatchAfterFinalFailureCallbacks(st : CheckerState, res : TestResult) {
 	for c in res.callbacks {
 		switch c {
 		case let .AfterFinalFailure(_, f):
@@ -485,18 +485,18 @@ internal func dispatchAfterFinalFailureCallbacks(st : State, res : TestResult) {
 	}
 }
 
-internal func summary(s : State) -> [(String, Int)] {
+internal func summary(s : CheckerState) -> [(String, Int)] {
 	let strings = s.collected.flatMap({ l in Array(l).map({ "," + $0.0 }).filter({ !$0.isEmpty }) })
 	let l = strings.sort().groupBy(==)
 	return l.map({ ss in (ss[0], ss.count * 100 / s.numSuccessTests) })
 }
 
-internal func labelPercentage(l : String, st : State) -> Int {
+internal func labelPercentage(l : String, st : CheckerState) -> Int {
 	let occur = st.collected.flatMap({ Array($0) }).filter({ $0 == l }).count
 	return (100 * occur) / st.maxSuccessTests
 }
 
-internal func printDistributionGraph(st : State) {
+internal func printDistributionGraph(st : CheckerState) {
 	func showP(n : Int) -> String {
 		return (n < 10 ? " " : "") + "\(n)" + "% "
 	}

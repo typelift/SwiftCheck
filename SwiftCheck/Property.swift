@@ -256,9 +256,9 @@ public func shrinking<A>(shrinker : A -> [A], initial : A, prop : A -> Testable)
 /// with and the result of the test to do with as it sees fit.
 public enum Callback {
 	/// A callback that is posted after a test case has completed.
-	case AfterTest(kind : CallbackKind, f : (State, TestResult) -> ())
+	case AfterTest(kind : CallbackKind, f : (CheckerState, TestResult) -> ())
 	/// The callback is posted after all cases in the test have failed.
-	case AfterFinalFailure(kind : CallbackKind, f : (State, TestResult) -> ())
+	case AfterFinalFailure(kind : CallbackKind, f : (CheckerState, TestResult) -> ())
 }
 
 /// The type of callbacks SwiftCheck can dispatch.
