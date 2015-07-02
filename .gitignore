@@ -18,3 +18,5 @@ DerivedData
 *.hmap
 *.xcuserstate
 Carthage/
+
+*.xccheckout
