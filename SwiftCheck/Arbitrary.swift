@@ -34,7 +34,20 @@ import Darwin
 /// grained testing is required see `Modifiers.swift` for an example of how to define a "Modifier"
 /// type to implement it.
 public protocol Arbitrary {
+	/// The generator for this particular type.
+	///
+	/// This function should call out to any sources of randomness or state necessary to generate
+	/// values.  It should not, however, be written as a deterministic function.  If such a
+	/// generator is needed, combinators are provided in `Gen.swift`.
 	static var arbitrary : Gen<Self> { get }
+	
+	/// An optional shrinking function.  If this function goes unimplemented, it is the same as
+	/// returning the empty list.
+	///
+	/// Shrunken values must be less than or equal to the "size" of the original type but never the
+	/// same as the value provided to this function (or a loop will form in the shrinker).  It is
+	/// recommended that they be presented smallest to largest to speed up the overall shrinking
+	/// process.
 	static func shrink(Self) -> [Self]
 }
 
@@ -466,10 +479,8 @@ extension Set where T : protocol<Arbitrary, Hashable> {
 /// Coarbitrary types must take an arbitrary value of their type and yield a function that
 /// transforms a given generator by returning a new generator that depends on the input value.  Put
 /// simply, the function should perturb the given generator (more than likely using `Gen.variant()`.
-///
-/// Using Coarbitrary types it is possible to write an Arbitrary instance for `->` (a type that
-/// generates functions).
 public protocol CoArbitrary {
+	/// Uses an instance of the receiver to return a function that perturbs a generator.
 	static func coarbitrary<C>(x : Self) -> (Gen<C> -> Gen<C>)
 }
 
