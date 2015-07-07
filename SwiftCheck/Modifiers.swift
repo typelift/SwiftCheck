@@ -24,8 +24,8 @@ public struct Blind<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 		return Blind(blind)
 	}
 	
-	public static func arbitrary() -> Gen<Blind<A>> {
-		return A.arbitrary().fmap(Blind.create)
+	public static var arbitrary : Gen<Blind<A>> {
+		return A.arbitrary.fmap(Blind.create)
 	}
 	
 	public static func shrink(bl : Blind<A>) -> [Blind<A>] {
@@ -56,8 +56,8 @@ public struct Static<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 		return Static(blind)
 	}
 	
-	public static func arbitrary() -> Gen<Static<A>> {
-		return A.arbitrary().fmap(Static.create)
+	public static var arbitrary : Gen<Static<A>> {
+		return A.arbitrary.fmap(Static.create)
 	}
 }
 
@@ -87,8 +87,8 @@ public struct ArrayOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 		return ArrayOf(array)
 	}
 	
-	public static func arbitrary() -> Gen<ArrayOf<A>> {
-		return Array<A>.arbitrary().fmap(ArrayOf.init)
+	public static var arbitrary : Gen<ArrayOf<A>> {
+		return Array<A>.arbitrary.fmap(ArrayOf.init)
 	}
 	
 	public static func shrink(bl : ArrayOf<A>) -> [ArrayOf<A>] {
@@ -122,8 +122,8 @@ public struct DictionaryOf<K : protocol<Hashable, Arbitrary>, V : Arbitrary> : A
 		return DictionaryOf(dict)
 	}
 	
-	public static func arbitrary() -> Gen<DictionaryOf<K, V>> {
-		return Dictionary<K, V>.arbitrary().fmap(DictionaryOf.init)
+	public static var arbitrary : Gen<DictionaryOf<K, V>> {
+		return Dictionary<K, V>.arbitrary.fmap(DictionaryOf.init)
 	}
 	
 	public static func shrink(d : DictionaryOf<K, V>) -> [DictionaryOf<K, V>] {
@@ -153,8 +153,8 @@ public struct OptionalOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 		return OptionalOf(opt)
 	}
 	
-	public static func arbitrary() -> Gen<OptionalOf<A>> {
-		return Optional<A>.arbitrary().fmap(OptionalOf.init)
+	public static var arbitrary : Gen<OptionalOf<A>> {
+		return Optional<A>.arbitrary.fmap(OptionalOf.init)
 	}
 	
 	public static func shrink(bl : OptionalOf<A>) -> [OptionalOf<A>] {
@@ -187,14 +187,14 @@ public struct SetOf<A : protocol<Hashable, Arbitrary>> : Arbitrary, CustomString
 		return SetOf(set)
 	}
 	
-	public static func arbitrary() -> Gen<SetOf<A>> {
+	public static var arbitrary : Gen<SetOf<A>> {
 		return Gen.sized { n in
 			return Gen<Int>.choose((0, n)).bind { k in
 				if k == 0 {
 					return Gen.pure(SetOf(Set([])))
 				}
 				
-				return sequence(Array((0...k)).map { _ in A.arbitrary() }).fmap({ SetOf.create(Set($0)) })
+				return sequence(Array((0...k)).map { _ in A.arbitrary }).fmap({ SetOf.create(Set($0)) })
 			}
 		}
 	}
@@ -247,9 +247,9 @@ public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbi
 		return ArrowOf(arr)
 	}
 	
-	public static func arbitrary() -> Gen<ArrowOf<T, U>> {
+	public static var arbitrary : Gen<ArrowOf<T, U>> {
 		return promote({ a in
-			return T.coarbitrary(a)(U.arbitrary())
+			return T.coarbitrary(a)(U.arbitrary)
 		}).fmap({ ArrowOf($0) })
 	}
 	
@@ -323,11 +323,11 @@ public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol
 		return "IsoOf<\(T.self) -> \(U.self), \(U.self) -> \(T.self)>"
 	}
 	
-	public static func arbitrary() -> Gen<IsoOf<T, U>> {
+	public static var arbitrary : Gen<IsoOf<T, U>> {
 		return Gen<(T -> U, U -> T)>.zip(promote({ a in
-			return T.coarbitrary(a)(U.arbitrary())
+			return T.coarbitrary(a)(U.arbitrary)
 		}), promote({ a in
-			return U.coarbitrary(a)(T.arbitrary())
+			return U.coarbitrary(a)(T.arbitrary)
 		})).fmap { IsoOf($0, $1) }
 	}
 	
@@ -380,8 +380,8 @@ public struct Positive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary, C
 		return Positive(blind)
 	}
 	
-	public static func arbitrary() -> Gen<Positive<A>> {
-		return A.arbitrary().fmap({ Positive.create(abs($0)) }).suchThat({ $0.getPositive > 0 })
+	public static var arbitrary : Gen<Positive<A>> {
+		return A.arbitrary.fmap({ Positive.create(abs($0)) }).suchThat({ $0.getPositive > 0 })
 	}
 	
 	public static func shrink(bl : Positive<A>) -> [Positive<A>] {
@@ -412,8 +412,8 @@ public struct NonZero<A : protocol<Arbitrary, IntegerType>> : Arbitrary, CustomS
 		return NonZero(blind)
 	}
 	
-	public static func arbitrary() -> Gen<NonZero<A>> {
-		return A.arbitrary().suchThat({ $0 != 0 }).fmap(NonZero.create)
+	public static var arbitrary : Gen<NonZero<A>> {
+		return A.arbitrary.suchThat({ $0 != 0 }).fmap(NonZero.create)
 	}
 	
 	public static func shrink(bl : NonZero<A>) -> [NonZero<A>] {
@@ -443,8 +443,8 @@ public struct NonNegative<A : protocol<Arbitrary, IntegerType>> : Arbitrary, Cus
 		return NonNegative(blind)
 	}
 	
-	public static func arbitrary() -> Gen<NonNegative<A>> {
-		return A.arbitrary().suchThat({ $0 >= 0 }).fmap(NonNegative.create)
+	public static var arbitrary : Gen<NonNegative<A>> {
+		return A.arbitrary.suchThat({ $0 >= 0 }).fmap(NonNegative.create)
 	}
 	
 	public static func shrink(bl : NonNegative<A>) -> [NonNegative<A>] {

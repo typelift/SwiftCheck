@@ -9,7 +9,7 @@
 /// Converts a function into a universally quantified property using the default shrinker and
 /// generator for that type.
 public func forAll<A : Arbitrary>(pf : (A -> Testable)) -> Property {
-	return forAllShrink(A.arbitrary(), shrinker: { A.shrink($0) }, f: pf)
+	return forAllShrink(A.arbitrary, shrinker: { A.shrink($0) }, f: pf)
 }
 
 /// Converts a function into a universally quantified property using the default shrinker and

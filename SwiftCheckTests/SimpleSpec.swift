@@ -23,9 +23,9 @@ public struct ArbitraryFoo {
 }
 
 extension ArbitraryFoo : Arbitrary {
-	public static func arbitrary() -> Gen<ArbitraryFoo> {
-		return Int.arbitrary().bind { i in
-			return Int.arbitrary().bind { j in
+	public static var arbitrary : Gen<ArbitraryFoo> {
+		return Int.arbitrary.bind { i in
+			return Int.arbitrary.bind { j in
 				return Gen.pure(ArbitraryFoo(x: i, y: j))
 			}
 		}

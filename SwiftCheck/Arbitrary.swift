@@ -19,20 +19,22 @@ import Darwin
 /// returning a list of all possible "smaller" values for SwiftCheck to run through.  As long as
 /// each individual value in the returned list is less than or equal to the size of the input value,
 /// and is not a duplicate of the input value, a minimal case should be reached fairly efficiently.
+/// Shrinking is an optional extension of normal testing.  If no implementation of `shrink` is
+/// provided, SwiftCheck will default to an empty one.
 ///
 /// As an example, take the `ArrayOf` implementation of shrink:
 ///
 /// shrink(ArrayOf([1, 2, 3]))
 ///	> [[], [2,3], [1,3], [1,2], [0,2,3], [1,0,3], [1,1,3], [1,2,0], [1,2,2]]
 ///
-/// SwiftCheck will search each case 1 by one and continue shrinking until it has reached a case
+/// SwiftCheck will search each case one-by-one and continue shrinking until it has reached a case
 /// it deems minimal enough to present.
 ///
 /// SwiftCheck implements a number of generators for common STL types for convenience.  If more fine-
 /// grained testing is required see `Modifiers.swift` for an example of how to define a "Modifier"
 /// type to implement it.
 public protocol Arbitrary {
-	static func arbitrary() -> Gen<Self>
+	static var arbitrary : Gen<Self> { get }
 	static func shrink(Self) -> [Self]
 }
 
@@ -57,7 +59,7 @@ extension IntegerType {
 }
 
 extension Bool : Arbitrary {
-	public static func arbitrary() -> Gen<Bool> {
+	public static var arbitrary : Gen<Bool> {
 		return Gen.pure((arc4random() % 2) == 1)
 	}
 	
@@ -70,7 +72,7 @@ extension Bool : Arbitrary {
 }
 
 extension Int : Arbitrary {
-	public static func arbitrary() -> Gen<Int> {
+	public static var arbitrary : Gen<Int> {
 		let sign = ((arc4random() % 2) == 1)
 		return Gen.sized { n in Gen.pure((sign ? 1 : -1) * Int(arc4random_uniform(UInt32(n)))) }
 	}
@@ -81,7 +83,7 @@ extension Int : Arbitrary {
 }
 
 extension Int8 : Arbitrary {
-	public static func arbitrary() -> Gen<Int8> {
+	public static var arbitrary : Gen<Int8> {
 		let sign = ((arc4random() % 2) == 1)
 		return Gen.sized { n in Gen.pure((sign ? 1 : -1) * Int8(arc4random_uniform(UInt32(n)))) }
 	}
@@ -92,7 +94,7 @@ extension Int8 : Arbitrary {
 }
 
 extension Int16 : Arbitrary {
-	public static func arbitrary() -> Gen<Int16> {
+	public static var arbitrary : Gen<Int16> {
 		let sign = ((arc4random() % 2) == 1)
 		return Gen.sized { n in Gen.pure((sign ? 1 : -1) * Int16(arc4random_uniform(UInt32(n)))) }
 	}
@@ -103,7 +105,7 @@ extension Int16 : Arbitrary {
 }
 
 extension Int32 : Arbitrary {
-	public static func arbitrary() -> Gen<Int32> {
+	public static var arbitrary : Gen<Int32> {
 		let sign = ((arc4random() % 2) == 1)
 		return Gen.sized { n in Gen.pure((sign ? 1 : -1) * Int32(arc4random_uniform(UInt32(n)))) }
 	}
@@ -114,7 +116,7 @@ extension Int32 : Arbitrary {
 }
 
 extension Int64 : Arbitrary {
-	public static func arbitrary() -> Gen<Int64> {
+	public static var arbitrary : Gen<Int64> {
 		let sign = ((arc4random() % 2) == 1)
 		return Gen.sized { n in Gen.pure((sign ? 1 : -1) * Int64(arc4random_uniform(UInt32(n)))) }
 	}
@@ -125,7 +127,7 @@ extension Int64 : Arbitrary {
 }
 
 extension UInt : Arbitrary {
-	public static func arbitrary() -> Gen<UInt> {
+	public static var arbitrary : Gen<UInt> {
 		return Gen.sized { n in Gen<UInt>.pure(UInt(arc4random_uniform(UInt32(abs(n))))) }
 	}
 	
@@ -135,7 +137,7 @@ extension UInt : Arbitrary {
 }
 
 extension UInt8 : Arbitrary {
-	public static func arbitrary() -> Gen<UInt8> {
+	public static var arbitrary : Gen<UInt8> {
 		return Gen.sized({ n in
 			return Gen.sized { n in Gen<UInt8>.pure(UInt8(arc4random_uniform(UInt32(abs(n))))) }
 		})
@@ -147,7 +149,7 @@ extension UInt8 : Arbitrary {
 }
 
 extension UInt16 : Arbitrary {
-	public static func arbitrary() -> Gen<UInt16> {
+	public static var arbitrary : Gen<UInt16> {
 		return Gen.sized { n in Gen<UInt16>.pure(UInt16(arc4random_uniform(UInt32(abs(n))))) }
 	}
 	
@@ -157,7 +159,7 @@ extension UInt16 : Arbitrary {
 }
 
 extension UInt32 : Arbitrary {
-	public static func arbitrary() -> Gen<UInt32> {
+	public static var arbitrary : Gen<UInt32> {
 		return Gen.sized { n in Gen<UInt32>.pure(arc4random_uniform(UInt32(abs(n)))) }
 	}
 	
@@ -167,7 +169,7 @@ extension UInt32 : Arbitrary {
 }
 
 extension UInt64 : Arbitrary {
-	public static func arbitrary() -> Gen<UInt64> {
+	public static var arbitrary : Gen<UInt64> {
 		return Gen.sized { n in Gen<UInt64>.pure(UInt64(arc4random_uniform(UInt32(abs(n))))) }
 	}
 	
@@ -177,7 +179,7 @@ extension UInt64 : Arbitrary {
 }
 
 extension Float : Arbitrary {
-	public static func arbitrary() -> Gen<Float> {
+	public static var arbitrary : Gen<Float> {
 		return Gen.sized({ n in
 			if n == 0 {
 				return Gen<Float>.pure(0.0)
@@ -198,7 +200,7 @@ extension Float : Arbitrary {
 }
 
 extension Double : Arbitrary {
-	public static func arbitrary() -> Gen<Double> {
+	public static var arbitrary : Gen<Double> {
 		return Gen.sized({ n in
 			if n == 0 {
 				return Gen<Double>.pure(0.0)
@@ -219,8 +221,8 @@ extension Double : Arbitrary {
 }
 
 extension UnicodeScalar : Arbitrary {
-	public static func arbitrary() -> Gen<UnicodeScalar> {
-		return UInt32.arbitrary().bind(Gen<UnicodeScalar>.pure • UnicodeScalar.init)
+	public static var arbitrary : Gen<UnicodeScalar> {
+		return UInt32.arbitrary.bind(Gen<UnicodeScalar>.pure • UnicodeScalar.init)
 	}
 	
 	public static func shrink(x : UnicodeScalar) -> [UnicodeScalar] {
@@ -230,8 +232,8 @@ extension UnicodeScalar : Arbitrary {
 }
 
 extension String : Arbitrary {
-	public static func arbitrary() -> Gen<String> {
-		let chars = Gen.sized({ n in Character.arbitrary().proliferateSized(n) })
+	public static var arbitrary : Gen<String> {
+		let chars = Gen.sized({ n in Character.arbitrary.proliferateSized(n) })
 		return chars.bind { ls in Gen<String>.pure(String(ls)) }
 	}
 	
@@ -241,7 +243,7 @@ extension String : Arbitrary {
 }
 
 extension Character : Arbitrary {
-	public static func arbitrary() -> Gen<Character> {
+	public static var arbitrary : Gen<Character> {
 		return Gen<UInt32>.choose((32, 255)).bind(Gen<Character>.pure • Character.init • UnicodeScalar.init)
 	}
 	
@@ -252,14 +254,14 @@ extension Character : Arbitrary {
 }
 
 extension Array where T : Arbitrary {
-	public static func arbitrary() -> Gen<Array<T>> {
+	public static var arbitrary : Gen<Array<T>> {
 		return Gen.sized { n in
 			return Gen<Int>.choose((0, n)).bind { k in
 				if k == 0 {
 					return Gen.pure([])
 				}
 				
-				return sequence((0...k).map { _ in T.arbitrary() })
+				return sequence((0...k).map { _ in T.arbitrary })
 			}
 		}
 	}
@@ -270,8 +272,8 @@ extension Array where T : Arbitrary {
 }
 
 extension AnyBidirectionalCollection where Element : Arbitrary {
-	public static func arbitrary() -> Gen<AnyBidirectionalCollection<Element>> {
-		return [Element].arbitrary().fmap(AnyBidirectionalCollection.init)
+	public static var arbitrary : Gen<AnyBidirectionalCollection<Element>> {
+		return [Element].arbitrary.fmap(AnyBidirectionalCollection.init)
 	}
 	
 	public static func shrink(bl : AnyBidirectionalCollection<Element>) -> [AnyBidirectionalCollection<Element>] {
@@ -280,20 +282,20 @@ extension AnyBidirectionalCollection where Element : Arbitrary {
 }
 
 extension AnyForwardIndex : Arbitrary {
-	public static func arbitrary() -> Gen<AnyForwardIndex> {
+	public static var arbitrary : Gen<AnyForwardIndex> {
 		return Gen<Int64>.choose((1, Int64.max)).bind(Gen<AnyForwardIndex>.pure • AnyForwardIndex.init)
 	}
 }
 
 extension AnyRandomAccessIndex : Arbitrary {
-	public static func arbitrary() -> Gen<AnyRandomAccessIndex> {
+	public static var arbitrary : Gen<AnyRandomAccessIndex> {
 		return Gen<Int64>.choose((1, Int64.max)).bind(Gen<AnyRandomAccessIndex>.pure • AnyRandomAccessIndex.init)
 	}
 }
 
 extension AnySequence where T : Arbitrary {
-	public static func arbitrary() -> Gen<AnySequence<T>> {
-		return [T].arbitrary().fmap(AnySequence.init)
+	public static var arbitrary : Gen<AnySequence<T>> {
+		return [T].arbitrary.fmap(AnySequence.init)
 	}
 	
 	public static func shrink(bl : AnySequence<T>) -> [AnySequence<T>] {
@@ -302,8 +304,8 @@ extension AnySequence where T : Arbitrary {
 }
 
 extension ArraySlice where T : Arbitrary {
-	public static func arbitrary() -> Gen<ArraySlice<T>> {
-		return [T].arbitrary().fmap(ArraySlice.init)
+	public static var arbitrary : Gen<ArraySlice<T>> {
+		return [T].arbitrary.fmap(ArraySlice.init)
 	}
 	
 	public static func shrink(bl : ArraySlice<T>) -> [ArraySlice<T>] {
@@ -312,17 +314,17 @@ extension ArraySlice where T : Arbitrary {
 }
 
 extension CollectionOfOne where T : Arbitrary {
-	public static func arbitrary() -> Gen<CollectionOfOne<T>> {
-		return T.arbitrary().fmap(CollectionOfOne.init)
+	public static var arbitrary : Gen<CollectionOfOne<T>> {
+		return T.arbitrary.fmap(CollectionOfOne.init)
 	}
 }
 
 /// Generates an Optional of arbitrary values of type A.
 extension Optional where T : Arbitrary {
-	public static func arbitrary() -> Gen<Optional<T>> {
+	public static var arbitrary : Gen<Optional<T>> {
 		return Gen<Optional<T>>.frequency([
 			(1, Gen<Optional<T>>.pure(.None)),
-			(3, liftM(Optional<T>.Some)(m1: T.arbitrary())),
+			(3, liftM(Optional<T>.Some)(m1: T.arbitrary)),
 			])
 	}
 	
@@ -335,8 +337,8 @@ extension Optional where T : Arbitrary {
 }
 
 extension ContiguousArray where T : Arbitrary {
-	public static func arbitrary() -> Gen<ContiguousArray<T>> {
-		return [T].arbitrary().fmap(ContiguousArray.init)
+	public static var arbitrary : Gen<ContiguousArray<T>> {
+		return [T].arbitrary.fmap(ContiguousArray.init)
 	}
 	
 	public static func shrink(bl : ContiguousArray<T>) -> [ContiguousArray<T>] {
@@ -346,9 +348,9 @@ extension ContiguousArray where T : Arbitrary {
 
 /// Generates an dictionary of arbitrary keys and values.
 extension Dictionary where Key : Arbitrary, Value : Arbitrary {
-	public static func arbitrary() -> Gen<Dictionary<Key, Value>> {
-		return [Key].arbitrary().bind { k in
-			return [Value].arbitrary().bind { v in
+	public static var arbitrary : Gen<Dictionary<Key, Value>> {
+		return [Key].arbitrary.bind { k in
+			return [Value].arbitrary.bind { v in
 				return Gen.pure(Dictionary(Zip2(k, v)))
 			}
 		}
@@ -370,15 +372,15 @@ extension Dictionary {
 }
 
 extension EmptyCollection : Arbitrary {
-	public static func arbitrary() -> Gen<EmptyCollection<T>> {
+	public static var arbitrary : Gen<EmptyCollection<T>> {
 		return Gen.pure(EmptyCollection())
 	}
 }
 
 extension HalfOpenInterval where T : protocol<Comparable, Arbitrary> {
-	public static func arbitrary() -> Gen<HalfOpenInterval<T>> {
-		return T.arbitrary().bind { l in
-			return T.arbitrary().bind { r in
+	public static var arbitrary : Gen<HalfOpenInterval<T>> {
+		return T.arbitrary.bind { l in
+			return T.arbitrary.bind { r in
 				return Gen.pure(HalfOpenInterval(min(l, r), max(l, r)))
 			}
 		}
@@ -390,8 +392,8 @@ extension HalfOpenInterval where T : protocol<Comparable, Arbitrary> {
 }
 
 extension ImplicitlyUnwrappedOptional where T : Arbitrary {
-	public static func arbitrary() -> Gen<ImplicitlyUnwrappedOptional<T>> {
-		return Optional<T>.arbitrary().fmap(ImplicitlyUnwrappedOptional.init)
+	public static var arbitrary : Gen<ImplicitlyUnwrappedOptional<T>> {
+		return Optional<T>.arbitrary.fmap(ImplicitlyUnwrappedOptional.init)
 	}
 	
 	public static func shrink(bl : ImplicitlyUnwrappedOptional<T>) -> [ImplicitlyUnwrappedOptional<T>] {
@@ -400,33 +402,33 @@ extension ImplicitlyUnwrappedOptional where T : Arbitrary {
 }
 
 extension LazyBidirectionalCollection where S : protocol<CollectionType, Arbitrary>, S.Index : BidirectionalIndexType {
-	public static func arbitrary() -> Gen<LazyBidirectionalCollection<S>> {
-		return S.arbitrary().fmap(lazy)
+	public static var arbitrary : Gen<LazyBidirectionalCollection<S>> {
+		return S.arbitrary.fmap(lazy)
 	}
 }
 
 extension LazyForwardCollection where S : protocol<CollectionType, Arbitrary>, S.Index : ForwardIndexType {
-	public static func arbitrary() -> Gen<LazyForwardCollection<S>> {
-		return S.arbitrary().fmap(lazy)
+	public static var arbitrary : Gen<LazyForwardCollection<S>> {
+		return S.arbitrary.fmap(lazy)
 	}
 }
 
 extension LazyRandomAccessCollection where S : protocol<CollectionType, Arbitrary>, S.Index : RandomAccessIndexType {
-	public static func arbitrary() -> Gen<LazyRandomAccessCollection<S>> {
-		return S.arbitrary().fmap(lazy)
+	public static var arbitrary : Gen<LazyRandomAccessCollection<S>> {
+		return S.arbitrary.fmap(lazy)
 	}
 }
 
 extension LazySequence where S : protocol<SequenceType, Arbitrary> {
-	public static func arbitrary() -> Gen<LazySequence<S>> {
-		return S.arbitrary().fmap(lazy)
+	public static var arbitrary : Gen<LazySequence<S>> {
+		return S.arbitrary.fmap(lazy)
 	}
 }
 
 extension Range where T : protocol<ForwardIndexType, Comparable, Arbitrary> {
-	public static func arbitrary() -> Gen<Range<T>> {
-		return T.arbitrary().bind { l in
-			return T.arbitrary().bind { r in
+	public static var arbitrary : Gen<Range<T>> {
+		return T.arbitrary.bind { l in
+			return T.arbitrary.bind { r in
 				return Gen.pure(Range(start: min(l, r), end: max(l, r)))
 			}
 		}
@@ -438,20 +440,20 @@ extension Range where T : protocol<ForwardIndexType, Comparable, Arbitrary> {
 }
 
 extension Repeat where T : Arbitrary {
-	public static func arbitrary() -> Gen<Repeat<T>> {
-		return Gen<Any>.zip(Int.arbitrary(), T.arbitrary()).fmap(Repeat.init)
+	public static var arbitrary : Gen<Repeat<T>> {
+		return Gen<Any>.zip(Int.arbitrary, T.arbitrary).fmap(Repeat.init)
 	}
 }
 
 extension Set where T : protocol<Arbitrary, Hashable> {
-	public static func arbitrary() -> Gen<Set<T>> {
+	public static var arbitrary : Gen<Set<T>> {
 		return Gen.sized { n in
 			return Gen<Int>.choose((0, n)).bind { k in
 				if k == 0 {
 					return Gen.pure(Set([]))
 				}
 				
-				return sequence(Array((0...k)).map { _ in T.arbitrary() }).fmap(Set.init)
+				return sequence(Array((0...k)).map { _ in T.arbitrary }).fmap(Set.init)
 			}
 		}
 	}
@@ -472,7 +474,7 @@ public protocol CoArbitrary {
 }
 
 extension IntegerType {
-	/// A corarbitrary implementation for any IntegerType
+	/// A coarbitrary implementation for any IntegerType
 	public func coarbitraryIntegral<C>() -> Gen<C> -> Gen<C> {
 		return { $0.variant(self) }
 	}

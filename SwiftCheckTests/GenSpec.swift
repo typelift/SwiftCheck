@@ -73,30 +73,30 @@ class GenSpec : XCTestCase {
 		}
 
 		property("Gen.proliferateSized n generates arrays of length n") <- forAll(Gen<Int>.choose((0, 100))) { n in
-			let g = Int.arbitrary().proliferateSized(n).fmap({ ArrayOf($0) })
+			let g = Int.arbitrary.proliferateSized(n).fmap({ ArrayOf($0) })
 			return forAll(g) { $0.getArray.count == n }
 		}
 
-		property("Gen.proliferateSized 0 generates only empty arrays") <- forAll(Int.arbitrary().proliferateSized(0).fmap({ ArrayOf($0) })) {
+		property("Gen.proliferateSized 0 generates only empty arrays") <- forAll(Int.arbitrary.proliferateSized(0).fmap({ ArrayOf($0) })) {
 			return $0.getArray.isEmpty
 		}
 
 		property("Gen.suchThat in series obeys both predicates.") <- {
-			let g = String.arbitrary().suchThat({ !$0.isEmpty }).suchThat({ $0.rangeOfString(",") == nil })
+			let g = String.arbitrary.suchThat({ !$0.isEmpty }).suchThat({ $0.rangeOfString(",") == nil })
 			return forAll(g) { str in
 				return !(str.isEmpty || str.rangeOfString(",") != nil)
 			}
 		}
 
 		property("Gen.suchThat in series obeys its first property") <- {
-			let g = String.arbitrary().suchThat({ !$0.isEmpty }).suchThat({ $0.rangeOfString(",") == nil })
+			let g = String.arbitrary.suchThat({ !$0.isEmpty }).suchThat({ $0.rangeOfString(",") == nil })
 			return forAll(g) { str in
 				return !str.isEmpty
 			}
 		}
 
 		property("Gen.suchThat in series obeys its last property") <- {
-			let g = String.arbitrary().suchThat({ !$0.isEmpty }).suchThat({ $0.rangeOfString(",") == nil })
+			let g = String.arbitrary.suchThat({ !$0.isEmpty }).suchThat({ $0.rangeOfString(",") == nil })
 			return forAll(g) { str in
 				return str.rangeOfString(",") == nil
 			}
