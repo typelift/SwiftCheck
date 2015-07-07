@@ -273,6 +273,15 @@ public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbi
 	}
 }
 
+extension ArrowOf : CustomReflectable {
+    public func customMirror() -> Mirror {
+        return Mirror(self, children: [
+            "types": "\(T.self) -> \(U.self)",
+            "currentMap": self.table,
+        ])
+    }
+}
+
 /// Generates two isomorphic Swift function from T to U and back again.
 public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol<Hashable, CoArbitrary, Arbitrary>> : Arbitrary, CustomStringConvertible {
     private var table : Dictionary<T, U>
@@ -306,8 +315,8 @@ public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol
         }
         
         self.project = { u in
-            let t = self.table.filter { $1.hashValue == u.hashValue }.map { $0.0 }
-            if let k = t.first, _ = self.table[k] {
+            let ts = self.table.filter { $1.hashValue == u.hashValue }.map { $0.0 }
+            if let k = ts.first, _ = self.table[k] {
                 return k
             }
             let y = project(u)
@@ -317,7 +326,7 @@ public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol
     }
     
     public var description : String {
-        return "\(T.self) -> \(U.self)"
+        return "IsoOf<\(T.self) -> \(U.self), \(U.self) -> \(T.self)>"
     }
     
     public static func arbitrary() -> Gen<IsoOf<T, U>> {
@@ -346,6 +355,16 @@ public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol
             })
         }
         return xxs
+    }
+}
+
+extension IsoOf : CustomReflectable {
+    public func customMirror() -> Mirror {
+        return Mirror(self, children: [
+            "embed": "\(T.self) -> \(U.self)",
+            "project": "\(U.self) -> \(T.self)",
+            "currentMap": self.table,
+        ])
     }
 }
 
