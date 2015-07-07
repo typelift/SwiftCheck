@@ -258,9 +258,8 @@ public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbi
 	}
 
 	public static func shrink(f : ArrowOf<T, U>) -> [ArrowOf<T, U>] {
-		var xxs : [ArrowOf<T, U>] = []
-		for (x, y) in f.table {
-			xxs += U.shrink(y).map({ (y2 : U) -> ArrowOf<T, U> in
+		return f.table.flatMap { (x, y) in
+			return U.shrink(y).map({ (y2 : U) -> ArrowOf<T, U> in
 				return ArrowOf<T, U>({ (z : T) -> U in
 					if x == z {
 						return y2
@@ -269,7 +268,6 @@ public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbi
 				})
 			})
 		}
-		return xxs
 	}
 }
 
@@ -315,7 +313,7 @@ public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol
         }
         
         self.project = { u in
-            let ts = self.table.filter { $1.hashValue == u.hashValue }.map { $0.0 }
+            let ts = self.table.filter { $1 == u }.map { $0.0 }
             if let k = ts.first, _ = self.table[k] {
                 return k
             }
@@ -338,9 +336,8 @@ public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol
     }
     
     public static func shrink(f : IsoOf<T, U>) -> [IsoOf<T, U>] {
-        var xxs : [IsoOf<T, U>] = []
-        for (x, y) in f.table {
-            xxs += Zip2(T.shrink(x), U.shrink(y)).map({ (y1 , y2) -> IsoOf<T, U> in
+        return f.table.flatMap { (x, y) in
+            return Zip2(T.shrink(x), U.shrink(y)).map({ (y1 , y2) -> IsoOf<T, U> in
                 return IsoOf<T, U>({ (z : T) -> U in
                     if x == z {
                         return y2
@@ -354,7 +351,6 @@ public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol
                 })
             })
         }
-        return xxs
     }
 }
 
