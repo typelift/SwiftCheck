@@ -211,12 +211,8 @@ public struct ArbitraryFoo {
 }
 
 extension ArbitraryFoo : Arbitrary {
-    public static func arbitrary() -> Gen<ArbitraryFoo> {
-        return ArbitraryFoo.create <^> Int.arbitrary() <*> Int.arbitrary()
-    }
-
-    public static func shrink(x : ArbitraryFoo) -> [ArbitraryFoo] {
-        return shrinkNone(x)
+    public static var arbitrary : Gen<ArbitraryFoo> {
+        return ArbitraryFoo.create <^> Int.arbitrary <*> Int.arbitrary
     }
 }
 
@@ -233,7 +229,7 @@ For everything else, SwiftCheck defines a number of combinators to make working
 with custom generators as simple as possible:
 
 ```swift
-let onlyEven = Int.arbitrary().suchThat { $0 % 2 == 0 }
+let onlyEven = Int.arbitrary.suchThat { $0 % 2 == 0 }
 
 let vowels = Gen.elements(["A", "E", "I", "O", "U" ])
 
@@ -243,7 +239,7 @@ let randomHexValue = Gen<UInt>.choose((0, 15))
 /// `.Some` 3/4 of the time
 let weightedOptionals = Gen.frequency([
     (1, Gen.pure(OptionalOf(Optional<A>.None))),
-    (3, liftM({ OptionalOf(Optional<A>.Some($0)) })(m1: Int.arbitrary()))
+    (3, liftM({ OptionalOf(Optional<A>.Some($0)) })(m1: Int.arbitrary))
 ])
 ```
 
