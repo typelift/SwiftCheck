@@ -30,10 +30,6 @@ extension ArbitraryFoo : Arbitrary {
 			}
 		}
 	}
-	
-	public static func shrink(x : ArbitraryFoo) -> [ArbitraryFoo] {
-		return shrinkNone(x)
-	}
 }
 
 
