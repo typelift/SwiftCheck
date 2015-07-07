@@ -273,6 +273,82 @@ public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbi
 	}
 }
 
+/// Generates two isomorphic Swift function from T to U and back again.
+public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol<Hashable, CoArbitrary, Arbitrary>> : Arbitrary, CustomStringConvertible {
+    private var table : Dictionary<T, U>
+    private var embed : T -> U
+    private var project : U -> T
+    
+    public var getTo : T -> U {
+        return embed
+    }
+    
+    public var getFrom : U -> T {
+        return project
+    }
+    
+    private init (_ table : Dictionary<T, U>, _ embed : (T -> U), _ project : (U -> T)) {
+        self.table = table
+        self.embed = embed
+        self.project = project
+    }
+    
+    public init(_ embed : (T -> U), _ project : (U -> T)) {
+        self.init(Dictionary(), { (_ : T) -> U in return undefined() }, { (_ : U) -> T in return undefined() })
+        
+        self.embed = { t in
+            if let v = self.table[t] {
+                return v
+            }
+            let y = embed(t)
+            self.table[t] = y
+            return y
+        }
+        
+        self.project = { u in
+            let t = self.table.filter { $1.hashValue == u.hashValue }.map { $0.0 }
+            if let k = t.first, _ = self.table[k] {
+                return k
+            }
+            let y = project(u)
+            self.table[y] = u
+            return y
+        }
+    }
+    
+    public var description : String {
+        return "\(T.self) -> \(U.self)"
+    }
+    
+    public static func arbitrary() -> Gen<IsoOf<T, U>> {
+        return Gen<(T -> U, U -> T)>.zip(promote({ a in
+            return T.coarbitrary(a)(U.arbitrary())
+        }), promote({ a in
+            return U.coarbitrary(a)(T.arbitrary())
+        })).fmap { IsoOf($0, $1) }
+    }
+    
+    public static func shrink(f : IsoOf<T, U>) -> [IsoOf<T, U>] {
+        var xxs : [IsoOf<T, U>] = []
+        for (x, y) in f.table {
+            xxs += Zip2(T.shrink(x), U.shrink(y)).map({ (y1 , y2) -> IsoOf<T, U> in
+                return IsoOf<T, U>({ (z : T) -> U in
+                    if x == z {
+                        return y2
+                    }
+                    return f.embed(z)
+                }, { (z : U) -> T in
+                    if y == z {
+                        return y1
+                    }
+                    return f.project(z)
+                })
+            })
+        }
+        return xxs
+    }
+}
+
 private func undefined<A>() -> A {
 	fatalError("")
 }
