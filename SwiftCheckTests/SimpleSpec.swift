@@ -24,11 +24,7 @@ public struct ArbitraryFoo {
 
 extension ArbitraryFoo : Arbitrary {
 	public static var arbitrary : Gen<ArbitraryFoo> {
-		return Int.arbitrary.bind { i in
-			return Int.arbitrary.bind { j in
-				return Gen.pure(ArbitraryFoo(x: i, y: j))
-			}
-		}
+		return ArbitraryFoo.create <^> Int.arbitrary <*> Int.arbitrary
 	}
 }
 
