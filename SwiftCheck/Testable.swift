@@ -16,7 +16,6 @@
 public protocol Testable {
 	var exhaustive : Bool { get }
 
-
 	func property() -> Property
 }
 
@@ -71,5 +70,13 @@ extension Bool : Testable {
 
 	public func property() -> Property {
 		return TestResult.liftBool(self).property()
+	}
+}
+
+extension Gen where A : Testable {
+	public var exhaustive : Bool { return false }
+	
+	public func property() -> Property {
+		return Property(self >>- { $0.property().unProperty })
 	}
 }
