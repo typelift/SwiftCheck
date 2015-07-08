@@ -26,7 +26,7 @@ public struct Gen<A> {
 	public static func zip<A, B>(gen1 : Gen<A>, _ gen2 : Gen<B>) -> Gen<(A, B)> {
 		return gen1.bind { l in
 			return gen2.bind { r in
-				return Gen<(A, B)>.pure(l, r)
+				return Gen<(A, B)>.pure((l, r))
 			}
 		}
 	}

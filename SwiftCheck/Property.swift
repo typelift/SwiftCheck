@@ -17,7 +17,7 @@
 /// When conjoining properties all calls to `expectFailure` will fail.
 public func conjoin(ps : Testable...) -> Property {
 	return Property(sequence(ps.map({ (p : Testable) in
-		return p.property.unProperty.fmap({ $0.unProp })
+		return p.property.unProperty.fmap { $0.unProp }
 	})).bind({ roses in
 		return Gen.pure(Prop(unProp: conj(id, xs: roses)))
 	}))
@@ -33,7 +33,7 @@ public func conjoin(ps : Testable...) -> Property {
 /// When disjoining properties all calls to `expectFailure` will fail.
 public func disjoin(ps : Testable...) -> Property {
 	return Property(sequence(ps.map({ (p : Testable) in
-		return p.property.unProperty.fmap({ $0.unProp })
+		return p.property.unProperty.fmap { $0.unProp }
 	})).bind({ roses in
 		return Gen.pure(Prop(unProp: roses.reduce(.MkRose({ TestResult.failed() }, { [] }), combine: disj)))
 	}))
@@ -42,7 +42,7 @@ public func disjoin(ps : Testable...) -> Property {
 extension Testable {
 	/// Applies a function that modifies the property generator's inner `Prop`.
 	public func mapProp(f : Prop -> Prop) -> Property {
-		return Property(self.property.unProperty.fmap(f))
+		return Property(f <^> self.property.unProperty)
 	}
 
 	/// Applies a function that modifies the property generator's size.
@@ -54,16 +54,16 @@ extension Testable {
 
 	/// Applies a function that modifies the result of a test case.
 	public func mapTotalResult(f : TestResult -> TestResult) -> Property {
-		return self.mapRoseResult({ rs in
-			return protectResults(rs.fmap(f))
-		})
+		return self.mapRoseResult { rs in
+			return protectResults(f <^> rs)
+		}
 	}
 
 	/// Applies a function that modifies the result of a test case.
 	public func mapResult(f : TestResult -> TestResult) -> Property {
-		return self.mapRoseResult({ rs in
-			return rs.fmap(f)
-		})
+		return self.mapRoseResult { rs in
+			return f <^> rs
+		}
 	}
 
 	/// Applies a function that modifies the underlying Rose Tree that a test case has generated.

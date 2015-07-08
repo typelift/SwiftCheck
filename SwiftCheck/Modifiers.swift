@@ -305,7 +305,7 @@ public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol
 	
 	public static func shrink(f : IsoOf<T, U>) -> [IsoOf<T, U>] {
 		return f.table.flatMap { (x, y) in
-			return Zip2(T.shrink(x), U.shrink(y)).map({ (y1 , y2) -> IsoOf<T, U> in
+			return Zip2Sequence(T.shrink(x), U.shrink(y)).map({ (y1 , y2) -> IsoOf<T, U> in
 				return IsoOf<T, U>({ (z : T) -> U in
 						if x == z {
 							return y2

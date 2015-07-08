@@ -535,13 +535,13 @@ internal func cons<T>(lhs : T, var _ rhs : [T]) -> [T] {
 }
 
 extension Array {
-	internal func groupBy(p : (T , T) -> Bool) -> [[T]] {
-		func span(list : [T], p : (T -> Bool)) -> ([T], [T]) {
+	internal func groupBy(p : (Element , Element) -> Bool) -> [[Element]] {
+		func span(list : [Element], p : (Element -> Bool)) -> ([Element], [Element]) {
 			if list.isEmpty {
 				return ([], [])
 			} else if let x = list.first {
 				if p (x) {
-					let (ys, zs) = span([T](list[1..<list.endIndex]), p: p)
+					let (ys, zs) = span([Element](list[1..<list.endIndex]), p: p)
 					return (cons(x, ys), zs)
 				}
 				return ([], list)
@@ -552,7 +552,7 @@ extension Array {
 		if self.isEmpty {
 			return []
 		} else if let x = self.first {
-			let (ys, zs) = span([T](self[1..<self.endIndex]), p: { p(x, $0) })
+			let (ys, zs) = span([Element](self[1..<self.endIndex]), p: { p(x, $0) })
 			let l = cons(x, ys)
 			return cons(l, zs.groupBy(p))
 		}
