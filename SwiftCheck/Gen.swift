@@ -65,7 +65,7 @@ public struct Gen<A> {
 		}
 
 		return Gen<(A, [A])>.fromElementsOf(selectOne(xs)).bind { (y, ys) in
-			return Gen.fromShufflingElementsOf(ys).fmap({ [y] + $0 })
+			return Gen.fromShufflingElementsOf(ys).fmap { [y] + $0 }
 		}
 	}
 
@@ -83,7 +83,7 @@ public struct Gen<A> {
 	/// When using this function, it is necessary to explicitly specialize the generic parameter
 	/// `A`.  For example:
 	///
-	///	    Gen<UInt32>.choose((32, 255)).bind { Gen.pure(Character(UnicodeScalar($0))) }
+	///     Gen<UInt32>.choose((32, 255)) >>- (Gen<Character>.pure • Character.init • UnicodeScalar.init)
 	public static func choose<A : RandomType>(rng : (A, A)) -> Gen<A> {
 		return Gen<A>(unGen: { s in
 			return { (_) in
@@ -97,7 +97,7 @@ public struct Gen<A> {
 	public static func oneOf(gs : [Gen<A>]) -> Gen<A> {
 		assert(gs.count != 0, "oneOf used with empty list")
 
-		return choose((0, gs.count - 1)).bind { x in
+		return choose((0, gs.count - 1)) >>- { x in
 			return gs[x]
 		}
 	}
@@ -173,9 +173,7 @@ extension Gen {
 	/// size parameter.
 	public func proliferate() -> Gen<[A]> {
 		return Gen<[A]>.sized({ n in
-			return Gen.choose((0, n)).bind { k in
-				return self.proliferateSized(k)
-			}
+			return Gen.choose((0, n)) >>- self.proliferateSized
 		})
 	}
 
@@ -183,9 +181,7 @@ extension Gen {
 	/// receiver's size parameter.
 	public func proliferateNonEmpty() -> Gen<[A]> {
 		return Gen<[A]>.sized({ n in
-			return Gen.choose((1, max(1, n))).bind { k in
-				return self.proliferateSized(k)
-			}
+			return Gen.choose((1, max(1, n))) >>- self.proliferateSized
 		})
 	}
 

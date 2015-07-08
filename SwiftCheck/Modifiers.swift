@@ -220,9 +220,9 @@ public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbi
 	}
 	
 	public static var arbitrary : Gen<ArrowOf<T, U>> {
-		return promote({ a in
+		return ArrowOf.init <^> promote({ a in
 			return T.coarbitrary(a)(U.arbitrary)
-		}).fmap({ ArrowOf($0) })
+		})
 	}
 	
 	public static func shrink(f : ArrowOf<T, U>) -> [ArrowOf<T, U>] {
@@ -381,7 +381,7 @@ public struct NonZero<A : protocol<Arbitrary, IntegerType>> : Arbitrary, CustomS
 	}
 	
 	public static func shrink(bl : NonZero<A>) -> [NonZero<A>] {
-		return A.shrink(bl.getNonZero).filter({ $0 != 0 }).map({ NonZero($0) })
+		return A.shrink(bl.getNonZero).filter({ $0 != 0 }).map(NonZero.init)
 	}
 }
 
