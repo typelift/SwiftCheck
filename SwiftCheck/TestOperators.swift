@@ -51,18 +51,18 @@ infix operator ==> {
 /// (in which case the test case is discarded), or if the given property holds.
 public func ==>(b : Bool, @autoclosure p : () -> Testable) -> Property {
 	if b {
-		return p().property()
+		return p().property
 	}
-	return Discard().property()
+	return Discard().property
 }
 
 /// Models implication for properties.  That is, the property holds if the first argument is false
 /// (in which case the test case is discarded), or if the given property holds.
 public func ==>(b : Bool, p : () -> Testable) -> Property {
 	if b {
-		return p().property()
+		return p().property
 	}
-	return Discard().property()
+	return Discard().property
 }
 
 infix operator ==== {
@@ -100,7 +100,7 @@ infix operator ^&&^ {
 /// Conjoined properties succeed only when both sub-properties succeed and fail when one or more
 /// sub-properties fail.
 public func ^&&^(p1 : Testable, p2 : Testable) -> Property {
-	return conjoin(p1.property(), p2.property())
+	return conjoin(p1.property, p2.property)
 }
 
 
@@ -114,7 +114,7 @@ infix operator ^||^ {
 /// Disjoined properties succeed only when one or more sub-properties succeed and fail when both
 /// sub-properties fail.
 public func ^||^(p1 : Testable, p2 : Testable) -> Property {
-	return disjoin(p1.property(), p2.property())
+	return disjoin(p1.property, p2.property)
 }
 
 import func XCTest.XCTFail

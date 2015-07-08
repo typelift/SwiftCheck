@@ -15,21 +15,24 @@
 /// An exhaustiveness property is also required.  If true, the property will only be tested once.
 public protocol Testable {
 	var exhaustive : Bool { get }
+	var property : Property { get }
+}
 
-	func property() -> Property
+extension Testable {
+	public var exhaustive : Bool {
+		return false
+	}
 }
 
 /// A property is anything that generates propositions.
 public struct Property : Testable {
 	let unProperty : Gen<Prop>
 	
-	public var exhaustive : Bool { return false }
-
 	public init(_ val : Gen<Prop>) {
 		self.unProperty = val;
 	}
 
-	public func property() -> Property {
+	public var property : Property {
 		return Property(self.unProperty)
 	}
 }
@@ -40,7 +43,7 @@ public struct Prop : Testable {
 	
 	public var exhaustive : Bool { return true }
 
-	public func property() -> Property {
+	public var property : Property {
 //		return Property(Gen.pure(Prop(unProp: .IORose(protectRose({ self.unProp })))))
 		return Property(Gen.pure(Prop(unProp: .IORose({ self.unProp }))))
 	}
@@ -52,15 +55,15 @@ public struct Discard : Testable {
 
 	public init() { }
 
-	public func property() -> Property {
-		return TestResult.rejected.property()
+	public var property : Property {
+		return TestResult.rejected.property
 	}
 }
 
 extension TestResult : Testable {
 	public var exhaustive : Bool { return true }
 
-	public func property() -> Property {
+	public var property : Property {
 		return Property(Gen.pure(Prop(unProp: Rose.pure(self))))
 	}
 }
@@ -68,15 +71,13 @@ extension TestResult : Testable {
 extension Bool : Testable {
 	public var exhaustive : Bool { return true }
 
-	public func property() -> Property {
-		return TestResult.liftBool(self).property()
+	public var property : Property {
+		return TestResult.liftBool(self).property
 	}
 }
 
-extension Gen where A : Testable {
-	public var exhaustive : Bool { return false }
-	
-	public func property() -> Property {
-		return Property(self >>- { $0.property().unProperty })
+extension Gen where A : Testable {	
+	public var property : Property {
+		return Property(self >>- { $0.property.unProperty })
 	}
 }

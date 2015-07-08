@@ -219,7 +219,7 @@ internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
                             , numTryShrinks:		0
                             , numTotTryShrinks:		0
                             , shouldAbort:			false)
-	let modP : Property = (p.exhaustive ? p.property().once : p.property())
+	let modP : Property = (p.exhaustive ? p.property.once : p.property)
 	return test(state, f: modP.unProperty.unGen)
 }
 
