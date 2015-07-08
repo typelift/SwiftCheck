@@ -20,16 +20,12 @@ public struct Blind<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 		return "(*)"
 	}
 	
-	private static func create(blind : A) -> Blind<A> {
-		return Blind(blind)
-	}
-	
 	public static var arbitrary : Gen<Blind<A>> {
-		return A.arbitrary.fmap(Blind.create)
+		return Blind.init <^> A.arbitrary
 	}
 	
 	public static func shrink(bl : Blind<A>) -> [Blind<A>] {
-		return A.shrink(bl.getBlind).map(Blind.create)
+		return A.shrink(bl.getBlind).map(Blind.init)
 	}
 }
 
@@ -52,12 +48,8 @@ public struct Static<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 		return "Static( \(self.getStatic) )"
 	}
 	
-	private static func create(blind : A) -> Static<A> {
-		return Static(blind)
-	}
-	
 	public static var arbitrary : Gen<Static<A>> {
-		return A.arbitrary.fmap(Static.create)
+		return Static.init <^> A.arbitrary
 	}
 }
 
@@ -83,12 +75,8 @@ public struct ArrayOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 		return "\(self.getArray)"
 	}
 	
-	private static func create(array : [A]) -> ArrayOf<A> {
-		return ArrayOf(array)
-	}
-	
 	public static var arbitrary : Gen<ArrayOf<A>> {
-		return Array<A>.arbitrary.fmap(ArrayOf.init)
+		return ArrayOf.init <^> Array<A>.arbitrary
 	}
 	
 	public static func shrink(bl : ArrayOf<A>) -> [ArrayOf<A>] {
@@ -118,12 +106,8 @@ public struct DictionaryOf<K : protocol<Hashable, Arbitrary>, V : Arbitrary> : A
 		return "\(self.getDictionary)"
 	}
 	
-	private static func create(dict : Dictionary<K, V>) -> DictionaryOf<K, V> {
-		return DictionaryOf(dict)
-	}
-	
 	public static var arbitrary : Gen<DictionaryOf<K, V>> {
-		return Dictionary<K, V>.arbitrary.fmap(DictionaryOf.init)
+		return DictionaryOf.init <^> Dictionary<K, V>.arbitrary
 	}
 	
 	public static func shrink(d : DictionaryOf<K, V>) -> [DictionaryOf<K, V>] {
@@ -149,12 +133,8 @@ public struct OptionalOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 		return "\(self.getOptional)"
 	}
 	
-	private static func create(opt : A?) -> OptionalOf<A> {
-		return OptionalOf(opt)
-	}
-	
 	public static var arbitrary : Gen<OptionalOf<A>> {
-		return Optional<A>.arbitrary.fmap(OptionalOf.init)
+		return OptionalOf.init <^> Optional<A>.arbitrary
 	}
 	
 	public static func shrink(bl : OptionalOf<A>) -> [OptionalOf<A>] {
@@ -183,10 +163,6 @@ public struct SetOf<A : protocol<Hashable, Arbitrary>> : Arbitrary, CustomString
 		return "\(self.getSet)"
 	}
 	
-	private static func create(set : Set<A>) -> SetOf<A>{
-		return SetOf(set)
-	}
-	
 	public static var arbitrary : Gen<SetOf<A>> {
 		return Gen.sized { n in
 			return Gen<Int>.choose((0, n)).bind { k in
@@ -194,7 +170,7 @@ public struct SetOf<A : protocol<Hashable, Arbitrary>> : Arbitrary, CustomString
 					return Gen.pure(SetOf(Set([])))
 				}
 				
-				return sequence(Array((0...k)).map { _ in A.arbitrary }).fmap({ SetOf.create(Set($0)) })
+				return (SetOf.init • Set.init) <^> sequence(Array((0...k)).map { _ in A.arbitrary })
 			}
 		}
 	}
@@ -241,10 +217,6 @@ public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbi
 	
 	public var description : String {
 		return "\(T.self) -> \(U.self)"
-	}
-	
-	private static func create(arr : (T -> U)) -> ArrowOf<T, U> {
-		return ArrowOf(arr)
 	}
 	
 	public static var arbitrary : Gen<ArrowOf<T, U>> {
@@ -376,16 +348,12 @@ public struct Positive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary, C
 		return "Positive( \(self.getPositive) )"
 	}
 	
-	private static func create(blind : A) -> Positive<A> {
-		return Positive(blind)
-	}
-	
 	public static var arbitrary : Gen<Positive<A>> {
-		return A.arbitrary.fmap({ Positive.create(abs($0)) }).suchThat({ $0.getPositive > 0 })
+		return A.arbitrary.fmap(Positive.init • abs).suchThat { $0.getPositive > 0 }
 	}
 	
 	public static func shrink(bl : Positive<A>) -> [Positive<A>] {
-		return A.shrink(bl.getPositive).filter({ $0 > 0 }).map({ Positive($0) })
+		return A.shrink(bl.getPositive).filter({ $0 > 0 }).map(Positive.init)
 	}
 }
 
@@ -408,12 +376,8 @@ public struct NonZero<A : protocol<Arbitrary, IntegerType>> : Arbitrary, CustomS
 		return "NonZero( \(self.getNonZero) )"
 	}
 	
-	private static func create(blind : A) -> NonZero<A> {
-		return NonZero(blind)
-	}
-	
 	public static var arbitrary : Gen<NonZero<A>> {
-		return A.arbitrary.suchThat({ $0 != 0 }).fmap(NonZero.create)
+		return NonZero.init <^> A.arbitrary.suchThat { $0 != 0 }
 	}
 	
 	public static func shrink(bl : NonZero<A>) -> [NonZero<A>] {
@@ -439,16 +403,12 @@ public struct NonNegative<A : protocol<Arbitrary, IntegerType>> : Arbitrary, Cus
 		return "NonNegative( \(self.getNonNegative) )"
 	}
 	
-	private static func create(blind : A) -> NonNegative<A> {
-		return NonNegative(blind)
-	}
-	
 	public static var arbitrary : Gen<NonNegative<A>> {
-		return A.arbitrary.suchThat({ $0 >= 0 }).fmap(NonNegative.create)
+		return NonNegative.init <^> A.arbitrary.suchThat { $0 >= 0 }
 	}
 	
 	public static func shrink(bl : NonNegative<A>) -> [NonNegative<A>] {
-		return A.shrink(bl.getNonNegative).filter({ $0 >= 0 }).map({ NonNegative($0) })
+		return A.shrink(bl.getNonNegative).filter({ $0 >= 0 }).map(NonNegative.init)
 	}
 }
 
