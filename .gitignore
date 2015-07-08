@@ -17,6 +17,7 @@ DerivedData
 .idea/
 *.hmap
 *.xcuserstate
-Carthage/
-
 *.xccheckout
+Carthage/Build
+Carthage/Checkouts
+
