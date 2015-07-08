@@ -63,7 +63,7 @@ class GenSpec : XCTestCase {
 				return Discard()
 			}
 			let l = Set(xss.getArray)
-			return forAll(Gen.oneOf(xss.getArray.map({ Gen.pure($0) }))) { l.contains($0) }
+			return forAll(Gen.oneOf(xss.getArray.map(Gen.pure))) { l.contains($0) }
 		}
 
 		property("Gen.oneOf multiple generators picks only given generators") <- forAll { (n1 : Int, n2 : Int) in
@@ -73,11 +73,11 @@ class GenSpec : XCTestCase {
 		}
 
 		property("Gen.proliferateSized n generates arrays of length n") <- forAll(Gen<Int>.choose((0, 100))) { n in
-			let g = Int.arbitrary.proliferateSized(n).fmap({ ArrayOf($0) })
+			let g = ArrayOf.init <^> Int.arbitrary.proliferateSized(n)
 			return forAll(g) { $0.getArray.count == n }
 		}
 
-		property("Gen.proliferateSized 0 generates only empty arrays") <- forAll(Int.arbitrary.proliferateSized(0).fmap({ ArrayOf($0) })) {
+		property("Gen.proliferateSized 0 generates only empty arrays") <- forAll(ArrayOf.init <^> Int.arbitrary.proliferateSized(0)) {
 			return $0.getArray.isEmpty
 		}
 

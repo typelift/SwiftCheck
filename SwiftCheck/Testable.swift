@@ -7,14 +7,20 @@
 //
 
 
-/// The type of things that can be tested.
+/// The type of things that can be tested.  Consequently, the type of things that can be returned
+/// from a `forAll` block.
 ///
-/// A testable type must be able to convert itself to a Property.  That entails being able to create
-/// a Generator for elements of its encapsulated type.
-///
-/// An exhaustiveness property is also required.  If true, the property will only be tested once.
+/// `Testable` values must be able to produce a `Rose<TestResult>`, that is a rose tree of test
+/// cases that terminates in a passing or failing `TestResult`.  SwiftCheck provides instances for
+/// `Bool`, `Discard`, `Prop`, and `Property`.  The last of these enables `forAll`s to return
+/// further	`forAll`s that can depend on previously generated values.
 public protocol Testable {
+	/// Returns true iff a single test case is exhaustive i.e. adequately covers the search space.
+	///
+	/// If true, the property will only be tested once.  Defaults to false.
 	var exhaustive : Bool { get }
+	
+	/// Returns a `Property`, which SwiftCheck uses to perform test case generation.
 	var property : Property { get }
 }
 
@@ -33,7 +39,7 @@ public struct Property : Testable {
 	}
 
 	public var property : Property {
-		return Property(self.unProperty)
+		return self
 	}
 }
 
@@ -76,7 +82,7 @@ extension Bool : Testable {
 	}
 }
 
-extension Gen where A : Testable {	
+extension Gen /*: Testable*/ where A : Testable {
 	public var property : Property {
 		return Property(self >>- { $0.property.unProperty })
 	}
