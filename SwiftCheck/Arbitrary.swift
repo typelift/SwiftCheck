@@ -286,7 +286,7 @@ extension Array where Element : Arbitrary {
 
 extension AnyBidirectionalCollection where Element : Arbitrary {
 	public static var arbitrary : Gen<AnyBidirectionalCollection<Element>> {
-		return [Element].arbitrary.fmap(AnyBidirectionalCollection.init)
+		return AnyBidirectionalCollection.init <^> [Element].arbitrary
 	}
 	
 	public static func shrink(bl : AnyBidirectionalCollection<Element>) -> [AnyBidirectionalCollection<Element>] {
@@ -308,7 +308,7 @@ extension AnyRandomAccessIndex : Arbitrary {
 
 extension AnySequence where Element : Arbitrary {
 	public static var arbitrary : Gen<AnySequence<Element>> {
-		return [Element].arbitrary.fmap(AnySequence.init)
+		return AnySequence.init <^> [Element].arbitrary
 	}
 	
 	public static func shrink(bl : AnySequence<Element>) -> [AnySequence<Element>] {
@@ -318,7 +318,7 @@ extension AnySequence where Element : Arbitrary {
 
 extension ArraySlice where Element : Arbitrary {
 	public static var arbitrary : Gen<ArraySlice<Element>> {
-		return [Element].arbitrary.fmap(ArraySlice.init)
+		return ArraySlice.init <^> [Element].arbitrary
 	}
 	
 	public static func shrink(bl : ArraySlice<Element>) -> [ArraySlice<Element>] {
@@ -328,7 +328,7 @@ extension ArraySlice where Element : Arbitrary {
 
 extension CollectionOfOne where Element : Arbitrary {
 	public static var arbitrary : Gen<CollectionOfOne<Element>> {
-		return Element.arbitrary.fmap(CollectionOfOne.init)
+		return CollectionOfOne.init <^> Element.arbitrary
 	}
 }
 
@@ -351,7 +351,7 @@ extension Optional where T : Arbitrary {
 
 extension ContiguousArray where Element : Arbitrary {
 	public static var arbitrary : Gen<ContiguousArray<Element>> {
-		return [Element].arbitrary.fmap(ContiguousArray.init)
+		return ContiguousArray.init <^> [Element].arbitrary
 	}
 	
 	public static func shrink(bl : ContiguousArray<Element>) -> [ContiguousArray<Element>] {
@@ -406,7 +406,7 @@ extension HalfOpenInterval where Bound : protocol<Comparable, Arbitrary> {
 
 extension ImplicitlyUnwrappedOptional where T : Arbitrary {
 	public static var arbitrary : Gen<ImplicitlyUnwrappedOptional<T>> {
-		return Optional<T>.arbitrary.fmap(ImplicitlyUnwrappedOptional.init)
+		return ImplicitlyUnwrappedOptional.init <^> Optional<T>.arbitrary
 	}
 	
 	public static func shrink(bl : ImplicitlyUnwrappedOptional<T>) -> [ImplicitlyUnwrappedOptional<T>] {
@@ -454,7 +454,7 @@ extension Range where Element : protocol<ForwardIndexType, Comparable, Arbitrary
 
 extension Repeat where Element : Arbitrary {
 	public static var arbitrary : Gen<Repeat<Element>> {
-		return Gen<Any>.zip(Int.arbitrary, Element.arbitrary).fmap(Repeat.init)
+		return Repeat.init <^> Gen<Any>.zip(Int.arbitrary, Element.arbitrary)
 	}
 }
 
@@ -466,7 +466,7 @@ extension Set where Element : protocol<Arbitrary, Hashable> {
 					return Gen.pure(Set([]))
 				}
 				
-				return sequence(Array((0...k)).map { _ in Element.arbitrary }).fmap(Set.init)
+				return Set.init <^> sequence(Array((0...k)).map { _ in Element.arbitrary })
 			}
 		}
 	}
@@ -650,9 +650,9 @@ private func bits<N : IntegerType>(n : N) -> Int {
 
 private func inBounds<A : IntegerType>(fi : (Int -> A)) -> Gen<Int> -> Gen<A> {
 	return { g in
-		return g.suchThat({ x in
+		return fi <^> g.suchThat { x in
 			return (fi(x) as! Int) == x
-		}).fmap(fi)
+		}
 	}
 }
 
