@@ -247,7 +247,7 @@ extension UnicodeScalar : Arbitrary {
 extension String : Arbitrary {
 	public static var arbitrary : Gen<String> {
 		let chars = Gen.sized({ n in Character.arbitrary.proliferateSized(n) })
-		return chars.bind { ls in Gen<String>.pure(String(ls)) }
+		return chars >>- (Gen<String>.pure • String.init)
 	}
 	
 	public static func shrink(s : String) -> [String] {
@@ -257,7 +257,7 @@ extension String : Arbitrary {
 
 extension Character : Arbitrary {
 	public static var arbitrary : Gen<Character> {
-		return Gen<UInt32>.choose((32, 255)).bind(Gen<Character>.pure • Character.init • UnicodeScalar.init)
+		return Gen<UInt32>.choose((32, 255)) >>- (Gen<Character>.pure • Character.init • UnicodeScalar.init)
 	}
 	
 	public static func shrink(x : Character) -> [Character] {

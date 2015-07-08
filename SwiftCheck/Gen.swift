@@ -65,7 +65,7 @@ public struct Gen<A> {
 		}
 
 		return Gen<(A, [A])>.fromElementsOf(selectOne(xs)).bind { (y, ys) in
-			return Gen.fromShufflingElementsOf(ys).fmap({ [y] + $0 })
+			return Gen.fromShufflingElementsOf(ys).fmap { [y] + $0 }
 		}
 	}
 
@@ -83,7 +83,7 @@ public struct Gen<A> {
 	/// When using this function, it is necessary to explicitly specialize the generic parameter
 	/// `A`.  For example:
 	///
-	///	    Gen<UInt32>.choose((32, 255)).bind { Gen.pure(Character(UnicodeScalar($0))) }
+	///     Gen<UInt32>.choose((32, 255)) >>- (Gen<Character>.pure • Character.init • UnicodeScalar.init)
 	public static func choose<A : RandomType>(rng : (A, A)) -> Gen<A> {
 		return Gen<A>(unGen: { s in
 			return { (_) in
@@ -97,7 +97,7 @@ public struct Gen<A> {
 	public static func oneOf(gs : [Gen<A>]) -> Gen<A> {
 		assert(gs.count != 0, "oneOf used with empty list")
 
-		return choose((0, gs.count - 1)).bind { x in
+		return choose((0, gs.count - 1)) >>- { x in
 			return gs[x]
 		}
 	}
@@ -173,9 +173,7 @@ extension Gen {
 	/// size parameter.
 	public func proliferate() -> Gen<[A]> {
 		return Gen<[A]>.sized({ n in
-			return Gen.choose((0, n)).bind { k in
-				return self.proliferateSized(k)
-			}
+			return Gen.choose((0, n)) >>- self.proliferateSized
 		})
 	}
 
@@ -183,9 +181,7 @@ extension Gen {
 	/// receiver's size parameter.
 	public func proliferateNonEmpty() -> Gen<[A]> {
 		return Gen<[A]>.sized({ n in
-			return Gen.choose((1, max(1, n))).bind { k in
-				return self.proliferateSized(k)
-			}
+			return Gen.choose((1, max(1, n))) >>- self.proliferateSized
 		})
 	}
 
@@ -202,12 +198,16 @@ extension Gen /*: Functor*/ {
 
 	/// Returns a new generator that applies a given function to any outputs the receiver creates.
 	public func fmap<B>(f : (A -> B)) -> Gen<B> {
-		return Gen<B>(unGen: { r in
-			return { n in
-				return f(self.unGen(r)(n))
-			}
-		}) 
+		return f <^> self
 	}
+}
+
+public func <^> <A, B>(f : A -> B, g : Gen<A>) -> Gen<B> {
+	return Gen(unGen: { r in
+		return { n in
+			return f(g.unGen(r)(n))
+		}
+	})
 }
 
 extension Gen /*: Applicative*/ {
@@ -225,12 +225,16 @@ extension Gen /*: Applicative*/ {
 	/// Given a generator of functions, applies any generated function to any outputs the receiver
 	/// creates.
 	public func ap<B>(fn : Gen<A -> B>) -> Gen<B> {
-		return Gen<B>(unGen: { r in
-			return { n in
-				return fn.unGen(r)(n)(self.unGen(r)(n))
-			}
-		})
+		return fn <*> self
 	}
+}
+
+public func <*> <A, B>(fn : Gen<A -> B>, g : Gen<A>) -> Gen<B> {
+	return Gen(unGen: { r in
+		return { n in
+			return fn.unGen(r)(n)(g.unGen(r)(n))
+		}
+	})
 }
 
 extension Gen /*: Monad*/ {
@@ -241,14 +245,18 @@ extension Gen /*: Monad*/ {
 	/// example, use a Generator of integers to control the length of a Generator of strings, or use
 	/// it to choose a random index into a Generator of arrays.
 	public func bind<B>(fn : A -> Gen<B>) -> Gen<B> {
-		return Gen<B>(unGen: { r in
-			return { n in
-				let (r1, r2) = r.split()
-				let m = fn(self.unGen(r1)(n))
-				return m.unGen(r2)(n)
-			}
-		})
+		return self >>- fn
 	}
+}
+
+public func >>- <A, B>(m : Gen<A>, fn : A -> Gen<B>) -> Gen<B> {
+	return Gen(unGen: { r in
+		return { n in
+			let (r1, r2) = r.split()
+			let m2 = fn(m.unGen(r1)(n))
+			return m2.unGen(r2)(n)
+		}
+	})
 }
 
 /// Reduces an array of generators to a generator that returns arrays of the original generators
@@ -276,7 +284,6 @@ public func liftM<A, R>(f : A -> R)(m1 : Gen<A>) -> Gen<R> {
 		return Gen.pure(f(x1))
 	}
 }
-
 
 /// Promotes a rose of generators to a generator of rose values.
 public func promote<A>(x : Rose<Gen<A>>) -> Gen<Rose<A>> {

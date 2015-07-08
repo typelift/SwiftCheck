@@ -9,7 +9,7 @@
 /// Converts a function into a universally quantified property using the default shrinker and
 /// generator for that type.
 public func forAll<A : Arbitrary>(pf : (A -> Testable)) -> Property {
-	return forAllShrink(A.arbitrary, shrinker: { A.shrink($0) }, f: pf)
+	return forAllShrink(A.arbitrary, shrinker: A.shrink, f: pf)
 }
 
 /// Converts a function into a universally quantified property using the default shrinker and
@@ -57,7 +57,7 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 /// Given an explicit generator, converts a function to a universally quantified property using the
 /// default shrinker for that type.
 public func forAll<A : Arbitrary>(gen : Gen<A>, pf : (A -> Testable)) -> Property {
-	return forAllShrink(gen, shrinker: { A.shrink($0) }, f: pf)
+	return forAllShrink(gen, shrinker: A.shrink, f: pf)
 }
 
 /// Given 2 explicit generators, converts a function to a universally quantified property using the
@@ -492,8 +492,8 @@ internal func summary(s : CheckerState) -> [(String, Int)] {
 }
 
 internal func labelPercentage(l : String, st : CheckerState) -> Int {
-	let occur = st.collected.flatMap({ Array($0) }).filter({ $0 == l }).count
-	return (100 * occur) / st.maxSuccessTests
+	let occur = st.collected.flatMap(Array.init).filter { $0 == l }
+	return (100 * occur.count) / st.maxSuccessTests
 }
 
 internal func printDistributionGraph(st : CheckerState) {

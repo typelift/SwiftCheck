@@ -6,11 +6,6 @@
 //  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
-infix operator • {
-	precedence 190
-	associativity right
-}
-
 /// Takes the conjunction of multiple properties and reports all successes and failures as one
 /// combined property.  That is, this property holds when all sub-properties hold and fails when one
 /// or more sub-properties fail.
