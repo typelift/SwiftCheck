@@ -202,12 +202,16 @@ extension Gen /*: Functor*/ {
 
 	/// Returns a new generator that applies a given function to any outputs the receiver creates.
 	public func fmap<B>(f : (A -> B)) -> Gen<B> {
-		return Gen<B>(unGen: { r in
-			return { n in
-				return f(self.unGen(r)(n))
-			}
-		}) 
+		return f <^> self
 	}
+}
+
+public func <^> <A, B>(f : A -> B, g : Gen<A>) -> Gen<B> {
+	return Gen(unGen: { r in
+		return { n in
+			return f(g.unGen(r)(n))
+		}
+	})
 }
 
 extension Gen /*: Applicative*/ {
@@ -225,12 +229,16 @@ extension Gen /*: Applicative*/ {
 	/// Given a generator of functions, applies any generated function to any outputs the receiver
 	/// creates.
 	public func ap<B>(fn : Gen<A -> B>) -> Gen<B> {
-		return Gen<B>(unGen: { r in
-			return { n in
-				return fn.unGen(r)(n)(self.unGen(r)(n))
-			}
-		})
+		return fn <*> self
 	}
+}
+
+public func <*> <A, B>(fn : Gen<A -> B>, g : Gen<A>) -> Gen<B> {
+	return Gen(unGen: { r in
+		return { n in
+			return fn.unGen(r)(n)(g.unGen(r)(n))
+		}
+	})
 }
 
 extension Gen /*: Monad*/ {
@@ -241,14 +249,18 @@ extension Gen /*: Monad*/ {
 	/// example, use a Generator of integers to control the length of a Generator of strings, or use
 	/// it to choose a random index into a Generator of arrays.
 	public func bind<B>(fn : A -> Gen<B>) -> Gen<B> {
-		return Gen<B>(unGen: { r in
-			return { n in
-				let (r1, r2) = r.split()
-				let m = fn(self.unGen(r1)(n))
-				return m.unGen(r2)(n)
-			}
-		})
+		return self >>- fn
 	}
+}
+
+public func >>- <A, B>(m : Gen<A>, fn : A -> Gen<B>) -> Gen<B> {
+	return Gen(unGen: { r in
+		return { n in
+			let (r1, r2) = r.split()
+			let m2 = fn(m.unGen(r1)(n))
+			return m2.unGen(r2)(n)
+		}
+	})
 }
 
 /// Reduces an array of generators to a generator that returns arrays of the original generators
@@ -276,7 +288,6 @@ public func liftM<A, R>(f : A -> R)(m1 : Gen<A>) -> Gen<R> {
 		return Gen.pure(f(x1))
 	}
 }
-
 
 /// Promotes a rose of generators to a generator of rose values.
 public func promote<A>(x : Rose<Gen<A>>) -> Gen<Rose<A>> {

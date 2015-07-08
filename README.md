@@ -194,9 +194,7 @@ For example:
 
 ```swift
 import SwiftCheck
-import func Swiftz.<^>
-import func Swiftz.<*>
-
+ 
 public struct ArbitraryFoo {
     let x : Int
     let y : Int

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		82DD8EEC1B4CC88C00B66551 /* Operators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82DD8EEB1B4CC88C00B66551 /* Operators.swift */; };
+		82DD8EED1B4CC88C00B66551 /* Operators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82DD8EEB1B4CC88C00B66551 /* Operators.swift */; };
 		841408BB1B1A85A900BA2B6C /* SwiftCheck.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		842015111AF5C91C00F1F3CD /* Lattice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842015101AF5C91C00F1F3CD /* Lattice.swift */; };
 		8445C4A31B16897200280089 /* DiscardSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C201A6DBA1C00241F68 /* DiscardSpec.swift */; };
@@ -87,6 +89,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		82DD8EEB1B4CC88C00B66551 /* Operators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Operators.swift; path = Carthage/Checkouts/Operadics/Operators.swift; sourceTree = SOURCE_ROOT; };
 		842015101AF5C91C00F1F3CD /* Lattice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Lattice.swift; sourceTree = "<group>"; };
 		8445C4A91B16D37800280089 /* GenSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GenSpec.swift; sourceTree = "<group>"; };
 		8445C4AC1B17E48300280089 /* ShrinkSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShrinkSpec.swift; sourceTree = "<group>"; };
@@ -180,6 +183,7 @@
 				844FCCAB198B32DC00EB242A /* Gen.swift */,
 				842015101AF5C91C00F1F3CD /* Lattice.swift */,
 				84F2C4F61A7AD43F00316E5F /* Modifiers.swift */,
+				82DD8EEB1B4CC88C00B66551 /* Operators.swift */,
 				8450D2491AF8003700095EF6 /* TestOperators.swift */,
 				844FCCAD198B367000EB242A /* Property.swift */,
 				844FCCC2198EC4F000EB242A /* Random.swift */,
@@ -409,6 +413,7 @@
 				D46395B61B1A94D200AA1B65 /* Equatable.swift in Sources */,
 				842015111AF5C91C00F1F3CD /* Lattice.swift in Sources */,
 				84572C2B1A6DBABA00241F68 /* Testable.swift in Sources */,
+				82DD8EEC1B4CC88C00B66551 /* Operators.swift in Sources */,
 				844FCCAA198B323800EB242A /* Arbitrary.swift in Sources */,
 				8450D24A1AF8003800095EF6 /* TestOperators.swift in Sources */,
 				844FCCB4198B39F300EB242A /* State.swift in Sources */,
@@ -444,6 +449,7 @@
 				84DF76171B0BD58100C912B0 /* TestOperators.swift in Sources */,
 				84DF76181B0BD58100C912B0 /* Property.swift in Sources */,
 				84DF76191B0BD58100C912B0 /* Random.swift in Sources */,
+				82DD8EED1B4CC88C00B66551 /* Operators.swift in Sources */,
 				84DF761A1B0BD58100C912B0 /* Rose.swift in Sources */,
 				84DF761B1B0BD58100C912B0 /* State.swift in Sources */,
 				84DF761C1B0BD58100C912B0 /* Test.swift in Sources */,
