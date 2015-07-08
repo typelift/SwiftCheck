@@ -1,0 +1,3 @@
+[submodule "Carthage/Checkouts/Operadics"]
+	path = Carthage/Checkouts/Operadics
+	url = https://github.com/typelift/Operadics.git
