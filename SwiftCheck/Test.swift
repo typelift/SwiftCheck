@@ -206,19 +206,19 @@ internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 	
 	
 	let state = CheckerState( name: args.name
-                            , maxSuccessTests:		args.maxSuccess
-                            , maxDiscardedTests:	args.maxDiscard
-                            , computeSize:			computeSize
-                            , numSuccessTests:		0
-                            , numDiscardedTests:	0
-                            , labels:				[:]
-                            , collected:			[]
-                            , expectedFailure:		false
-                            , randomSeed:			rnd()
-                            , numSuccessShrinks:	0
-                            , numTryShrinks:		0
-                            , numTotTryShrinks:		0
-                            , shouldAbort:			false)
+							, maxSuccessTests:		args.maxSuccess
+							, maxDiscardedTests:	args.maxDiscard
+							, computeSize:			computeSize
+							, numSuccessTests:		0
+							, numDiscardedTests:	0
+							, labels:				[:]
+							, collected:			[]
+							, expectedFailure:		false
+							, randomSeed:			rnd()
+							, numSuccessShrinks:	0
+							, numTryShrinks:		0
+							, numTotTryShrinks:		0
+							, shouldAbort:			false)
 	let modP : Property = (p.exhaustive ? p.property.once : p.property)
 	return test(state, f: modP.unProperty.unGen)
 }
@@ -275,36 +275,36 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 				// Success
 				case .MatchResult(.Some(true), let expect, _, _, let labels, let stamp, _, let abort):
 					let nstate = CheckerState(name: st.name
-                                            , maxSuccessTests: st.maxSuccessTests
-                                            , maxDiscardedTests: st.maxDiscardedTests
-                                            , computeSize: st.computeSize
-                                            , numSuccessTests: st.numSuccessTests + 1
-                                            , numDiscardedTests: st.numDiscardedTests
-                                            , labels: unionWith(max, l: st.labels, r: labels)
-                                            , collected: [stamp] + st.collected
-                                            , expectedFailure: expect
-                                            , randomSeed: st.randomSeed
-                                            , numSuccessShrinks: st.numSuccessShrinks
-                                            , numTryShrinks: st.numTryShrinks
-                                            , numTotTryShrinks: st.numTotTryShrinks
+											, maxSuccessTests: st.maxSuccessTests
+											, maxDiscardedTests: st.maxDiscardedTests
+											, computeSize: st.computeSize
+											, numSuccessTests: st.numSuccessTests + 1
+											, numDiscardedTests: st.numDiscardedTests
+											, labels: unionWith(max, l: st.labels, r: labels)
+											, collected: [stamp] + st.collected
+											, expectedFailure: expect
+											, randomSeed: st.randomSeed
+											, numSuccessShrinks: st.numSuccessShrinks
+											, numTryShrinks: st.numTryShrinks
+											, numTotTryShrinks: st.numTotTryShrinks
 									, shouldAbort: abort)
 					return .Right(Box(nstate))
 				// Discard
 				case .MatchResult(.None, let expect, _, _, let labels, _, _, let abort):
 					let nstate = CheckerState(name: st.name
-                                            , maxSuccessTests: st.maxSuccessTests
-                                            , maxDiscardedTests: st.maxDiscardedTests
-                                            , computeSize: st.computeSize
-                                            , numSuccessTests: st.numSuccessTests
-                                            , numDiscardedTests: st.numDiscardedTests + 1
-                                            , labels: unionWith(max, l: st.labels, r: labels)
-                                            , collected: st.collected
-                                            , expectedFailure: expect
-                                            , randomSeed: rnd2
-                                            , numSuccessShrinks: st.numSuccessShrinks
-                                            , numTryShrinks: st.numTryShrinks
-                                            , numTotTryShrinks: st.numTotTryShrinks
-                                            , shouldAbort: abort)
+											, maxSuccessTests: st.maxSuccessTests
+											, maxDiscardedTests: st.maxDiscardedTests
+											, computeSize: st.computeSize
+											, numSuccessTests: st.numSuccessTests
+											, numDiscardedTests: st.numDiscardedTests + 1
+											, labels: unionWith(max, l: st.labels, r: labels)
+											, collected: st.collected
+											, expectedFailure: expect
+											, randomSeed: rnd2
+											, numSuccessShrinks: st.numSuccessShrinks
+											, numTryShrinks: st.numTryShrinks
+											, numTotTryShrinks: st.numTotTryShrinks
+											, shouldAbort: abort)
 					return .Right(Box(nstate))
 				// Fail
 				case .MatchResult(.Some(false), let expect, _, _, _, _, _, let abort):

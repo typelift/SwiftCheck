@@ -34,7 +34,7 @@ class ModifierSpec : XCTestCase {
 		property("ArrayOf modifiers nest") <- forAll { (xxxs : ArrayOf<ArrayOf<Int8>>) in
 			return true
 		}
-    
+	
 		property("The reverse of the reverse of an array is that array") <- forAll { (xs : ArrayOf<Int>) in
 			return
 				(xs.getArray.reverse().reverse() == xs.getArray) <?> "Left identity"
@@ -45,13 +45,13 @@ class ModifierSpec : XCTestCase {
 		property("map behaves") <- forAll { (xs : ArrayOf<Int>, f : ArrowOf<Int, Int>) in
 			return xs.getArray.map(f.getArrow) == xs.getArray.map(f.getArrow)
 		}
-        
-        property("IsoOf generates a real isomorphism") <- forAll { (x : Int, y : String, iso : IsoOf<Int, String>) in
-            return
-                iso.getFrom(iso.getTo(x)) == x
-                ^&&^
-                iso.getTo(iso.getFrom(y)) == y
-        }
+		
+		property("IsoOf generates a real isomorphism") <- forAll { (x : Int, y : String, iso : IsoOf<Int, String>) in
+			return
+				iso.getFrom(iso.getTo(x)) == x
+				^&&^
+				iso.getTo(iso.getFrom(y)) == y
+		}
 
 		property("filter behaves") <- forAll { (xs : ArrayOf<Int>, pred : ArrowOf<Int, Bool>) in
 			let f = pred.getArrow

@@ -249,7 +249,7 @@ extension ArrowOf : CustomReflectable {
 }
 
 /// Generates two isomorphic Swift function from T to U and back again.
-public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol<Hashable, CoArbitrary, Arbitrary>> : Arbitrary, CustomStringConvertible {
+public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol<Equatable, CoArbitrary, Arbitrary>> : Arbitrary, CustomStringConvertible {
 	private var table : Dictionary<T, U>
 	private var embed : T -> U
 	private var project : U -> T
