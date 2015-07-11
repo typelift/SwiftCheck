@@ -94,10 +94,10 @@ public struct Gen<A> {
 	}
 
 	/// Constructs a Generator that randomly selects and uses one of a number of given Generators.
-	public static func oneOf(gs : [Gen<A>]) -> Gen<A> {
+	public static func oneOf<S : CollectionType where S.Generator.Element == Gen<A>, S.Index : protocol<RandomType, BidirectionalIndexType>>(gs : S) -> Gen<A> {
 		assert(gs.count != 0, "oneOf used with empty list")
 
-		return choose((0, gs.count - 1)) >>- { x in
+		return choose((gs.indices.startIndex, gs.indices.endIndex.predecessor())) >>- { x in
 			return gs[x]
 		}
 	}
