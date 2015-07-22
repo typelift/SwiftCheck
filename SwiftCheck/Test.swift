@@ -486,9 +486,11 @@ internal func dispatchAfterFinalFailureCallbacks(st : CheckerState, res : TestRe
 }
 
 internal func summary(s : CheckerState) -> [(String, Int)] {
-	let strings = s.collected.flatMap({ l in Array(l).map({ "," + $0.0 }).filter({ !$0.isEmpty }) })
-	let l = strings.sort().groupBy(==)
-	return l.map({ ss in (ss[0], ss.count * 100 / s.numSuccessTests) })
+	let l = s.collected
+			.flatMap({ l in l.map({ "," + $0 }).filter({ !$0.isEmpty }) })
+			.sort()
+			.groupBy(==)
+	return l.map({ ss in (ss.first!, ss.count * 100 / s.numSuccessTests) })
 }
 
 internal func labelPercentage(l : String, st : CheckerState) -> Int {
@@ -498,7 +500,7 @@ internal func labelPercentage(l : String, st : CheckerState) -> Int {
 
 internal func printDistributionGraph(st : CheckerState) {
 	func showP(n : Int) -> String {
-		return (n < 10 ? " " : "") + "\(n)" + "% "
+		return (n < 10 ? " " : "") + "\(n)" + "%"
 	}
 
 	let gAllLabels = st.collected.map({ (s : Set<String>) in
