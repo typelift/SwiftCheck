@@ -3,7 +3,7 @@
 //  SwiftCheck
 //
 //  Created by Robert Widmann on 8/3/14.
-//  Copyright (c) 2014 Robert Widmann. All rights reserved.
+//  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
 import XCTest
@@ -54,7 +54,7 @@ class SimpleSpec : XCTestCase {
 		property["Double Equality is Reflexive"] = forAll { (i : Double) in
 			return i == i
 		}
-		
+
 		property["String Equality is Reflexive"] = forAll { (s : String) in
 			return s == s
 		}
@@ -62,5 +62,7 @@ class SimpleSpec : XCTestCase {
 		property["ArbitraryFoo Properties are Reflexive"] = forAll { (i : ArbitraryFoo) in
 			return i.x == i.x && i.y == i.y
 		}
+
 	}
 }
+

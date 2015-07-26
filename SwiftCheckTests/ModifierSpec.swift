@@ -3,7 +3,7 @@
 //  SwiftCheck
 //
 //  Created by Robert Widmann on 1/29/15.
-//  Copyright (c) 2015 Robert Widmann. All rights reserved.
+//  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
 import XCTest
@@ -33,6 +33,22 @@ class ModifierSpec : XCTestCase {
 
 		property["ArrayOf modifiers nest"] = forAll { (xxxs : ArrayOf<ArrayOf<Int8>>) in
 			return true
+		}
+
+		property["The reverse of the reverse of an array is that array"] = forAll { (xs : ArrayOf<Int>) in
+			return
+				(xs.getArray.reverse().reverse() == xs.getArray) <?> "Left identity"
+				^&&^
+				(xs.getArray == xs.getArray.reverse().reverse()) <?> "Right identity"
+		}
+
+		property["map behaves"] = forAll { (xs : ArrayOf<Int>, f : ArrowOf<Int, Int>) in
+			return xs.getArray.map(f.getArrow) == xs.getArray.map(f.getArrow)
+		}
+
+		property["filter behaves"] = forAll { (xs : ArrayOf<Int>, pred : ArrowOf<Int, Bool>) in
+			let f = pred.getArrow
+			return (xs.getArray.filter(f).reduce(true, combine: { $0.0 && f($0.1) }) as Bool)
 		}
 	}
 }
