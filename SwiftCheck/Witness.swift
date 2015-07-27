@@ -3,7 +3,7 @@
 //  SwiftCheck
 //
 //  Created by Robert Widmann on 7/26/15.
-//  Copyright © 2015 Robert Widmann. All rights reserved.
+//  Copyright © 2015 TypeLift. All rights reserved.
 //
 
 public protocol WitnessedArbitrary {
