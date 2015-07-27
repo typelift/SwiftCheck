@@ -389,7 +389,7 @@ private func protectResult(r : () throws -> TestResult) -> (() -> TestResult) {
 	return { protect(exception("Exception"))(x: r) }
 }
 
-private func id<A>(x : A) -> A {
+internal func id<A>(x : A) -> A {
 	return x
 }
 
