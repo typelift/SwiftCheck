@@ -280,7 +280,7 @@ extension Array where Element : Arbitrary {
 	}
 	
 	public static func shrink(bl : Array<Element>) -> [[Element]] {
-		return Int.shrink(bl.count).reverse().flatMap({ k in removes(k + 1, n: bl.count, xs: bl) }) + shrinkOne(bl)
+		return Int.shrink(bl.count).reverse().flatMap({ k in removes(k.successor(), n: bl.count, xs: bl) }) + shrinkOne(bl)
 	}
 }
 
