@@ -278,7 +278,7 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 											, maxSuccessTests: st.maxSuccessTests
 											, maxDiscardedTests: st.maxDiscardedTests
 											, computeSize: st.computeSize
-											, numSuccessTests: st.numSuccessTests + 1
+											, numSuccessTests: st.numSuccessTests.successor()
 											, numDiscardedTests: st.numDiscardedTests
 											, labels: unionWith(max, l: st.labels, r: labels)
 											, collected: [stamp] + st.collected
@@ -296,7 +296,7 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 											, maxDiscardedTests: st.maxDiscardedTests
 											, computeSize: st.computeSize
 											, numSuccessTests: st.numSuccessTests
-											, numDiscardedTests: st.numDiscardedTests + 1
+											, numDiscardedTests: st.numDiscardedTests.successor()
 											, labels: unionWith(max, l: st.labels, r: labels)
 											, collected: st.collected
 											, expectedFailure: expect
@@ -318,11 +318,11 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 					let (numShrinks, _, _) = findMinimalFailingTestCase(st, res: res, ts: ts())
 
 					if !expect {
-						let s = Result.Success(numTests: st.numSuccessTests + 1, labels: summary(st), output: "+++ OK, failed as expected. ")
+						let s = Result.Success(numTests: st.numSuccessTests.successor(), labels: summary(st), output: "+++ OK, failed as expected. ")
 						return .Left(Box((s, st)))
 					}
 
-					let stat = Result.Failure(numTests: st.numSuccessTests + 1
+					let stat = Result.Failure(numTests: st.numSuccessTests.successor()
 											, numShrinks: numShrinks
 											, usedSeed: st.randomSeed
 											, usedSize: st.computeSize(st.numSuccessTests)(st.numDiscardedTests)
@@ -335,7 +335,7 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 									, maxDiscardedTests: st.maxDiscardedTests
 									, computeSize: st.computeSize
 									, numSuccessTests: st.numSuccessTests
-									, numDiscardedTests: st.numDiscardedTests + 1
+									, numDiscardedTests: st.numDiscardedTests.successor()
 									, labels: st.labels
 									, collected: st.collected
 									, expectedFailure: res.expect
@@ -385,7 +385,7 @@ internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts
 	var lastResult = res
 	var branches = ts
 	var numSuccessShrinks = st.numSuccessShrinks
-	var numTryShrinks = st.numTryShrinks + 1
+	var numTryShrinks = st.numTryShrinks.successor()
 	var numTotTryShrinks = st.numTotTryShrinks
 
 	// cont is a sanity check so we don't fall into an infinite loop.  It is set to false at each
@@ -403,7 +403,7 @@ internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts
 		numTryShrinks = 0
 
 		// Try all possible courses of action in this Rose Tree
-		for r in branches {
+		branches.forEach { r in
 			switch reduce(r) {
 			case .MkRose(let resC, let ts1):
 				let res1 = resC()
@@ -447,7 +447,7 @@ internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts
 }
 
 internal func reportMinimumCaseFound(st : CheckerState, res : TestResult) -> (Int, Int, Int) {
-	let testMsg = " (after \(st.numSuccessTests + 1) test"
+	let testMsg = " (after \(st.numSuccessTests.successor()) test"
 	let shrinkMsg = st.numSuccessShrinks > 1 ? (" and \(st.numSuccessShrinks) shrink") : ""
 	
 	func pluralize(s : String, i : Int) -> String {
@@ -458,29 +458,29 @@ internal func reportMinimumCaseFound(st : CheckerState, res : TestResult) -> (In
 	}
 	
 	print("Proposition: " + st.name)
-	print(res.reason + pluralize(testMsg, i: st.numSuccessTests + 1) + pluralize(shrinkMsg, i: st.numSuccessShrinks) + "):")
+	print(res.reason + pluralize(testMsg, i: st.numSuccessTests.successor()) + pluralize(shrinkMsg, i: st.numSuccessShrinks) + "):")
 	dispatchAfterFinalFailureCallbacks(st, res: res)
 	return (st.numSuccessShrinks, st.numTotTryShrinks - st.numTryShrinks, st.numTryShrinks)
 }
 
 internal func dispatchAfterTestCallbacks(st : CheckerState, res : TestResult) {
-	for c in res.callbacks {
+	res.callbacks.forEach { c in
 		switch c {
 		case let .AfterTest(_, f):
 			f(st, res)
 		default:
-			continue
+			break
 		}
 	}
 }
 
 internal func dispatchAfterFinalFailureCallbacks(st : CheckerState, res : TestResult) {
-	for c in res.callbacks {
+	res.callbacks.forEach { c in
 		switch c {
 		case let .AfterFinalFailure(_, f):
 			f(st, res)
 		default:
-			continue
+			break
 		}
 	}
 }
@@ -511,7 +511,7 @@ internal func printDistributionGraph(st : CheckerState) {
 	let allLabels = Array(gPrint.sort().reverse())
 
 	var covers = [String]()
-	for (l, reqP) in st.labels {
+	st.labels.forEach { (l, reqP) in
 		let p = labelPercentage(l, st: st)
 		if p < reqP {
 			covers += ["only \(p)% " + l + ", not \(reqP)%"]
@@ -525,7 +525,7 @@ internal func printDistributionGraph(st : CheckerState) {
 		print("(\(pt))")
 	} else {
 		print(":")
-		for pt in all {
+		all.forEach { pt in
 			print(pt)
 		}
 	}

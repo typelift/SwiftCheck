@@ -154,7 +154,7 @@ extension Gen {
 				return Gen.pure(x)
 			case .None:
 				return Gen.sized { n in
-					return self.suchThat(p).resize(n + 1)
+					return self.suchThat(p).resize(n.successor())
 				}
 			}
 		}
@@ -313,13 +313,13 @@ internal func delay<A>() -> Gen<Gen<A> -> A> {
 
 import func Darwin.log
 
-private func vary<S : IntegerType>(k : S)(r: StdGen) -> StdGen {
+private func vary<S : IntegerType>(k : S)(r : StdGen) -> StdGen {
 	let s = r.split()
 	let gen = ((k % 2) == 0) ? s.0 : s.1
 	return (k == (k / 2)) ? gen : vary(k / 2)(r: r)
 }
 
-private func attemptBoundedTry<A>(gen: Gen<A>, k: Int, n : Int, p: A -> Bool) -> Gen<Optional<A>> {
+private func attemptBoundedTry<A>(gen: Gen<A>, k : Int, n : Int, p: A -> Bool) -> Gen<Optional<A>> {
 	if n == 0 {
 		return Gen.pure(.None)
 	}
@@ -327,7 +327,7 @@ private func attemptBoundedTry<A>(gen: Gen<A>, k: Int, n : Int, p: A -> Bool) ->
 		if p(x) {
 			return Gen.pure(.Some(x))
 		}
-		return attemptBoundedTry(gen, k: k + 1, n: n - 1, p: p)
+		return attemptBoundedTry(gen, k: k.successor(), n: n - 1, p: p)
 	}
 }
 
