@@ -73,7 +73,7 @@ extension IntegerType {
 
 extension Bool : Arbitrary {
 	public static var arbitrary : Gen<Bool> {
-		return Gen.pure((arc4random() % 2) == 1)
+		return Gen.sized { _ in Gen.pure((arc4random() % 2) == 1) }
 	}
 	
 	public static func shrink(x : Bool) -> [Bool] {
@@ -86,8 +86,9 @@ extension Bool : Arbitrary {
 
 extension Int : Arbitrary {
 	public static var arbitrary : Gen<Int> {
-		let sign = ((arc4random() % 2) == 1)
-		return Gen.sized { n in Gen.pure((sign ? 1 : -1) * Int(arc4random_uniform(UInt32(n)))) }
+		return Gen.sized { n in
+			return Bool.arbitrary.fmap { ($0 ? 1 : -1) * Int(arc4random_uniform(UInt32(n))) }
+		}
 	}
 	
 	public static func shrink(x : Int) -> [Int] {
@@ -97,8 +98,9 @@ extension Int : Arbitrary {
 
 extension Int8 : Arbitrary {
 	public static var arbitrary : Gen<Int8> {
-		let sign = ((arc4random() % 2) == 1)
-		return Gen.sized { n in Gen.pure((sign ? 1 : -1) * Int8(arc4random_uniform(UInt32(n)))) }
+		return Gen.sized { n in
+			return Bool.arbitrary.fmap { ($0 ? 1 : -1) * Int8(arc4random_uniform(UInt32(n))) }
+		}
 	}
 	
 	public static func shrink(x : Int8) -> [Int8] {
@@ -108,8 +110,9 @@ extension Int8 : Arbitrary {
 
 extension Int16 : Arbitrary {
 	public static var arbitrary : Gen<Int16> {
-		let sign = ((arc4random() % 2) == 1)
-		return Gen.sized { n in Gen.pure((sign ? 1 : -1) * Int16(arc4random_uniform(UInt32(n)))) }
+		return Gen.sized { n in
+			return Bool.arbitrary.fmap { ($0 ? 1 : -1) * Int16(arc4random_uniform(UInt32(n))) }
+		}
 	}
 	
 	public static func shrink(x : Int16) -> [Int16] {
@@ -119,8 +122,9 @@ extension Int16 : Arbitrary {
 
 extension Int32 : Arbitrary {
 	public static var arbitrary : Gen<Int32> {
-		let sign = ((arc4random() % 2) == 1)
-		return Gen.sized { n in Gen.pure((sign ? 1 : -1) * Int32(arc4random_uniform(UInt32(n)))) }
+		return Gen.sized { n in
+			return Bool.arbitrary.fmap { ($0 ? 1 : -1) * Int32(arc4random_uniform(UInt32(n))) }
+		}
 	}
 	
 	public static func shrink(x : Int32) -> [Int32] {
@@ -130,8 +134,9 @@ extension Int32 : Arbitrary {
 
 extension Int64 : Arbitrary {
 	public static var arbitrary : Gen<Int64> {
-		let sign = ((arc4random() % 2) == 1)
-		return Gen.sized { n in Gen.pure((sign ? 1 : -1) * Int64(arc4random_uniform(UInt32(n)))) }
+		return Gen.sized { n in
+			return Bool.arbitrary.fmap { ($0 ? 1 : -1) * Int64(arc4random_uniform(UInt32(n))) }
+		}
 	}
 	
 	public static func shrink(x : Int64) -> [Int64] {
@@ -805,4 +810,3 @@ private func shrinkOne<A : Arbitrary>(xs : [A]) -> [[A]] {
 	}
 	fatalError("Array could not produce a first element")
 }
-
