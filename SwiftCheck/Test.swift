@@ -168,22 +168,22 @@ internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 	func roundTo(n : Int)(m : Int) -> Int {
 		return (m / m) * m
 	}
-
+	
 	func rnd() -> StdGen {
 		switch args.replay {
-			case Optional.None:
-				return newStdGen()
-			case Optional.Some(let (rnd, _)):
-				return rnd
+		case Optional.None:
+			return newStdGen()
+		case Optional.Some(let (rnd, _)):
+			return rnd
 		}
 	}
 	
-	let computeSize_ : Int -> Int -> Int  = { x in 
-		return { y in 
+	let computeSize_ : Int -> Int -> Int  = { x in
+		return { y in
 			if	roundTo(x)(m: args.maxSize) + args.maxSize <= args.maxSuccess ||
 				x >= args.maxSuccess ||
 				args.maxSuccess % args.maxSize == 0 {
-				return min(x % args.maxSize + (y / 10), args.maxSize)	
+					return min(x % args.maxSize + (y / 10), args.maxSize)
 			} else {
 				return min((x % args.maxSize) * args.maxSize / (args.maxSuccess % args.maxSize) + y / 10, args.maxSize)
 			}
@@ -197,7 +197,7 @@ internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 			return f(n)(d)
 		}
 	}
-
+	
 	let computeSize : Int -> Int -> Int = { x in
 		return { y in
 			return (args.replay == nil) ? computeSize_(x)(y) : at0(computeSize_)(s: args.replay!.1)(n: x)(d: y)
@@ -205,7 +205,7 @@ internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 	}
 	
 	
-	let state = CheckerState( name: args.name
+	let istate = CheckerState(name: args.name
 							, maxSuccessTests:		args.maxSuccess
 							, maxDiscardedTests:	args.maxDiscard
 							, computeSize:			computeSize
@@ -220,12 +220,12 @@ internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 							, numTotTryShrinks:		0
 							, shouldAbort:			false)
 	let modP : Property = (p.exhaustive ? p.property.once : p.property)
-	return test(state, f: modP.unProperty.unGen)
+	return test(istate, f: modP.unProperty.unGen)
 }
 
 // Main Testing Loop:
 //
-// Given an initial state and the inner function that runs the property begins turning a runloop 
+// Given an initial state and the inner function that runs the property begins turning a runloop
 // that starts firing off individual test cases.  Only 3 functions get dispatched from this loop:
 //
 // - runATest: Does what it says; .Left indicates failure, .Right indicates continuation.
@@ -236,24 +236,24 @@ internal func test(st : CheckerState, f : (StdGen -> Int -> Prop)) -> Result {
 	var state = st
 	while true {
 		switch runATest(state)(f: f) {
-			case let .Left(fail):
-				switch (fail.value.0, doneTesting(fail.value.1)(f: f)) {
-				case (.Success(_, _, _), _):
-					return fail.value.0
-				case let (_, .NoExpectedFailure(numTests, labels, output)):
-					return .NoExpectedFailure(numTests: numTests, labels: labels, output: output)
-				default:
-					return fail.value.0
-				}
-			case let .Right(sta):
-				let lsta = sta.value // Local copy so I don't have to keep unwrapping.
-				if lsta.numSuccessTests >= lsta.maxSuccessTests || lsta.shouldAbort {
-					return doneTesting(lsta)(f: f)
-				}
-				if lsta.numDiscardedTests >= lsta.maxDiscardedTests || lsta.shouldAbort {
-					return giveUp(lsta)(f: f)
-				}
-				state = lsta
+		case let .Left(fail):
+			switch (fail.value.0, doneTesting(fail.value.1)(f: f)) {
+			case (.Success(_, _, _), _):
+				return fail.value.0
+			case let (_, .NoExpectedFailure(numTests, labels, output)):
+				return .NoExpectedFailure(numTests: numTests, labels: labels, output: output)
+			default:
+				return fail.value.0
+			}
+		case let .Right(sta):
+			let lsta = sta.value // Local copy so I don't have to keep unwrapping.
+			if lsta.numSuccessTests >= lsta.maxSuccessTests || lsta.shouldAbort {
+				return doneTesting(lsta)(f: f)
+			}
+			if lsta.numDiscardedTests >= lsta.maxDiscardedTests || lsta.shouldAbort {
+				return giveUp(lsta)(f: f)
+			}
+			state = lsta
 		}
 	}
 }
@@ -264,73 +264,73 @@ internal func test(st : CheckerState, f : (StdGen -> Int -> Prop)) -> Result {
 internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either<(Result, CheckerState), CheckerState> {
 	let size = st.computeSize(st.numSuccessTests)(st.numDiscardedTests)
 	let (rnd1, rnd2) = st.randomSeed.split()
-
+	
 	// Execute the Rose Tree for the test and reduce to .MkRose.
 	switch reduce(f(rnd1)(size).unProp) {
-		case .MkRose(let resC, let ts):
-			let res = resC() // Force the result only once.
-			dispatchAfterTestCallbacks(st, res: res) // Then invoke the post-test callbacks
-
-			switch res.match() {
-				// Success
-				case .MatchResult(.Some(true), let expect, _, _, let labels, let stamp, _, let abort):
-					let nstate = CheckerState(name: st.name
-											, maxSuccessTests: st.maxSuccessTests
-											, maxDiscardedTests: st.maxDiscardedTests
-											, computeSize: st.computeSize
-											, numSuccessTests: st.numSuccessTests.successor()
-											, numDiscardedTests: st.numDiscardedTests
-											, labels: unionWith(max, l: st.labels, r: labels)
-											, collected: [stamp] + st.collected
-											, expectedFailure: expect
-											, randomSeed: st.randomSeed
-											, numSuccessShrinks: st.numSuccessShrinks
-											, numTryShrinks: st.numTryShrinks
-											, numTotTryShrinks: st.numTotTryShrinks
+	case .MkRose(let resC, let ts):
+		let res = resC() // Force the result only once.
+		dispatchAfterTestCallbacks(st, res: res) // Then invoke the post-test callbacks
+		
+		switch res.match() {
+			// Success
+		case .MatchResult(.Some(true), let expect, _, _, let labels, let stamp, _, let abort):
+			let nstate = CheckerState(name: st.name
+									, maxSuccessTests: st.maxSuccessTests
+									, maxDiscardedTests: st.maxDiscardedTests
+									, computeSize: st.computeSize
+									, numSuccessTests: st.numSuccessTests.successor()
+									, numDiscardedTests: st.numDiscardedTests
+									, labels: unionWith(max, l: st.labels, r: labels)
+									, collected: [stamp] + st.collected
+									, expectedFailure: expect
+									, randomSeed: st.randomSeed
+									, numSuccessShrinks: st.numSuccessShrinks
+									, numTryShrinks: st.numTryShrinks
+									, numTotTryShrinks: st.numTotTryShrinks
 									, shouldAbort: abort)
-					return .Right(Box(nstate))
-				// Discard
-				case .MatchResult(.None, let expect, _, _, let labels, _, _, let abort):
-					let nstate = CheckerState(name: st.name
-											, maxSuccessTests: st.maxSuccessTests
-											, maxDiscardedTests: st.maxDiscardedTests
-											, computeSize: st.computeSize
-											, numSuccessTests: st.numSuccessTests
-											, numDiscardedTests: st.numDiscardedTests.successor()
-											, labels: unionWith(max, l: st.labels, r: labels)
-											, collected: st.collected
-											, expectedFailure: expect
-											, randomSeed: rnd2
-											, numSuccessShrinks: st.numSuccessShrinks
-											, numTryShrinks: st.numTryShrinks
-											, numTotTryShrinks: st.numTotTryShrinks
-											, shouldAbort: abort)
-					return .Right(Box(nstate))
-				// Fail
-				case .MatchResult(.Some(false), let expect, _, _, _, _, _, let abort):
-					if !expect {
-						print("+++ OK, failed as expected. ", appendNewline: false)
-					} else {
-						print("*** Failed! ", appendNewline: false)
-					}
-
-					// Attempt a shrink.
-					let (numShrinks, _, _) = findMinimalFailingTestCase(st, res: res, ts: ts())
-
-					if !expect {
-						let s = Result.Success(numTests: st.numSuccessTests.successor(), labels: summary(st), output: "+++ OK, failed as expected. ")
-						return .Left(Box((s, st)))
-					}
-
-					let stat = Result.Failure(numTests: st.numSuccessTests.successor()
-											, numShrinks: numShrinks
-											, usedSeed: st.randomSeed
-											, usedSize: st.computeSize(st.numSuccessTests)(st.numDiscardedTests)
-											, reason: res.reason
-											, labels: summary(st)
-											, output: "*** Failed! ")
-
-					let state = CheckerState(name: st.name
+			return .Right(Box(nstate))
+			// Discard
+		case .MatchResult(.None, let expect, _, _, let labels, _, _, let abort):
+			let nstate = CheckerState(name: st.name
+									, maxSuccessTests: st.maxSuccessTests
+									, maxDiscardedTests: st.maxDiscardedTests
+									, computeSize: st.computeSize
+									, numSuccessTests: st.numSuccessTests
+									, numDiscardedTests: st.numDiscardedTests.successor()
+									, labels: unionWith(max, l: st.labels, r: labels)
+									, collected: st.collected
+									, expectedFailure: expect
+									, randomSeed: rnd2
+									, numSuccessShrinks: st.numSuccessShrinks
+									, numTryShrinks: st.numTryShrinks
+									, numTotTryShrinks: st.numTotTryShrinks
+									, shouldAbort: abort)
+			return .Right(Box(nstate))
+			// Fail
+		case .MatchResult(.Some(false), let expect, _, _, _, _, _, let abort):
+			if !expect {
+				print("+++ OK, failed as expected. ", appendNewline: false)
+			} else {
+				print("*** Failed! ", appendNewline: false)
+			}
+			
+			// Attempt a shrink.
+			let (numShrinks, _, _) = findMinimalFailingTestCase(st, res: res, ts: ts())
+			
+			if !expect {
+				let s = Result.Success(numTests: st.numSuccessTests.successor(), labels: summary(st), output: "+++ OK, failed as expected. ")
+				return .Left(Box((s, st)))
+			}
+			
+			let stat = Result.Failure(numTests: st.numSuccessTests.successor()
+									, numShrinks: numShrinks
+									, usedSeed: st.randomSeed
+									, usedSize: st.computeSize(st.numSuccessTests)(st.numDiscardedTests)
+									, reason: res.reason
+									, labels: summary(st)
+									, output: "*** Failed! ")
+			
+			let nstate = CheckerState(name: st.name
 									, maxSuccessTests: st.maxSuccessTests
 									, maxDiscardedTests: st.maxDiscardedTests
 									, computeSize: st.computeSize
@@ -344,11 +344,11 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 									, numTryShrinks: st.numTryShrinks
 									, numTotTryShrinks: st.numTotTryShrinks
 									, shouldAbort: abort)
-					return .Left(Box((stat, state)))
-			}
-		default:
-			fatalError("Pattern Match Failed: Rose should have been reduced to MkRose, not IORose.")
-			break
+			return .Left(Box((stat, nstate)))
+		}
+	default:
+		fatalError("Pattern Match Failed: Rose should have been reduced to MkRose, not IORose.")
+		break
 	}
 }
 
@@ -368,7 +368,7 @@ internal func giveUp(st: CheckerState)(f : (StdGen -> Int -> Prop)) -> Result {
 	return Result.GaveUp(numTests: st.numSuccessTests, labels: summary(st), output: "")
 }
 
-// Interface to shrinking loop.  Returns (number of shrinks performed, number of failed shrinks, 
+// Interface to shrinking loop.  Returns (number of shrinks performed, number of failed shrinks,
 // total number of shrinks performed).
 //
 // This ridiculously stateful looping nonsense is due to limitations of the Swift unroller and, more
@@ -381,13 +381,13 @@ internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts
 	if let e = res.theException {
 		fatalError("Test failed due to exception: \(e)")
 	}
-
+	
 	var lastResult = res
 	var branches = ts
 	var numSuccessShrinks = st.numSuccessShrinks
 	var numTryShrinks = st.numTryShrinks.successor()
 	var numTotTryShrinks = st.numTotTryShrinks
-
+	
 	// cont is a sanity check so we don't fall into an infinite loop.  It is set to false at each
 	// new iteration and true when we select a new set of branches to test.  If the branch
 	// selection doesn't change then we have exhausted our possibilities and so must have reached a
@@ -398,18 +398,18 @@ internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts
 		if branches.isEmpty {
 			break;
 		}
-
+		
 		cont = false
 		numTryShrinks = 0
-
+		
 		// Try all possible courses of action in this Rose Tree
 		branches.forEach { r in
 			switch reduce(r) {
 			case .MkRose(let resC, let ts1):
 				let res1 = resC()
 				dispatchAfterTestCallbacks(st, res: res1)
-
-				// Did we fail?  Good!  Failure is healthy.  
+				
+				// Did we fail?  Good!  Failure is healthy.
 				// Try the next set of branches.
 				if res1.ok == .Some(false) {
 					lastResult = res1
@@ -417,7 +417,7 @@ internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts
 					cont = true
 					break;
 				}
-
+				
 				// Otherwise increment the tried shrink counter and the failed shrink counter.
 				numTryShrinks++
 				numTotTryShrinks++
@@ -425,24 +425,24 @@ internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts
 				fatalError("Rose should not have reduced to IO")
 			}
 		}
-
+		
 		numSuccessShrinks++
 	}
-
+	
 	let state = CheckerState(name: st.name
-					, maxSuccessTests: st.maxSuccessTests
-					, maxDiscardedTests: st.maxDiscardedTests
-					, computeSize: st.computeSize
-					, numSuccessTests: st.numSuccessTests
-					, numDiscardedTests: st.numDiscardedTests
-					, labels: st.labels
-					, collected: st.collected
-					, expectedFailure: st.expectedFailure
-					, randomSeed: st.randomSeed
-					, numSuccessShrinks: numSuccessShrinks
-					, numTryShrinks: numTryShrinks
-					, numTotTryShrinks: numTotTryShrinks
-					, shouldAbort: st.shouldAbort)
+							, maxSuccessTests: st.maxSuccessTests
+							, maxDiscardedTests: st.maxDiscardedTests
+							, computeSize: st.computeSize
+							, numSuccessTests: st.numSuccessTests
+							, numDiscardedTests: st.numDiscardedTests
+							, labels: st.labels
+							, collected: st.collected
+							, expectedFailure: st.expectedFailure
+							, randomSeed: st.randomSeed
+							, numSuccessShrinks: numSuccessShrinks
+							, numTryShrinks: numTryShrinks
+							, numTotTryShrinks: numTotTryShrinks
+							, shouldAbort: st.shouldAbort)
 	return reportMinimumCaseFound(state, res: lastResult)
 }
 
@@ -487,10 +487,10 @@ internal func dispatchAfterFinalFailureCallbacks(st : CheckerState, res : TestRe
 
 internal func summary(s : CheckerState) -> [(String, Int)] {
 	let l = s.collected
-			.flatMap({ l in l.map({ "," + $0 }).filter({ !$0.isEmpty }) })
-			.sort()
-			.groupBy(==)
-	return l.map({ ss in (ss.first!, ss.count * 100 / s.numSuccessTests) })
+		.flatMap({ l in l.map({ "," + $0 }).filter({ !$0.isEmpty }) })
+		.sort()
+		.groupBy(==)
+	return l.map { ss in (ss.first!, ss.count * 100 / s.numSuccessTests) }
 }
 
 internal func labelPercentage(l : String, st : CheckerState) -> Int {
@@ -502,14 +502,14 @@ internal func printDistributionGraph(st : CheckerState) {
 	func showP(n : Int) -> String {
 		return (n < 10 ? " " : "") + "\(n)" + "%"
 	}
-
+	
 	let gAllLabels = st.collected.map({ (s : Set<String>) in
 		return Array(s).filter({ t in st.labels[t] == .Some(0) }).reduce("", combine: { (l : String, r : String) in l + ", " + r })
 	})
 	let gAll = gAllLabels.filter({ !$0.isEmpty }).sort().groupBy(==)
 	let gPrint = gAll.map({ ss in showP((ss.count * 100) / st.numSuccessTests) + ss.first! })
 	let allLabels = Array(gPrint.sort().reverse())
-
+	
 	var covers = [String]()
 	st.labels.forEach { (l, reqP) in
 		let p = labelPercentage(l, st: st)
@@ -517,7 +517,7 @@ internal func printDistributionGraph(st : CheckerState) {
 			covers += ["only \(p)% " + l + ", not \(reqP)%"]
 		}
 	}
-
+	
 	let all = covers + allLabels
 	if all.isEmpty {
 		print(".")
@@ -550,7 +550,7 @@ extension Array {
 			}
 			fatalError("span reached a non-empty list that could not produce a first element")
 		}
-
+		
 		if self.isEmpty {
 			return []
 		} else if let x = self.first {
@@ -561,5 +561,3 @@ extension Array {
 		fatalError("groupBy reached a non-empty list that could not produce a first element")
 	}
 }
-
-

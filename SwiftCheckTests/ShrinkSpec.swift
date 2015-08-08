@@ -3,7 +3,7 @@
 //  SwiftCheck
 //
 //  Created by Robert Widmann on 5/28/15.
-//  Copyright (c) 2015 Robert Widmann. All rights reserved.
+//  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
 import XCTest
@@ -27,11 +27,11 @@ class ShrinkSpec : XCTestCase {
 			return (n != 0) ==> Set(self.shrinkArbitrary(n)).contains(0)
 		}
 
-		property("Shrinking a list never gives back the original") <- forAll { (l : ArrayOf<Int8>) in
-			return ArrayOf.shrink(l).map({ $0.getArray }).filter({ $0 == l.getArray }).isEmpty
+		property("Shrinking an array never gives back the original") <- forAll { (l : Array<Int8>) in
+			return Array.shrink(l).filter({ $0 == l }).isEmpty
 		}
 
-		property("Shrunken lists of integers always contain [] or [0]") <- forAll { (l : ArrayOf<Int>) in
+		property("Shrunken arrays of integers always contain [] or [0]") <- forAll { (l : ArrayOf<Int>) in
 			return (!l.getArray.isEmpty && l.getArray != [0]) ==> {
 				let ls = self.shrinkArbitrary(l).map { $0.getArray }
 				return (ls.filter({ $0 == [] || $0 == [0] }).count >= 1)
