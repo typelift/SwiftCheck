@@ -55,7 +55,7 @@ public func shrinkIntegral<A : IntegerType>(x : A) -> [A] {
 
 extension Bool : Arbitrary {
 	public static func arbitrary() -> Gen<Bool> {
-		return Gen.pure((arc4random() % 2) == 1)
+		return Gen.sized { n in Gen.pure((arc4random() % 2) == 1) }
 	}
 
 	public static func shrink(x : Bool) -> [Bool] {
