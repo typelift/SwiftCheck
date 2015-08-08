@@ -409,10 +409,10 @@ internal func insertWith<K : Hashable, V>(f : (V, V) -> V, k : K, v : V, var m :
 
 internal func unionWith<K : Hashable, V>(f : (V, V) -> V, l : Dictionary<K, V>, r : Dictionary<K, V>) -> Dictionary<K, V> {
 	var map = l
-	for (k, v) in l {
+	l.forEach { (k, v) in
 		map.updateValue(v, forKey: k)
 	}
-	for (k, v) in r {
+	r.forEach { (k, v) in
 		map.updateValue(v, forKey: k)
 	}
 	return map
@@ -509,7 +509,7 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 		return l
 	}
 
-	return p.bind({ result1 in
+	return p.bind { result1 in
 		if !result1.expect {
 			return Rose.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 		}
@@ -517,7 +517,7 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 		case .Some(true):
 			return Rose.pure(result1)
 		case .Some(false):
-			return q.bind({ result2 in
+			return q.bind { result2 in
 				if !result2.expect {
 					return Rose.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 				}
@@ -538,9 +538,9 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 				case .None:
 					return Rose.pure(result2)
 				}
-			})
+			}
 		case .None:
-			return q.bind({ result2 in
+			return q.bind { result2 in
 				if !result2.expect {
 					return Rose.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 				}
@@ -550,7 +550,7 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 				default:
 					return Rose.pure(result1)
 				}
-			})
+			}
 		}
-	})
+	}
 }
