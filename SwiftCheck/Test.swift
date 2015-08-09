@@ -354,7 +354,7 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 
 internal func doneTesting(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Result {
 	if st.expectedFailure {
-		print("*** Passed " + "\(st.numSuccessTests)" + " tests")
+		print("*** Passed " + "\(st.numSuccessTests)" + pluralize(" test", i: st.numSuccessShrinks))
 		printDistributionGraph(st)
 		return .Success(numTests: st.numSuccessTests, labels: summary(st), output: "")
 	} else {
@@ -450,13 +450,6 @@ internal func reportMinimumCaseFound(st : CheckerState, res : TestResult) -> (In
 	let testMsg = " (after \(st.numSuccessTests.successor()) test"
 	let shrinkMsg = st.numSuccessShrinks > 1 ? (" and \(st.numSuccessShrinks) shrink") : ""
 	
-	func pluralize(s : String, i : Int) -> String {
-		if i > 1 {
-			return s + "s"
-		}
-		return s
-	}
-	
 	print("Proposition: " + st.name)
 	print(res.reason + pluralize(testMsg, i: st.numSuccessTests.successor()) + pluralize(shrinkMsg, i: st.numSuccessShrinks) + "):")
 	dispatchAfterFinalFailureCallbacks(st, res: res)
@@ -534,6 +527,13 @@ internal func printDistributionGraph(st : CheckerState) {
 internal func cons<T>(lhs : T, var _ rhs : [T]) -> [T] {
 	rhs.insert(lhs, atIndex: 0)
 	return rhs
+}
+
+private func pluralize(s : String, i : Int) -> String {
+	if i > 1 {
+		return s + "s"
+	}
+	return s
 }
 
 extension Array {
