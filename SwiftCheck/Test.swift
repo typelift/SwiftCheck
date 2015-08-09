@@ -354,7 +354,7 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 
 internal func doneTesting(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Result {
 	if st.expectedFailure {
-		print("*** Passed " + "\(st.numSuccessTests)" + pluralize(" test", i: st.numSuccessShrinks))
+		print("*** Passed " + "\(st.numSuccessTests)" + pluralize(" test", i: st.numSuccessTests))
 		printDistributionGraph(st)
 		return .Success(numTests: st.numSuccessTests, labels: summary(st), output: "")
 	} else {
@@ -543,10 +543,10 @@ internal func cons<T>(lhs : T, var _ rhs : [T]) -> [T] {
 }
 
 private func pluralize(s : String, i : Int) -> String {
-	if i > 1 {
-		return s + "s"
+	if i == 0 {
+		return s
 	}
-	return s
+	return s + "s"
 }
 
 extension Array {
