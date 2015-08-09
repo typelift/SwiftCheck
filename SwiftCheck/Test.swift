@@ -491,6 +491,19 @@ internal func labelPercentage(l : String, st : CheckerState) -> Int {
 	return (100 * occur.count) / st.maxSuccessTests
 }
 
+internal func printLabels(st : TestResult) {
+	if st.labels.isEmpty {
+		print("(.)")
+	} else if st.labels.count == 1, let pt = st.labels.first {
+		print("(\(pt.0))")
+	} else {
+		let gAllLabels = st.labels.map({ (l, _) in
+			return l + ", "
+		}).reduce("", combine: +)
+		print("("  + gAllLabels[gAllLabels.startIndex..<advance(gAllLabels.endIndex, -2)] + ")")
+	}
+}
+
 internal func printDistributionGraph(st : CheckerState) {
 	func showP(n : Int) -> String {
 		return (n < 10 ? " " : "") + "\(n)" + "%"

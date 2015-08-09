@@ -159,11 +159,14 @@ extension Testable {
 			let c = Callback.AfterTest(kind: .Counterexample, f: { (st, res) in
 				switch res.ok {
 				case .Some(true):
-					print("Passed:")
+					print("Passed: ", appendNewline: false)
+					printLabels(res)
 				case .Some(false):
-					print("Failed:")
+					print("Failed: ", appendNewline: false)
+					printLabels(res)
 				default:
-					print("Discarded:")
+					print("Discarded: ", appendNewline: false)
+					printLabels(res)
 				}
 			})
 
