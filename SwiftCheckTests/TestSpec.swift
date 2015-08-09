@@ -29,6 +29,13 @@ class TestSpec : XCTestCase {
 			^&&^
 			(xs == xs.reverse().reverse()) <?> "Right identity"
 		}
+		
+		property("Failing conjunctions print labelled properties") <- forAll { (xs : Array<Int>) in
+			return
+				(xs.sort().sort() == xs.sort()).verbose <?> "Sort Left"
+				^&&^
+				((xs.sort() != xs.sort().sort()).verbose <?> "Bad Sort Right")
+		}.expectFailure
 
 		property("map behaves") <- forAll { (xs : Array<Int>) in
 			return forAll { (f : ArrowOf<Int, Int>) in

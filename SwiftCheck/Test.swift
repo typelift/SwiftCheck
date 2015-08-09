@@ -354,7 +354,7 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 
 internal func doneTesting(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Result {
 	if st.expectedFailure {
-		print("*** Passed " + "\(st.numSuccessTests)" + pluralize(" test", i: st.numSuccessShrinks))
+		print("*** Passed " + "\(st.numSuccessTests)" + pluralize(" test", i: st.numSuccessTests))
 		printDistributionGraph(st)
 		return .Success(numTests: st.numSuccessTests, labels: summary(st), output: "")
 	} else {
@@ -491,6 +491,19 @@ internal func labelPercentage(l : String, st : CheckerState) -> Int {
 	return (100 * occur.count) / st.maxSuccessTests
 }
 
+internal func printLabels(st : TestResult) {
+	if st.labels.isEmpty {
+		print("(.)")
+	} else if st.labels.count == 1, let pt = st.labels.first {
+		print("(\(pt.0))")
+	} else {
+		let gAllLabels = st.labels.map({ (l, _) in
+			return l + ", "
+		}).reduce("", combine: +)
+		print("("  + gAllLabels[gAllLabels.startIndex..<advance(gAllLabels.endIndex, -2)] + ")")
+	}
+}
+
 internal func printDistributionGraph(st : CheckerState) {
 	func showP(n : Int) -> String {
 		return (n < 10 ? " " : "") + "\(n)" + "%"
@@ -530,10 +543,10 @@ internal func cons<T>(lhs : T, var _ rhs : [T]) -> [T] {
 }
 
 private func pluralize(s : String, i : Int) -> String {
-	if i > 1 {
-		return s + "s"
+	if i == 0 {
+		return s
 	}
-	return s
+	return s + "s"
 }
 
 extension Array {
