@@ -309,7 +309,7 @@ internal func delay<A>() -> Gen<Gen<A> -> A> {
 	})
 }
 
-/// Implementation Details Follow
+/// MARK: - Implementation Details
 
 import func Darwin.log
 

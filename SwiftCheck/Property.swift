@@ -350,7 +350,7 @@ public struct TestResult {
 	}
 }
 
-/// MARK: Implementation Details
+/// MARK: - Implementation Details
 
 private func exception(msg : String) -> ErrorType -> TestResult {
 	return { e in TestResult.failed(String(e)) }
