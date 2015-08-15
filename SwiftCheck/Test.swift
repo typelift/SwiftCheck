@@ -116,7 +116,7 @@ public func quickCheck(prop : Testable, name : String = "") {
 	quickCheckWithResult(stdArgs(name), p: prop)
 }
 
-/// MARK: Implementation Details
+/// MARK: - Implementation Details
 
 internal enum Result {
 	case Success(numTests: Int
@@ -141,14 +141,9 @@ internal enum Result {
 	)
 }
 
-internal class Box<T> {
-	let value : T
-	internal init(_ x : T) { self.value = x }
-}
-
-internal enum Either<L, R> {
-	case Left(Box<L>)
-	case Right(Box<R>)
+internal indirect enum Either<L, R> {
+	case Left(L)
+	case Right(R)
 }
 
 internal struct Arguments {
@@ -237,16 +232,15 @@ internal func test(st : CheckerState, f : (StdGen -> Int -> Prop)) -> Result {
 	while true {
 		switch runATest(state)(f: f) {
 		case let .Left(fail):
-			switch (fail.value.0, doneTesting(fail.value.1)(f: f)) {
+			switch (fail.0, doneTesting(fail.1)(f: f)) {
 			case (.Success(_, _, _), _):
-				return fail.value.0
+				return fail.0
 			case let (_, .NoExpectedFailure(numTests, labels, output)):
 				return .NoExpectedFailure(numTests: numTests, labels: labels, output: output)
 			default:
-				return fail.value.0
+				return fail.0
 			}
-		case let .Right(sta):
-			let lsta = sta.value // Local copy so I don't have to keep unwrapping.
+		case let .Right(lsta):
 			if lsta.numSuccessTests >= lsta.maxSuccessTests || lsta.shouldAbort {
 				return doneTesting(lsta)(f: f)
 			}
@@ -288,7 +282,7 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 									, numTryShrinks: st.numTryShrinks
 									, numTotTryShrinks: st.numTotTryShrinks
 									, shouldAbort: abort)
-			return .Right(Box(nstate))
+			return .Right(nstate)
 			// Discard
 		case .MatchResult(.None, let expect, _, _, let labels, _, _, let abort):
 			let nstate = CheckerState(name: st.name
@@ -305,7 +299,7 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 									, numTryShrinks: st.numTryShrinks
 									, numTotTryShrinks: st.numTotTryShrinks
 									, shouldAbort: abort)
-			return .Right(Box(nstate))
+			return .Right(nstate)
 			// Fail
 		case .MatchResult(.Some(false), let expect, _, _, _, _, _, let abort):
 			if !expect {
@@ -319,7 +313,7 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 			
 			if !expect {
 				let s = Result.Success(numTests: st.numSuccessTests.successor(), labels: summary(st), output: "+++ OK, failed as expected. ")
-				return .Left(Box((s, st)))
+				return .Left((s, st))
 			}
 			
 			let stat = Result.Failure(numTests: st.numSuccessTests.successor()
@@ -344,7 +338,7 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 									, numTryShrinks: st.numTryShrinks
 									, numTotTryShrinks: st.numTotTryShrinks
 									, shouldAbort: abort)
-			return .Left(Box((stat, nstate)))
+			return .Left((stat, nstate))
 		}
 	default:
 		fatalError("Pattern Match Failed: Rose should have been reduced to MkRose, not IORose.")
