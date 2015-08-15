@@ -745,7 +745,7 @@ extension Set : CoArbitrary {
 	}
 }
 
-/// MARK: Implementation Details
+/// MARK: - Implementation Details
 
 private func bits<N : IntegerType>(n : N) -> Int {
 	if n / 2 == 0 {
