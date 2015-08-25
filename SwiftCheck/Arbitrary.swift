@@ -499,35 +499,15 @@ extension ImplicitlyUnwrappedOptional : WitnessedArbitrary {
 	}
 }
 
-private func lazy<S : CollectionType>(s: S) -> LazyCollection<S> {
-    return s.lazy
-}
-
-private func lazy<S : SequenceType>(s: S) -> LazySequence<S> {
-    return s.lazy
-}
-
-extension LazyCollection where Base : protocol<CollectionType, Arbitrary>, Base.Index : BidirectionalIndexType {
-	public static var arbitrary : Gen<LazyCollection<Base>> {
-		return Base.arbitrary.fmap(SwiftCheck.lazy)
-	}
-}
-
 extension LazyCollection where Base : protocol<CollectionType, Arbitrary>, Base.Index : ForwardIndexType {
 	public static var arbitrary : Gen<LazyCollection<Base>> {
-		return Base.arbitrary.fmap(SwiftCheck.lazy)
-	}
-}
-
-extension LazyCollection where Base : protocol<CollectionType, Arbitrary>, Base.Index : RandomAccessIndexType {
-	public static var arbitrary : Gen<LazyCollection<Base>> {
-		return Base.arbitrary.fmap(SwiftCheck.lazy)
+		return LazyCollection<Base>.arbitrary
 	}
 }
 
 extension LazySequence where Base : protocol<SequenceType, Arbitrary> {
 	public static var arbitrary : Gen<LazySequence<Base>> {
-		return Base.arbitrary.fmap(SwiftCheck.lazy)
+		return LazySequence<Base>.arbitrary
 	}
 }
 
