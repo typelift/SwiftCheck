@@ -640,7 +640,7 @@ extension String : CoArbitrary {
 		if x.isEmpty {
 			return { $0.variant(0) }
 		}
-		return Character.coarbitrary(x[x.startIndex]) • String.coarbitrary(x[x.startIndex.advancedBy(1)..<x.endIndex])
+		return Character.coarbitrary(x[x.startIndex]) • String.coarbitrary(x[x.startIndex.successor()..<x.endIndex])
 	}
 }
 
