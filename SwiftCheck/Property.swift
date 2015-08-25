@@ -46,7 +46,7 @@ public func disjoin(ps : Testable...) -> Property {
 /// running multiple test cases will result in distinct arbitrary sequences of each property being
 /// tested.
 public func conjamb(ps : () -> Testable...) -> Property {
-	let ls = lazy(ps).map { $0().property.unProperty }
+	let ls = ps.lazy.map { $0().property.unProperty }
 	return Property(Gen.oneOf(ls))
 }
 
@@ -159,13 +159,13 @@ extension Testable {
 			let c = Callback.AfterTest(kind: .Counterexample, f: { (st, res) in
 				switch res.ok {
 				case .Some(true):
-					print("\nPassed: ", appendNewline: false)
+					print("\nPassed: ", terminator: "")
 					printLabels(res)
 				case .Some(false):
-					print("\nFailed: ", appendNewline: false)
+					print("\nFailed: ", terminator: "")
 					printLabels(res)
 				default:
-					print("\nDiscarded: ", appendNewline: false)
+					print("\nDiscarded: ", terminator: "")
 					printLabels(res)
 				}
 			})

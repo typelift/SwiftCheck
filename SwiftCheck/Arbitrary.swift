@@ -388,26 +388,26 @@ extension CollectionOfOne : WitnessedArbitrary {
 }
 
 /// Generates an Optional of arbitrary values of type A.
-extension Optional where T : Arbitrary {
-	public static var arbitrary : Gen<Optional<T>> {
-		return Gen<Optional<T>>.frequency([
-			(1, Gen<Optional<T>>.pure(.None)),
-			(3, liftM(Optional<T>.Some)(m1: T.arbitrary)),
+extension Optional where Wrapped : Arbitrary {
+	public static var arbitrary : Gen<Optional<Wrapped>> {
+		return Gen<Optional<Wrapped>>.frequency([
+			(1, Gen<Optional<Wrapped>>.pure(.None)),
+			(3, liftM(Optional<Wrapped>.Some)(m1: Wrapped.arbitrary)),
 		])
 	}
 	
-	public static func shrink(bl : Optional<T>) -> [Optional<T>] {
+	public static func shrink(bl : Optional<Wrapped>) -> [Optional<Wrapped>] {
 		if let x = bl {
-			return [.None] + T.shrink(x).map(Optional<T>.Some)
+			return [.None] + Wrapped.shrink(x).map(Optional<Wrapped>.Some)
 		}
 		return []
 	}
 }
 
 extension Optional : WitnessedArbitrary {
-	public typealias Param = T
+	public typealias Param = Wrapped
 	
-	public static func forAllWitnessed<A : Arbitrary>(wit : A -> T)(pf : (Optional<T> -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Wrapped)(pf : (Optional<Wrapped> -> Testable)) -> Property {
 		return forAllShrink(Optional<A>.arbitrary, shrinker: Optional<A>.shrink, f: { bl in
 			return pf(bl.map(wit))
 		})
@@ -479,47 +479,35 @@ extension HalfOpenInterval where Bound : protocol<Comparable, Arbitrary> {
 	}
 }
 
-extension ImplicitlyUnwrappedOptional where T : Arbitrary {
-	public static var arbitrary : Gen<ImplicitlyUnwrappedOptional<T>> {
-		return ImplicitlyUnwrappedOptional.init <^> Optional<T>.arbitrary
+extension ImplicitlyUnwrappedOptional where Wrapped : Arbitrary {
+	public static var arbitrary : Gen<ImplicitlyUnwrappedOptional<Wrapped>> {
+		return ImplicitlyUnwrappedOptional.init <^> Optional<Wrapped>.arbitrary
 	}
 	
-	public static func shrink(bl : ImplicitlyUnwrappedOptional<T>) -> [ImplicitlyUnwrappedOptional<T>] {
-		return Optional<T>.shrink(bl).map(ImplicitlyUnwrappedOptional.init)
+	public static func shrink(bl : ImplicitlyUnwrappedOptional<Wrapped>) -> [ImplicitlyUnwrappedOptional<Wrapped>] {
+		return Optional<Wrapped>.shrink(bl).map(ImplicitlyUnwrappedOptional.init)
 	}
 }
 
 extension ImplicitlyUnwrappedOptional : WitnessedArbitrary {
-	public typealias Param = T
+	public typealias Param = Wrapped
 	
-	public static func forAllWitnessed<A : Arbitrary>(wit : A -> T)(pf : (ImplicitlyUnwrappedOptional<T> -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Wrapped)(pf : (ImplicitlyUnwrappedOptional<Wrapped> -> Testable)) -> Property {
 		return forAllShrink(ImplicitlyUnwrappedOptional<A>.arbitrary, shrinker: ImplicitlyUnwrappedOptional<A>.shrink, f: { bl in
 			return pf(bl.map(wit))
 		})
 	}
 }
 
-extension LazyBidirectionalCollection where Base : protocol<CollectionType, Arbitrary>, Base.Index : BidirectionalIndexType {
-	public static var arbitrary : Gen<LazyBidirectionalCollection<Base>> {
-		return Base.arbitrary.fmap(lazy)
-	}
-}
-
-extension LazyForwardCollection where Base : protocol<CollectionType, Arbitrary>, Base.Index : ForwardIndexType {
-	public static var arbitrary : Gen<LazyForwardCollection<Base>> {
-		return Base.arbitrary.fmap(lazy)
-	}
-}
-
-extension LazyRandomAccessCollection where Base : protocol<CollectionType, Arbitrary>, Base.Index : RandomAccessIndexType {
-	public static var arbitrary : Gen<LazyRandomAccessCollection<Base>> {
-		return Base.arbitrary.fmap(lazy)
+extension LazyCollection where Base : protocol<CollectionType, Arbitrary>, Base.Index : ForwardIndexType {
+	public static var arbitrary : Gen<LazyCollection<Base>> {
+		return LazyCollection<Base>.arbitrary
 	}
 }
 
 extension LazySequence where Base : protocol<SequenceType, Arbitrary> {
 	public static var arbitrary : Gen<LazySequence<Base>> {
-		return Base.arbitrary.fmap(lazy)
+		return LazySequence<Base>.arbitrary
 	}
 }
 
@@ -632,7 +620,7 @@ extension String : CoArbitrary {
 		if x.isEmpty {
 			return { $0.variant(0) }
 		}
-		return Character.coarbitrary(x[x.startIndex]) • String.coarbitrary(x[advance(x.startIndex, 1)..<x.endIndex])
+		return Character.coarbitrary(x[x.startIndex]) • String.coarbitrary(x[x.startIndex.successor()..<x.endIndex])
 	}
 }
 
@@ -728,7 +716,7 @@ extension Dictionary : CoArbitrary {
 }
 
 extension Optional : CoArbitrary {
-	public static func coarbitrary<C>(x : Optional<T>) -> (Gen<C> -> Gen<C>) {
+	public static func coarbitrary<C>(x : Optional<Wrapped>) -> (Gen<C> -> Gen<C>) {
 		if let _ = x {
 			return { $0.variant(0) }
 		}
