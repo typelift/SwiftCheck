@@ -303,9 +303,9 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 			// Fail
 		case .MatchResult(.Some(false), let expect, _, _, _, _, _, let abort):
 			if !expect {
-				print("+++ OK, failed as expected. ", appendNewline: false)
+				print("+++ OK, failed as expected. ", terminator: "")
 			} else {
-				print("*** Failed! ", appendNewline: false)
+				print("*** Failed! ", terminator: "")
 			}
 			
 			// Attempt a shrink.
@@ -494,7 +494,7 @@ internal func printLabels(st : TestResult) {
 		let gAllLabels = st.labels.map({ (l, _) in
 			return l + ", "
 		}).reduce("", combine: +)
-		print("("  + gAllLabels[gAllLabels.startIndex..<advance(gAllLabels.endIndex, -2)] + ")")
+		print("("  + gAllLabels[gAllLabels.startIndex..<gAllLabels.endIndex.advancedBy(-2)] + ")")
 	}
 }
 
