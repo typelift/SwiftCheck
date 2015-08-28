@@ -241,4 +241,41 @@ let weightedOptionals = Gen.frequency([
 ])
 ```
 
+System Requirements
+===================
+
+SwiftCheck supports OS X 10.9+ and iOS 7.0+.
+
+Setup
+=====
+
+SwiftCheck can be included one of two ways:
+
+**Using Carthage**
+
+- Add SwiftCheck to your Cartfile
+- Run `carthage update`
+- Drag the relevant copy of SwiftCheck into your project.
+- Expand the Link Binary With Libraries phase
+- Click the + and add SwiftCheck
+- Click the + at the top left corner to add a Copy Files build phase
+- Set the directory to `Frameworks`
+- Click the + and add SwiftCheck
+
+**Framework**
+
+- Drag SwiftCheck.xcodeproj into your project tree
+  as a subproject
+- Under your project's Build Phases, expand Target Dependencies
+- Click the + and add SwiftCheck
+- Expand the Link Binary With Libraries phase
+- Click the + and add SwiftCheck
+- Click the + at the top left corner to add a Copy Files build phase
+- Set the directory to Frameworks
+- Click the + and add SwiftCheck
+
+License
+=======
+
+SwiftCheck is released under the MIT license.
 
