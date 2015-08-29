@@ -25,11 +25,11 @@ class TestSpec : XCTestCase {
 
 		property("The reverse of the reverse of an array is that array") <- forAll { (xs : Array<Int>) in
 			return
-			(xs.reverse().reverse() == xs) <?> "Left identity"
-			^&&^
-			(xs == xs.reverse().reverse()) <?> "Right identity"
+				(xs.reverse().reverse() == xs) <?> "Left identity"
+				^&&^
+				(xs == xs.reverse().reverse()) <?> "Right identity"
 		}
-		
+
 		property("Failing conjunctions print labelled properties") <- forAll { (xs : Array<Int>) in
 			return
 				(xs.sort().sort() == xs.sort()).verbose <?> "Sort Left"

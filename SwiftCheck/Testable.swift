@@ -19,7 +19,7 @@ public protocol Testable {
 	///
 	/// If true, the property will only be tested once.  Defaults to false.
 	var exhaustive : Bool { get }
-	
+
 	/// Returns a `Property`, which SwiftCheck uses to perform test case generation.
 	var property : Property { get }
 }
@@ -33,7 +33,7 @@ extension Testable {
 /// A property is anything that generates propositions.
 public struct Property : Testable {
 	let unProperty : Gen<Prop>
-	
+
 	public init(_ val : Gen<Prop>) {
 		self.unProperty = val;
 	}
@@ -46,7 +46,7 @@ public struct Property : Testable {
 /// A proposition.
 public struct Prop : Testable {
 	var unProp : Rose<TestResult>
-	
+
 	public var exhaustive : Bool { return true }
 
 	public var property : Property {

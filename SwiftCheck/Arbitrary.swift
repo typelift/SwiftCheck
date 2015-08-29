@@ -40,7 +40,7 @@ public protocol Arbitrary {
 	/// values.  It should not, however, be written as a deterministic function.  If such a
 	/// generator is needed, combinators are provided in `Gen.swift`.
 	static var arbitrary : Gen<Self> { get }
-	
+
 	/// An optional shrinking function.  If this function goes unimplemented, it is the same as
 	/// returning the empty list.
 	///
@@ -75,7 +75,7 @@ extension Bool : Arbitrary {
 	public static var arbitrary : Gen<Bool> {
 		return Gen.sized { _ in Gen.pure((arc4random() % 2) == 1) }
 	}
-	
+
 	public static func shrink(x : Bool) -> [Bool] {
 		if x {
 			return [false]
@@ -90,7 +90,7 @@ extension Int : Arbitrary {
 			return Bool.arbitrary.fmap { ($0 ? 1 : -1) * Int(arc4random_uniform(UInt32(n))) }
 		}
 	}
-	
+
 	public static func shrink(x : Int) -> [Int] {
 		return x.shrinkIntegral
 	}
@@ -102,7 +102,7 @@ extension Int8 : Arbitrary {
 			return Bool.arbitrary.fmap { ($0 ? 1 : -1) * Int8(arc4random_uniform(UInt32(n))) }
 		}
 	}
-	
+
 	public static func shrink(x : Int8) -> [Int8] {
 		return x.shrinkIntegral
 	}
@@ -114,7 +114,7 @@ extension Int16 : Arbitrary {
 			return Bool.arbitrary.fmap { ($0 ? 1 : -1) * Int16(arc4random_uniform(UInt32(n))) }
 		}
 	}
-	
+
 	public static func shrink(x : Int16) -> [Int16] {
 		return x.shrinkIntegral
 	}
@@ -126,7 +126,7 @@ extension Int32 : Arbitrary {
 			return Bool.arbitrary.fmap { ($0 ? 1 : -1) * Int32(arc4random_uniform(UInt32(n))) }
 		}
 	}
-	
+
 	public static func shrink(x : Int32) -> [Int32] {
 		return x.shrinkIntegral
 	}
@@ -138,7 +138,7 @@ extension Int64 : Arbitrary {
 			return Bool.arbitrary.fmap { ($0 ? 1 : -1) * Int64(arc4random_uniform(UInt32(n))) }
 		}
 	}
-	
+
 	public static func shrink(x : Int64) -> [Int64] {
 		return x.shrinkIntegral
 	}
@@ -148,7 +148,7 @@ extension UInt : Arbitrary {
 	public static var arbitrary : Gen<UInt> {
 		return Gen.sized { n in Gen<UInt>.pure(UInt(arc4random_uniform(UInt32(abs(n))))) }
 	}
-	
+
 	public static func shrink(x : UInt) -> [UInt] {
 		return x.shrinkIntegral
 	}
@@ -160,7 +160,7 @@ extension UInt8 : Arbitrary {
 			return Gen.sized { n in Gen<UInt8>.pure(UInt8(arc4random_uniform(UInt32(abs(n))))) }
 		})
 	}
-	
+
 	public static func shrink(x : UInt8) -> [UInt8] {
 		return x.shrinkIntegral
 	}
@@ -170,7 +170,7 @@ extension UInt16 : Arbitrary {
 	public static var arbitrary : Gen<UInt16> {
 		return Gen.sized { n in Gen<UInt16>.pure(UInt16(arc4random_uniform(UInt32(abs(n))))) }
 	}
-	
+
 	public static func shrink(x : UInt16) -> [UInt16] {
 		return x.shrinkIntegral
 	}
@@ -180,7 +180,7 @@ extension UInt32 : Arbitrary {
 	public static var arbitrary : Gen<UInt32> {
 		return Gen.sized { n in Gen<UInt32>.pure(arc4random_uniform(UInt32(abs(n)))) }
 	}
-	
+
 	public static func shrink(x : UInt32) -> [UInt32] {
 		return x.shrinkIntegral
 	}
@@ -190,7 +190,7 @@ extension UInt64 : Arbitrary {
 	public static var arbitrary : Gen<UInt64> {
 		return Gen.sized { n in Gen<UInt64>.pure(UInt64(arc4random_uniform(UInt32(abs(n))))) }
 	}
-	
+
 	public static func shrink(x : UInt64) -> [UInt64] {
 		return x.shrinkIntegral
 	}
@@ -205,7 +205,7 @@ extension Float : Arbitrary {
 			return Gen<Float>.pure(Float(-n) + Float(arc4random()) / Float(UINT32_MAX / UInt32((n)*2)))
 		})
 	}
-	
+
 	public static func shrink(x : Float) -> [Float] {
 		return unfoldr({ i in
 			if i == 0.0 {
@@ -226,7 +226,7 @@ extension Double : Arbitrary {
 			return Gen<Double>.pure(Double(-n) + Double(arc4random()) / Double(UINT32_MAX / UInt32(n*2)))
 		})
 	}
-	
+
 	public static func shrink(x : Double) -> [Double] {
 		return unfoldr({ i in
 			if i == 0.0 {
@@ -242,7 +242,7 @@ extension UnicodeScalar : Arbitrary {
 	public static var arbitrary : Gen<UnicodeScalar> {
 		return UInt32.arbitrary.bind(Gen<UnicodeScalar>.pure • UnicodeScalar.init)
 	}
-	
+
 	public static func shrink(x : UnicodeScalar) -> [UnicodeScalar] {
 		let s : UnicodeScalar = UnicodeScalar(UInt32(towlower(Int32(x.value))))
 		return nub([ "a", "b", "c", s, "A", "B", "C", "1", "2", "3", "\n", " " ]).filter { $0 < x }
@@ -254,7 +254,7 @@ extension String : Arbitrary {
 		let chars = Gen.sized({ n in Character.arbitrary.proliferateSized(n) })
 		return chars >>- (Gen<String>.pure • String.init)
 	}
-	
+
 	public static func shrink(s : String) -> [String] {
 		return [Character].shrink([Character](s.characters)).map(String.init)
 	}
@@ -264,7 +264,7 @@ extension Character : Arbitrary {
 	public static var arbitrary : Gen<Character> {
 		return Gen<UInt32>.choose((32, 255)) >>- (Gen<Character>.pure • Character.init • UnicodeScalar.init)
 	}
-	
+
 	public static func shrink(x : Character) -> [Character] {
 		let ss = String(x).unicodeScalars
 		return UnicodeScalar.shrink(ss[ss.startIndex]).map(Character.init)
@@ -278,12 +278,12 @@ extension Array where Element : Arbitrary {
 				if k == 0 {
 					return Gen.pure([])
 				}
-				
+
 				return sequence((0...k).map { _ in Element.arbitrary })
 			}
 		}
 	}
-	
+
 	public static func shrink(bl : Array<Element>) -> [[Element]] {
 		return Int.shrink(bl.count).reverse().flatMap({ k in removes(k.successor(), n: bl.count, xs: bl) }) + shrinkOne(bl)
 	}
@@ -291,7 +291,7 @@ extension Array where Element : Arbitrary {
 
 extension Array : WitnessedArbitrary {
 	public typealias Param = Element
-	
+
 	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : ([Element] -> Testable)) -> Property {
 		return forAllShrink([A].arbitrary, shrinker: [A].shrink, f: { bl in
 			return pf(bl.map(wit))
@@ -303,7 +303,7 @@ extension AnyBidirectionalCollection where Element : Arbitrary {
 	public static var arbitrary : Gen<AnyBidirectionalCollection<Element>> {
 		return AnyBidirectionalCollection.init <^> [Element].arbitrary
 	}
-	
+
 	public static func shrink(bl : AnyBidirectionalCollection<Element>) -> [AnyBidirectionalCollection<Element>] {
 		return [Element].shrink([Element](bl)).map(AnyBidirectionalCollection.init)
 	}
@@ -311,7 +311,7 @@ extension AnyBidirectionalCollection where Element : Arbitrary {
 
 extension AnyBidirectionalCollection : WitnessedArbitrary {
 	public typealias Param = Element
-	
+
 	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (AnyBidirectionalCollection<Element> -> Testable)) -> Property {
 		return forAllShrink(AnyBidirectionalCollection<A>.arbitrary, shrinker: AnyBidirectionalCollection<A>.shrink, f: { bl in
 			return pf(AnyBidirectionalCollection<Element>(bl.map(wit)))
@@ -335,7 +335,7 @@ extension AnySequence where Element : Arbitrary {
 	public static var arbitrary : Gen<AnySequence<Element>> {
 		return AnySequence.init <^> [Element].arbitrary
 	}
-	
+
 	public static func shrink(bl : AnySequence<Element>) -> [AnySequence<Element>] {
 		return [Element].shrink([Element](bl)).map(AnySequence.init)
 	}
@@ -343,7 +343,7 @@ extension AnySequence where Element : Arbitrary {
 
 extension AnySequence : WitnessedArbitrary {
 	public typealias Param = Element
-	
+
 	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (AnySequence<Element> -> Testable)) -> Property {
 		return forAllShrink(AnySequence<A>.arbitrary, shrinker: AnySequence<A>.shrink, f: { bl in
 			return pf(AnySequence<Element>(bl.map(wit)))
@@ -355,7 +355,7 @@ extension ArraySlice where Element : Arbitrary {
 	public static var arbitrary : Gen<ArraySlice<Element>> {
 		return ArraySlice.init <^> [Element].arbitrary
 	}
-	
+
 	public static func shrink(bl : ArraySlice<Element>) -> [ArraySlice<Element>] {
 		return [Element].shrink([Element](bl)).map(ArraySlice.init)
 	}
@@ -363,7 +363,7 @@ extension ArraySlice where Element : Arbitrary {
 
 extension ArraySlice : WitnessedArbitrary {
 	public typealias Param = Element
-	
+
 	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (ArraySlice<Element> -> Testable)) -> Property {
 		return forAllShrink(ArraySlice<A>.arbitrary, shrinker: ArraySlice<A>.shrink, f: { bl in
 			return pf(ArraySlice<Element>(bl.map(wit)))
@@ -379,7 +379,7 @@ extension CollectionOfOne where Element : Arbitrary {
 
 extension CollectionOfOne : WitnessedArbitrary {
 	public typealias Param = Element
-	
+
 	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (CollectionOfOne<Element> -> Testable)) -> Property {
 		return forAllShrink(CollectionOfOne<A>.arbitrary, shrinker: { _ in [] }, f: { (bl : CollectionOfOne<A>) -> Testable in
 			return pf(CollectionOfOne<Element>(wit(bl[.Zero])))
@@ -395,7 +395,7 @@ extension Optional where Wrapped : Arbitrary {
 			(3, liftM(Optional<Wrapped>.Some)(m1: Wrapped.arbitrary)),
 		])
 	}
-	
+
 	public static func shrink(bl : Optional<Wrapped>) -> [Optional<Wrapped>] {
 		if let x = bl {
 			return [.None] + Wrapped.shrink(x).map(Optional<Wrapped>.Some)
@@ -406,7 +406,7 @@ extension Optional where Wrapped : Arbitrary {
 
 extension Optional : WitnessedArbitrary {
 	public typealias Param = Wrapped
-	
+
 	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Wrapped)(pf : (Optional<Wrapped> -> Testable)) -> Property {
 		return forAllShrink(Optional<A>.arbitrary, shrinker: Optional<A>.shrink, f: { bl in
 			return pf(bl.map(wit))
@@ -418,7 +418,7 @@ extension ContiguousArray where Element : Arbitrary {
 	public static var arbitrary : Gen<ContiguousArray<Element>> {
 		return ContiguousArray.init <^> [Element].arbitrary
 	}
-	
+
 	public static func shrink(bl : ContiguousArray<Element>) -> [ContiguousArray<Element>] {
 		return [Element].shrink([Element](bl)).map(ContiguousArray.init)
 	}
@@ -426,7 +426,7 @@ extension ContiguousArray where Element : Arbitrary {
 
 extension ContiguousArray : WitnessedArbitrary {
 	public typealias Param = Element
-	
+
 	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (ContiguousArray<Element> -> Testable)) -> Property {
 		return forAllShrink(ContiguousArray<A>.arbitrary, shrinker: ContiguousArray<A>.shrink, f: { bl in
 			return pf(ContiguousArray<Element>(bl.map(wit)))
@@ -443,7 +443,7 @@ extension Dictionary where Key : Arbitrary, Value : Arbitrary {
 			}
 		}
 	}
-	
+
 	public static func shrink(d : Dictionary<Key, Value>) -> [Dictionary<Key, Value>] {
 		return d.map { Dictionary(Zip2Sequence(Key.shrink($0), Value.shrink($1))) }
 	}
@@ -473,7 +473,7 @@ extension HalfOpenInterval where Bound : protocol<Comparable, Arbitrary> {
 			}
 		}
 	}
-	
+
 	public static func shrink(bl : HalfOpenInterval<Bound>) -> [HalfOpenInterval<Bound>] {
 		return zip(Bound.shrink(bl.start), Bound.shrink(bl.end)).map(HalfOpenInterval.init)
 	}
@@ -483,7 +483,7 @@ extension ImplicitlyUnwrappedOptional where Wrapped : Arbitrary {
 	public static var arbitrary : Gen<ImplicitlyUnwrappedOptional<Wrapped>> {
 		return ImplicitlyUnwrappedOptional.init <^> Optional<Wrapped>.arbitrary
 	}
-	
+
 	public static func shrink(bl : ImplicitlyUnwrappedOptional<Wrapped>) -> [ImplicitlyUnwrappedOptional<Wrapped>] {
 		return Optional<Wrapped>.shrink(bl).map(ImplicitlyUnwrappedOptional.init)
 	}
@@ -491,7 +491,7 @@ extension ImplicitlyUnwrappedOptional where Wrapped : Arbitrary {
 
 extension ImplicitlyUnwrappedOptional : WitnessedArbitrary {
 	public typealias Param = Wrapped
-	
+
 	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Wrapped)(pf : (ImplicitlyUnwrappedOptional<Wrapped> -> Testable)) -> Property {
 		return forAllShrink(ImplicitlyUnwrappedOptional<A>.arbitrary, shrinker: ImplicitlyUnwrappedOptional<A>.shrink, f: { bl in
 			return pf(bl.map(wit))
@@ -519,7 +519,7 @@ extension Range where Element : protocol<ForwardIndexType, Comparable, Arbitrary
 			}
 		}
 	}
-	
+
 	public static func shrink(bl : Range<Element>) -> [Range<Element>] {
 		return Zip2Sequence(Element.shrink(bl.startIndex), Element.shrink(bl.endIndex)).map(Range.init)
 	}
@@ -533,7 +533,7 @@ extension Repeat where Element : Arbitrary {
 
 extension Repeat : WitnessedArbitrary {
 	public typealias Param = Element
-	
+
 	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (Repeat<Element> -> Testable)) -> Property {
 		return forAllShrink(Repeat<A>.arbitrary, shrinker: { _ in [] }, f: { bl in
 			let xs = bl.map(wit)
@@ -549,12 +549,12 @@ extension Set where Element : protocol<Arbitrary, Hashable> {
 				if k == 0 {
 					return Gen.pure(Set([]))
 				}
-				
+
 				return Set.init <^> sequence(Array((0...k)).map { _ in Element.arbitrary })
 			}
 		}
 	}
-	
+
 	public static func shrink(s : Set<Element>) -> [Set<Element>] {
 		return [Element].shrink([Element](s)).map(Set.init)
 	}
@@ -562,7 +562,7 @@ extension Set where Element : protocol<Arbitrary, Hashable> {
 
 extension Set : WitnessedArbitrary {
 	public typealias Param = Element
-	
+
 	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (Set<Element> -> Testable)) -> Property {
 		return forAll { (xs : [A]) in
 			return pf(Set<Element>(xs.map(wit)))
@@ -767,7 +767,7 @@ private func unfoldr<A, B>(f : B -> Optional<(A, B)>, initial : B) -> [A] {
 private func removes<A : Arbitrary>(k : Int, n : Int, xs : [A]) -> [[A]] {
 	let xs1 = take(k, xs: xs)
 	let xs2 = drop(k, xs: xs)
-	
+
 	if k > n {
 		return []
 	} else if xs2.isEmpty {

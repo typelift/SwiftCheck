@@ -19,7 +19,7 @@ class PropertySpec : XCTestCase {
 				return b == n
 			}.once
 		}
-		
+
 		property("Conjamb randomly picks from multiple generators") <- forAll { (n : Int, m : Int, o : Int) in
 			return conjamb({
 				return true <?> "picked 1"

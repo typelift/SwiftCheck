@@ -182,13 +182,13 @@ extension Testable {
 
 		return self.mapResult({ res in
 			return TestResult(ok: res.ok,
-						expect: res.expect,
-						reason: res.reason,
-						theException: res.theException,
-						labels: res.labels,
-						stamp: res.stamp,
-						callbacks: res.callbacks + chattyCallbacks(res.callbacks),
-						abort: res.abort)
+							expect: res.expect,
+							reason: res.reason,
+							theException: res.theException,
+							labels: res.labels,
+							stamp: res.stamp,
+							callbacks: res.callbacks + chattyCallbacks(res.callbacks),
+							abort: res.abort)
 		})
 	}
 
@@ -198,13 +198,13 @@ extension Testable {
 	public var expectFailure : Property {
 		return self.mapTotalResult({ res in
 			return TestResult(ok: res.ok,
-						expect: false,
-						reason: res.reason,
-						theException: res.theException,
-						labels: res.labels,
-						stamp: res.stamp,
-						callbacks: res.callbacks,
-						abort: res.abort)
+							expect: false,
+							reason: res.reason,
+							theException: res.theException,
+							labels: res.labels,
+							stamp: res.stamp,
+							callbacks: res.callbacks,
+							abort: res.abort)
 		})
 	}
 
@@ -235,13 +235,13 @@ extension Testable {
 		if b {
 			return self.mapResult({ res in
 				return TestResult(ok: res.ok,
-							expect: res.expect,
-							reason: res.reason,
-							theException: res.theException,
-							labels: insertWith(max, k: s, v: n, m: res.labels),
-							stamp: res.stamp.union([s]),
-							callbacks: res.callbacks,
-							abort: res.abort)
+								expect: res.expect,
+								reason: res.reason,
+								theException: res.theException,
+								labels: insertWith(max, k: s, v: n, m: res.labels),
+								stamp: res.stamp.union([s]),
+								callbacks: res.callbacks,
+								abort: res.abort)
 			})
 		}
 		return self.property
@@ -291,7 +291,7 @@ public enum TestResultMatcher {
 
 /// A `TestResult` represents the result of performing a single test.
 public struct TestResult {
-	/// The result of executing the test case.  For Discarded test cases the value of this property 
+	/// The result of executing the test case.  For Discarded test cases the value of this property
 	/// is .None.
 	let ok				: Optional<Bool>
 	/// Indicates what the expected result of the property is.
@@ -363,7 +363,14 @@ private func props<A>(shrinker : A -> [A], original : A, pf: A -> Testable) -> R
 }
 
 private func result(ok : Bool?, reason : String = "") -> TestResult {
-	return TestResult(ok: ok, expect: true, reason: reason, theException: .None, labels: [:], stamp: Set(), callbacks: [], abort: false)
+	return TestResult(ok: ok,
+					expect: true,
+					reason: reason,
+					theException: .None,
+					labels: [:],
+					stamp: Set(),
+					callbacks: [],
+					abort: false)
 }
 
 private func protectResults(rs : Rose<TestResult>) -> Rose<TestResult> {
@@ -424,26 +431,26 @@ internal func unionWith<K : Hashable, V>(f : (V, V) -> V, l : Dictionary<K, V>, 
 private func addCallbacks(result : TestResult) -> TestResult -> TestResult {
 	return { res in
 		return TestResult(ok: res.ok,
-			expect: res.expect,
-			reason: res.reason,
-			theException: res.theException,
-			labels: res.labels,
-			stamp: res.stamp,
-			callbacks: result.callbacks + res.callbacks,
-			abort: res.abort)
+						expect: res.expect,
+						reason: res.reason,
+						theException: res.theException,
+						labels: res.labels,
+						stamp: res.stamp,
+						callbacks: result.callbacks + res.callbacks,
+						abort: res.abort)
 	}
 }
 
 private func addLabels(result : TestResult) -> TestResult -> TestResult {
 	return { res in
 		return TestResult(ok: res.ok,
-			expect: res.expect,
-			reason: res.reason,
-			theException: res.theException,
-			labels: unionWith(max, l: res.labels, r: result.labels),
-			stamp: res.stamp.union(result.stamp),
-			callbacks: res.callbacks,
-			abort: res.abort)
+						expect: res.expect,
+						reason: res.reason,
+						theException: res.theException,
+						labels: unionWith(max, l: res.labels, r: result.labels),
+						stamp: res.stamp.union(result.stamp),
+						callbacks: res.callbacks,
+						abort: res.abort)
 	}
 }
 
@@ -517,30 +524,31 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 			return Rose.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 		}
 		switch result1.ok {
-		case .Some(true):
-			return Rose.pure(result1)
-		case .Some(false):
-			return q.bind { result2 in
-				if !result2.expect {
-					return Rose.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
-				}
-				switch result2.ok {
-				case .Some(true):
-					return Rose.pure(result2)
-				case .Some(false):
-					return Rose.pure(TestResult(ok: .Some(false),
-						expect: true,
-						reason: sep(result1.reason, r: result2.reason),
-						theException: mplus(result1.theException, r: result2.theException),
-						labels: [:],
-						stamp: Set(),
-						callbacks: result1.callbacks + [.AfterFinalFailure(kind: .Counterexample, f: { _ in
-							return print("")
-						})] + result2.callbacks,
-						abort: false))
-				case .None:
-					return Rose.pure(result2)
-				}
+			case .Some(true):
+				return Rose.pure(result1)
+			case .Some(false):
+				return q.bind { result2 in
+					if !result2.expect {
+						return Rose.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
+					}
+					switch result2.ok {
+						case .Some(true):
+							return Rose.pure(result2)
+						case .Some(false):
+							return Rose.pure(TestResult(ok: .Some(false),
+														expect: true,
+														reason: sep(result1.reason, r: result2.reason),
+														theException: mplus(result1.theException, r: result2.theException),
+														labels: [:],
+														stamp: Set(),
+														callbacks: result1.callbacks + [.AfterFinalFailure(kind: .Counterexample,
+															f: { _ in
+																return print("")
+															})] + result2.callbacks,
+														abort: false))
+						case .None:
+							return Rose.pure(result2)
+					}
 			}
 		case .None:
 			return q.bind { result2 in
@@ -548,10 +556,10 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 					return Rose.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 				}
 				switch result2.ok {
-				case .Some(true):
-					return Rose.pure(result2)
-				default:
-					return Rose.pure(result1)
+					case .Some(true):
+						return Rose.pure(result2)
+					default:
+						return Rose.pure(result1)
 				}
 			}
 		}

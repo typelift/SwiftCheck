@@ -118,4 +118,3 @@ public func ^||^(p1 : Testable, p2 : Testable) -> Property {
 }
 
 import func XCTest.XCTFail
-

@@ -11,7 +11,7 @@ import func Darwin.rand
 
 public protocol RandomGen {
 	func next() -> (Int, Self)
-	
+
 	func genRange() -> (Int, Int)
 	func split() -> (Self, Self)
 }
@@ -21,22 +21,22 @@ let standardRNG : StdGen = StdGen(time(nil))
 
 public struct StdGen : RandomGen {
 	let seed: Int
-	
+
 	init(_ seed : Int) {
 		self.seed = seed
 	}
-	
+
 	public func next() -> (Int, StdGen) {
 		let s = Int(time(nil))
 		return (Int(rand()), StdGen(s))
 	}
-	
+
 	public func split() -> (StdGen, StdGen) {
 		let (s1, g) = self.next()
 		let (s2, _) = g.next()
 		return (StdGen(s1), StdGen(s2))
 	}
-	
+
 	public func genRange() -> (Int, Int) {
 		return (Int.min, Int.max)
 	}
@@ -50,7 +50,7 @@ private func mkStdRNG(seed : Int) -> StdGen {
 	return StdGen(seed)
 }
 
-/// Types that can generate random versions of themselves. 
+/// Types that can generate random versions of themselves.
 public protocol RandomType {
 	static func randomInRange<G : RandomGen>(range : (Self, Self), gen : G) -> (Self, G)
 }
@@ -65,7 +65,7 @@ extension Int : RandomType {
 		let (min, max) = range
 		let (r, g) = gen.next()
 		let result = (r % ((max + 1) - min)) + min;
-		
+
 		return (result, g);
 	}
 }
@@ -75,7 +75,7 @@ extension Int8 : RandomType {
 		let (min, max) = range
 		let (r, g) = gen.next()
 		let result = (r % ((max + 1) - min)) + min;
-		
+
 		return (result, g);
 	}
 }
@@ -85,7 +85,7 @@ extension Int16 : RandomType {
 		let (min, max) = range
 		let (r, g) = gen.next()
 		let result = (r % ((max + 1) - min)) + min;
-		
+
 		return (result, g);
 	}
 }
@@ -95,7 +95,7 @@ extension Int32 : RandomType {
 		let (min, max) = range
 		let (r, g) = gen.next()
 		let result = (r % ((max + 1) - min)) + min;
-		
+
 		return (result, g);
 	}
 }
@@ -105,7 +105,7 @@ extension Int64 : RandomType {
 		let (min, max) = range
 		let (r, g) = gen.next()
 		let result = (r % ((max + 1) - min)) + min;
-		
+
 		return (result, g);
 	}
 }
@@ -115,7 +115,7 @@ extension UInt : RandomType {
 		let (min, max) = range
 		let (r, g) = gen.next()
 		let result = (UInt(r) % ((max + 1) - min)) + min;
-		
+
 		return (result, g);
 	}
 }
@@ -125,7 +125,7 @@ extension UInt8 : RandomType {
 		let (min, max) = range
 		let (r, g) = gen.next()
 		let result = (UInt8(r) % ((max + 1) - min)) + min;
-		
+
 		return (result, g);
 	}
 }
@@ -135,7 +135,7 @@ extension UInt16 : RandomType {
 		let (min, max) = range
 		let (r, g) = gen.next()
 		let result = (UInt16(r) % ((max + 1) - min)) + min;
-		
+
 		return (result, g);
 	}
 }
@@ -145,7 +145,7 @@ extension UInt32 : RandomType {
 		let (min, max) = range
 		let (r, g) = gen.next()
 		let result = (UInt32(r) % ((max + 1) - min)) + min;
-		
+
 		return (result, g);
 	}
 }
@@ -155,7 +155,7 @@ extension UInt64 : RandomType {
 		let (min, max) = range
 		let (r, g) = gen.next()
 		let result = (UInt64(r) % ((max + 1) - min)) + min;
-		
+
 		return (result, g);
 	}
 }
@@ -166,7 +166,7 @@ extension Float : RandomType {
 		let (r, g) = gen.next()
 		let fr = Float(r)
 		let result = (fr % ((max + 1) - min)) + min;
-		
+
 		return (result, g);
 	}
 }
@@ -177,7 +177,7 @@ extension Double : RandomType {
 		let (r, g) = gen.next()
 		let dr = Double(r)
 		let result = (dr % ((max + 1) - min)) + min;
-		
+
 		return (result, g);
 	}
 }
