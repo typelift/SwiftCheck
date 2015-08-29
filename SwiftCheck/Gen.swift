@@ -31,7 +31,7 @@ public struct Gen<A> {
 		}
 	}
 
-	/// Constructs a Generator that selects a random value from the given list and produces only 
+	/// Constructs a Generator that selects a random value from the given list and produces only
 	/// that value.
 	///
 	/// The input array is required to be non-empty.
@@ -43,8 +43,8 @@ public struct Gen<A> {
 		}
 	}
 
-	/// Constructs a Generator that uses a given array to produce smaller arrays composed of its 
-	/// initial segments.  The size of each initial segment increases with the receiver's size 
+	/// Constructs a Generator that uses a given array to produce smaller arrays composed of its
+	/// initial segments.  The size of each initial segment increases with the receiver's size
 	/// parameter.
 	///
 	/// The input array is required to be non-empty.

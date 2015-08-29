@@ -6,9 +6,9 @@
 //  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
-/// A `Rose` is a modified Rose Tree, or multi-way tree, for representing the steps necessary for 
+/// A `Rose` is a modified Rose Tree, or multi-way tree, for representing the steps necessary for
 /// testing a property.  The first case, .MkRose, consists of a value and a list of trees.  The
-/// second, case, .IORose, is a suspended IO action SwiftCheck must execute in order to produce 
+/// second, case, .IORose, is a suspended IO action SwiftCheck must execute in order to produce
 /// another Rose tree.  All values in a `Rose` are lazy.
 ///
 /// In practice SwiftCheck will minimize the side-effects performed in a given `IORose` to printing
@@ -33,10 +33,10 @@ extension Rose /*: Functor*/ {
 
 public func <^> <A, B>(f : A -> B, g : Rose<A>) -> Rose<B> {
 	switch g {
-	case .MkRose(let root, let children):
-		return .MkRose({ f(root()) }, { children().map() { $0.fmap(f) } })
-	case .IORose(let rs):
-		return .IORose({ rs().fmap(f) })
+		case .MkRose(let root, let children):
+			return .MkRose({ f(root()) }, { children().map() { $0.fmap(f) } })
+		case .IORose(let rs):
+			return .IORose({ rs().fmap(f) })
 	}
 }
 
@@ -51,7 +51,7 @@ extension Rose /*: Applicative*/ {
 	/// Applies a Rose Tree of functions to the receiver to yield a new Rose Tree of values.
 	///
 	/// For `.MkRose` branches the computation is applied to the node's value then application
-	/// recurses into the sub-trees.  For `.IORose` the branch is reduced to a `.MkRose` and 
+	/// recurses into the sub-trees.  For `.IORose` the branch is reduced to a `.MkRose` and
 	/// applied, executing all side-effects along the way.
 	public func ap<B>(fn : Rose<A -> B>) -> Rose<B> {
 		return fn <*> self
@@ -60,10 +60,10 @@ extension Rose /*: Applicative*/ {
 
 public func <*> <A, B>(fn : Rose<A -> B>, g : Rose<A>) -> Rose<B> {
 	switch fn {
-	case .MkRose(let f, _):
-		return g.fmap(f())
-	case .IORose(let rs):
-		return g.ap(rs()) ///EEWW, EW, EW, EW, EW, EW
+		case .MkRose(let f, _):
+			return g.fmap(f())
+		case .IORose(let rs):
+			return g.ap(rs()) ///EEWW, EW, EW, EW, EW, EW
 	}
 }
 
@@ -89,7 +89,7 @@ public func liftM<A, R>(f : A -> R)(m1 : Rose<A>) -> Rose<R> {
 ///
 /// For `.IORose` branches the join is suspended.  For `.MkRose` branches, the kind of subtree at
 /// the node dictates the behavior of the join.  For `.IORose` sub-trees The join is suspended.  For
-/// `.MkRose` the result is the value at the sub-tree node and a recursive call to join the branch's 
+/// `.MkRose` the result is the value at the sub-tree node and a recursive call to join the branch's
 /// tree to its sub-trees.
 public func joinRose<A>(rs : Rose<Rose<A>>) -> Rose<A> {
 	switch rs {
@@ -102,11 +102,10 @@ public func joinRose<A>(rs : Rose<Rose<A>>) -> Rose<A> {
 				case .MkRose(let x, let ts):
 					return .MkRose(x, { rs().map(joinRose) + ts() })
 			}
-			
 	}
 }
 
-/// Reduces a rose tree by evaluating all `.IORose` branches until the first `.MkRose` branch is 
+/// Reduces a rose tree by evaluating all `.IORose` branches until the first `.MkRose` branch is
 /// encountered.  That branch is then returned.
 public func reduce(rs : Rose<TestResult>) -> Rose<TestResult> {
 	switch rs {

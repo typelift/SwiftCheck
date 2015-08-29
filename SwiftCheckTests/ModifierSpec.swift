@@ -14,7 +14,7 @@ class ModifierSpec : XCTestCase {
 		property("All blind variables print '(*)'") <- forAll { (x : Blind<Int>) in
 			return x.description == "(*)"
 		}
-		
+
 		property("Static propositions never shrink") <- forAll { (x : Static<Int>) in
 			return Static<Int>.shrink(x).isEmpty
 		}
@@ -22,11 +22,11 @@ class ModifierSpec : XCTestCase {
 		property("Positive propositions only generate positive numbers") <- forAll { (x : Positive<Int>) in
 			return x.getPositive > 0
 		}
-		
+
 		property("NonZero propositions never generate zero") <- forAll { (x : NonZero<Int>) in
 			return x.getNonZero != 0
 		}
-		
+
 		property("NonNegative propositions only generate non negative numbers") <- forAll { (x : NonNegative<Int>) in
 			return x.getNonNegative >= 0
 		}
@@ -34,7 +34,7 @@ class ModifierSpec : XCTestCase {
 		property("ArrayOf modifiers nest") <- forAll { (xxxs : ArrayOf<ArrayOf<Int8>>) in
 			return true
 		}
-	
+
 		property("The reverse of the reverse of an array is that array") <- forAll { (xs : ArrayOf<Int>) in
 			return
 				(xs.getArray.reverse().reverse() == xs.getArray) <?> "Left identity"
@@ -45,7 +45,7 @@ class ModifierSpec : XCTestCase {
 		property("map behaves") <- forAll { (xs : ArrayOf<Int>, f : ArrowOf<Int, Int>) in
 			return xs.getArray.map(f.getArrow) == xs.getArray.map(f.getArrow)
 		}
-		
+
 		property("IsoOf generates a real isomorphism") <- forAll { (x : Int, y : String, iso : IsoOf<Int, String>) in
 			return
 				iso.getFrom(iso.getTo(x)) == x

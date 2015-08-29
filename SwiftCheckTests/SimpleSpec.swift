@@ -12,11 +12,11 @@ import SwiftCheck
 public struct ArbitraryFoo {
 	let x : Int
 	let y : Int
-	
+
 	public static func create(x : Int) -> Int -> ArbitraryFoo {
 		return { y in ArbitraryFoo(x: x, y: y) }
-	} 
-	
+	}
+
 	public var description : String {
 		return "Arbitrary Foo!"
 	}
@@ -50,7 +50,7 @@ class SimpleSpec : XCTestCase {
 		property("String Equality is Reflexive") <- forAll { (s : String) in
 			return s == s
 		}
-		
+
 		property("ArbitraryFoo Properties are Reflexive") <- forAll { (i : ArbitraryFoo) in
 			return i.x == i.x && i.y == i.y
 		}
