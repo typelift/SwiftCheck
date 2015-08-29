@@ -197,16 +197,14 @@ extension Testable {
 	/// If the property does not fail, SwiftCheck will report an error.
 	public var expectFailure : Property {
 		return self.mapTotalResult({ res in
-			return TestResult(
-				ok: res.ok,
-				expect: false,
-				reason: res.reason,
-				theException: res.theException,
-				labels: res.labels,
-				stamp: res.stamp,
-				callbacks: res.callbacks,
-				abort: res.abort
-			)
+			return TestResult(ok: res.ok,
+							expect: false,
+							reason: res.reason,
+							theException: res.theException,
+							labels: res.labels,
+							stamp: res.stamp,
+							callbacks: res.callbacks,
+							abort: res.abort)
 		})
 	}
 
@@ -236,16 +234,14 @@ extension Testable {
 	public func cover(b : Bool)(n : Int)(s : String) -> Property {
 		if b {
 			return self.mapResult({ res in
-				return TestResult(
-					ok: res.ok,
-					expect: res.expect,
-					reason: res.reason,
-					theException: res.theException,
-					labels: insertWith(max, k: s, v: n, m: res.labels),
-					stamp: res.stamp.union([s]),
-					callbacks: res.callbacks,
-					abort: res.abort
-				)
+				return TestResult(ok: res.ok,
+								expect: res.expect,
+								reason: res.reason,
+								theException: res.theException,
+								labels: insertWith(max, k: s, v: n, m: res.labels),
+								stamp: res.stamp.union([s]),
+								callbacks: res.callbacks,
+								abort: res.abort)
 			})
 		}
 		return self.property
