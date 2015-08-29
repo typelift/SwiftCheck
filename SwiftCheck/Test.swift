@@ -120,25 +120,25 @@ public func quickCheck(prop : Testable, name : String = "") {
 
 internal enum Result {
 	case Success(numTests: Int
-		, labels: [(String, Int)]
-		, output: String
-	)
+				, labels: [(String, Int)]
+				, output: String
+				)
 	case GaveUp(numTests: Int
-		, labels: [(String,Int)]
-		, output: String
-	)
+				, labels: [(String,Int)]
+				, output: String
+				)
 	case Failure(numTests: Int
-		, numShrinks: Int
-		, usedSeed: StdGen
-		, usedSize: Int
-		, reason: String
-		, labels: [(String,Int)]
-		, output: String
-	)
+				, numShrinks: Int
+				, usedSeed: StdGen
+				, usedSize: Int
+				, reason: String
+				, labels: [(String,Int)]
+				, output: String
+				)
 	case  NoExpectedFailure(numTests: Int
-		, labels: [(String,Int)]
-		, output: String
-	)
+							, labels: [(String,Int)]
+							, output: String
+							)
 }
 
 internal indirect enum Either<L, R> {
@@ -201,19 +201,19 @@ internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 
 
 	let istate = CheckerState(name: args.name
-		, maxSuccessTests:		args.maxSuccess
-		, maxDiscardedTests:	args.maxDiscard
-		, computeSize:			computeSize
-		, numSuccessTests:		0
-		, numDiscardedTests:	0
-		, labels:				[:]
-		, collected:			[]
-		, expectedFailure:		false
-		, randomSeed:			rnd()
-		, numSuccessShrinks:	0
-		, numTryShrinks:		0
-		, numTotTryShrinks:		0
-		, shouldAbort:			false)
+							, maxSuccessTests:		args.maxSuccess
+							, maxDiscardedTests:	args.maxDiscard
+							, computeSize:			computeSize
+							, numSuccessTests:		0
+							, numDiscardedTests:	0
+							, labels:				[:]
+							, collected:			[]
+							, expectedFailure:		false
+							, randomSeed:			rnd()
+							, numSuccessShrinks:	0
+							, numTryShrinks:		0
+							, numTotTryShrinks:		0
+							, shouldAbort:			false)
 	let modP : Property = (p.exhaustive ? p.property.once : p.property)
 	return test(istate, f: modP.unProperty.unGen)
 }
@@ -268,37 +268,37 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 			switch res.match() {
 				// Success
 				case .MatchResult(.Some(true), let expect, _, _, let labels, let stamp, _, let abort):
-					let nstate = CheckerState(name: st.name
-						, maxSuccessTests: st.maxSuccessTests
-						, maxDiscardedTests: st.maxDiscardedTests
-						, computeSize: st.computeSize
-						, numSuccessTests: st.numSuccessTests.successor()
-						, numDiscardedTests: st.numDiscardedTests
-						, labels: unionWith(max, l: st.labels, r: labels)
-						, collected: [stamp] + st.collected
-						, expectedFailure: expect
-						, randomSeed: st.randomSeed
-						, numSuccessShrinks: st.numSuccessShrinks
-						, numTryShrinks: st.numTryShrinks
-						, numTotTryShrinks: st.numTotTryShrinks
-						, shouldAbort: abort)
+					let nstate = CheckerState(name:					st.name
+											, maxSuccessTests:		st.maxSuccessTests
+											, maxDiscardedTests:	st.maxDiscardedTests
+											, computeSize:			st.computeSize
+											, numSuccessTests:		st.numSuccessTests.successor()
+											, numDiscardedTests:	st.numDiscardedTests
+											, labels:				unionWith(max, l: st.labels, r: labels)
+											, collected:			[stamp] + st.collected
+											, expectedFailure:		expect
+											, randomSeed:			st.randomSeed
+											, numSuccessShrinks:	st.numSuccessShrinks
+											, numTryShrinks:		st.numTryShrinks
+											, numTotTryShrinks:		st.numTotTryShrinks
+											, shouldAbort:			abort)
 					return .Right(nstate)
 				// Discard
 				case .MatchResult(.None, let expect, _, _, let labels, _, _, let abort):
-					let nstate = CheckerState(name: st.name
-						, maxSuccessTests: st.maxSuccessTests
-						, maxDiscardedTests: st.maxDiscardedTests
-						, computeSize: st.computeSize
-						, numSuccessTests: st.numSuccessTests
-						, numDiscardedTests: st.numDiscardedTests.successor()
-						, labels: unionWith(max, l: st.labels, r: labels)
-						, collected: st.collected
-						, expectedFailure: expect
-						, randomSeed: rnd2
-						, numSuccessShrinks: st.numSuccessShrinks
-						, numTryShrinks: st.numTryShrinks
-						, numTotTryShrinks: st.numTotTryShrinks
-						, shouldAbort: abort)
+					let nstate = CheckerState(name:					st.name
+											, maxSuccessTests:		st.maxSuccessTests
+											, maxDiscardedTests:	st.maxDiscardedTests
+											, computeSize:			st.computeSize
+											, numSuccessTests:		st.numSuccessTests
+											, numDiscardedTests:	st.numDiscardedTests.successor()
+											, labels:				unionWith(max, l: st.labels, r: labels)
+											, collected:			st.collected
+											, expectedFailure:		expect
+											, randomSeed:			rnd2
+											, numSuccessShrinks:	st.numSuccessShrinks
+											, numTryShrinks:		st.numTryShrinks
+											, numTotTryShrinks:		st.numTotTryShrinks
+											, shouldAbort:			abort)
 					return .Right(nstate)
 				// Fail
 				case .MatchResult(.Some(false), let expect, _, _, _, _, _, let abort):
@@ -316,28 +316,28 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 						return .Left((s, st))
 					}
 
-					let stat = Result.Failure(numTests: st.numSuccessTests.successor()
-						, numShrinks: numShrinks
-						, usedSeed: st.randomSeed
-						, usedSize: st.computeSize(st.numSuccessTests)(st.numDiscardedTests)
-						, reason: res.reason
-						, labels: summary(st)
-						, output: "*** Failed! ")
+					let stat = Result.Failure(numTests:		st.numSuccessTests.successor()
+											, numShrinks:	numShrinks
+											, usedSeed:		st.randomSeed
+											, usedSize:		st.computeSize(st.numSuccessTests)(st.numDiscardedTests)
+											, reason:		res.reason
+											, labels:		summary(st)
+											, output:		"*** Failed! ")
 
-					let nstate = CheckerState(name: st.name
-						, maxSuccessTests: st.maxSuccessTests
-						, maxDiscardedTests: st.maxDiscardedTests
-						, computeSize: st.computeSize
-						, numSuccessTests: st.numSuccessTests
-						, numDiscardedTests: st.numDiscardedTests.successor()
-						, labels: st.labels
-						, collected: st.collected
-						, expectedFailure: res.expect
-						, randomSeed: rnd2
-						, numSuccessShrinks: st.numSuccessShrinks
-						, numTryShrinks: st.numTryShrinks
-						, numTotTryShrinks: st.numTotTryShrinks
-						, shouldAbort: abort)
+					let nstate = CheckerState(name:					st.name
+											, maxSuccessTests:		st.maxSuccessTests
+											, maxDiscardedTests:	st.maxDiscardedTests
+											, computeSize:			st.computeSize
+											, numSuccessTests:		st.numSuccessTests
+											, numDiscardedTests:	st.numDiscardedTests.successor()
+											, labels:				st.labels
+											, collected:			st.collected
+											, expectedFailure:		res.expect
+											, randomSeed:			rnd2
+											, numSuccessShrinks:	st.numSuccessShrinks
+											, numTryShrinks:		st.numTryShrinks
+											, numTotTryShrinks:		st.numTotTryShrinks
+											, shouldAbort:			abort)
 					return .Left((stat, nstate))
 			}
 		default:
@@ -423,20 +423,20 @@ internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts
 		numSuccessShrinks++
 	}
 
-	let state = CheckerState(name: st.name
-		, maxSuccessTests: st.maxSuccessTests
-		, maxDiscardedTests: st.maxDiscardedTests
-		, computeSize: st.computeSize
-		, numSuccessTests: st.numSuccessTests
-		, numDiscardedTests: st.numDiscardedTests
-		, labels: st.labels
-		, collected: st.collected
-		, expectedFailure: st.expectedFailure
-		, randomSeed: st.randomSeed
-		, numSuccessShrinks: numSuccessShrinks
-		, numTryShrinks: numTryShrinks
-		, numTotTryShrinks: numTotTryShrinks
-		, shouldAbort: st.shouldAbort)
+	let state = CheckerState(name:					st.name
+							, maxSuccessTests:		st.maxSuccessTests
+							, maxDiscardedTests:	st.maxDiscardedTests
+							, computeSize:			st.computeSize
+							, numSuccessTests:		st.numSuccessTests
+							, numDiscardedTests:	st.numDiscardedTests
+							, labels:				st.labels
+							, collected:			st.collected
+							, expectedFailure:		st.expectedFailure
+							, randomSeed:			st.randomSeed
+							, numSuccessShrinks:	numSuccessShrinks
+							, numTryShrinks:		numTryShrinks
+							, numTotTryShrinks:		numTotTryShrinks
+							, shouldAbort:			st.shouldAbort)
 	return reportMinimumCaseFound(state, res: lastResult)
 }
 
