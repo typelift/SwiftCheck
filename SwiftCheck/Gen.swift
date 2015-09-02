@@ -36,7 +36,7 @@ public struct Gen<A> {
 	///
 	/// The input array is required to be non-empty.
 	public static func fromElementsOf<S : CollectionType where S.Generator.Element == A, S.Index : protocol<RandomType, BidirectionalIndexType>>(xs : S) -> Gen<A> {
-		assert(!xs.isEmpty, "Gen.fromElementsOf used with empty list")
+		assert(!xs.isEmpty, "Gen.fromElementsOf used with empty sequence")
 
 		return choose((xs.startIndex, xs.endIndex.predecessor())).fmap { i in
 			return xs[i]
@@ -48,7 +48,7 @@ public struct Gen<A> {
 	///
 	/// The input interval is required to be non-empty.
 	public static func fromElementsIn<S : IntervalType where S.Bound : RandomType>(xs : S) -> Gen<S.Bound> {
-		assert(!xs.isEmpty, "Gen.fromElementsOf used with empty list")
+		assert(!xs.isEmpty, "Gen.fromElementsOf used with empty interval")
 
 		return choose((xs.start, xs.end))
 	}
