@@ -31,16 +31,26 @@ public struct Gen<A> {
 		}
 	}
 
-	/// Constructs a Generator that selects a random value from the given list and produces only
+	/// Constructs a Generator that selects a random value from the given collection and produces only
 	/// that value.
 	///
 	/// The input array is required to be non-empty.
-	public static func fromElementsOf(xs : [A]) -> Gen<A> {
-		assert(xs.count != 0, "Gen.fromElementsOf used with empty list")
+	public static func fromElementsOf<S : CollectionType where S.Generator.Element == A, S.Index : protocol<RandomType, BidirectionalIndexType>>(xs : S) -> Gen<A> {
+		assert(!xs.isEmpty, "Gen.fromElementsOf used with empty sequence")
 
-		return choose((0, xs.count - 1)).fmap { i in
+		return choose((xs.startIndex, xs.endIndex.predecessor())).fmap { i in
 			return xs[i]
 		}
+	}
+
+	/// Constructs a Generator that selects a random value from the given interval and produces only
+	/// that value.
+	///
+	/// The input interval is required to be non-empty.
+	public static func fromElementsIn<S : IntervalType where S.Bound : RandomType>(xs : S) -> Gen<S.Bound> {
+		assert(!xs.isEmpty, "Gen.fromElementsOf used with empty interval")
+
+		return choose((xs.start, xs.end))
 	}
 
 	/// Constructs a Generator that uses a given array to produce smaller arrays composed of its
