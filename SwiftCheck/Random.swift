@@ -60,6 +60,24 @@ public func random<A : protocol<LatticeType, RandomType>, G : RandomGen>(gen : G
 	return A.randomInRange((A.min, A.max), gen: gen)
 }
 
+extension Character : RandomType {
+	public static func randomInRange<G : RandomGen>(range : (Character, Character), gen : G) -> (Character, G) {
+		let (min, max) = range
+		let minc = String(min).unicodeScalars.first!
+		let maxc = String(max).unicodeScalars.first!
+
+		let (val, gg) = UnicodeScalar.randomInRange((minc, maxc), gen: gen)
+		return (Character(val), gg)
+	}
+}
+
+extension UnicodeScalar : RandomType {
+	public static func randomInRange<G : RandomGen>(range : (UnicodeScalar, UnicodeScalar), gen : G) -> (UnicodeScalar, G) {
+		let (val, gg) = UInt32.randomInRange((range.0.value, range.1.value), gen: gen)
+		return (UnicodeScalar(val), gg)
+	}
+}
+
 extension Int : RandomType {
 	public static func randomInRange<G : RandomGen>(range : (Int, Int), gen : G) -> (Int, G) {
 		let (min, max) = range
