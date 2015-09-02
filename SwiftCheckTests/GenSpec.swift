@@ -46,7 +46,7 @@ class GenSpec : XCTestCase {
 			return forAll(g) { $0 == 0 }
 		}
 
-		property("Gen.elements only generates the elements of the given array") <- forAll { (xss : Array<Int>) in
+		property("Gen.fromElementsOf only generates the elements of the given array") <- forAll { (xss : Array<Int>) in
 			if xss.isEmpty {
 				return Discard()
 			}
@@ -54,8 +54,15 @@ class GenSpec : XCTestCase {
 			return forAll(Gen.fromElementsOf(xss)) { l.contains($0) }
 		}
 
-		property("Gen.elements only generates the elements of the given array") <- forAll { (n1 : Int, n2 : Int) in
+		property("Gen.fromElementsOf only generates the elements of the given array") <- forAll { (n1 : Int, n2 : Int) in
 			return forAll(Gen.fromElementsOf([n1, n2])) { $0 == n1 || $0 == n2 }
+		}
+
+		property("Gen.fromElementsOf only generates the elements of the given interval") <- forAll { (n1 : Int, n2 : Int) in
+			return (n1 < n2) ==> {
+				let interval = n1..<n2
+				return forAll(Gen<Int>.fromElementsOf(interval)) { interval.contains($0) }
+			}
 		}
 
 		property("oneOf n") <- forAll { (xss : ArrayOf<Int>) in
