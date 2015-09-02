@@ -9,12 +9,12 @@
 import XCTest
 import SwiftCheck
 
-let upper = Gen<Character>.fromElementsOf("A"..."Z" as ClosedInterval<Character>)
-let lower = Gen<Character>.fromElementsOf("a"..."z" as ClosedInterval<Character>)
-let numeric = Gen<Character>.fromElementsOf("0"..."9" as ClosedInterval<Character>)
+let upper : Gen<Character>= Gen<Character>.fromElementsIn("A"..."Z")
+let lower : Gen<Character> = Gen<Character>.fromElementsIn("a"..."z")
+let numeric : Gen<Character> = Gen<Character>.fromElementsIn("0"..."9")
 let special = Gen<Character>.fromElementsOf(["!", "#", "$", "%", "&", "'", "*", "+", "-", "/", "=", "?", "^", "_", "`", "{", "|", "}", "~", "."])
 let hexDigits = Gen<Character>.oneOf([
-	Gen<Character>.fromElementsOf("A"..."F"),
+	Gen<Character>.fromElementsIn("A"..."F"),
 	numeric,
 ])
 

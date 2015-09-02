@@ -47,7 +47,7 @@ public struct Gen<A> {
 	/// that value.
 	///
 	/// The input interval is required to be non-empty.
-	public static func fromElementsOf<S : IntervalType where S.Bound : RandomType>(xs : S) -> Gen<S.Bound> {
+	public static func fromElementsIn<S : IntervalType where S.Bound : RandomType>(xs : S) -> Gen<S.Bound> {
 		assert(!xs.isEmpty, "Gen.fromElementsOf used with empty list")
 
 		return choose((xs.start, xs.end))

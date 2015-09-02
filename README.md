@@ -233,8 +233,10 @@ let vowels = Gen.fromElementsOf(["A", "E", "I", "O", "U" ])
 
 let randomHexValue = Gen<UInt>.choose((0, 15))
 
-let randomCharacter = Gen<Character>.choose("A"..."Z")
-
+let uppers : Gen<Character>= Gen<Character>.fromElementsIn("A"..."Z")
+let lowers : Gen<Character> = Gen<Character>.fromElementsIn("a"..."z")
+let numbers : Gen<Character> = Gen<Character>.fromElementsIn("0"..."9")
+ 
 /// This generator will generate `.None` 1/4 of the time and an arbitrary
 /// `.Some` 3/4 of the time
 let weightedOptionals = Gen<Int?>.frequency([
