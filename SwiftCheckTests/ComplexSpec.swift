@@ -15,6 +15,10 @@ class ComplexSpec : XCTestCase {
 		let lower = Gen<Character>.fromElementsOf("a"..."z" as ClosedInterval<Character>)
 		let numeric = Gen<Character>.fromElementsOf("0"..."9" as ClosedInterval<Character>)
 		let special = Gen<Character>.fromElementsOf(["!", "#", "$", "%", "&", "'", "*", "+", "-", "/", "=", "?", "^", "_", "`", "{", "|", "}", "~", "."])
+		let hexDigits = Gen<Character>.oneOf([
+			Gen<Character>.fromElementsOf("A"..."F"),
+			numeric,
+		])
 
 		let localEmail = Gen<Character>.oneOf([
 			upper,
@@ -27,20 +31,13 @@ class ComplexSpec : XCTestCase {
 			numeric,
 			Gen.pure("-"),
 		]).proliferateNonEmpty().fmap(String.init)
-		let tld = Gen<Character>.oneOf([
-			lower,
-		]).proliferateNonEmpty().suchThat({ $0.count > 1 }).fmap(String.init)
+		let tld = lower.proliferateNonEmpty().suchThat({ $0.count > 1 }).fmap(String.init)
 
 		let emailGen = wrap3 <^> localEmail <*> Gen.pure("@") <*> hostname <*> Gen.pure(".") <*> tld
 
 		property("Generated email addresses contain 1 @") <- forAll(emailGen) { (e : String) in
 			return e.characters.filter({ $0 == "@" }).count == 1
 		}
-
-		let hexDigits = Gen<Character>.oneOf([
-			Gen<Character>.fromElementsOf("A"..."F"),
-			numeric,
-		])
 
 		let ipHexDigits = Gen<String>.oneOf([
 			hexDigits.proliferateSized(1).fmap{ String.init($0) + ":" },
