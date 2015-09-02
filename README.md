@@ -229,15 +229,15 @@ with custom generators as simple as possible:
 ```swift
 let onlyEven = Int.arbitrary.suchThat { $0 % 2 == 0 }
 
-let vowels = Gen.elements(["A", "E", "I", "O", "U" ])
+let vowels = Gen.fromElementsOf(["A", "E", "I", "O", "U" ])
 
 let randomHexValue = Gen<UInt>.choose((0, 15))
 
 /// This generator will generate `.None` 1/4 of the time and an arbitrary
 /// `.Some` 3/4 of the time
-let weightedOptionals = Gen.frequency([
-    (1, Gen.pure(OptionalOf(Optional<A>.None))),
-    (3, liftM({ OptionalOf(Optional<A>.Some($0)) })(m1: Int.arbitrary))
+let weightedOptionals = Gen<Int?>.frequency([
+	(1, Gen<Int?>.pure(nil)),
+	(3, Optional.Some <^> Int.arbitrary)
 ])
 ```
 
