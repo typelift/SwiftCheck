@@ -9,17 +9,17 @@
 import XCTest
 import SwiftCheck
 
-class ComplexSpec : XCTestCase {
-	func testProperties() {
-		let upper = Gen<Character>.fromElementsOf("A"..."Z" as ClosedInterval<Character>)
-		let lower = Gen<Character>.fromElementsOf("a"..."z" as ClosedInterval<Character>)
-		let numeric = Gen<Character>.fromElementsOf("0"..."9" as ClosedInterval<Character>)
-		let special = Gen<Character>.fromElementsOf(["!", "#", "$", "%", "&", "'", "*", "+", "-", "/", "=", "?", "^", "_", "`", "{", "|", "}", "~", "."])
-		let hexDigits = Gen<Character>.oneOf([
-			Gen<Character>.fromElementsOf("A"..."F"),
-			numeric,
-		])
+let upper = Gen<Character>.fromElementsOf("A"..."Z" as ClosedInterval<Character>)
+let lower = Gen<Character>.fromElementsOf("a"..."z" as ClosedInterval<Character>)
+let numeric = Gen<Character>.fromElementsOf("0"..."9" as ClosedInterval<Character>)
+let special = Gen<Character>.fromElementsOf(["!", "#", "$", "%", "&", "'", "*", "+", "-", "/", "=", "?", "^", "_", "`", "{", "|", "}", "~", "."])
+let hexDigits = Gen<Character>.oneOf([
+	Gen<Character>.fromElementsOf("A"..."F"),
+	numeric,
+])
 
+class ComplexSpec : XCTestCase {
+	func testEmailAddressProperties() {
 		let localEmail = Gen<Character>.oneOf([
 			upper,
 			lower,
@@ -38,7 +38,9 @@ class ComplexSpec : XCTestCase {
 		property("Generated email addresses contain 1 @") <- forAll(emailGen) { (e : String) in
 			return e.characters.filter({ $0 == "@" }).count == 1
 		}
+	}
 
+	func testIPv6Properties() {
 		let ipHexDigits = Gen<String>.oneOf([
 			hexDigits.proliferateSized(1).fmap{ String.init($0) + ":" },
 			hexDigits.proliferateSized(2).fmap{ String.init($0) + ":" },
@@ -51,7 +53,6 @@ class ComplexSpec : XCTestCase {
 		property("Generated IPs contain 3 sections") <- forAll(ipGen) { (e : String) in
 			return e.characters.filter({ $0 == ":" }).count == 3
 		}
-
 	}
 }
 
