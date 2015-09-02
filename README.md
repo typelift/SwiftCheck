@@ -233,6 +233,8 @@ let vowels = Gen.fromElementsOf(["A", "E", "I", "O", "U" ])
 
 let randomHexValue = Gen<UInt>.choose((0, 15))
 
+let randomCharacter = Gen<Character>.choose("A"..."Z")
+
 /// This generator will generate `.None` 1/4 of the time and an arbitrary
 /// `.Some` 3/4 of the time
 let weightedOptionals = Gen<Int?>.frequency([
@@ -240,6 +242,9 @@ let weightedOptionals = Gen<Int?>.frequency([
 	(3, Optional.Some <^> Int.arbitrary)
 ])
 ```
+ 
+For instances of many complex or "real world" generators, see 
+[`ComplexSpec.swift`](SwiftCheckTests/ComplexSpec.swift).
 
 System Requirements
 ===================
