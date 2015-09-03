@@ -6,12 +6,18 @@
 //  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
-/// A generator for values of type A.
+/// `Gen` represents a generator for random arbitrary values of type `A`.
 ///
 /// `Gen` wraps a function that, when given a random number generator and a size, can be used to
 /// control the distribution of resultant values.  A generator relies on its size to help control
 /// aspects like the length of generated arrays and the magnitude of integral values.
 public struct Gen<A> {
+	/// The function underlying the receiver.
+	///
+	///         +--- An RNG
+	///         |         +--- The size of generated values.
+	///         |         |
+	///         v         v
 	let unGen : StdGen -> Int -> A
 
 	/// Generates a value.
@@ -21,14 +27,6 @@ public struct Gen<A> {
 	public var generate : A {
 		let r = newStdGen()
 		return unGen(r)(30)
-	}
-
-	public static func zip<A, B>(gen1 : Gen<A>, _ gen2 : Gen<B>) -> Gen<(A, B)> {
-		return gen1.bind { l in
-			return gen2.bind { r in
-				return Gen<(A, B)>.pure((l, r))
-			}
-		}
 	}
 
 	/// Constructs a Generator that selects a random value from the given collection and produces only
@@ -127,6 +125,15 @@ public struct Gen<A> {
 	/// uses a Generator wrapping one of the values.
 	public static func weighted<S : SequenceType where S.Generator.Element == (Int, A)>(xs : S) -> Gen<A> {
 		return frequency(xs.map { ($0, Gen.pure($1)) })
+	}
+
+	/// Zips together 2 generators of type `A` and `B` into a generator of pairs `(A, B)`.
+	public static func zip<A, B>(gen1 : Gen<A>, _ gen2 : Gen<B>) -> Gen<(A, B)> {
+		return gen1.bind { l in
+			return gen2.bind { r in
+				return Gen<(A, B)>.pure((l, r))
+			}
+		}
 	}
 }
 
