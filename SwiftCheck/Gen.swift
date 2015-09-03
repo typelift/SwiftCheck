@@ -29,10 +29,10 @@ public struct Gen<A> {
 		return unGen(r)(30)
 	}
 
-	/// Constructs a Generator that selects a random value from the given collection and produces only
-	/// that value.
+	/// Constructs a Generator that selects a random value from the given collection and produces 
+	/// only that value.
 	///
-	/// The input array is required to be non-empty.
+	/// The input collection is required to be non-empty.
 	public static func fromElementsOf<S : CollectionType where S.Generator.Element == A, S.Index : protocol<RandomType, BidirectionalIndexType>>(xs : S) -> Gen<A> {
 		assert(!xs.isEmpty, "Gen.fromElementsOf used with empty sequence")
 
@@ -57,12 +57,12 @@ public struct Gen<A> {
 	///
 	/// The input array is required to be non-empty.
 	public static func fromInitialSegmentsOf(xs : [A]) -> Gen<A> {
-		assert(xs.count != 0, "Gen.fromInitialSegmentsOf used with empty list")
+		assert(!xs.isEmpty, "Gen.fromInitialSegmentsOf used with empty list")
 
 		let k = Double(xs.count)
 		return sized({ n in
 			let m = max(1, size(k)(m: n))
-			return Gen.fromElementsOf(Array(xs[0 ..< m]))
+			return Gen.fromElementsOf(xs[0 ..< m])
 		})
 	}
 
@@ -101,7 +101,11 @@ public struct Gen<A> {
 		})
 	}
 
-	/// Constructs a Generator that randomly selects and uses one of a number of given Generators.
+	/// Constructs a Generator that randomly selects and uses a particular generator from the given
+	/// sequence of Generators.
+	///
+	/// If control over the distribution of generators is needed, see `Gen.frequency` or 
+	/// `Gen.weighted`.
 	public static func oneOf<S : CollectionType where S.Generator.Element == Gen<A>, S.Index : protocol<RandomType, BidirectionalIndexType>>(gs : S) -> Gen<A> {
 		assert(gs.count != 0, "oneOf used with empty list")
 
@@ -110,8 +114,11 @@ public struct Gen<A> {
 		}
 	}
 
-	/// Given a list of Generators and weights associated with them, this function randomly selects and
-	/// uses a Generator.
+	/// Given a sequence of Generators and weights associated with them, this function randomly 
+	/// selects and uses a Generator.
+	///
+	/// Only use this function when you need to assign uneven "weights" to each generator.  If all
+	/// generators need to have an equal chance of being selected, use `Gen.oneOf`.
 	public static func frequency<S : SequenceType where S.Generator.Element == (Int, Gen<A>)>(xs : S) -> Gen<A> {
 		let xs: [(Int, Gen<A>)] = Array(xs)
 		assert(xs.count != 0, "frequency used with empty list")
@@ -123,6 +130,11 @@ public struct Gen<A> {
 
 	/// Given a list of values and weights associated with them, this function randomly selects and
 	/// uses a Generator wrapping one of the values.
+	///
+	/// This function operates in exactly the same manner as `Gen.frequency`, `Gen.fromElementsOf`,
+	/// and `Gen.fromElementsIn` but for any type rather than only Generators.  It can help in cases
+	/// where your `Gen.from*` call contains only `Gen.pure` calls by allowing you to remove every
+	/// `.pure` in favor of a direct list of values.
 	public static func weighted<S : SequenceType where S.Generator.Element == (Int, A)>(xs : S) -> Gen<A> {
 		return frequency(xs.map { ($0, Gen.pure($1)) })
 	}
@@ -219,6 +231,13 @@ extension Gen /*: Functor*/ {
 	}
 }
 
+/// Fmap | Returns a new generator that applies a given function to any outputs the given generator
+/// creates.
+///
+/// This function is most useful for converting between generators of inter-related types.  For
+/// example, you might have a Generator of `Character` values that you then `.proliferate()` into an
+/// `Array` of `Character`s.  You can then use `fmap` to convert that generator of `Array`s to a
+/// generator of `String`s.
 public func <^> <A, B>(f : A -> B, g : Gen<A>) -> Gen<B> {
 	return Gen(unGen: { r in
 		return { n in
@@ -246,6 +265,19 @@ extension Gen /*: Applicative*/ {
 	}
 }
 
+/// Ap | Returns a Generator that uses the first given Generator to produce functions and the second
+/// given Generator to produce values that it applies to those functions.  It can be used in
+/// conjunction with <^> to simplify the application of "combining" functions to a large amount of
+/// sub-generators.  For example:
+///
+///     struct Foo { let b : Int; let c : Int; let d : Int }
+///
+///     let genFoo = curry(Foo.init) <^> Int.arbitrary <*> Int.arbitrary <*> Int.arbitrary
+///
+/// This combinator acts like `zip`, but instead of creating pairs it creates values after applying
+/// the zipped function to the zipped value.
+///
+/// Promotes function application to a Generator of functions applied to a Generator of values.
 public func <*> <A, B>(fn : Gen<A -> B>, g : Gen<A>) -> Gen<B> {
 	return Gen(unGen: { r in
 		return { n in
@@ -258,14 +290,20 @@ extension Gen /*: Monad*/ {
 	/// Applies the function to any generated values to yield a new generator.  This generator is
 	/// then given a new random seed and returned.
 	///
-	/// Bind allows for the creation of Generators that depend on other generators.  One might, for
-	/// example, use a Generator of integers to control the length of a Generator of strings, or use
-	/// it to choose a random index into a Generator of arrays.
+	/// `bind` allows for the creation of Generators that depend on other generators.  One might, 
+	/// for example, use a Generator of integers to control the length of a Generator of strings, or
+	/// use it to choose a random index into a Generator of arrays.
 	public func bind<B>(fn : A -> Gen<B>) -> Gen<B> {
 		return self >>- fn
 	}
 }
 
+/// Applies the function to any generated values to yield a new generator.  This generator is
+/// then given a new random seed and returned.
+///
+/// `bind` allows for the creation of Generators that depend on other generators.  One might,
+/// for example, use a Generator of integers to control the length of a Generator of strings, or
+/// use it to choose a random index into a Generator of arrays.
 public func >>- <A, B>(m : Gen<A>, fn : A -> Gen<B>) -> Gen<B> {
 	return Gen(unGen: { r in
 		return { n in
@@ -276,8 +314,12 @@ public func >>- <A, B>(m : Gen<A>, fn : A -> Gen<B>) -> Gen<B> {
 	})
 }
 
-/// Reduces an array of generators to a generator that returns arrays of the original generators
-/// values in the order given.
+/// Creates and returns a Generator of arrays of values drawn from each generator in the given
+/// array.  
+///
+/// The array that is created is guaranteed to use each of the given Generators in the order they 
+/// were given to the function exactly once.  Thus all arrays generated are of the same rank as the
+/// array that was given.
 public func sequence<A>(ms : [Gen<A>]) -> Gen<[A]> {
 	return ms.reduce(Gen<[A]>.pure([]), combine: { y, x in
 		return x.bind { x1 in
