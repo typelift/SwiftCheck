@@ -357,7 +357,7 @@ internal func test(st : CheckerState, f : (StdGen -> Int -> Prop)) -> Result {
 // On success the next state is returned.  On failure the final result and state are returned.
 internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either<(Result, CheckerState), CheckerState> {
 	let size = st.computeSize(st.successfulTestCount)(st.discardedTestCount)
-	let (rnd1, rnd2) = st.randomSeedGenerator.split()
+	let (rnd1, rnd2) = st.randomSeedGenerator.split
 
 	// Execute the Rose Tree for the test and reduce to .MkRose.
 	switch reduce(f(rnd1)(size).unProp) {

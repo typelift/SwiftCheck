@@ -9,41 +9,49 @@
 import func Darwin.time
 import func Darwin.rand
 
-public protocol RandomGen {
-	func next() -> (Int, Self)
-
-	func genRange() -> (Int, Int)
-	func split() -> (Self, Self)
+/// Provides a standard interface to an underlying Random Value Generator of any type.  It is
+/// analogous to `GeneratorType`, but rather than consume a sequence it uses sources of randomness
+/// to generate values indefinitely.
+public protocol RandomGeneneratorType {
+	/// The next operation returns an Int that is uniformly distributed in the range returned by 
+	/// `genRange` (including both end points), and a new generator.
+	var next : (Int, Self) { get }
+	/// The genRange operation yields the range of values returned by the generator.
+	///
+	/// This property must return integers in ascending order.
+	var genRange : (Int, Int) { get }
+	/// Splits the receiver into two distinct random value generators.
+	var split : (Self, Self) { get }
 }
 
 /// A library-provided standard random number generator.
 let standardRNG : StdGen = StdGen(time(nil))
 
-public struct StdGen : RandomGen {
+public struct StdGen : RandomGeneneratorType {
 	let seed: Int
 
 	init(_ seed : Int) {
 		self.seed = seed
 	}
 
-	public func next() -> (Int, StdGen) {
+	public var next : (Int, StdGen) {
 		let s = Int(time(nil))
 		return (Int(rand()), StdGen(s))
 	}
 
-	public func split() -> (StdGen, StdGen) {
-		let (s1, g) = self.next()
-		let (s2, _) = g.next()
+	public var split : (StdGen, StdGen) {
+		let (s1, g) = self.next
+		let (s2, _) = g.next
 		return (StdGen(s1), StdGen(s2))
 	}
 
-	public func genRange() -> (Int, Int) {
+	public var genRange : (Int, Int) {
 		return (Int.min, Int.max)
 	}
 }
 
 public func newStdGen() -> StdGen {
-	return standardRNG.split().1
+	return standardRNG.split.1
 }
 
 private func mkStdRNG(seed : Int) -> StdGen {
@@ -52,16 +60,16 @@ private func mkStdRNG(seed : Int) -> StdGen {
 
 /// Types that can generate random versions of themselves.
 public protocol RandomType {
-	static func randomInRange<G : RandomGen>(range : (Self, Self), gen : G) -> (Self, G)
+	static func randomInRange<G : RandomGeneneratorType>(range : (Self, Self), gen : G) -> (Self, G)
 }
 
 /// Generates a random value from a LatticeType random type.
-public func random<A : protocol<LatticeType, RandomType>, G : RandomGen>(gen : G) -> (A, G) {
+public func random<A : protocol<LatticeType, RandomType>, G : RandomGeneneratorType>(gen : G) -> (A, G) {
 	return A.randomInRange((A.min, A.max), gen: gen)
 }
 
 extension Character : RandomType {
-	public static func randomInRange<G : RandomGen>(range : (Character, Character), gen : G) -> (Character, G) {
+	public static func randomInRange<G : RandomGeneneratorType>(range : (Character, Character), gen : G) -> (Character, G) {
 		let (min, max) = range
 		let minc = String(min).unicodeScalars.first!
 		let maxc = String(max).unicodeScalars.first!
@@ -72,16 +80,16 @@ extension Character : RandomType {
 }
 
 extension UnicodeScalar : RandomType {
-	public static func randomInRange<G : RandomGen>(range : (UnicodeScalar, UnicodeScalar), gen : G) -> (UnicodeScalar, G) {
+	public static func randomInRange<G : RandomGeneneratorType>(range : (UnicodeScalar, UnicodeScalar), gen : G) -> (UnicodeScalar, G) {
 		let (val, gg) = UInt32.randomInRange((range.0.value, range.1.value), gen: gen)
 		return (UnicodeScalar(val), gg)
 	}
 }
 
 extension Int : RandomType {
-	public static func randomInRange<G : RandomGen>(range : (Int, Int), gen : G) -> (Int, G) {
+	public static func randomInRange<G : RandomGeneneratorType>(range : (Int, Int), gen : G) -> (Int, G) {
 		let (min, max) = range
-		let (r, g) = gen.next()
+		let (r, g) = gen.next
 		let result = (r % ((max + 1) - min)) + min;
 
 		return (result, g);
@@ -89,9 +97,9 @@ extension Int : RandomType {
 }
 
 extension Int8 : RandomType {
-	public static func randomInRange<G : RandomGen>(range : (Int8, Int8), gen : G) -> (Int8, G) {
+	public static func randomInRange<G : RandomGeneneratorType>(range : (Int8, Int8), gen : G) -> (Int8, G) {
 		let (min, max) = range
-		let (r, g) = gen.next()
+		let (r, g) = gen.next
 		let result = (r % ((max + 1) - min)) + min;
 
 		return (result, g);
@@ -99,9 +107,9 @@ extension Int8 : RandomType {
 }
 
 extension Int16 : RandomType {
-	public static func randomInRange<G : RandomGen>(range : (Int16, Int16), gen : G) -> (Int16, G) {
+	public static func randomInRange<G : RandomGeneneratorType>(range : (Int16, Int16), gen : G) -> (Int16, G) {
 		let (min, max) = range
-		let (r, g) = gen.next()
+		let (r, g) = gen.next
 		let result = (r % ((max + 1) - min)) + min;
 
 		return (result, g);
@@ -109,9 +117,9 @@ extension Int16 : RandomType {
 }
 
 extension Int32 : RandomType {
-	public static func randomInRange<G : RandomGen>(range : (Int32, Int32), gen : G) -> (Int32, G) {
+	public static func randomInRange<G : RandomGeneneratorType>(range : (Int32, Int32), gen : G) -> (Int32, G) {
 		let (min, max) = range
-		let (r, g) = gen.next()
+		let (r, g) = gen.next
 		let result = (r % ((max + 1) - min)) + min;
 
 		return (result, g);
@@ -119,9 +127,9 @@ extension Int32 : RandomType {
 }
 
 extension Int64 : RandomType {
-	public static func randomInRange<G : RandomGen>(range : (Int64, Int64), gen : G) -> (Int64, G) {
+	public static func randomInRange<G : RandomGeneneratorType>(range : (Int64, Int64), gen : G) -> (Int64, G) {
 		let (min, max) = range
-		let (r, g) = gen.next()
+		let (r, g) = gen.next
 		let result = (r % ((max + 1) - min)) + min;
 
 		return (result, g);
@@ -129,9 +137,9 @@ extension Int64 : RandomType {
 }
 
 extension UInt : RandomType {
-	public static func randomInRange<G : RandomGen>(range : (UInt, UInt), gen : G) -> (UInt, G) {
+	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt, UInt), gen : G) -> (UInt, G) {
 		let (min, max) = range
-		let (r, g) = gen.next()
+		let (r, g) = gen.next
 		let result = (UInt(r) % ((max + 1) - min)) + min;
 
 		return (result, g);
@@ -139,9 +147,9 @@ extension UInt : RandomType {
 }
 
 extension UInt8 : RandomType {
-	public static func randomInRange<G : RandomGen>(range : (UInt8, UInt8), gen : G) -> (UInt8, G) {
+	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt8, UInt8), gen : G) -> (UInt8, G) {
 		let (min, max) = range
-		let (r, g) = gen.next()
+		let (r, g) = gen.next
 		let result = (UInt8(r) % ((max + 1) - min)) + min;
 
 		return (result, g);
@@ -149,9 +157,9 @@ extension UInt8 : RandomType {
 }
 
 extension UInt16 : RandomType {
-	public static func randomInRange<G : RandomGen>(range : (UInt16, UInt16), gen : G) -> (UInt16, G) {
+	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt16, UInt16), gen : G) -> (UInt16, G) {
 		let (min, max) = range
-		let (r, g) = gen.next()
+		let (r, g) = gen.next
 		let result = (UInt16(r) % ((max + 1) - min)) + min;
 
 		return (result, g);
@@ -159,9 +167,9 @@ extension UInt16 : RandomType {
 }
 
 extension UInt32 : RandomType {
-	public static func randomInRange<G : RandomGen>(range : (UInt32, UInt32), gen : G) -> (UInt32, G) {
+	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt32, UInt32), gen : G) -> (UInt32, G) {
 		let (min, max) = range
-		let (r, g) = gen.next()
+		let (r, g) = gen.next
 		let result = (UInt32(r) % ((max + 1) - min)) + min;
 
 		return (result, g);
@@ -169,9 +177,9 @@ extension UInt32 : RandomType {
 }
 
 extension UInt64 : RandomType {
-	public static func randomInRange<G : RandomGen>(range : (UInt64, UInt64), gen : G) -> (UInt64, G) {
+	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt64, UInt64), gen : G) -> (UInt64, G) {
 		let (min, max) = range
-		let (r, g) = gen.next()
+		let (r, g) = gen.next
 		let result = (UInt64(r) % ((max + 1) - min)) + min;
 
 		return (result, g);
@@ -179,9 +187,9 @@ extension UInt64 : RandomType {
 }
 
 extension Float : RandomType {
-	public static func randomInRange<G : RandomGen>(range : (Float, Float), gen : G) -> (Float, G) {
+	public static func randomInRange<G : RandomGeneneratorType>(range : (Float, Float), gen : G) -> (Float, G) {
 		let (min, max) = range
-		let (r, g) = gen.next()
+		let (r, g) = gen.next
 		let fr = Float(r)
 		let result = (fr % ((max + 1) - min)) + min;
 
@@ -190,9 +198,9 @@ extension Float : RandomType {
 }
 
 extension Double : RandomType {
-	public static func randomInRange<G : RandomGen>(range : (Double, Double), gen : G) -> (Double, G) {
+	public static func randomInRange<G : RandomGeneneratorType>(range : (Double, Double), gen : G) -> (Double, G) {
 		let (min, max) = range
-		let (r, g) = gen.next()
+		let (r, g) = gen.next
 		let dr = Double(r)
 		let result = (dr % ((max + 1) - min)) + min;
 

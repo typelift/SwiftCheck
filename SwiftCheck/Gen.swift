@@ -307,7 +307,7 @@ extension Gen /*: Monad*/ {
 public func >>- <A, B>(m : Gen<A>, fn : A -> Gen<B>) -> Gen<B> {
 	return Gen(unGen: { r in
 		return { n in
-			let (r1, r2) = r.split()
+			let (r1, r2) = r.split
 			let m2 = fn(m.unGen(r1)(n))
 			return m2.unGen(r2)(n)
 		}
@@ -373,7 +373,7 @@ internal func delay<A>() -> Gen<Gen<A> -> A> {
 import func Darwin.log
 
 private func vary<S : IntegerType>(k : S)(r : StdGen) -> StdGen {
-	let s = r.split()
+	let s = r.split
 	let gen = ((k % 2) == 0) ? s.0 : s.1
 	return (k == (k / 2)) ? gen : vary(k / 2)(r: r)
 }
