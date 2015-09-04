@@ -44,6 +44,23 @@ public func disjoin(ps : Testable...) -> Property {
 	}))
 }
 
+/// Inverts the result of a test.  That is, test cases that would pass now fail and vice versa.
+///
+/// Discarded tests remain discarded under inversion.
+public func invert(p : Testable) -> Property {
+	return mapResult({ res in
+		return TestResult(ok: res.ok.map(!),
+						expect: res.expect,
+						reason: res.reason,
+						theException: res.theException,
+						labels: res.labels,
+						stamp: res.stamp,
+						callbacks: res.callbacks,
+						abort: res.abort,
+						quantifier: res.quantifier)
+	})(p: p)
+}
+
 /// Applies a function that modifies the property generator's inner `Prop`.
 public func mapProp(f : Prop -> Prop)(p : Testable) -> Property {
 	return Property(p.property().unProperty.fmap(f))
@@ -92,7 +109,8 @@ public func once(p : Testable) -> Property {
 			labels: res.labels,
 			stamp: res.stamp,
 			callbacks: res.callbacks,
-			abort: true)
+			abort: true,
+			quantifier: res.quantifier)
 	})(p: p)
 }
 
@@ -117,7 +135,8 @@ public func withCallback(cb : Callback)(p : Testable) -> Property {
 			labels: res.labels,
 			stamp: res.stamp,
 			callbacks: [cb] + res.callbacks,
-			abort: res.abort)
+			abort: res.abort,
+			quantifier: res.quantifier)
 	})(p: p)
 }
 
@@ -183,7 +202,8 @@ public func verbose(p : Testable) -> Property {
 			labels: res.labels,
 			stamp: res.stamp,
 			callbacks: res.callbacks + chattyCallbacks(res.callbacks),
-			abort: res.abort)
+			abort: res.abort,
+			quantifier: res.quantifier)
 	})(p: p)
 }
 
@@ -199,7 +219,8 @@ public func expectFailure(p : Testable) -> Property {
 			labels: res.labels,
 			stamp: res.stamp,
 			callbacks: res.callbacks,
-			abort: res.abort)
+			abort: res.abort,
+			quantifier: res.quantifier)
 	})(p: p)
 }
 
@@ -236,7 +257,8 @@ public func cover(b : Bool)(n : Int)(s : String)(p : Testable) -> Property {
 				labels: insertWith(max, s, n, res.labels),
 				stamp: res.stamp.union([s]),
 				callbacks: res.callbacks,
-				abort: res.abort)
+				abort: res.abort,
+				quantifier: res.quantifier)
 		})(p: p)
 	}
 	return p.property()
@@ -254,12 +276,25 @@ public enum Callback {
 
 /// The type of callbacks SwiftCheck can dispatch.
 public enum CallbackKind {
-	///
+	/// The callback is invoked after a counterexample is displayed.
 	case Counterexample
+	/// The callback is invoked after every test.
 	case NotCounterexample
 }
 
-public enum TestResultMatcher {
+/// The types of quantification SwiftCheck can perform.
+public enum Quantification {
+	/// Universal Quantification ("for all").
+	case Universal
+	/// Existential Quanfication ("there exists").
+	case Existential
+	/// Uniqueness Quantification ("there exists one and only one")
+	// case Uniqueness
+	/// Counting Quantification ("there exist exactly k")
+	// case Counting
+}
+
+internal enum TestResultMatcher {
 	case MatchResult( ok : Optional<Bool>
 					, expect : Bool
 					, reason : String
@@ -268,6 +303,7 @@ public enum TestResultMatcher {
 					, stamp : Set<String>
 					, callbacks : [Callback]
 					, abort : Bool
+					, quantifier : Quantification
 					)
 }
 
@@ -290,13 +326,15 @@ public struct TestResult {
 	let callbacks		: [Callback]
 	/// Indicates that any further testing of the property should cease.
 	let abort			: Bool
+	///
+	let quantifier		: Quantification
 
 	/// Destructures a test case into a matcher that can be used in switch statement.
-	public func match() -> TestResultMatcher {
-		return .MatchResult(ok: ok, expect: expect, reason: reason, theException: theException, labels: labels, stamp: stamp, callbacks: callbacks, abort: abort)
+	internal func match() -> TestResultMatcher {
+		return .MatchResult(ok: ok, expect: expect, reason: reason, theException: theException, labels: labels, stamp: stamp, callbacks: callbacks, abort: abort, quantifier: quantifier)
 	}
 
-	public init(ok : Optional<Bool>, expect : Bool, reason : String, theException : Optional<String>, labels : Dictionary<String, Int>, stamp : Set<String>, callbacks : [Callback], abort : Bool) {
+	internal init(ok : Optional<Bool>, expect : Bool, reason : String, theException : Optional<String>, labels : Dictionary<String, Int>, stamp : Set<String>, callbacks : [Callback], abort : Bool, quantifier : Quantification) {
 		self.ok = ok
 		self.expect = expect
 		self.reason = reason
@@ -305,9 +343,10 @@ public struct TestResult {
 		self.stamp = stamp
 		self.callbacks = callbacks
 		self.abort = abort
+		self.quantifier = quantifier
 	}
 }
-///
+
 public func succeeded() -> TestResult {
 	return result(Optional.Some(true))
 }
@@ -340,7 +379,7 @@ private func props<A>(shrinker : A -> [A], #original : A, #pf: A -> Testable) ->
 }
 
 private func result(ok : Bool?, reason : String = "") -> TestResult {
-	return TestResult(ok: ok, expect: true, reason: reason, theException: .None, labels: [:], stamp: Set(), callbacks: [], abort: false)
+	return TestResult(ok: ok, expect: true, reason: reason, theException: .None, labels: [:], stamp: Set(), callbacks: [], abort: false, quantifier: .Universal)
 }
 
 private func id<A>(x : A) -> A {
@@ -381,7 +420,8 @@ private func addCallbacks(result : TestResult) -> TestResult -> TestResult {
 			labels: res.labels,
 			stamp: res.stamp,
 			callbacks: result.callbacks + res.callbacks,
-			abort: res.abort)
+			abort: res.abort,
+			quantifier: res.quantifier)
 	}
 }
 
@@ -394,7 +434,8 @@ private func addLabels(result : TestResult) -> TestResult -> TestResult {
 			labels: unionWith(max, res.labels, result.labels),
 			stamp: res.stamp.union(result.stamp),
 			callbacks: res.callbacks,
-			abort: res.abort)
+			abort: res.abort,
+			quantifier: res.quantifier)
 	}
 }
 
@@ -492,7 +533,8 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 						callbacks: result1.callbacks + [.AfterFinalFailure(kind: .Counterexample, f: { _ in
 							return println("")
 						})] + result2.callbacks,
-						abort: false))
+						abort: false,
+						quantifier: .Universal))
 				case .None:
 					return Rose.pure(result2)
 				default:

@@ -102,6 +102,40 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 	return forAll(genA, { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)(genF : genG)(genG : genH)(pf: { b, c, d, e, f, g, h in pf(t, b, c, d, e, f, g, h) }) })
 }
 
+/// Converts a function into an existentially quantified property using the default shrinker and
+/// generator for that type to search for a passing case.  SwiftCheck only runs a limited number of
+/// trials before giving up and failing.
+///
+/// The nature of Existential Quantification means we have to enumerate over the entire domain of 
+/// `A` in order to return a proper value.  Because such a traversal is both impractical and leads 
+/// to computationally questionable behavior (infinite loops and the like), SwiftCheck instead
+/// interprets `exists` as a finite search over arbitrarily many values (around 500).  No shrinking
+/// is performed during the search.
+///
+/// It is recommended that you avoid existential quantification and instead reduce your property to
+/// `Skolem Normal Form <https://en.wikipedia.org/wiki/Skolem_normal_form/>`_.  `SNF` involves 
+/// turning every `exists` into a function returning the existential value, taking any other 
+/// parameters being quantified over as needed.
+public func exists<A : Arbitrary>(pf : A -> Testable) -> Property {
+	return exists(A.arbitrary(), pf)
+}
+
+/// Given an explicit generator, converts a function to an existentially quantified property using 
+/// the default shrinker for that type.
+public func exists<A : Arbitrary>(gen : Gen<A>, pf : A -> Testable) -> Property {
+	return mapResult({ res in
+		return TestResult(ok: res.ok,
+			expect: res.expect,
+			reason: res.reason,
+			theException: res.theException,
+			labels: res.labels,
+			stamp: res.stamp,
+			callbacks: res.callbacks,
+			abort: res.abort,
+			quantifier: .Existential)
+	})(p: invert(forAllShrink(A.arbitrary(), shrinkNone, { (invert • pf)($0) })))
+}
+
 /// Given an explicit generator and shrinker, converts a function to a universally quantified
 /// property.
 public func forAllShrink<A>(gen : Gen<A>, shrinker: A -> [A], f : A -> Testable) -> Property {
@@ -126,24 +160,32 @@ public func quickCheck(prop : Testable, name : String = "") {
 
 internal enum Result {
 	case Success(numTests: Int
-		, labels: [(String, Int)]
-		, output: String
+		, labels : [(String, Int)]
+		, output : String
 	)
 	case GaveUp(numTests: Int
-		, labels: [(String,Int)]
-		, output: String
+		, labels : [(String,Int)]
+		, output : String
 	)
 	case Failure(numTests: Int
-		, numShrinks: Int
-		, usedSeed: StdGen
-		, usedSize: Int
-		, reason: String
-		, labels: [(String,Int)]
-		, output: String
+		, numShrinks : Int
+		, usedSeed : StdGen
+		, usedSize : Int
+		, reason : String
+		, labels : [(String,Int)]
+		, output : String
 	)
-	case  NoExpectedFailure(numTests: Int
-		, labels: [(String,Int)]
-		, output: String
+	case ExistentialFailure(numTests: Int
+		, usedSeed : StdGen
+		, usedSize : Int
+		, reason : String
+		, labels : [(String,Int)]
+		, output : String
+		, lastResult : TestResult
+	)
+	case NoExpectedFailure(numTests: Int
+		, labels : [(String,Int)]
+		, output : String
 	)
 }
 
@@ -224,7 +266,8 @@ internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 					, numSuccessShrinks:	0
 					, numTryShrinks:		0
 					, numTotTryShrinks:		0
-					, shouldAbort:			false)
+					, shouldAbort:			false
+					, quantifier:			.Universal)
 	let modP : Property = (p.exhaustive ? once(p.property()) : p.property())
 	return test(state, modP.unProperty.unGen)
 }
@@ -243,21 +286,36 @@ internal func test(st : State, f : (StdGen -> Int -> Prop)) -> Result {
 	while true {
 		switch runATest(state)(f: f) {
 			case let .Left(fail):
-				switch (fail.value.0, doneTesting(fail.value.1)(f: f)) {
-				case let (.Success(_, _, _), _):
-					return fail.value.0
-				case let (_, .NoExpectedFailure(numTests, labels, output)):
-					return .NoExpectedFailure(numTests: numTests, labels: labels, output: output)
-				default:
-					return fail.value.0
+				switch fail.value {
+					// Succeed at all costs!
+					case let (.Success(_, _, _), _):
+						doneTesting(fail.value.1)
+						return fail.value.0
+					case let (.NoExpectedFailure(_, _, _), _):
+						return doneTesting(fail.value.1)
+					// Existential Failures need explicit propagation.  Existentials increment the
+					// discard count so we check if it has been surpassed.  If it has with any kind
+					// of success we're done.  If no successes are found we've failed checking the
+					// existential and report it as such.  Otherwise turn the testing loop.
+					case let (.ExistentialFailure(_, _, _, _, _, _, _), lsta):
+						if lsta.numDiscardedTests >= lsta.maxDiscardedTests && lsta.numSuccessTests == 0 {
+							return reportExistentialFailure(fail.value.1, fail.value.0)
+						} else if lsta.numDiscardedTests >= lsta.maxDiscardedTests {
+							return doneTesting(lsta)
+						} else {
+							state = lsta
+							break
+						}
+					default:
+						return fail.value.0
 				}
 			case let .Right(sta):
 				let lsta = sta.value // Local copy so I don't have to keep unwrapping.
 				if lsta.numSuccessTests >= lsta.maxSuccessTests || lsta.shouldAbort {
-					return doneTesting(lsta)(f: f)
+					return doneTesting(lsta)
 				}
 				if lsta.numDiscardedTests >= lsta.maxDiscardedTests || lsta.shouldAbort {
-					return giveUp(lsta)(f: f)
+					return giveUp(lsta)
 				}
 				state = lsta
 		}
@@ -279,7 +337,7 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 
 			switch res.match() {
 				// Success
-				case .MatchResult(.Some(true), let expect, _, _, let labels, let stamp, _, let abort):
+				case .MatchResult(.Some(true), let expect, _, _, let labels, let stamp, _, let abort, let quantifier):
 					let state = State(name: st.name
 									, maxSuccessTests: st.maxSuccessTests
 									, maxDiscardedTests: st.maxDiscardedTests
@@ -293,10 +351,12 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 									, numSuccessShrinks: st.numSuccessShrinks
 									, numTryShrinks: st.numTryShrinks
 									, numTotTryShrinks: st.numTotTryShrinks
-									, shouldAbort: abort)
+									// Existentials break on success
+									, shouldAbort: abort || (quantifier == .Existential)
+									, quantifier: quantifier)
 					return .Right(Box(state))
 				// Discard
-				case .MatchResult(.None, let expect, _, _, let labels, _, _, let abort):
+				case .MatchResult(.None, let expect, _, _, let labels, _, _, let abort, let quantifier):
 					let state = State(name: st.name
 									, maxSuccessTests: st.maxSuccessTests
 									, maxDiscardedTests: st.maxDiscardedTests
@@ -310,14 +370,46 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 									, numSuccessShrinks: st.numSuccessShrinks
 									, numTryShrinks: st.numTryShrinks
 									, numTotTryShrinks: st.numTotTryShrinks
-									, shouldAbort: abort)
+									, shouldAbort: abort
+									, quantifier: quantifier)
 					return .Right(Box(state))
 				// Fail
-				case .MatchResult(.Some(false), let expect, _, _, _, _, _, let abort):
-					if !expect {
+				case .MatchResult(.Some(false), let expect, _, _, _, _, _, let abort, let quantifier):
+					if quantifier == .Existential {
+						print("")
+					} else if !expect {
 						print("+++ OK, failed as expected. ")
 					} else {
 						print("*** Failed! ")
+					}
+
+					let state = State(name: st.name
+									, maxSuccessTests: st.maxSuccessTests
+									, maxDiscardedTests: st.maxDiscardedTests
+									, computeSize: st.computeSize
+									, numSuccessTests: st.numSuccessTests
+									, numDiscardedTests: st.numDiscardedTests + 1
+									, labels: st.labels
+									, collected: st.collected
+									, expectedFailure: res.expect
+									, randomSeed: rnd2
+									, numSuccessShrinks: st.numSuccessShrinks
+									, numTryShrinks: st.numTryShrinks
+									, numTotTryShrinks: st.numTotTryShrinks
+									, shouldAbort: abort
+									, quantifier: quantifier)
+
+					// Failure of an existential is not necessarily failure of the whole test case,
+					// so treat this like a discard.
+					if quantifier == .Existential {
+						let resul = Result.ExistentialFailure(numTests: st.numSuccessTests + 1
+															, usedSeed: st.randomSeed
+															, usedSize: st.computeSize(st.numSuccessTests)(st.numDiscardedTests)
+															, reason: "Could not satisfy existential"
+															, labels: summary(st)
+															, output: "*** Failed! "
+															, lastResult: res)
+						return .Left(Box((resul, state)))
 					}
 
 					// Attempt a shrink.
@@ -336,21 +428,8 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 											, labels: summary(st)
 											, output: "*** Failed! ")
 
-					let state = State(name: st.name
-									, maxSuccessTests: st.maxSuccessTests
-									, maxDiscardedTests: st.maxDiscardedTests
-									, computeSize: st.computeSize
-									, numSuccessTests: st.numSuccessTests
-									, numDiscardedTests: st.numDiscardedTests + 1
-									, labels: st.labels
-									, collected: st.collected
-									, expectedFailure: res.expect
-									, randomSeed: rnd2
-									, numSuccessShrinks: st.numSuccessShrinks
-									, numTryShrinks: st.numTryShrinks
-									, numTotTryShrinks: st.numTotTryShrinks
-									, shouldAbort: abort)
 					return .Left(Box((stat, state)))
+
 			default:
 				fatalError("Pattern Match Failed: switch on a Result was inexhaustive.")
 				break
@@ -361,9 +440,9 @@ internal func runATest(st : State)(f : (StdGen -> Int -> Prop)) -> Either<(Resul
 	}
 }
 
-internal func doneTesting(st : State)(f : (StdGen -> Int -> Prop)) -> Result {
+internal func doneTesting(st : State) -> Result {
 	if st.expectedFailure {
-		println("*** Passed " + "\(st.numSuccessTests)" + " tests")
+		println("*** Passed " + "\(st.numSuccessTests)" + pluralize(" test", st.numSuccessTests))
 		printDistributionGraph(st)
 		return .Success(numTests: st.numSuccessTests, labels: summary(st), output: "")
 	} else {
@@ -372,7 +451,7 @@ internal func doneTesting(st : State)(f : (StdGen -> Int -> Prop)) -> Result {
 	}
 }
 
-internal func giveUp(st: State)(f : (StdGen -> Int -> Prop)) -> Result {
+internal func giveUp(st : State) -> Result {
 	printDistributionGraph(st)
 	return Result.GaveUp(numTests: st.numSuccessTests, labels: summary(st), output: "")
 }
@@ -451,25 +530,34 @@ internal func findMinimalFailingTestCase(st : State, res : TestResult, ts : [Ros
 					, numSuccessShrinks: numSuccessShrinks
 					, numTryShrinks: numTryShrinks
 					, numTotTryShrinks: numTotTryShrinks
-					, shouldAbort: st.shouldAbort)
+					, shouldAbort: st.shouldAbort
+					, quantifier: st.quantifier)
 	return reportMinimumCaseFound(state, lastResult)
 }
 
 internal func reportMinimumCaseFound(st : State, res : TestResult) -> (Int, Int, Int) {
 	let testMsg = " (after \(st.numSuccessTests + 1) test"
-	let shrinkMsg = st.numSuccessShrinks > 1 ? (" and \(st.numSuccessShrinks) shrink") : ""
-	
-	func pluralize(s : String, i : Int) -> String {
-		if i > 1 {
-			return s + "s"
-		}
-		return s
-	}
+	let shrinkMsg = st.numSuccessShrinks > 1 ? pluralize(" and \(st.numSuccessShrinks) shrink", st.numSuccessShrinks) : ""
 	
 	println("Proposition: " + st.name)
-	println(res.reason + pluralize(testMsg, st.numSuccessTests + 1) + pluralize(shrinkMsg, st.numSuccessShrinks) + "):")
+	println(res.reason + pluralize(testMsg, st.numSuccessTests + 1) + shrinkMsg + "):")
 	dispatchAfterFinalFailureCallbacks(st, res)
 	return (st.numSuccessShrinks, st.numTotTryShrinks - st.numTryShrinks, st.numTryShrinks)
+}
+
+internal func reportExistentialFailure(st : State, res : Result) -> Result {
+	switch res {
+	case let .ExistentialFailure(_, _, _, reason, _, _, lastTest):
+		let testMsg = " (after \(st.numDiscardedTests) test"
+
+		print("*** Failed! ")
+		println("Proposition: " + st.name)
+		println(reason + pluralize(testMsg, st.numDiscardedTests) + "):")
+		dispatchAfterFinalFailureCallbacks(st, lastTest)
+		return res
+	default:
+		fatalError("Cannot report existential failure on non-failure type \(res)")
+	}
 }
 
 internal func dispatchAfterTestCallbacks(st : State, res : TestResult) {
@@ -567,4 +655,11 @@ internal func groupBy<A>(list : [A], p : (A , A) -> Bool) -> [[A]] {
 		return cons(l, groupBy(zs, p))
 	}
 	fatalError("groupBy reached a non-empty list that could not produce a first element")
+}
+
+private func pluralize(s : String, i : Int) -> String {
+	if i == 1 {
+		return s
+	}
+	return s + "s"
 }
