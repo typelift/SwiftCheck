@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
-// MARK: - Testing
+// MARK: - Property Testing with SwiftCheck
 
 /// Property Testing is a more static and expressive form of Test-Driven Development that emphasizes
 /// the testability of program properties - A statement or invariant that can be proven to hold when
@@ -56,10 +56,14 @@
 /// purely illustrative example utilizing a significant portion of SwiftCheck's testing functions:
 ///
 ///     /// This method comes out of SwiftCheck's test suite.
+///     
+///    `SetOf` is called a "Modifier Type".  To learn more about them see `Modifiers.swift`---+
+///                                                                                           |
+///                                                                                           v
 ///     property("Shrunken sets of integers don't always contain [] or [0]") <- forAll { (s : SetOf<Int>) in
 ///
 ///         /// This part of the property uses `==>`, or the "implication" combinator.  Implication
-///         /// only executes the following block if the preceding statement returns true.  It can
+///         /// only executes the following block if the preceding expression returns true.  It can
 ///         /// be used to discard test cases that contain data you don't want to test with.
 ///         return (!s.getSet.isEmpty && s.getSet != Set([0])) ==> {
 ///
@@ -70,16 +74,10 @@
 ///                        return x != x // Well that can't possibly hold.
 ///
 ///                    }
-///                    ^||^ /// <- `^||^` is like `||` in Swift, but lifted to work with properties.
-///                    (ls.filter({ $0 == [0] || $0 == [] }).count >= 1).withCallback(.AfterTest(.NotCounterexample, { st, res in
-///                        /// For the seriously EXTREME tester, `withCallback` provides a look into
-///                        /// SwiftCheck's testing mechanism.  You can request a variety of information
-///                        /// about the current state of the testing loop from inside this block.
-///                        ///
-///                        /// For the less crazed, SwiftCheck offers straight callbacks with `whenFail` and
-///                        /// `whenEachFail`.
-///                        print("This test is called: \(name)")
-///                    }))
+///                    ^||^ /// <- `^||^` is like `||` in Swift, but for properties.
+///                    (ls.filter({ $0 == [0] || $0 == [] }).count >= 1).whenFail {
+///                        print("Oh noe!")
+///                    }
 ///         }
 ///     }.expectFailure.verbose
 ///       ^             ^
@@ -87,7 +85,7 @@
 ///       |             +--- The property will print EVERY generated test case to the console.
 ///       + --- We expect this property not to hold.
 ///
-/// Testing is not limited to just these listed combinators.  New users should check out our test
+/// Testing is not limited to just these listed functions.  New users should check out our test
 /// suite and the files `Gen.swift`, `Property.swift`, `Modifiers.swift`, and the top half of this
 /// very file to learn more about the various parts of the SwiftCheck testing mechanism.
 
