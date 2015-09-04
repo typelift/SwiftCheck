@@ -6,6 +6,78 @@
 //  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
+// MARK: - Testing
+
+/// Property Testing is a more static and expressive form of Test-Driven Development that emphasizes
+/// the testability of program properties - A statement or invariant that can be proven to hold when
+/// fed any number of arguments of a particular kind.  It is akin to Fuzz Testing but is made
+/// significantly more power by the primitives in this framework.
+///
+/// A `Property` in SwiftCheck is more than just `true` and `false`, it is a value that is capable
+/// of producing a framework type called `Prop`, which models individual test cases that themselves
+/// are capable of passing or failing "in the small" with a `TestResult`.  This ability is encoded
+/// by a protocol called `Testable` that is adopted by Bool, Property, Prop, and several other
+/// internal framework types.  The thing to notice is the majority of user-facing functions and
+/// combinators in this library return types that conform to `Testable`.  This enables a high level
+/// of composition and enables the testing of incredibly complex properties that would normally be
+/// expressed by stateful, complected unit tests.
+///
+/// Below is the method all SwiftCheck properties are based on, `forAll`.  `forAll` acts as a
+/// "Quantifier", i.e. a contract that serves as a guarantee that a property holds when the given
+/// testing block returns `true` or truthy values, and fails when the testing block returns `false`
+/// or falsy values.  The testing block is usually used with Swift's abbreviated block syntax and
+/// requires type annotations for all value positions being requested.  For example,
+///
+///     forAll { (anInteger : Int, aBoolean : Bool, someStrings : ArrayOf<String>) in
+///         return true // This test case always passes.
+///     }
+///
+/// Why require types?  For one, Swift cannot infer the types of local variables because SwiftCheck
+/// uses highly polymorphic testing primitives.  But, more importantly, types are required because 
+/// SwiftCheck uses them to select the appropriate `Gen`erators and shrinkers for each data type
+/// automagically by default.  Those `Gen`erators and shrinkers are then used to create 100 random
+/// test cases that are evaluated lazily to produce a final result.
+///
+/// As mentioned before, SwiftCheck types do not exist in a bubble.  They are highly compositional
+/// and flexible enough to express unique combinations and permutations of test types.  Below is a
+/// purely illustrative example utilizing a significant portion of SwiftCheck's testing functions:
+///
+///     /// This method comes out of SwiftCheck's test suite.
+///     property("Shrunken sets of integers don't always contain [] or [0]") <- forAll { (s : SetOf<Int>) in
+///
+///         /// This part of the property uses `==>`, or the "implication" combinator.  Implication
+///         /// only executes the following block if the preceding statement returns true.  It can
+///         /// be used to discard test cases that contain data you don't want to test with.
+///         return (!s.getSet.isEmpty && s.getSet != Set([0])) ==> {
+///
+///             /// shrinkArbitrary is a method call that invokes the shrinker
+///             let ls = self.shrinkArbitrary(s).map { $0.getSet }
+///             return forAll { (x : Int) in /// OMG, is that a `forAll` inside a `forAll`?!
+///
+///                        return x != x // Well that can't possibly hold.
+///
+///                    }
+///                    ^||^ /// <- `^||^` is like `||` in Swift, but lifted to work with properties.
+///                    (ls.filter({ $0 == [0] || $0 == [] }).count >= 1).withCallback(.AfterTest(.NotCounterexample, { st, res in
+///                        /// For the seriously EXTREME tester, `withCallback` provides a look into
+///                        /// SwiftCheck's testing mechanism.  You can request a variety of information
+///                        /// about the current state of the testing loop from inside this block.
+///                        ///
+///                        /// For the less crazed, SwiftCheck offers straight callbacks with `whenFail` and
+///                        /// `whenEachFail`.
+///                        print("This test is called: \(name)")
+///                    }))
+///         }
+///     }.expectFailure.verbose
+///       ^             ^
+///       |             |
+///       |             +--- The property will print EVERY generated test case to the console.
+///       + --- We expect this property not to hold.
+///
+/// Testing is not limited to just these listed combinators.  New users should check out our test
+/// suite and the files `Gen.swift`, `Property.swift`, `Modifiers.swift`, and the top half of this
+/// very file to learn more about the various parts of the SwiftCheck testing mechanism.
+
 /// Converts a function into a universally quantified property using the default shrinker and
 /// generator for that type.
 public func forAll<A : Arbitrary>(pf : (A -> Testable)) -> Property {
@@ -119,25 +191,25 @@ public func quickCheck(prop : Testable, name : String = "") {
 /// MARK: - Implementation Details
 
 internal enum Result {
-	case Success(numTests: Int
-				, labels: [(String, Int)]
-				, output: String
+	case Success(numTests : Int
+				, labels : [(String, Int)]
+				, output : String
 				)
-	case GaveUp(numTests: Int
-				, labels: [(String,Int)]
-				, output: String
+	case GaveUp(numTests : Int
+				, labels : [(String,Int)]
+				, output : String
 				)
-	case Failure(numTests: Int
-				, numShrinks: Int
-				, usedSeed: StdGen
-				, usedSize: Int
-				, reason: String
-				, labels: [(String,Int)]
-				, output: String
+	case Failure(numTests : Int
+				, numShrinks : Int
+				, usedSeed : StdGen
+				, usedSize : Int
+				, reason : String
+				, labels : [(String,Int)]
+				, output : String
 				)
-	case  NoExpectedFailure(numTests: Int
-							, labels: [(String,Int)]
-							, output: String
+	case  NoExpectedFailure(numTests : Int
+							, labels : [(String,Int)]
+							, output : String
 							)
 }
 
