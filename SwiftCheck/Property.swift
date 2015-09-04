@@ -253,8 +253,8 @@ extension Testable {
 /// Shrinking is handled automatically by SwiftCheck.  Invoking this function is only necessary
 /// when you must override the default behavior.
 public func shrinking<A>(shrinker : A -> [A], initial : A, prop : A -> Testable) -> Property {
-	return Property(promote(props(shrinker, original: initial, pf: prop)).fmap { (let rs : Rose<Prop>) in
-		return Prop(unProp: joinRose(rs.fmap { (let x : Prop) in
+	return Property(promote(props(shrinker, original: initial, pf: prop)).fmap { rs in
+		return Prop(unProp: joinRose(rs.fmap { x in
 			return x.unProp
 		}))
 	})
@@ -356,7 +356,7 @@ private func exception(msg : String) -> ErrorType -> TestResult {
 	return { e in TestResult.failed(String(e)) }
 }
 
-private func props<A>(shrinker : A -> [A], original : A, pf: A -> Testable) -> Rose<Gen<Prop>> {
+private func props<A>(shrinker : A -> [A], original : A, pf : A -> Testable) -> Rose<Gen<Prop>> {
 	return .MkRose({ pf(original).property.unProperty }, { shrinker(original).map { x1 in
 		return props(shrinker, original: x1, pf: pf)
 	}})
