@@ -32,8 +32,15 @@
 /// or falsy values.  The testing block is usually used with Swift's abbreviated block syntax and
 /// requires type annotations for all value positions being requested.  For example,
 ///
-///     forAll { (anInteger : Int, aBoolean : Bool, someStrings : ArrayOf<String>) in
-///         return true // This test case always passes.
+///     + This is "Property Notation".  It allows you to give your properties a name and instructs SwiftCheck to test it.
+///     |                                                                + This backwards arrow binds a property name and a property to each other.
+///     |                                                                |
+///     v                                                                v
+///     property("The reverse of the reverse of an array is that array") <- forAll { (xs : Array<Int>) in
+///	        return
+///	            (xs.reverse().reverse() == xs) <?> "Reverse on the left"
+/// 	        ^&&^
+///	 	        (xs == xs.reverse().reverse()) <?> "Reverse on the right"
 ///     }
 ///
 /// Why require types?  For one, Swift cannot infer the types of local variables because SwiftCheck
@@ -41,7 +48,9 @@
 /// SwiftCheck uses them to select the appropriate `Gen`erators and shrinkers for each data type
 /// automagically by default.  Those `Gen`erators and shrinkers are then used to create 100 random
 /// test cases that are evaluated lazily to produce a final result.
-///
+
+// MARK: - Going Further
+
 /// As mentioned before, SwiftCheck types do not exist in a bubble.  They are highly compositional
 /// and flexible enough to express unique combinations and permutations of test types.  Below is a
 /// purely illustrative example utilizing a significant portion of SwiftCheck's testing functions:
@@ -84,102 +93,119 @@
 
 /// Converts a function into a universally quantified property using the default shrinker and
 /// generator for that type.
+@warn_unused_result
 public func forAll<A : Arbitrary>(pf : (A -> Testable)) -> Property {
 	return forAllShrink(A.arbitrary, shrinker: A.shrink, f: pf)
 }
 
 /// Converts a function into a universally quantified property using the default shrinker and
 /// generator for 2 types.
+@warn_unused_result
 public func forAll<A : Arbitrary, B : Arbitrary>(pf : (A, B) -> Testable) -> Property {
 	return forAll({ t in forAll({ b in pf(t, b) }) })
 }
 
 /// Converts a function into a universally quantified property using the default shrinker and
 /// generator for 3 types.
+@warn_unused_result
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary>(pf : (A, B, C) -> Testable) -> Property {
 	return forAll({ t in forAll({ b, c in pf(t, b, c) }) })
 }
 
 /// Converts a function into a universally quantified property using the default shrinker and
 /// generator for 4 types.
+@warn_unused_result
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary>(pf : (A, B, C, D) -> Testable) -> Property {
 	return forAll({ t in forAll({ b, c, d in pf(t, b, c, d) }) })
 }
 
 /// Converts a function into a universally quantified property using the default shrinker and
 /// generator for 5 types.
+@warn_unused_result
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary>(pf : (A, B, C, D, E) -> Testable) -> Property {
 	return forAll({ t in forAll({ b, c, d, e in pf(t, b, c, d, e) }) })
 }
 
 /// Converts a function into a universally quantified property using the default shrinker and
 /// generator for 6 types.
+@warn_unused_result
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary>(pf : (A, B, C, D, E, F) -> Testable) -> Property {
 	return forAll({ t in forAll({ b, c, d, e, f in pf(t, b, c, d, e, f) }) })
 }
 
 /// Converts a function into a universally quantified property using the default shrinker and
 /// generator for 7 types.
+@warn_unused_result
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary>(pf : (A, B, C, D, E, F, G) -> Testable) -> Property {
 	return forAll({ t in forAll({ b, c, d, e, f, g in pf(t, b, c, d, e, f, g) }) })
 }
 
 /// Converts a function into a universally quantified property using the default shrinker and
 /// generator for 8 types.
+@warn_unused_result
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary, H : Arbitrary>(pf : (A, B, C, D, E, F, G, H) -> Testable) -> Property {
 	return forAll({ t in forAll({ b, c, d, e, f, g, h in pf(t, b, c, d, e, f, g, h) }) })
 }
 
 /// Given an explicit generator, converts a function to a universally quantified property using the
 /// default shrinker for that type.
+@warn_unused_result
 public func forAll<A : Arbitrary>(gen : Gen<A>, pf : (A -> Testable)) -> Property {
 	return forAllShrink(gen, shrinker: A.shrink, f: pf)
 }
 
 /// Given 2 explicit generators, converts a function to a universally quantified property using the
 /// default shrinkers for those 2 types.
+@warn_unused_result
 public func forAll<A : Arbitrary, B : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(pf : (A, B) -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB, pf: { b in pf(t, b) }) })
 }
 
 /// Given 3 explicit generators, converts a function to a universally quantified property using the
 /// default shrinkers for those 3 types.
+@warn_unused_result
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(pf : (A, B, C) -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB)(genB: genC)(pf: { b, c in pf(t, b, c) }) })
 }
 
 /// Given 4 explicit generators, converts a function to a universally quantified property using the
 /// default shrinkers for those 4 types.
+@warn_unused_result
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(genD : Gen<D>)(pf : (A, B, C, D) -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB)(genB: genC)(genC: genD)(pf: { b, c, d in pf(t, b, c, d) }) })
 }
 
 /// Given 5 explicit generators, converts a function to a universally quantified property using the
 /// default shrinkers for those 5 types.
+@warn_unused_result
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(genD : Gen<D>)(genE : Gen<E>)(pf : (A, B, C, D, E) -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(pf: { b, c, d, e in pf(t, b, c, d, e) }) })
 }
 
 /// Given 6 explicit generators, converts a function to a universally quantified property using the
 /// default shrinkers for those 6 types.
+@warn_unused_result
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(genD : Gen<D>)(genE : Gen<E>)(genF : Gen<F>)(pf : (A, B, C, D, E, F) -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)(pf: { b, c, d, e, f in pf(t, b, c, d, e, f) }) })
 }
 
 /// Given 7 explicit generators, converts a function to a universally quantified property using the
 /// default shrinkers for those 7 types.
+@warn_unused_result
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(genD : Gen<D>)(genE : Gen<E>)(genF : Gen<F>)(genG : Gen<G>)(pf : (A, B, C, D, E, F, G) -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)(genF : genG)(pf: { b, c, d, e, f, g in pf(t, b, c, d, e, f, g) }) })
 }
 
 /// Given 8 explicit generators, converts a function to a universally quantified property using the
 /// default shrinkers for those 8 types.
+@warn_unused_result
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary, H : Arbitrary>(genA : Gen<A>)(genB : Gen<B>)(genC : Gen<C>)(genD : Gen<D>)(genE : Gen<E>)(genF : Gen<F>)(genG : Gen<G>)(genH : Gen<H>)(pf : (A, B, C, D, E, F, G, H) -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB)(genB: genC)(genC: genD)(genD: genE)(genE: genF)(genF : genG)(genG : genH)(pf: { b, c, d, e, f, g, h in pf(t, b, c, d, e, f, g, h) }) })
 }
 
 /// Given an explicit generator and shrinker, converts a function to a universally quantified
 /// property.
+@warn_unused_result
 public func forAllShrink<A>(gen : Gen<A>, shrinker : A -> [A], f : A -> Testable) -> Property {
 	return Property(gen.bind { x in
 		return shrinking(shrinker, initial: x, prop: { xs  in
