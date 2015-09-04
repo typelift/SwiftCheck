@@ -15,13 +15,17 @@
 ///
 /// A `Property` in SwiftCheck is more than just `true` and `false`, it is a value that is capable
 /// of producing a framework type called `Prop`, which models individual test cases that themselves
-/// are capable of passing or failing "in the small" with a `TestResult`.  This ability is encoded
-/// by a protocol called `Testable` that is adopted by Bool, Property, Prop, and several other
-/// internal framework types.  The thing to notice is the majority of user-facing functions and
-/// combinators in this library return types that conform to `Testable`.  This enables a high level
-/// of composition and enables the testing of incredibly complex properties that would normally be
-/// expressed by stateful, complected unit tests.
-///
+/// are capable of passing or failing "in the small" with a `TestResult`.  For those familiar with
+/// Protocol-Oriented Programming, lying at the heart of all of these types is a protocol called
+/// `Testable` that provides any type a means of converting itself to a `Property`.  SwiftCheck
+/// uses `Testable` early and often in functions and operators to enable a high level of nesting
+/// of framework primitives and an even higher level of genericity in the interface.  By default
+/// SwiftCheck provides `Testable` instances for `Bool`, `Property`, `Prop`, and several other
+/// internal framework types.  Practically, this means any assertions you could make in `XCTest`
+/// will work immediately with the framework.
+
+// MARK: - Quantifiers
+
 /// Below is the method all SwiftCheck properties are based on, `forAll`.  `forAll` acts as a
 /// "Quantifier", i.e. a contract that serves as a guarantee that a property holds when the given
 /// testing block returns `true` or truthy values, and fails when the testing block returns `false`
