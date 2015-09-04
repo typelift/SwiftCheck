@@ -6,9 +6,34 @@
 //  Copyright (c) 2015 CodaFi. All rights reserved.
 //
 
+// MARK: - Modifier Types
 
-/// For types that either do not have a Printable instance or that wish to have no description to
-/// print, Blind will create a default description for them.
+/// A Modifier Type is a type that wraps another to provide special semantics or simply to generate
+/// values of an underlying type that would be unusually difficult to express given the limitations
+/// of Swift's type system.  
+///
+/// For an example of the former, take the `Blind` modifier.  Because SwiftCheck's counterexamples 
+/// come from a description a particular object provides for itself, there are many cases where 
+/// console output can become unbearably long, or just simply isn't useful to your test suite.  By
+/// wrapping that type in `Blind` SwiftCheck ignore whatever description the property provides and 
+/// just print "(*)".
+///
+/// For an example of the latter see the `ArrowOf` modifier.  Because Swift's type system treats
+/// arrows (`->`) as an opaque entity that you can't interact with or extend, SwiftCheck provides
+/// `ArrowOf` to enable the generation of functions between 2 types.  That's right, we can generate
+/// arbitrary functions!
+///
+/// Finally, modifiers nest to allow the generation of intricate structures that would not otherwise
+/// be possible due to the limitations above.  For example, to generate an Array of Arrays of 
+/// Dictionaries of Integers and Strings (a type that normally looks like 
+/// `Array<Array<Dictionary<String, Int>>>`), would look like this:
+///
+///     property("Generating monstrous data types is possible") <- forAll { (xs : ArrayOf<ArrayOf<DictionaryOf<String, Int>>>) in
+///         /// We're gonna need a bigger boat.
+///     }
+
+/// For types that either do not have a `CustomStringConvertible` instance or that wish to have no
+/// description to print, Blind will create a default description for them.
 public struct Blind<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 	public let getBlind : A
 
