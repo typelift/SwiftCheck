@@ -17,7 +17,7 @@ import XCTest
 //:
 //: * [Abstract Nonsense](https://en.wikipedia.org/wiki/Abstract_nonsense)
 //: * Functional Programming
-//: * What that dumb 'M' word is/does/means
+//: * What that dumb ['M' word](https://wiki.haskell.org/Monad) is/does/means
 
 //: # Introduction
 
