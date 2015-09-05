@@ -13,7 +13,7 @@ import XCTest
 //: * [Polymorphism](https://en.wikipedia.org/wiki/Polymorphism)
 //: * [Map/Filter/Reduce](https://medium.com/@ivicamil/higher-order-functions-in-swift-part-1-d8e75f963d13)
 //:
-//: What this tutorial does *not* require are that you know
+//: What this tutorial does *not* require is that you know about
 //:
 //: * [Abstract Nonsense](https://en.wikipedia.org/wiki/Abstract_nonsense)
 //: * Functional Programming
