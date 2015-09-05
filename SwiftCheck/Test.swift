@@ -69,15 +69,9 @@
 ///
 ///             /// shrinkArbitrary is a method call that invokes the shrinker
 ///             let ls = self.shrinkArbitrary(s).map { $0.getSet }
-///             return forAll { (x : Int) in /// OMG, is that a `forAll` inside a `forAll`?!
-///
-///                        return x != x // Well that can't possibly hold.
-///
-///                    }
-///                    ^||^ /// <- `^||^` is like `||` in Swift, but for properties.
-///                    (ls.filter({ $0 == [0] || $0 == [] }).count >= 1).whenFail {
-///                        print("Oh noe!")
-///                    }
+///             return (ls.filter({ $0 == [0] || $0 == [] }).count >= 1).whenFail {
+///                 print("Oh noe!")
+///             }
 ///         }
 ///     }.expectFailure.verbose
 ///       ^             ^
