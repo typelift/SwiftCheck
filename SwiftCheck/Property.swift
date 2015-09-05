@@ -272,20 +272,21 @@ public enum Callback {
 
 /// The type of callbacks SwiftCheck can dispatch.
 public enum CallbackKind {
-	///
+	/// Affected by the verbose combinator.
 	case Counterexample
+	/// Not affected by the verbose combinator
 	case NotCounterexample
 }
 
 public enum TestResultMatcher {
-	case MatchResult( ok : Optional<Bool>
-					, expect : Bool
-					, reason : String
+	case MatchResult( ok           : Optional<Bool>
+					, expect       : Bool
+					, reason       : String
 					, theException : Optional<String>
-					, labels : Dictionary<String, Int>
-					, stamp : Set<String>
-					, callbacks : [Callback]
-					, abort : Bool
+					, labels       : Dictionary<String, Int>
+					, stamp        : Set<String>
+					, callbacks    : Array<Callback>
+					, abort        : Bool
 					)
 }
 
@@ -430,27 +431,27 @@ internal func unionWith<K : Hashable, V>(f : (V, V) -> V, l : Dictionary<K, V>, 
 
 private func addCallbacks(result : TestResult) -> TestResult -> TestResult {
 	return { res in
-		return TestResult(ok: res.ok,
-						expect: res.expect,
-						reason: res.reason,
-						theException: res.theException,
-						labels: res.labels,
-						stamp: res.stamp,
-						callbacks: result.callbacks + res.callbacks,
-						abort: res.abort)
+		return TestResult(ok:           res.ok
+						, expect:       res.expect
+						, reason:       res.reason
+						, theException: res.theException
+						, labels:       res.labels
+						, stamp:        res.stamp
+						, callbacks:    result.callbacks + res.callbacks
+						, abort:        res.abort)
 	}
 }
 
 private func addLabels(result : TestResult) -> TestResult -> TestResult {
 	return { res in
-		return TestResult(ok: res.ok,
-						expect: res.expect,
-						reason: res.reason,
-						theException: res.theException,
-						labels: unionWith(max, l: res.labels, r: result.labels),
-						stamp: res.stamp.union(result.stamp),
-						callbacks: res.callbacks,
-						abort: res.abort)
+		return TestResult(ok:           res.ok
+						, expect:       res.expect
+						, reason:       res.reason
+						, theException: res.theException
+						, labels:       unionWith(max, l: res.labels, r: result.labels)
+						, stamp:        res.stamp.union(result.stamp)
+						, callbacks:    res.callbacks
+						, abort:        res.abort)
 	}
 }
 
