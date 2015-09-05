@@ -97,30 +97,30 @@ extension Testable {
 
 	/// Modifies a property so that it only will be tested once.
 	public var once : Property {
-		return self.mapResult({ res in
-			return TestResult(ok: res.ok,
-							expect: res.expect,
-							reason: res.reason,
-							theException: res.theException,
-							labels: res.labels,
-							stamp: res.stamp,
-							callbacks: res.callbacks,
-							abort: true)
-		})
+		return self.mapResult { res in
+			return TestResult(ok:           res.ok
+							, expect:       res.expect
+							, reason:       res.reason
+							, theException: res.theException
+							, labels:       res.labels
+							, stamp:        res.stamp
+							, callbacks:    res.callbacks
+							, abort:        true)
+		}
 	}
 
 	/// Attaches a callback to a test case.
 	public func withCallback(cb : Callback) -> Property {
-		return self.mapResult({ (res) in
-			return TestResult(ok: res.ok,
-							expect: res.expect,
-							reason: res.reason,
-							theException: res.theException,
-							labels: res.labels,
-							stamp: res.stamp,
-							callbacks: [cb] + res.callbacks,
-							abort: res.abort)
-		})
+		return self.mapResult { (res) in
+			return TestResult(ok:           res.ok
+							, expect:       res.expect
+							, reason:       res.reason
+							, theException: res.theException
+							, labels:       res.labels
+							, stamp:        res.stamp
+							, callbacks:    [cb] + res.callbacks
+							, abort:        res.abort)
+		}
 	}
 
 	/// Adds the given string to the counterexamples of a failing property.
@@ -180,16 +180,16 @@ extension Testable {
 			}
 		}
 
-		return self.mapResult({ res in
-			return TestResult(ok: res.ok,
-							expect: res.expect,
-							reason: res.reason,
-							theException: res.theException,
-							labels: res.labels,
-							stamp: res.stamp,
-							callbacks: res.callbacks + chattyCallbacks(res.callbacks),
-							abort: res.abort)
-		})
+		return self.mapResult { res in
+			return TestResult(ok:           res.ok
+							, expect:       res.expect
+							, reason:       res.reason
+							, theException: res.theException
+							, labels:       res.labels
+							, stamp:        res.stamp
+							, callbacks:    res.callbacks + chattyCallbacks(res.callbacks)
+							, abort:        res.abort)
+		}
 	}
 
 	/// Modifies a property to indicate that it is expected to fail.
@@ -197,14 +197,14 @@ extension Testable {
 	/// If the property does not fail, SwiftCheck will report an error.
 	public var expectFailure : Property {
 		return self.mapTotalResult({ res in
-			return TestResult(ok: res.ok,
-							expect: false,
-							reason: res.reason,
-							theException: res.theException,
-							labels: res.labels,
-							stamp: res.stamp,
-							callbacks: res.callbacks,
-							abort: res.abort)
+			return TestResult(ok:           res.ok
+							, expect:       false
+							, reason:       res.reason
+							, theException: res.theException
+							, labels:       res.labels
+							, stamp:        res.stamp
+							, callbacks:    res.callbacks
+							, abort:        res.abort)
 		})
 	}
 
@@ -233,16 +233,16 @@ extension Testable {
 	/// Discarded tests (i.e. ones with a false precondition) do not affect coverage.
 	public func cover(b : Bool)(n : Int)(s : String) -> Property {
 		if b {
-			return self.mapResult({ res in
-				return TestResult(ok: res.ok,
-								expect: res.expect,
-								reason: res.reason,
-								theException: res.theException,
-								labels: insertWith(max, k: s, v: n, m: res.labels),
-								stamp: res.stamp.union([s]),
-								callbacks: res.callbacks,
-								abort: res.abort)
-			})
+			return self.mapResult { res in
+				return TestResult(ok:           res.ok
+								, expect:       res.expect
+								, reason:       res.reason
+								, theException: res.theException
+								, labels:       insertWith(max, k: s, v: n, m: res.labels)
+								, stamp:        res.stamp.union([s])
+								, callbacks:    res.callbacks
+								, abort:        res.abort)
+			}
 		}
 		return self.property
 	}

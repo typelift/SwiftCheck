@@ -67,7 +67,7 @@
 ///         /// be used to discard test cases that contain data you don't want to test with.
 ///         return (!s.getSet.isEmpty && s.getSet != Set([0])) ==> {
 ///
-///             /// shrinkArbitrary is a method call that invokes the shrinker
+///             /// N.B. `shrinkArbitrary` is a internal method call that invokes the shrinker.
 ///             let ls = self.shrinkArbitrary(s).map { $0.getSet }
 ///             return (ls.filter({ $0 == [0] || $0 == [] }).count >= 1).whenFail {
 ///                 print("Oh noe!")
