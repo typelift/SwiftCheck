@@ -36,7 +36,7 @@
 ///     |                                                                + This backwards arrow binds a property name and a property to each other.
 ///     |                                                                |
 ///     v                                                                v
-///     property("The reverse of the reverse of an array is that array") <- forAll { (xs : Array<Int>) in
+///     property("The reverse of the reverse of an array is that array") <- forAll { (xs : [Int]) in
 ///	        return
 ///	            (xs.reverse().reverse() == xs) <?> "Reverse on the left"
 /// 	        ^&&^
