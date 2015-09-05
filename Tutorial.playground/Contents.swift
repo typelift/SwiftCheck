@@ -39,8 +39,9 @@ import XCTest
 //: In Swift, when one thinks of a Generator, they usually think of the `GeneratorType` protocol or the
 //: many many individual structures the Swift Standard Library exposes to allow loops to work with data
 //: structures like `[T]` and `Set<T>`.  In Swift, we also have Generators, but we spell them `Gen`erators,
-//: as in the universal Generator type `Gen`.  `Gen` is a struct defined generically over any kind of type
-//: that looks like this:
+//: as in the universal Generator type `Gen`.  
+//:
+//: `Gen` is a struct defined generically over any kind of type that looks like this:
 //
 //     /// We're not defining this here; We'll be using SwiftCheck's `Gen` from here on out.
 //     struct Gen<Wrapped> { }
@@ -153,8 +154,139 @@ oddLengthArrays.generate.count
 oddLengthArrays.generate.count
 oddLengthArrays.generate.count
 
+//: Generators also admit functional methods like `map` and `flatMap`, but with different names than you might
+//: be used to.
 
+// `fmap` (function map) works exactly like Array's `map` method; it applies the function to any 
+// values it generates.
+let fromTwoToSix = fromOnetoFive.fmap { $0 + 1 }
 
+fromTwoToSix.generate
+fromTwoToSix.generate
+fromTwoToSix.generate
+fromTwoToSix.generate
+fromTwoToSix.generate
+
+// `bind` works exactly like Array's `flatMap`, but instead of concatenating the generated arrays it produces
+// a new generator that picks values from among the newly created generators produced by the function.  While
+// That definition may *technically* be what occurs, it is better to think of `bind` as a way of making a generator
+// depend on another.  For example, you can use a generator of sizes to limit the length of generators of arrays:
+
+let generatorBoundedSizeArrays = fromOnetoFive.bind { len in
+	return characterArray.suchThat { xs in xs.count <= len }
+}
+
+generatorBoundedSizeArrays.generate
+generatorBoundedSizeArrays.generate
+generatorBoundedSizeArrays.generate
+generatorBoundedSizeArrays.generate
+generatorBoundedSizeArrays.generate
+
+//: Because SwiftCheck is based on the functional concepts in our other library [Swiftz](https://github.com/typelift/Swiftz),
+//: each of these functions has an operator alias:
+//:
+//: * `<^>` is an alias for `fmap`
+//: * `<*>` is an alias for `ap`
+//: * `>>-` is an alias for `bind`
+
+// <^> is backwards for aesthetic and historical purposes.  Its true use will be revealled soon.
+let fromTwoToSix_ = { $0 + 1 } <^> fromOnetoFive
+
+fromTwoToSix_.generate
+fromTwoToSix_.generate
+fromTwoToSix_.generate
+
+let generatorBoundedSizeArrays_ = fromOnetoFive >>- { len in
+	return characterArray.suchThat { xs in xs.count <= len }
+}
+
+generatorBoundedSizeArrays_.generate
+generatorBoundedSizeArrays_.generate
+generatorBoundedSizeArrays_.generate
+
+//: Now that you've seen what generators can do, we'll use all we've learned to create a generator that
+//: produces email addresses.  To do this, we'll need one more operator/method notated `<*>` or `ap`.
+//: `ap` comes from [Applicative Functors](http://staff.city.ac.uk/~ross/papers/Applicative.html) and is
+//: used to "zip together" `Gen`erators of functions with `Gen`erators of of values, applying each function
+//: during the zipping phase.  That definition is a little hand-wavey and technical, so for now we'll say that
+//: `ap` works like "glue" that sticks special kinds of generators togethers.
+//:
+//: For our purposes, we will say that an email address consists of 3 parts: A local part, a hostname, and a 
+//: Top-Level Domain each separated by an `@`, and a `.` respectively.
+//:
+//: According to RFC 2822, the local part can consist of uppercase characters, lowercase letters, numbers, and
+//: certain kinds of special characters.  We already have generators for upper and lower cased letters, so all we
+//: need are special characters and a more complete number generator:
+
+let numeric : Gen<Character> = Gen<Character>.fromElementsIn("0"..."9")
+let special : Gen<Character> = Gen<Character>.fromElementsOf(["!", "#", "$", "%", "&", "'", "*", "+", "-", "/", "=", "?", "^", "_", "`", "{", "|", "}", "~", "."])
+
+//: Now for the actual generator
+
+let allowedLocalCharacters : Gen<Character> = Gen<Character>.oneOf([
+	upperCaseLetters,
+	lowerCaseLetters,
+	numeric,
+	special,
+])
+
+//: Now we need a `String` made of these characters. so we'll just `proliferate` an array of characters and `fmap`
+//: to get a `String` back.
+
+let localEmail = allowedLocalCharacters.proliferateNonEmpty().fmap(String.init)
+
+//: The RFC says that the host name can only consist of lowercase letters, numbers, and dashes.  We'll skip some
+//: steps here and combine both steps above into one big generator.
+
+let hostname = Gen<Character>.oneOf([
+	lowerCaseLetters,
+	numeric,
+	Gen.pure("-"),
+]).proliferateNonEmpty().fmap(String.init)
+
+//: Finally, the RFC says the TLD for the address can only consist of lowercase letters with a length larger than 1.
+
+let tld = lowerCaseLetters.proliferateNonEmpty().suchThat({ $0[$0.endIndex.predecessor()] != "." }).fmap(String.init)
+
+//: So now we've got all the pieces together, so how do we put them together to make the final generator?  Well, how
+//: about some glue?
+
+// Concatenates 5 strings together in order.
+func glue5(l : String) -> String -> String -> String -> String -> String {
+	return { m in { m2 in { m3 in { r in l + m + m2 + m3 + r } } } }
+}
+
+//: This big thing looks a bit complicated, let's go through it part by part:
+
+//:            +--- Here's our glue function.
+//:            |     +--- This says we're mapping that function over all these pieces.
+//:            |     |              +--- Here's our funtional "glue" from before.
+//:            |     |              |
+//:            v     v              v
+let emailGen = glue5 <^> localEmail <*> Gen.pure("@") <*> hostname <*> Gen.pure(".") <*> tld
+
+//: And we're done!
+
+// Yes, these are in fact, all valid email addresses.
+emailGen.generate
+
+//: By now you may be asking "why do we need all of this in the first place?  Can't we just apply the parts to the
+//: function to get back a result?"  Well, we do it because we aren't working with Characters or Strings or Arrays,
+//: we're working with `Gen<String>`.  And we can't apply `Gen<String>` to a function that expects `String`, that wouldn't
+//: make any sense - and it would never compile!  Instead we use these operators to "lift" our function over `String`s to
+//: functions over `Gen<String>`s.
+//:
+//: Complex cases like the above are rare in practice.  Most of the time you won't even need to use generators at all!  This
+//: brings us to one of the most important parts of SwiftCheck:
+
+//: # Randomness
+
+//: Here at TypeLift, we believe that Types are the most useful part of a program.  So when we were writing 
+//: SwiftCheck, we thought about just using `Gen` everywhere and making instance methods on values that would ask them
+//: to generate a "next" value.  But that would have been incredibly boring!  Instead, we wrote a protocol called `Arbitrary`
+//: and let Types, not values, do all the work.
+//:
+//: The `Arbitrary` protocol looks like this:
 
 
 
