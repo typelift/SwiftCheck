@@ -156,7 +156,7 @@ extension Testable {
 	/// callbacks.
 	public var verbose : Property {
 		func chattyCallbacks(cbs : [Callback]) -> [Callback] {
-			let c = Callback.AfterTest(kind: .Counterexample, f: { (st, res) in
+			let c = Callback.AfterTest(kind: .Counterexample) { (st, res) in
 				switch res.ok {
 				case .Some(true):
 					print("\nPassed: ", terminator: "")
@@ -168,7 +168,7 @@ extension Testable {
 					print("\nDiscarded: ", terminator: "")
 					printLabels(res)
 				}
-			})
+			}
 
 			return [c] + cbs.map { (c : Callback) -> Callback in
 				switch c {

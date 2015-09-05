@@ -24,7 +24,7 @@ import Darwin
 ///
 /// As an example, take the `ArrayOf` implementation of shrink:
 ///
-/// shrink(ArrayOf([1, 2, 3]))
+/// Arbitrary.shrink(ArrayOf([1, 2, 3]))
 ///	> [[], [2,3], [1,3], [1,2], [0,2,3], [1,0,3], [1,1,3], [1,2,0], [1,2,2]]
 ///
 /// SwiftCheck will search each case one-by-one and continue shrinking until it has reached a case
