@@ -26,11 +26,13 @@ class ComplexSpec : XCTestCase {
 			numeric,
 			special,
 		]).proliferateNonEmpty().suchThat({ $0[$0.endIndex.predecessor()] != "." }).fmap(String.init)
+
 		let hostname = Gen<Character>.oneOf([
 			lower,
 			numeric,
 			Gen.pure("-"),
 		]).proliferateNonEmpty().fmap(String.init)
+
 		let tld = lower.proliferateNonEmpty().suchThat({ $0.count > 1 }).fmap(String.init)
 
 		let emailGen = wrap3 <^> localEmail <*> Gen.pure("@") <*> hostname <*> Gen.pure(".") <*> tld

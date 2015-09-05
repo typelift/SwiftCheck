@@ -15,13 +15,25 @@
 /// For an example of the former, take the `Blind` modifier.  Because SwiftCheck's counterexamples 
 /// come from a description a particular object provides for itself, there are many cases where 
 /// console output can become unbearably long, or just simply isn't useful to your test suite.  By
-/// wrapping that type in `Blind` SwiftCheck ignore whatever description the property provides and 
+/// wrapping that type in `Blind` SwiftCheck ignores whatever description the property provides and
 /// just print "(*)".
+///
+///     property("All blind variables print '(*)'") <- forAll { (x : Blind<Int>) in
+///         return x.description == "(*)"
+///     }
 ///
 /// For an example of the latter see the `ArrowOf` modifier.  Because Swift's type system treats
 /// arrows (`->`) as an opaque entity that you can't interact with or extend, SwiftCheck provides
 /// `ArrowOf` to enable the generation of functions between 2 types.  That's right, we can generate
 /// arbitrary functions!
+///
+///     property("map accepts SwiftCheck arrows") <- forAll { (xs : [Int]) in
+///         return forAll { (f : ArrowOf<Int, Int>) in
+///             /// Just to prove it really is a function (that is, every input always maps to the
+///             /// same output), and not just a trick, we map twice and should get equal arrays.
+///	            return xs.map(f.getArrow) == xs.map(f.getArrow)
+///         }
+///     }
 ///
 /// Finally, modifiers nest to allow the generation of intricate structures that would not otherwise
 /// be possible due to the limitations above.  For example, to generate an Array of Arrays of 
