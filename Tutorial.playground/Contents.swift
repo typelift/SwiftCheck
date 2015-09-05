@@ -103,7 +103,7 @@ uppersAndLowers.generate
 uppersAndLowers.generate
 uppersAndLowers.generate
 
-// `Gen.zip` works like zip in Swift but with `Gen`erators.
+// `Gen.zip` works like `zip` in Swift but with `Gen`erators.
 let pairsOfNumbers = Gen<(Int, Int)>.zip(fromOnetoFive, fromOnetoFive)
 
 pairsOfNumbers.generate
@@ -132,18 +132,21 @@ let biasedUppersAndLowers = Gen<Character>.frequency([
 
 //: `Gen`erators can even filter, modify, or combine the elements they create to produce.
 
+// `suchThat` takes a predicate function that filters generated elements.
 let oneToFiveEven = fromOnetoFive.suchThat { $0 % 2 == 0 }
 
 oneToFiveEven.generate
 oneToFiveEven.generate
 oneToFiveEven.generate
 
+// `proliferate` turns a generator of single elements into a generator of arrays of those elements. 
 let characterArray = uppersAndLowers.proliferate()
 
 characterArray.generate
 characterArray.generate
 characterArray.generate
 
+/// `proliferateNonEmpty` works like `proliferate` but guarantees the generated array is never empty.
 let oddLengthArrays = fromOnetoFive.proliferateNonEmpty().suchThat { $0.count % 2 == 1 }
 
 oddLengthArrays.generate.count
