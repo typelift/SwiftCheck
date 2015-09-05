@@ -33,10 +33,8 @@ public struct Gen<A> {
 	/// only that value.
 	///
 	/// The input collection is required to be non-empty.
-	public static func fromElementsOf<S : CollectionType where S.Generator.Element == A, S.Index : protocol<RandomType, BidirectionalIndexType>>(xs : S) -> Gen<A> {
-		assert(!xs.isEmpty, "Gen.fromElementsOf used with empty sequence")
-
-		return choose((xs.startIndex, xs.endIndex.predecessor())).fmap { i in
+	public static func fromElementsOf<S : Indexable where S.Index : protocol<Comparable, RandomType>>(xs : S) -> Gen<S._Element> {
+		return Gen.fromElementsIn(xs.startIndex..<xs.endIndex).fmap { i in
 			return xs[i]
 		}
 	}
