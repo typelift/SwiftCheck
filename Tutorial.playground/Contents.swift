@@ -354,7 +354,7 @@ ArbitraryDate.arbitrary.generate.getDate
 //: What we've just written is called a `Modifier Type`; a wrapper around one type that we can't 
 //: generate with another that we can.
 //:
-//: SwiftCheck also uses this strategy for a few of the more "difficult" types in the Swift STL, but
+//: SwiftCheck uses this strategy for a few of the more "difficult" types in the Swift STL, but
 //: we also use them in more benign ways too.  For example, we can write a modifier type that only 
 //: generates positive numbers:
 
@@ -430,8 +430,9 @@ property("DeMorgan's Law") <- forAll { (x : Bool, y : Bool) in
 //: block for the proper number of tests.  For some real magic, let's see what happens when we fail 
 //: a test:
 
-// `reportProperty` is a variation of `property` that doesn't assert on failure.  It does, however, still print all failures to
-// the console.  We use it here because XCTest does not like it when you assert outside of a test case.
+// `reportProperty` is a variation of `property` that doesn't assert on failure.  It does, however, 
+// still print all failures to the console.  We use it here because XCTest does not like it when you
+// assert outside of a test case.
 reportProperty("Obviously wrong") <- forAll({ (x : Int) in
 	return x != x
 }).whenFail { // `whenFail` attaches a callback to the test when we fail.
