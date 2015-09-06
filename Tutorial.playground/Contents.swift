@@ -21,34 +21,35 @@ import XCTest
 
 //: # Introduction
 
-//: SwiftCheck is a testing library that augments libraries like `XCTest` and `Quick`, by giving them
-//: the ability to automatically test program properties.  A property is a particular facet of an
-//: algorithm, method, data structure, or program that must *hold* (that is, remain valid) even when
-//: fed random or pseudo-random data.  If that all seems complicated, it may be simpler to think of
-//: Property Testing like Fuzz Testing, but with the outcome being to satisfy requirements rather than
-//: break the program.  Throughout this tutorial, simplifications like the above will be made to aid
-//: your understanding.  Towards the end of it, we will begin to remove much of these "training wheels"
-//: and reveal the real concepts and types of the operations in the library, which are often much more
-//: powerful and generic than previously presented.
+//: SwiftCheck is a testing library that augments libraries like `XCTest` and `Quick`, by giving 
+//: them the ability to automatically test program properties.  A property is a particular facet of
+//: an algorithm, method, data structure, or program that must *hold* (that is, remain valid) even 
+//: when fed random or pseudo-random data.  If that all seems complicated, it may be simpler to 
+//: think of Property Testing like Fuzz Testing, but with the outcome being to satisfy requirements 
+//: rather than break the program.  Throughout this tutorial, simplifications like the above will be
+//: made to aid your understanding.  Towards the end of it, we will begin to remove much of these 
+//: "training wheels" and reveal the real concepts and types of the operations in the library, which
+//: are often much more powerful and generic than previously presented.
 //:
-//: This tutorial is divided into 3 parts, each meant to espouse a different aspect of the SwiftCheck
-//: library.
+//: This tutorial is divided into 3 parts, each meant to espouse a different aspect of the 
+//: SwiftCheck library.
 
 //: # `Gen`erators
 
-//: In Swift, when one thinks of a Generator, they usually think of the `GeneratorType` protocol or the
-//: many many individual structures the Swift Standard Library exposes to allow loops to work with data
-//: structures like `[T]` and `Set<T>`.  In Swift, we also have Generators, but we spell them `Gen`erators,
-//: as in the universal Generator type `Gen`.  
+//: In Swift, when one thinks of a Generator, they usually think of the `GeneratorType` protocol or
+//: the many many individual structures the Swift Standard Library exposes to allow loops to work 
+//: with data structures like `[T]` and `Set<T>`.  In Swift, we also have Generators, but we spell 
+//: them `Gen`erators, as in the universal Generator type `Gen`.
 //:
 //: `Gen` is a struct defined generically over any kind of type that looks like this:
 //
 //     /// We're not defining this here; We'll be using SwiftCheck's `Gen` from here on out.
 //     struct Gen<Wrapped> { }
 //
-//: `Gen`, unlike `GeneratorType`, is not backed by a concrete data structure like an array or dictionary,
-//: but is instead constructed by invoking methods that refine the kind of data that gets generated.  Below
-//: are some examples of `Gen`erators that generate random instances of simple data types.
+//: `Gen`, unlike `GeneratorType`, is not backed by a concrete data structure like an `Array` or
+//: `Dictionary`, but is instead constructed by invoking methods that refine the kind of data that 
+//: gets generated.  Below are some examples of `Gen`erators that generate random instances of 
+//: simple data types.
 
 // `Gen.pure` constructs a generator that *only* produces the given value.
 let onlyFive = Gen.pure(5)
@@ -59,8 +60,8 @@ onlyFive.generate
 onlyFive.generate
 onlyFive.generate
 
-// `Gen.fromElementsIn` constructs a generator that pulls values from inside the 
-// bounds of the given Range.  Because generation is random, some values may be repeated.
+// `Gen.fromElementsIn` constructs a generator that pulls values from inside the  bounds of the 
+// given Range.  Because generation is random, some values may be repeated.
 let fromOnetoFive = Gen<Int>.fromElementsIn(1...5)
 
 fromOnetoFive.generate
@@ -91,8 +92,8 @@ specialCharacters.generate
 specialCharacters.generate
 specialCharacters.generate
 
-//: But SwiftCheck `Gen`erators aren't just flat types, they stack and compose and fit together in amazing
-//: ways.
+//: But SwiftCheck `Gen`erators aren't just flat types, they stack and compose and fit together in 
+//: amazing ways.
 
 // `Gen.oneOf` randomly picks one of the generators from the given list and draws element from it.
 let uppersAndLowers = Gen<Character>.oneOf([
@@ -113,8 +114,9 @@ pairsOfNumbers.generate
 pairsOfNumbers.generate
 pairsOfNumbers.generate
 
-//: `Gen`erators don't have to always generate their elements with equal frequency.  SwiftCheck includes a number
-//: of functions for creating `Gen`erators with "weights" attached to their elements.
+//: `Gen`erators don't have to always generate their elements with equal frequency.  SwiftCheck 
+//: includes a number of functions for creating `Gen`erators with "weights" attached to their 
+//: elements.
 
 // This generator ideally generates nil 1/4 (1 / (1 + 3)) of the time and `.Some(5)` 3/4 of the time.
 let weightedGen = Gen<Int?>.weighted([
@@ -156,8 +158,8 @@ oddLengthArrays.generate.count
 oddLengthArrays.generate.count
 oddLengthArrays.generate.count
 
-//: Generators also admit functional methods like `map` and `flatMap`, but with different names than you might
-//: be used to.
+//: Generators also admit functional methods like `map` and `flatMap`, but with different names than
+//: you might be used to.
 
 // `fmap` (function map) works exactly like Array's `map` method; it applies the function to any 
 // values it generates.
@@ -169,10 +171,11 @@ fromTwoToSix.generate
 fromTwoToSix.generate
 fromTwoToSix.generate
 
-// `bind` works exactly like Array's `flatMap`, but instead of concatenating the generated arrays it produces
-// a new generator that picks values from among the newly created generators produced by the function.  While
-// That definition may *technically* be what occurs, it is better to think of `bind` as a way of making a generator
-// depend on another.  For example, you can use a generator of sizes to limit the length of generators of arrays:
+// `bind` works exactly like Array's `flatMap`, but instead of concatenating the generated arrays it
+// produces a new generator that picks values from among the newly created generators produced by 
+// the function.  While That definition may *technically* be what occurs, it is better to think of 
+// `bind` as a way of making a generator depend on another.  For example, you can use a generator of
+// sizes to limit the length of generators of arrays:
 
 let generatorBoundedSizeArrays = fromOnetoFive.bind { len in
 	return characterArray.suchThat { xs in xs.count <= len }
@@ -184,8 +187,8 @@ generatorBoundedSizeArrays.generate
 generatorBoundedSizeArrays.generate
 generatorBoundedSizeArrays.generate
 
-//: Because SwiftCheck is based on the functional concepts in our other library [Swiftz](https://github.com/typelift/Swiftz),
-//: each of these functions has an operator alias:
+//: Because SwiftCheck is based on the functional concepts in our other library 
+//: [Swiftz](https://github.com/typelift/Swiftz), each of these functions has an operator alias:
 //:
 //: * `<^>` is an alias for `fmap`
 //: * `<*>` is an alias for `ap`
@@ -206,19 +209,20 @@ generatorBoundedSizeArrays_.generate
 generatorBoundedSizeArrays_.generate
 generatorBoundedSizeArrays_.generate
 
-//: Now that you've seen what generators can do, we'll use all we've learned to create a generator that
-//: produces email addresses.  To do this, we'll need one more operator/method notated `<*>` or `ap`.
-//: `ap` comes from [Applicative Functors](http://staff.city.ac.uk/~ross/papers/Applicative.html) and is
-//: used to "zip together" `Gen`erators of functions with `Gen`erators of of values, applying each function
-//: during the zipping phase.  That definition is a little hand-wavey and technical, so for now we'll say that
-//: `ap` works like "glue" that sticks special kinds of generators togethers.
+//: Now that you've seen what generators can do, we'll use all we've learned to create a generator 
+//: that produces email addresses.  To do this, we'll need one more operator/method notated `<*>` or
+//: `ap`. `ap` comes from 
+//: [Applicative Functors](http://staff.city.ac.uk/~ross/papers/Applicative.html) and is used to 
+//: "zip together" `Gen`erators of functions with `Gen`erators of of values, applying each function 
+//: during the zipping phase.  That definition is a little hand-wavey and technical, so for now 
+//: we'll say that `ap` works like "glue" that sticks special kinds of generators togethers.
 //:
-//: For our purposes, we will say that an email address consists of 3 parts: A local part, a hostname, and a 
-//: Top-Level Domain each separated by an `@`, and a `.` respectively.
+//: For our purposes, we will say that an email address consists of 3 parts: A local part, a 
+//: hostname, and a Top-Level Domain each separated by an `@`, and a `.` respectively.
 //:
-//: According to RFC 2822, the local part can consist of uppercase characters, lowercase letters, numbers, and
-//: certain kinds of special characters.  We already have generators for upper and lower cased letters, so all we
-//: need are special characters and a more complete number generator:
+//: According to RFC 2822, the local part can consist of uppercase characters, lowercase letters, 
+//: numbers, and certain kinds of special characters.  We already have generators for upper and 
+//: lower cased letters, so all we need are special characters and a more complete number generator:
 
 let numeric : Gen<Character> = Gen<Character>.fromElementsIn("0"..."9")
 let special : Gen<Character> = Gen<Character>.fromElementsOf(["!", "#", "$", "%", "&", "'", "*", "+", "-", "/", "=", "?", "^", "_", "`", "{", "|", "}", "~", "."])
@@ -272,21 +276,23 @@ let emailGen = glue5 <^> localEmail <*> Gen.pure("@") <*> hostname <*> Gen.pure(
 // Yes, these are in fact, all valid email addresses.
 emailGen.generate
 
-//: By now you may be asking "why do we need all of this in the first place?  Can't we just apply the parts to the
-//: function to get back a result?"  Well, we do it because we aren't working with Characters or Strings or Arrays,
-//: we're working with `Gen<String>`.  And we can't apply `Gen<String>` to a function that expects `String`, that wouldn't
-//: make any sense - and it would never compile!  Instead we use these operators to "lift" our function over `String`s to
+//: By now you may be asking "why do we need all of this in the first place?  Can't we just apply 
+//: the parts to the function to get back a result?"  Well, we do it because we aren't working with 
+//: `Character`s or `String`s or `Array`s, we're working with `Gen<String>`.  And we can't apply 
+//: `Gen<String>` to a function that expects `String`, that wouldn't make any sense - and it would 
+//: never compile!  Instead we use these operators to "lift" our function over `String`s to 
 //: functions over `Gen<String>`s.
 //:
-//: Complex cases like the above are rare in practice.  Most of the time you won't even need to use generators at all!  This
-//: brings us to one of the most important parts of SwiftCheck:
+//: Complex cases like the above are rare in practice.  Most of the time you won't even need to use
+//: generators at all!  This brings us to one of the most important parts of SwiftCheck:
 
 //: # Randomness
 
-//: Here at TypeLift, we believe that Types are the most useful part of a program.  So when we were writing 
-//: SwiftCheck, we thought about just using `Gen` everywhere and making instance methods on values that would ask them
-//: to generate a "next" value.  But that would have been incredibly boring!  Instead, we wrote a protocol called `Arbitrary`
-//: and let Types, not values, do all the work.
+//: Here at TypeLift, we believe that Types are the most useful part of a program.  So when we were
+//: writing SwiftCheck, we thought about just using `Gen` everywhere and making instance methods on 
+//: values that would ask them to generate a "next" value.  But that would have been incredibly 
+//: boring!  Instead, we wrote a protocol called `Arbitrary` and let Types, not values, do all the 
+//: work.
 //:
 //: The `Arbitrary` protocol looks like this:
 //
@@ -299,12 +305,13 @@ emailGen.generate
 //         static var arbitrary : Gen<Self> { get }
 //     }
 //
-//: There's our old friend, `Gen`!  So, an `Arbitrary` type is a type that can give us a generator to create
-//: `Arbitrary` values.  SwiftCheck defines `Arbitrary` instances for the majority of types in the Swift Standard
-//: Library in the ways you might expect e.g. The `Arbitrary` instance for `Int` calls `arc4random_uniform`.
+//: There's our old friend, `Gen`!  So, an `Arbitrary` type is a type that can give us a generator 
+//: to create `Arbitrary` values.  SwiftCheck defines `Arbitrary` instances for the majority of 
+//: types in the Swift Standard Library in the ways you might expect e.g. The `Arbitrary` instance 
+//: for `Int` calls `arc4random_uniform`.
 //:
-//: We'll take this opportunity here to show you how to use Arbitrary for any types you might happen to write yourself.  But
-//: before that, let's try to write an `Arbitrary` instance for `NSDate`.
+//: We'll take this opportunity here to show you how to use Arbitrary for any types you might happen
+//: to write yourself.  But before that, let's try to write an `Arbitrary` instance for `NSDate`.
 
 import class Foundation.NSDate
 
@@ -321,8 +328,8 @@ import class Foundation.NSDate
 //     }
 // }
 //
-//: But this doesn't work!  Swift won't let us extend `NSDate` directly because we use `Gen<Self>` in the wrong 
-//: position.  What to do?
+//: But this doesn't work!  Swift won't let us extend `NSDate` directly because we use `Gen<Self>` 
+//: in the wrong position.  What to do?
 //:
 //: Let's write a wrapper!
 
@@ -344,11 +351,12 @@ struct ArbitraryDate : Arbitrary {
 ArbitraryDate.arbitrary.generate.getDate
 ArbitraryDate.arbitrary.generate.getDate
 
-//: What we've just written is called a `Modifier Type`; a wrapper around one type that we can't generate with
-//: another that we can.
+//: What we've just written is called a `Modifier Type`; a wrapper around one type that we can't 
+//: generate with another that we can.
 //:
-//: SwiftCheck also uses this strategy for a few of the more "difficult" types in the Swift STL, but we also use them
-//: in more benign ways too.  For example, we can write a modifier type that only generates positive numbers:
+//: SwiftCheck also uses this strategy for a few of the more "difficult" types in the Swift STL, but
+//: we also use them in more benign ways too.  For example, we can write a modifier type that only 
+//: generates positive numbers:
 
 public struct ArbitraryPositive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary {
 	public let getPositive : A
@@ -366,15 +374,15 @@ ArbitraryPositive<Int>.arbitrary.generate.getPositive
 
 //: # Quantifiers
 
-//: What we've seen so far are the building blocks we need to introduce the final part of the library: The actual testing
-//: interface.  The last concept we'll introduce is *Quantifiers*.
+//: What we've seen so far are the building blocks we need to introduce the final part of the 
+//; library: The actual testing interface.  The last concept we'll introduce is *Quantifiers*.
 //:
 //: A Quantifier is a contract that serves as a guarantee that a property holds when the given
 //: testing block returns `true` or truthy values, and fails when the testing block returns `false`
 //: or falsy values.  The testing block is usually used with Swift's abbreviated block syntax and
 //: requires type annotations for all value positions being requested.  There is only one quantifier
-//: in SwiftCheck, `forAll`.  As its name implies, `forAll` will produce random data and your spec must
-//: pass "for all" of the values.  Here's what it looks like:
+//: in SwiftCheck, `forAll`.  As its name implies, `forAll` will produce random data and your spec 
+//: must pass "for all" of the values.  Here's what it looks like:
 //
 //     func forAll<A : Arbitrary>(_ : (A... -> Bool)) -> Property
 //
@@ -412,13 +420,15 @@ property("DeMorgan's Law") <- forAll { (x : Bool, y : Bool) in
 	return l && r
 }
 
-//: The thing to notice about all of these examples is that there isn't a `Gen`erator in sight.  Not once did we have to invoke
-//: `.generate` or have to construct a generator.  We simply told the `forAll` block how many variables we wanted and of what
-//: type and SwiftCheck automagically went out and was able to produce random values.
+//: The thing to notice about all of these examples is that there isn't a `Gen`erator in sight.  Not
+//: once did we have to invoke `.generate` or have to construct a generator.  We simply told the 
+//: `forAll` block how many variables we wanted and of what type and SwiftCheck automagically went 
+//: out and was able to produce random values.
 //:
-//: Our not-so-magic trick is enabled behind the scenes by the judicious combination of `Arbitrary` to construct default generators
-//: for each type and a testing mechanism that invokes the testing block for the proper number of tests.  For some real magic, let's
-//: see what happens when we fail a test:
+//: Our not-so-magic trick is enabled behind the scenes by the judicious combination of `Arbitrary` 
+//: to construct default generators for each type and a testing mechanism that invokes the testing 
+//: block for the proper number of tests.  For some real magic, let's see what happens when we fail 
+//: a test:
 
 // `reportProperty` is a variation of `property` that doesn't assert on failure.  It does, however, still print all failures to
 // the console.  We use it here because XCTest does not like it when you assert outside of a test case.
@@ -435,9 +445,10 @@ reportProperty("Obviously wrong") <- forAll({ (x : Int) in
 //:     Oh noes!
 //:     0
 //: 
-//: The first line tells you what failed, the next how long it took to fail, the next our message from the callback, and the
-//: last the value of `x` the property failed with.  If you keep running the test over and over again you'll notice that the
-//: test keeps failing on the number 0 despite the integer supposedly being random.  What's going on here?
+//: The first line tells you what failed, the next how long it took to fail, the next our message 
+//: from the callback, and the last the value of `x` the property failed with.  If you keep running
+//: the test over and over again you'll notice that the test keeps failing on the number 0 despite 
+//: the integer supposedly being random.  What's going on here?
 //:
 //: To find out, let's see the full definition of the `Arbitrary` protocol:
 //
@@ -459,26 +470,29 @@ reportProperty("Obviously wrong") <- forAll({ (x : Int) in
 //         static func shrink(_ : Self) -> [Self]
 //     }
 //
-//: Here's where we one-up Fuzz Testing and show the real power of property testing.  A "shrink" is a strategy for reducing
-//: randomly generated values.  To shrink a value, all you need to do is return an array of "smaller values", whether in
-//: magnitude or value.  For example, the shrinker for `Array` returns Arrays that have a size less than or equal to that of
-//: the input array.
+//: Here's where we one-up Fuzz Testing and show the real power of property testing.  A "shrink" is
+//: a strategy for reducing randomly generated values.  To shrink a value, all you need to do is 
+//: return an array of "smaller values", whether in magnitude or value.  For example, the shrinker 
+//: for `Array` returns Arrays that have a size less than or equal to that of the input array.
 
 Array<Int>.shrink([1, 2, 3])
 
-//: So herein lies the genius: Whenever SwiftCheck encounters a failing property, it simply invokes the shrinker, tries the
-//: property again on the values of the array until it finds another failing case, then repeats the process until it runs
-//: out of cases to try.  In other words, it *shrinks* the value down to the least possible size then reports that to you
-//: as the failing test case rather than the randomly generated value which could be unnecessarily large or complex.
+//: So herein lies the genius: Whenever SwiftCheck encounters a failing property, it simply invokes
+//: the shrinker, tries the property again on the values of the array until it finds another failing
+//: case, then repeats the process until it runs out of cases to try.  In other words, it *shrinks*
+//: the value down to the least possible size then reports that to you as the failing test case 
+//: rather than the randomly generated value which could be unnecessarily large or complex.
 
 //: # All Together Now!
 
-//: If you've made it this far, congratulations!  That's it.  Naturally, there are other combinators and fancy ways of creating
-//: `Gen`erators and properties with the primitives in this framework, but they are all variations on the themes present in ths
-//: tutorial.  With the power of SwiftCheck and a sufficiently expressive testing suite, we can begin to check our programs not
-//: for individual passing cases in a few scattershot unit tests, but declare and enforce immutable properties that better describe
-//: the intent and invariants of our programs.  If you would like further reading, see the files `Arbitrary.swift`, `Test.swift`,
-//: `Modifiers.swift`, and `Property.swift`.
+//: If you've made it this far, congratulations!  That's it.  Naturally, there are other combinators
+//: and fancy ways of creating `Gen`erators and properties with the primitives in this framework, 
+//: but they are all variations on the themes present in ths tutorial.  With the power of SwiftCheck
+//: and a sufficiently expressive testing suite, we can begin to check our programs not for 
+//: individual passing cases in a few scattershot unit tests, but declare and enforce immutable 
+//: properties that better describe the intent and invariants of our programs.  If you would like 
+//: further reading, see the files `Arbitrary.swift`, `Test.swift`, `Modifiers.swift`, and 
+//: `Property.swift`.
 //:
 //: Go forth and test.
 
