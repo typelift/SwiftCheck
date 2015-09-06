@@ -254,8 +254,8 @@ let tld = lowerCaseLetters.proliferateNonEmpty().suchThat({ $0[$0.endIndex.prede
 //: about some glue?
 
 // Concatenates 5 strings together in order.
-func glue5(l : String) -> String -> String -> String -> String -> String {
-	return { m in { m2 in { m3 in { r in l + m + m2 + m3 + r } } } }
+func glue5(l: String)(m: String)(m2: String)(m3: String)(r: String) -> String {
+	return l + m + m2 + m3 + r
 }
 
 //: This big thing looks a bit complicated, let's go through it part by part:
