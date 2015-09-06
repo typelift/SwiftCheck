@@ -473,7 +473,12 @@ Array<Int>.shrink([1, 2, 3])
 
 //: # All Together Now!
 
-//: 
-
-
+//: If you've made it this far, congratulations!  That's it.  Naturally, there are other combinators and fancy ways of creating
+//: `Gen`erators and properties with the primitives in this framework, but they are all variations on the themes present in ths
+//: tutorial.  With the power of SwiftCheck and a sufficiently expressive testing suite, we can begin to check our programs not
+//: for individual passing cases in a few scattershot unit tests, but declare and enforce immutable properties that better describe
+//: the intent and invariants of our programs.  If you would like further reading, see the files `Arbitrary.swift`, `Test.swift`,
+//: `Modifiers.swift`, and `Property.swift`.
+//:
+//: Go forth and test.
 
