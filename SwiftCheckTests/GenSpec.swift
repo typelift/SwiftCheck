@@ -46,12 +46,12 @@ class GenSpec : XCTestCase {
 			return forAll(g) { $0 == 0 }
 		}
 
-		property("Gen.fromElementsOf only generates the elements of the given array") <- forAll { (xss : Array<Int>) in
-			if xss.isEmpty {
+		property("Gen.fromElementsOf only generates the elements of the given array") <- forAll { (xss : SetOf<Int>) in
+			if xss.getSet.isEmpty {
 				return Discard()
 			}
-			let l = Set(xss)
-			return forAll(Gen.fromElementsOf(xss)) { l.contains($0) }
+			let ll = Gen<Int>.fromElementsOf(xss.getSet)
+			return forAll(ll) { xss.getSet.contains($0) }
 		}
 
 		property("Gen.fromElementsOf only generates the elements of the given array") <- forAll { (n1 : Int, n2 : Int) in

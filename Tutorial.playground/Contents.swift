@@ -317,7 +317,7 @@ import class Foundation.NSDate
 //             Gen.pure(NSDate.distantFuture()),
 //             Gen.pure(NSDate.distantPast()),
 //             NSDate.init <^> NSTimeInterval.arbitrary,
-// 		   ])
+//         ])
 //     }
 // }
 //
@@ -332,7 +332,7 @@ struct ArbitraryDate : Arbitrary {
 	init(date : NSDate) { self.getDate = date }
 
 	static var arbitrary : Gen<ArbitraryDate> {
-         return Gen.oneOf([
+		return Gen.oneOf([
 			Gen.pure(NSDate()),
 			Gen.pure(NSDate.distantFuture()),
 			Gen.pure(NSDate.distantPast()),
@@ -344,8 +344,8 @@ struct ArbitraryDate : Arbitrary {
 ArbitraryDate.arbitrary.generate.getDate
 ArbitraryDate.arbitrary.generate.getDate
 
-//: What we've just written is called a `Modifier Type`; a wrapper around another type that we can't generate with
-//: one that we can.
+//: What we've just written is called a `Modifier Type`; a wrapper around one type that we can't generate with
+//: another that we can.
 //:
 //: SwiftCheck also uses this strategy for a few of the more "difficult" types in the Swift STL, but we also use them
 //: in more benign ways too.  For example, we can write a modifier type that only generates positive numbers:
@@ -356,12 +356,124 @@ public struct ArbitraryPositive<A : protocol<Arbitrary, SignedNumberType>> : Arb
 	public init(_ pos : A) { self.getPositive = pos }
 
 	public static var arbitrary : Gen<ArbitraryPositive<A>> {
-		return A.arbitrary.fmap({ ArbitraryPositive.init(abs($0)) })
+		return A.arbitrary.fmap { ArbitraryPositive.init(abs($0)) }
 	}
 }
 
 ArbitraryPositive<Int>.arbitrary.generate.getPositive
 ArbitraryPositive<Int>.arbitrary.generate.getPositive
 ArbitraryPositive<Int>.arbitrary.generate.getPositive
+
+//: # Quantifiers
+
+//: What we've seen so far are the building blocks we need to introduce the final part of the library: The actual testing
+//: interface.  The last concept we'll introduce is *Quantifiers*.
+//:
+//: A Quantifier is a contract that serves as a guarantee that a property holds when the given
+//: testing block returns `true` or truthy values, and fails when the testing block returns `false`
+//: or falsy values.  The testing block is usually used with Swift's abbreviated block syntax and
+//: requires type annotations for all value positions being requested.  There is only one quantifier
+//: in SwiftCheck, `forAll`.  As its name implies, `forAll` will produce random data and your spec must
+//: pass "for all" of the values.  Here's what it looks like:
+//
+//     func forAll<A : Arbitrary>(_ : (A... -> Bool)) -> Property
+//
+//: The actual type of `forAll` is much more general and expressive than this, but for now this will do.
+//:
+//: Here is an example of a simple property
+
+//     + This is "Property Notation".  It allows you to give your properties a name and instructs SwiftCheck to test it.
+//     |                                                          + This backwards arrow binds a property name and a property to each other.
+//     |                                                          |
+//     v                                                          v
+property("The reverse of the reverse of an array is that array") <- forAll { (xs : [Int]) in
+	return xs.reverse().reverse() == xs
+}
+
+// From now on, all of our examples will take the form above.
+
+//: Because `forAll` is variadic it works for a large number and variety of types too:
+
+//                                           +--- This Modifier Type produces Arrays of Integers.
+//                                           |                    +--- This Modifier Type generates functions.  That's right, SwiftCheck
+//                                           |                    |    can generate *functions*!!
+//                                           v                    v
+property("filter behaves") <- forAll { (xs : ArrayOf<Int>, pred : ArrowOf<Int, Bool>) in
+	let f = pred.getArrow
+	return xs.getArray.filter(f).reduce(true, combine: { $0.0 && f($0.1) })
+	// ^ This property says that if we filter an array then apply the predicate to all its elements, then they
+	//   should all return true.
+}
+
+// How about a little Boolean Algebra too?
+property("DeMorgan's Law") <- forAll { (x : Bool, y : Bool) in
+	let l = !(x && y) == (!x || !y)
+	let r = !(x || y) == (!x && !y)
+	return l && r
+}
+
+//: The thing to notice about all of these examples is that there isn't a `Gen`erator in sight.  Not once did we have to invoke
+//: `.generate` or have to construct a generator.  We simply told the `forAll` block how many variables we wanted and of what
+//: type and SwiftCheck automagically went out and was able to produce random values.
+//:
+//: Our not-so-magic trick is enabled behind the scenes by the judicious combination of `Arbitrary` to construct default generators
+//: for each type and a testing mechanism that invokes the testing block for the proper number of tests.  For some real magic, let's
+//: see what happens when we fail a test:
+
+// `reportProperty` is a variation of `property` that doesn't assert on failure.  It does, however, still print all failures to
+// the console.  We use it here because XCTest does not like it when you assert outside of a test case.
+reportProperty("Obviously wrong") <- forAll({ (x : Int) in
+	return x != x
+}).whenFail { // `whenFail` attaches a callback to the test when we fail.
+	print("Oh noes!")
+}
+
+//: If you open the console for the playground, you'll see output very similar to the following:
+//:
+//:     *** Failed! Proposition: Obviously wrong
+//:     Falsifiable (after 1 test):
+//:     Oh noes!
+//:     0
+//: 
+//: The first line tells you what failed, the next how long it took to fail, the next our message from the callback, and the
+//: last the value of `x` the property failed with.  If you keep running the test over and over again you'll notice that the
+//: test keeps failing on the number 0 despite the integer supposedly being random.  What's going on here?
+//:
+//: To find out, let's see the full definition of the `Arbitrary` protocol:
+//
+//     public protocol Arbitrary {
+//         /// The generator for this particular type.
+//         ///
+//         /// This function should call out to any sources of randomness or state necessary to generate
+//         /// values.  It should not, however, be written as a deterministic function.  If such a
+//         /// generator is needed, combinators are provided in `Gen.swift`.
+//         static var arbitrary : Gen<Self> { get }
+//
+//         /// An optional shrinking function.  If this function goes unimplemented, it is the same as
+//         /// returning the empty list.
+//         ///
+//         /// Shrunken values must be less than or equal to the "size" of the original type but never the
+//         /// same as the value provided to this function (or a loop will form in the shrinker).  It is
+//         /// recommended that they be presented smallest to largest to speed up the overall shrinking
+//         /// process.
+//         static func shrink(_ : Self) -> [Self]
+//     }
+//
+//: Here's where we one-up Fuzz Testing and show the real power of property testing.  A "shrink" is a strategy for reducing
+//: randomly generated values.  To shrink a value, all you need to do is return an array of "smaller values", whether in
+//: magnitude or value.  For example, the shrinker for `Array` returns Arrays that have a size less than or equal to that of
+//: the input array.
+
+Array<Int>.shrink([1, 2, 3])
+
+//: So herein lies the genius: Whenever SwiftCheck encounters a failing property, it simply invokes the shrinker, tries the
+//: property again on the values of the array until it finds another failing case, then repeats the process until it runs
+//: out of cases to try.  In other words, it *shrinks* the value down to the least possible size then reports that to you
+//: as the failing test case rather than the randomly generated value which could be unnecessarily large or complex.
+
+//: # All Together Now!
+
+//: 
+
 
 

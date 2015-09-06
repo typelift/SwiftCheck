@@ -539,7 +539,7 @@ internal func reportMinimumCaseFound(st : CheckerState, res : TestResult) -> (In
 	let shrinkMsg = st.successfulShrinkCount > 1 ? (" and \(st.successfulShrinkCount) shrink") : ""
 
 	print("Proposition: " + st.name)
-	print(res.reason + pluralize(testMsg, i: st.successfulTestCount.successor()) + pluralize(shrinkMsg, i: st.successfulShrinkCount) + "):")
+	print(res.reason + pluralize(testMsg, i: st.successfulTestCount.successor()) + (st.successfulShrinkCount > 1 ? pluralize(shrinkMsg, i: st.successfulShrinkCount) : "") + "):")
 	dispatchAfterFinalFailureCallbacks(st, res: res)
 	return (st.successfulShrinkCount, st.failedShrinkStepCount - st.failedShrinkStepDistance, st.failedShrinkStepDistance)
 }
@@ -631,7 +631,7 @@ internal func cons<T>(lhs : T, var _ rhs : [T]) -> [T] {
 }
 
 private func pluralize(s : String, i : Int) -> String {
-	if i == 0 {
+	if i == 1 {
 		return s
 	}
 	return s + "s"
