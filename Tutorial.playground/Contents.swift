@@ -82,6 +82,8 @@ upperCaseLetters.generate
 upperCaseLetters.generate
 
 // `Gen.fromElementsOf` works like `Gen.fromElementsIn` but over an Array, not just a Range.
+//
+// mnemonic: Use `fromElementsIn` with an INdex.
 let specialCharacters = Gen<Character>.fromElementsOf([ "!", "@", "#", "$", "%", "^", "&", "*", "(", ")" ])
 
 specialCharacters.generate
@@ -287,10 +289,79 @@ emailGen.generate
 //: and let Types, not values, do all the work.
 //:
 //: The `Arbitrary` protocol looks like this:
+//
+//     public protocol Arbitrary {
+//         /// The generator for this particular type.
+//         ///
+//         /// This function should call out to any sources of randomness or state necessary to generate
+//         /// values.  It should not, however, be written as a deterministic function.  If such a
+//         /// generator is needed, combinators are provided in `Gen.swift`.
+//         static var arbitrary : Gen<Self> { get }
+//     }
+//
+//: There's our old friend, `Gen`!  So, an `Arbitrary` type is a type that can, well, give us a generator to create
+//: `Arbitrary` values.  SwiftCheck defines `Arbitrary` instances for the majority of types in the Swift Standard
+//: Library in the ways you might expect e.g. The `Arbitrary` instance for `Int` calls `arc4random_uniform`.
+//:
+//: We'll take this opportunity here to show you how to use Arbitrary for any types you might happen to write yourself.  But
+//: before that, let's try to write an `Arbitrary` instance for `NSDate`.
 
+import class Foundation.NSDate
 
+//: Here's the obvious way to do it
+//
+// extension NSDate : Arbitrary {
+//     public static var arbitrary : Gen<NSDate> {
+//         return Gen.oneOf([
+//             Gen.pure(NSDate()),
+//             Gen.pure(NSDate.distantFuture()),
+//             Gen.pure(NSDate.distantPast()),
+//             NSDate.init <^> NSTimeInterval.arbitrary,
+// 		   ])
+//     }
+// }
+//
+//: But this doesn't work!  Swift won't let us extend `NSDate` directly because we use `Gen<Self>` in the wrong 
+//: position.  What to do?
+//:
+//: Let's write a wrapper!
 
+struct ArbitraryDate : Arbitrary {
+	let getDate : NSDate
 
+	init(date : NSDate) { self.getDate = date }
 
+	static var arbitrary : Gen<ArbitraryDate> {
+         return Gen.oneOf([
+			Gen.pure(NSDate()),
+			Gen.pure(NSDate.distantFuture()),
+			Gen.pure(NSDate.distantPast()),
+			NSDate.init <^> NSTimeInterval.arbitrary,
+		]).fmap(ArbitraryDate.init)
+	}
+}
+
+ArbitraryDate.arbitrary.generate.getDate
+ArbitraryDate.arbitrary.generate.getDate
+
+//: What we've just written is called a `Modifier Type`; a wrapper around another type that we can't generate with
+//: one that we can.
+//:
+//: SwiftCheck also uses this strategy for a few of the more "difficult" types in the Swift STL, but we also use them
+//: in more benign ways too.  For example, we can write a modifier type that only generates positive numbers:
+
+public struct ArbitraryPositive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary {
+	public let getPositive : A
+
+	public init(_ pos : A) { self.getPositive = pos }
+
+	public static var arbitrary : Gen<ArbitraryPositive<A>> {
+		return A.arbitrary.fmap({ ArbitraryPositive.init(abs($0)) })
+	}
+}
+
+ArbitraryPositive<Int>.arbitrary.generate.getPositive
+ArbitraryPositive<Int>.arbitrary.generate.getPositive
+ArbitraryPositive<Int>.arbitrary.generate.getPositive
 
 
