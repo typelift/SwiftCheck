@@ -262,7 +262,7 @@ func glue5(l : String) -> String -> String -> String -> String -> String {
 
 //:            +--- Here's our glue function.
 //:            |     +--- This says we're mapping that function over all these pieces.
-//:            |     |              +--- Here's our funtional "glue" from before.
+//:            |     |              +--- Here's our functional "glue" from before.
 //:            |     |              |
 //:            v     v              v
 let emailGen = glue5 <^> localEmail <*> Gen.pure("@") <*> hostname <*> Gen.pure(".") <*> tld
@@ -299,7 +299,7 @@ emailGen.generate
 //         static var arbitrary : Gen<Self> { get }
 //     }
 //
-//: There's our old friend, `Gen`!  So, an `Arbitrary` type is a type that can, well, give us a generator to create
+//: There's our old friend, `Gen`!  So, an `Arbitrary` type is a type that can give us a generator to create
 //: `Arbitrary` values.  SwiftCheck defines `Arbitrary` instances for the majority of types in the Swift Standard
 //: Library in the ways you might expect e.g. The `Arbitrary` instance for `Int` calls `arc4random_uniform`.
 //:
