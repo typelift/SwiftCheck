@@ -213,9 +213,11 @@ generatorBoundedSizeArrays_.generate
 //: that produces email addresses.  To do this, we'll need one more operator/method notated `<*>` or
 //: `ap`. `ap` comes from 
 //: [Applicative Functors](http://staff.city.ac.uk/~ross/papers/Applicative.html) and is used to 
-//: "zip together" `Gen`erators of functions with `Gen`erators of of values, applying each function 
-//: during the zipping phase.  That definition is a little hand-wavey and technical, so for now 
-//: we'll say that `ap` works like "glue" that sticks special kinds of generators togethers.
+//: "zip together" `Gen`erators of functions with `Gen`erators of of values.  Unlike `zip`, when
+//: a function gets paired with a value the latter is applied to the former to produce a new
+//: value.  For our purposes, we don't even need that definition.  We can think of `ap` like
+//: a platform that a lifted value can ride atop as a function is carried through.  You'll
+//: see what this means in detail shortly.
 //:
 //: For our purposes, we will say that an email address consists of 3 parts: A local part, a 
 //: hostname, and a Top-Level Domain each separated by an `@`, and a `.` respectively.
@@ -267,8 +269,8 @@ func glue5(l : String)(m : String)(m2 : String)(m3 : String)(r : String) -> Stri
 //: This big thing looks a bit complicated, let's go through it part by part:
 
 //:            +--- Here's our glue function.
-//:            |     +--- This says we're mapping that function over all these pieces.
-//:            |     |              +--- Here's our functional "glue" from before.
+//:            |     +--- This says we're "lifting" and mapping that function over all these pieces.
+//:            |     |              +--- Here's our "platforms" from before.
 //:            |     |              |
 //:            v     v              v
 let emailGen = glue5 <^> localEmail <*> Gen.pure("@") <*> hostname <*> Gen.pure(".") <*> tld
@@ -572,8 +574,8 @@ reportProperty("All Prime") <- forAll { (n : Positive<Int>) in
 //:          we put a condition on the left-hand side that requires arrays have a size larger than 1.
 //:
 //: * `forAll` in `forAll`: The *actual* type that `forAll` expects is not `Bool`. It's a protocol
-//:                         called `Testable`, Bool just happens to conform to it.  It turns out that
-//:                         `Property`, the thing `forAll` returns, does to.  So you can nest `forAll`s
+//:                         called `Testable`, `Bool` just happens to conform to it.  It turns out that
+//:                         `Property`, the thing `forAll` returns, does too.  So you can nest `forAll`s
 //:                         in `forAll`s to your heart's content!
 //:
 //: * `forAll` + `Gen`: The `forAll`s we've seen before have all been using `Arbitrary` to retrieve a
