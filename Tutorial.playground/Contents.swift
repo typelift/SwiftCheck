@@ -286,7 +286,7 @@ emailGen.generate
 //: Complex cases like the above are rare in practice.  Most of the time you won't even need to use
 //: generators at all!  This brings us to one of the most important parts of SwiftCheck:
 
-//: # Randomness
+//: # Arbitrary
 
 //: Here at TypeLift, we believe that Types are the most useful part of a program.  So when we were
 //: writing SwiftCheck, we thought about just using `Gen` everywhere and making instance methods on 
@@ -485,6 +485,157 @@ Array<Int>.shrink([1, 2, 3])
 //: rather than the randomly generated value which could be unnecessarily large or complex.
 
 //: # All Together Now!
+
+//: Let's put all of our newfound understanding of this framework to use by writing a property that
+//: tests an implementation of the Sieve of Eratosthenes:
+
+// The Sieve of Eratosthenes:
+//
+// To find all the prime numbers less than or equal to a given integer n:
+//    - let l = [2...n]
+//    - let p = 2
+//    - for i in [(2 * p) through n by p] {
+//          mark l[i]
+//      }
+//    - Remaining indices of unmarked numbers are primes
+func sieve(n : Int) -> [Int] {
+	if n <= 1 {
+		return []
+	}
+
+	var marked : [Bool] = (0...n).map({ _ in false })
+	marked[0] = true
+	marked[1] = true
+
+	for p in 2..<n {
+		for i in (2 * p).stride(to: n, by: p) {
+			marked[i] = true
+		}
+	}
+
+	var primes : [Int] = []
+	for (t, i) in zip(marked, 0...n) {
+		if !t {
+			primes.append(i)
+		}
+	}
+	return primes
+}
+
+// Trial Division
+//
+// Short and sweet check if a number is prime by enumerating from 2...⌈√(x)⌉ and checking
+// for a nonzero modulus.
+func isPrime(n : Int) -> Bool {
+	if n == 0 || n == 1 {
+		return false
+	} else if n == 2 {
+		return true
+	}
+
+	let max = Int(ceil(sqrt(Double(n))))
+	for i in 2...max {
+		if n % i == 0 {
+			return false
+		}
+	}
+	return true
+}
+
+//: We would like to test whether our sieve works properly, so we run it through SwiftCheck with the
+//: following property:
+
+reportProperty("All Prime") <- forAll { (n : Positive<Int>) in
+	let primes = sieve(n.getPositive)
+	return primes.count > 1 ==> {
+		let primeNumberGen = Gen<Int>.fromElementsOf(primes)
+		return forAll(primeNumberGen) { (p : Int) in
+			return isPrime(p)
+		}
+	}
+}
+
+//: This test introduces several new concepts that we'll go through 1-by-1:
+//:
+//: * `Positive<Wrapped>`: This is a Modifier Type defined by SwiftCheck that only produces
+//:                        integers larger than zero - positive integers.  SwiftCheck also has
+//:                        modifiers for `NonZero` (all integers that aren't 0) and `NonNegative` 
+//:                        (all positive integers including 0).
+//:
+//: * `==>`: This operator is called "Implication".  It is used to introduce tests that need to
+//:          reject certain kinds of data that gets generated.  Here, because our prime number
+//:          generator can return empty lists (which throws an error when used with `Gen.fromElementsOf`)
+//:          we put a condition on the left-hand side that requires arrays have a size larger than 1.
+//:
+//: * `forAll` in `forAll`: The *actual* type that `forAll` expects is not `Bool`. It's a protocol
+//:                         called `Testable`, Bool just happens to conform to it.  It turns out that
+//:                         `Property`, the thing `forAll` returns, does to.  So you can nest `forAll`s
+//:                         in `forAll`s to your heart's content!
+//:
+//: * `forAll` + `Gen`: The `forAll`s we've seen before have all been using `Arbitrary` to retrieve a
+//:                     default `Gen`erator for each type.  But SwiftCheck also includes a variant of
+//:                     `forAll` that takes a user-supplied generator.  For those times when you want
+//:                     absolute control over generated values, like we do here, use that particular
+//:                     series of overloads.
+
+//: If you check the console, you'll notice that this property doesn't hold!  What's wrong here?
+//:
+//: Let's go back to the spec we had for the sieve:
+//
+// The Sieve of Eratosthenes:
+//
+// To find all the prime numbers less than or equal to a given integer n:
+//    - let l = [2...n]
+//    - let p = 2
+//    - for i in [(2 * p) **through** n by p] {
+//          mark l[i]
+//      }
+//    - Remaining indices of unmarked numbers are primes
+//
+//: Looks like we used `to:` when we meant `through:`.  Let's try again:
+
+func sieveProperly(n : Int) -> [Int] {
+	if n <= 1 {
+		return []
+	}
+
+	var marked : [Bool] = (0...n).map({ _ in false })
+	marked[0] = true
+	marked[1] = true
+
+	for p in 2..<n {
+		for i in (2 * p).stride(through: n, by: p) {
+			marked[i] = true
+		}
+	}
+
+	var primes : [Int] = []
+	for (t, i) in zip(marked, 0...n) {
+		if !t {
+			primes.append(i)
+		}
+	}
+	return primes
+}
+
+// Fo' Real This Time.
+reportProperty("All Prime") <- forAll { (n : Positive<Int>) in
+	let primes = sieveProperly(n.getPositive)
+	return primes.count > 1 ==> {
+		let primeNumberGen = Gen<Int>.fromElementsOf(primes)
+		return forAll(primeNumberGen) { (p : Int) in
+			return isPrime(p)
+		}
+	}
+}
+
+//: And that's how you test with SwiftCheck.  When properties fail, it means some part of your algorithm
+//: isn't handling the case presented.  So you search through some specification to find the mistake in
+//: logic and try again.  Along the way, SwiftCheck will do its best help you by presenting minimal
+//: cases at the least, and, with more advanced uses of the framework, the names of specific sub-parts of
+//: cases and even percentages of failing vs. passing tests.
+
+//; # Conclusion
 
 //: If you've made it this far, congratulations!  That's it.  Naturally, there are other combinators
 //: and fancy ways of creating `Gen`erators and properties with the primitives in this framework, 
