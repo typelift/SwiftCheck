@@ -182,10 +182,11 @@ fromTwoToSix.generate
 
 // `bind` works exactly like Array's `flatMap`, but instead of concatenating the generated arrays it
 // produces a new generator that picks values from among the newly created generators produced by 
-// the function.  While That definition may *technically* be what occurs, it is better to think of 
-// `bind` as a way of making a generator depend on another.  For example, you can use a generator of
-// sizes to limit the length of generators of arrays:
-
+// the function.  
+//
+// While that definition may *technically* be what occurs, it is better to think of `bind` as a way 
+// of making a generator depend on another.  For example, you can use a generator of sizes to limit
+// the length of generators of arrays:
 let generatorBoundedSizeArrays = fromOnetoFive.bind { len in
 	return characterArray.suchThat { xs in xs.count <= len }
 }
@@ -253,7 +254,7 @@ let allowedLocalCharacters : Gen<Character> = Gen<Character>.oneOf([
 let localEmail = allowedLocalCharacters.proliferateNonEmpty().fmap(String.init)
 
 //: The RFC says that the host name can only consist of lowercase letters, numbers, and dashes.  We'll skip some
-//: steps here and combine both steps above into one big generator.
+//: steps here and combine both steps into one big generator.
 
 let hostname = Gen<Character>.oneOf([
 	lowerCaseLetters,
@@ -486,7 +487,7 @@ reportProperty("Obviously wrong") <- forAll({ (x : Int) in
 //         static func shrink(_ : Self) -> [Self]
 //     }
 //
-//: Here's where we one-up Fuzz Testing and show the real power of property testing.  A "shrink" is
+//: Here's where we one-up Fuzz Testing and show the real power of Property Testing.  A "shrink" is
 //: a strategy for reducing randomly generated values.  To shrink a value, all you need to do is 
 //: return an array of "smaller values", whether in magnitude or value.  For example, the shrinker 
 //: for `Array` returns Arrays that have a size less than or equal to that of the input array.
@@ -641,7 +642,7 @@ func sieveProperly(n : Int) -> [Int] {
 }
 
 // Fo' Real This Time.
-reportProperty("All Prime") <- forAll { (n : Positive<Int>) in
+property("All Prime") <- forAll { (n : Positive<Int>) in
 	let primes = sieveProperly(n.getPositive)
 	return primes.count > 1 ==> {
 		let primeNumberGen = Gen<Int>.fromElementsOf(primes)
@@ -659,7 +660,7 @@ reportProperty("All Prime") <- forAll { (n : Positive<Int>) in
 
 //: Just for fun, let's try a simpler property that checks the same outcome:
 
-reportProperty("All Prime") <- forAll { (n : Positive<Int>) in
+property("All Prime") <- forAll { (n : Positive<Int>) in
 	// Sieving Properly then filtering for primes is the same as just Sieving, right?
 	return sieveProperly(n.getPositive).filter(isPrime) == sieveProperly(n.getPositive)
 }
