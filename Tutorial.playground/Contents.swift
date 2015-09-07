@@ -34,16 +34,14 @@ import XCTest
 //: Unlike Unit Testing, Property Testing abhors the use of state and global variables.  Property 
 //: Tests are local, atomic entities that ideally only use the data given to them to match a 
 //: user-defined specification for the behavior of a program or algorithm.  While this may
-//: seem draconian, the upshot of these [unwritten] rules is that produced tests become
+//: seem draconian, the upshot of following these [unwritten] rules is that the produced tests become
 //: "law-like", as in a [Mathematical or Scientific Law](https://en.wikipedia.org/wiki/Laws_of_science).
 //:
 //: When you approach your tests with a clear goal in mind, SwiftCheck allows you to turn
 //: that goal into many smaller parts that are each much easier to reason about than
-//: considering the whole problem at once and putting out spot fires as they arise.  With that,
-//: let's begin.
+//: considering the whole problem at once and putting out spot fires as they arise.  
 //:
-//: This tutorial is divided into 3 parts, each meant to espouse a different aspect of the 
-//: SwiftCheck library.
+//: With that, let's begin.
 
 //: # `Gen`erators
 
