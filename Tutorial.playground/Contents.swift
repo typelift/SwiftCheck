@@ -500,6 +500,35 @@ Array<Int>.shrink([1, 2, 3])
 //: the value down to the least possible size then reports that to you as the failing test case 
 //: rather than the randomly generated value which could be unnecessarily large or complex.
 
+//: Before we move on, let's write a Modifier Type with a custom shrinker for the email generator we defined a little while ago:
+
+// SwiftCheck defines default shrinkers for most of the types it gives Arbitrary instances.  There
+// will often be times when those default shrinkers don't cut it, or you need more control over
+// what happens when you generate or shrink values.  Modifier Types to the rescue!
+struct ArbitraryEmail : Arbitrary {
+	let getEmail : String
+
+	init(email : String) { self.getEmail = email }
+
+	static var arbitrary : Gen<ArbitraryEmail> { return emailGen.fmap(ArbitraryEmail.init) }
+
+	// Here we use `emailGen` to generate our cases out of convenience, but there are much 
+	// more efficient ways we could have done this.  See `Modifiers.swift` for examples.
+	static func shrink(tt : ArbitraryEmail) -> [ArbitraryEmail] {
+		return emailGen.suchThat({ $0.unicodeScalars.count <= (tt.getEmail.unicodeScalars.count / 2) }) // Halve the size of the input address for efficient shrinking.
+						.proliferateNonEmpty() // Proliferate an array 
+						.generate // Generate
+						.map(ArbitraryEmail.init) // Then wrap in our Modifier Type
+	}
+}
+
+// Let's be wrong for the sake of example
+property("email addresses don't come with a TLD") <- forAll { (email : ArbitraryEmail) in
+	return !email.getEmail.containsString(".")
+}.expectFailure // It turns out true things aren't the only thing we can test.  We can `expectFailure`
+                // to make SwiftCheck, well, expect failure.  Beware, however, that if you don't fail
+                // and live up to your expectations, SwiftCheck treats that as a failure of the test case.
+
 //: # All Together Now!
 
 //: Let's put all of our newfound understanding of this framework to use by writing a property that
