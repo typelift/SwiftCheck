@@ -252,6 +252,8 @@ let hostname = Gen<Character>.oneOf([
 
 //: Finally, the RFC says the TLD for the address can only consist of lowercase letters with a length larger than 1.
 
+//                                                       Email addresses ending in '.' are invalid.
+//                                                          ------------------------------------
 let tld = lowerCaseLetters.proliferateNonEmpty().suchThat({ $0[$0.endIndex.predecessor()] != "." }).fmap(String.init)
 
 //: So now we've got all the pieces together, so how do we put them together to make the final generator?  Well, how
@@ -274,6 +276,8 @@ let emailGen = glue5 <^> localEmail <*> Gen.pure("@") <*> hostname <*> Gen.pure(
 //: And we're done!
 
 // Yes, these are in fact, all valid email addresses.
+emailGen.generate
+emailGen.generate
 emailGen.generate
 
 //: By now you may be asking "why do we need all of this in the first place?  Can't we just apply 
@@ -375,7 +379,7 @@ ArbitraryPositive<Int>.arbitrary.generate.getPositive
 //: # Quantifiers
 
 //: What we've seen so far are the building blocks we need to introduce the final part of the 
-//; library: The actual testing interface.  The last concept we'll introduce is *Quantifiers*.
+//: library: The actual testing interface.  The last concept we'll introduce is *Quantifiers*.
 //:
 //: A Quantifier is a contract that serves as a guarantee that a property holds when the given
 //: testing block returns `true` or truthy values, and fails when the testing block returns `false`
@@ -409,8 +413,8 @@ property("The reverse of the reverse of an array is that array") <- forAll { (xs
 property("filter behaves") <- forAll { (xs : ArrayOf<Int>, pred : ArrowOf<Int, Bool>) in
 	let f = pred.getArrow
 	return xs.getArray.filter(f).reduce(true, combine: { $0.0 && f($0.1) })
-	// ^ This property says that if we filter an array then apply the predicate to all its elements, then they
-	//   should all return true.
+	// ^ This property says that if we filter an array then apply the predicate 
+	//   to all its elements, then they should all respond with `true`.
 }
 
 // How about a little Boolean Algebra too?
@@ -578,8 +582,15 @@ reportProperty("All Prime") <- forAll { (n : Positive<Int>) in
 //:                     absolute control over generated values, like we do here, use that particular
 //:                     series of overloads.
 
-//: If you check the console, you'll notice that this property doesn't hold!  What's wrong here?
+//: If you check the console, you'll notice that this property doesn't hold!  
 //:
+//:     *** Failed! Proposition: All Prime
+//:     Falsifiable (after 11 tests and 2 shrinks):
+//:     Positive( 4 ) // or Positive( 10 )
+//:     0
+//:
+//: What's wrong here?
+
 //: Let's go back to the spec we had for the sieve:
 //
 // The Sieve of Eratosthenes:
@@ -634,6 +645,13 @@ reportProperty("All Prime") <- forAll { (n : Positive<Int>) in
 //: logic and try again.  Along the way, SwiftCheck will do its best help you by presenting minimal
 //: cases at the least, and, with more advanced uses of the framework, the names of specific sub-parts of
 //: cases and even percentages of failing vs. passing tests.
+
+//: Just for fun, let's try a simpler property that checks the same outcome:
+
+reportProperty("All Prime") <- forAll { (n : Positive<Int>) in
+	// Sieving Properly then filtering for primes is the same as just Sieving, right?
+	return sieveProperly(n.getPositive).filter(isPrime) == sieveProperly(n.getPositive)
+}
 
 //; # Conclusion
 
