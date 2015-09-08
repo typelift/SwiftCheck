@@ -12,7 +12,7 @@ import SwiftCheck
 let upper : Gen<Character>= Gen<Character>.fromElementsIn("A"..."Z")
 let lower : Gen<Character> = Gen<Character>.fromElementsIn("a"..."z")
 let numeric : Gen<Character> = Gen<Character>.fromElementsIn("0"..."9")
-let special = Gen<Character>.fromElementsOf(["!", "#", "$", "%", "&", "'", "*", "+", "-", "/", "=", "?", "^", "_", "`", "{", "|", "}", "~", "."])
+let special : Gen<Character> = Gen<Character>.fromElementsOf(["!", "#", "$", "%", "&", "'", "*", "+", "-", "/", "=", "?", "^", "_", "`", "{", "|", "}", "~", "."])
 let hexDigits = Gen<Character>.oneOf([
 	Gen<Character>.fromElementsIn("A"..."F"),
 	numeric,

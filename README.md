@@ -5,6 +5,10 @@ SwiftCheck
 
 QuickCheck for Swift.
 
+For those already familiar with the Haskell library, check out the source.  For
+everybody else, see the [Tutorial Playground](Tutorial.playground) for a
+beginner-level introduction to the major concepts and use-cases of this library.
+ 
 Introduction
 ============
 
