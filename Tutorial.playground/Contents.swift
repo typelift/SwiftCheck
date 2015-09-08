@@ -694,7 +694,7 @@ property("All Prime") <- forAll { (n : Positive<Int>) in
 	return sieveProperly(n.getPositive).filter(isPrime) == sieveProperly(n.getPositive)
 }
 
-//; # Conclusion
+//: # Conclusion
 
 //: If you've made it this far, congratulations!  That's it.  Naturally, there are other combinators
 //: and fancy ways of creating `Gen`erators and properties with the primitives in this framework, 
@@ -703,7 +703,13 @@ property("All Prime") <- forAll { (n : Positive<Int>) in
 //: individual passing cases in a few scattershot unit tests, but declare and enforce immutable 
 //: properties that better describe the intent and invariants of our programs.  If you would like 
 //: further reading, see the files `Arbitrary.swift`, `Test.swift`, `Modifiers.swift`, and 
-//: `Property.swift`.
+//: `Property.swift`.  Beyond that, there are a number of resources built for the original framework
+//: and its other derivatives whose concepts translate directly into SwiftCheck:
+//:
+//: * [FP Complete's Intro to QuickCheck](https://www.fpcomplete.com/user/pbv/an-introduction-to-quickcheck-testing)
+//: * [Real World Haskell on QuickCheck for QA](http://book.realworldhaskell.org/read/testing-and-quality-assurance.html)
+//: * [ScalaCheck](https://www.scalacheck.org)
+//: * [The Original (slightly outdated) QuickCheck Tutorial](http://www.cse.chalmers.se/~rjmh/QuickCheck/manual.html)
 //:
 //: Go forth and test.
 
