@@ -21,17 +21,17 @@ import XCTest
 
 //: # Introduction
 
-//: SwiftCheck is a testing library that augments libraries like `XCTest` and `Quick`, by giving 
+//: SwiftCheck is a testing library that augments libraries like `XCTest` and `Quick` by giving
 //: them the ability to automatically test program properties.  A property is a particular facet of
 //: an algorithm, method, data structure, or program that must *hold* (that is, remain valid) even 
 //: when fed random or pseudo-random data.  If that all seems complicated, it may be simpler to 
 //: think of Property Testing like Fuzz Testing, but with the outcome being to satisfy requirements 
 //: rather than break the program.  Throughout this tutorial, simplifications like the above will be
-//: made to aid your understanding.  Towards the end of it, we will begin to remove much of these 
+//: made to aid your understanding.  Towards the end of it, we will begin to remove many of these
 //: "training wheels" and reveal the real concepts and types of the operations in the library, which
 //: are often much more powerful and generic than previously presented.
 //:
-//: Unlike Unit Testing, Property Testing abhors the use of state and global variables.  Property 
+//: Unlike Unit Testing, Property Testing is antithetical to the use of state and global variables.  Property 
 //: Tests are local, atomic entities that ideally only use the data given to them to match a 
 //: user-defined specification for the behavior of a program or algorithm.  While this may
 //: seem draconian, the upshot of following these [unwritten] rules is that the produced tests become
@@ -39,7 +39,7 @@ import XCTest
 //:
 //: When you approach your tests with a clear goal in mind, SwiftCheck allows you to turn
 //: that goal into many smaller parts that are each much easier to reason about than
-//: considering the whole problem at once and putting out spot fires as they arise.  
+//: the whole problem at once.
 //:
 //: With that, let's begin.
 
