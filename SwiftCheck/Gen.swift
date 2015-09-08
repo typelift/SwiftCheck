@@ -34,7 +34,7 @@ public struct Gen<A> {
 	///
 	/// The input collection is required to be non-empty.
 	public static func fromElementsOf<S : Indexable where S.Index : protocol<Comparable, RandomType>>(xs : S) -> Gen<S._Element> {
-		return Gen.fromElementsIn(xs.startIndex..<xs.endIndex.advancedBy(-1)).fmap { i in
+		return Gen.fromElementsIn(xs.startIndex...xs.endIndex.advancedBy(-1)).fmap { i in
 			return xs[i]
 		}
 	}
