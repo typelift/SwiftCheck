@@ -30,7 +30,7 @@ public struct AssertiveQuickCheck {
 		self.msg = msg
 		self.file = file
 		self.line = line
-		self.args = args
+		self.args = { var chk = args; chk.name = msg; return chk }()
 	}
 }
 
@@ -50,16 +50,55 @@ public struct ReportiveQuickCheck {
 		self.msg = msg
 		self.file = file
 		self.line = line
-		self.args = args
+		self.args = { var chk = args; chk.name = msg; return chk }()
 	}
 }
 
+/// Represents the arguments the test driver will use while performing testing, shrinking, and
+/// printing results.
 public struct CheckerArguments {
-	let name			: String
-	let replay			: Optional<(StdGen, Int)>
-	let maxSuccess		: Int
-	let maxDiscard		: Int
-	let maxSize			: Int
-	let chatty			: Bool
+	/// Provides a way of re-doing the test at the given size with a new generator.
+	let replay : Optional<(StdGen, Int)>
+	/// The maximum number of test cases that must pass before the property itself passes.
+	///
+	/// The default value of this property is 100.  In general, some tests may require more than
+	/// this amount, but less is rare.  If you need a value less than or equal to 1, use `.once`
+	/// on the property instead.
+	let maxAllowableSuccessfulTests : Int
+	/// The maximum number of tests cases that can be discarded before testing gives up on the
+	/// property.
+	///
+	/// The default value of this property is 500.  In general, most tests will require less than 
+	/// this amount.  `Discard`ed test cases do not affect the passing or failing status of the
+	/// property as a whole.
+	let maxAllowableDiscardedTests : Int
+	/// The limit to the size of all generators in the test.  
+	///
+	/// The default value of this property is 100.  If "large" values, in magnitude or
+	/// size, are necessary then increase this value, else keep it relatively near the default.  If
+	/// it becomes too small the samples present in the test case will lose diversity.
+	let maxTestCaseSize : Int
+
+	public init( replay : Optional<(StdGen, Int)>
+				, maxAllowableSuccessfulTests : Int
+				, maxAllowableDiscardedTests : Int
+				, maxTestCaseSize : Int) {
+		self = CheckerArguments(replay: replay, maxAllowableSuccessfulTests: maxAllowableSuccessfulTests, maxAllowableDiscardedTests: maxAllowableDiscardedTests, maxTestCaseSize: maxTestCaseSize, name: "")
+	}
+
+	internal init( replay : Optional<(StdGen, Int)>
+				, maxAllowableSuccessfulTests : Int
+				, maxAllowableDiscardedTests : Int
+				, maxTestCaseSize : Int
+				, name : String) {
+
+		self.replay = replay
+		self.maxAllowableSuccessfulTests = maxAllowableSuccessfulTests
+		self.maxAllowableDiscardedTests = maxAllowableDiscardedTests
+		self.maxTestCaseSize = maxTestCaseSize
+		self.name = name
+	}
+
+	internal var name	: String
 }
 
