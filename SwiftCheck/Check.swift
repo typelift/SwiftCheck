@@ -15,7 +15,22 @@
 ///     }
 ///
 /// SwiftCheck will report all failures through the XCTest mechanism like a normal testing assert,
-/// but with minimal failing case reported as well.
+/// but with the minimal failing case reported as well.
+///
+/// If necessary, arguments can be provided to this function to change the behavior of the testing
+/// mechanism:
+///
+///     let args = CheckerArguments( replay: Optional.Some((standardRNG, 10)) // Replays all tests with a new generator of size 10
+///                                , maxAllowableSuccessfulTests: 200 // Requires twice the normal amount of successes to pass.
+///                                , maxAllowableDiscardedTests: 0 // Discards are not allowed anymore.
+///                                , maxTestCaseSize: 1000 // Increase the size of tested values by 10x.
+///                                )
+///
+///     property("reflexitivity", arguments: args) <- forAll { (i : Int8) in
+///	        return i == i
+///     }
+///
+/// If no arguments are provided, or nil is given, SwiftCheck will select an internal default.
 public func property(msg : String, arguments : CheckerArguments? = nil, file : String = __FILE__, line : UInt = __LINE__) -> AssertiveQuickCheck {
 	return AssertiveQuickCheck(msg: msg, file: file, line: line, args: arguments ?? stdArgs(msg))
 }
@@ -57,7 +72,7 @@ public struct ReportiveQuickCheck {
 /// Represents the arguments the test driver will use while performing testing, shrinking, and
 /// printing results.
 public struct CheckerArguments {
-	/// Provides a way of re-doing the test at the given size with a new generator.
+	/// Provides a way of re-doing a test at the given size with a new generator.
 	let replay : Optional<(StdGen, Int)>
 	/// The maximum number of test cases that must pass before the property itself passes.
 	///
@@ -99,6 +114,6 @@ public struct CheckerArguments {
 		self.name = name
 	}
 
-	internal var name	: String
+	internal var name : String
 }
 
