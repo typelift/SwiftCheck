@@ -25,7 +25,7 @@ public protocol RandomGeneneratorType {
 }
 
 /// A library-provided standard random number generator.
-let standardRNG : StdGen = StdGen(time(nil))
+public let standardRNG : StdGen = StdGen(time(nil))
 
 public struct StdGen : RandomGeneneratorType {
 	let seed: Int

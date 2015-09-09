@@ -373,6 +373,26 @@ private func undefined<A>() -> A {
 	fatalError("")
 }
 
+public struct Large<A : protocol<RandomType, LatticeType, IntegerType>> : Arbitrary {
+	public let getLarge : A
+
+	public init(_ lrg : A) {
+		self.getLarge = lrg
+	}
+
+	public var description : String {
+		return "Large( \(self.getLarge) )"
+	}
+
+	public static var arbitrary : Gen<Large<A>> {
+		return Gen<A>.choose((A.min, A.max)).fmap(Large.init)
+	}
+
+	public static func shrink(bl : Large<A>) -> [Large<A>] {
+		return bl.getLarge.shrinkIntegral.map(Large.init)
+	}
+}
+
 /// Guarantees that every generated integer is greater than 0.
 public struct Positive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary, CustomStringConvertible {
 	public let getPositive : A
@@ -452,5 +472,13 @@ public struct NonNegative<A : protocol<Arbitrary, IntegerType>> : Arbitrary, Cus
 extension NonNegative : CoArbitrary {
 	public static func coarbitrary<C>(x : NonNegative) -> (Gen<C> -> Gen<C>) {
 		return x.getNonNegative.coarbitraryIntegral()
+	}
+}
+
+private func inBounds<A : IntegerType where A.IntegerLiteralType == Int>(fi : (Int -> A)) -> Gen<Int> -> Gen<A> {
+	return { g in
+		return fi <^> g.suchThat { x in
+			return (fi(x) as! Int) == x
+		}
 	}
 }

@@ -212,6 +212,10 @@ public func quickCheck(prop : Testable, name : String = "") {
 
 /// MARK: - Implementation Details
 
+internal func stdArgs(name : String = "") -> CheckerArguments {
+	return CheckerArguments(replay: .None, maxAllowableSuccessfulTests: 100, maxAllowableDiscardedTests: 500, maxTestCaseSize: 100, name: name)
+}
+
 internal enum Result {
 	case Success(numTests : Int
 				, labels : [(String, Int)]
@@ -240,20 +244,7 @@ internal indirect enum Either<L, R> {
 	case Right(R)
 }
 
-internal struct Arguments {
-	let name			: String
-	let replay			: Optional<(StdGen, Int)>
-	let maxSuccess		: Int
-	let maxDiscard		: Int
-	let maxSize			: Int
-	let chatty			: Bool
-}
-
-internal func stdArgs(name : String = "") -> Arguments{
-	return Arguments(name: name, replay: .None, maxSuccess: 100, maxDiscard: 500, maxSize: 100, chatty: true)
-}
-
-internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
+internal func quickCheckWithResult(args : CheckerArguments, p : Testable) -> Result {
 	func roundTo(n : Int)(m : Int) -> Int {
 		return (m / m) * m
 	}
@@ -267,18 +258,6 @@ internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 		}
 	}
 
-	let computeSize_ : Int -> Int -> Int  = { x in
-		return { y in
-			if	roundTo(x)(m: args.maxSize) + args.maxSize <= args.maxSuccess ||
-				x >= args.maxSuccess ||
-				args.maxSuccess % args.maxSize == 0 {
-					return min(x % args.maxSize + (y / 10), args.maxSize)
-			} else {
-				return min((x % args.maxSize) * args.maxSize / (args.maxSuccess % args.maxSize) + y / 10, args.maxSize)
-			}
-		}
-	}
-
 	func at0(f : Int -> Int -> Int)(s : Int)(n : Int)(d : Int) -> Int {
 		if n == 0 && d == 0 {
 			return s
@@ -288,15 +267,30 @@ internal func quickCheckWithResult(args : Arguments, p : Testable) -> Result {
 	}
 
 	let computeSize : Int -> Int -> Int = { x in
+		let computeSize_ : Int -> Int -> Int  = { x in
+			return { y in
+				if	roundTo(x)(m: args.maxTestCaseSize) + args.maxTestCaseSize <= args.maxAllowableSuccessfulTests ||
+					x >= args.maxAllowableSuccessfulTests ||
+					args.maxAllowableSuccessfulTests % args.maxTestCaseSize == 0 {
+						return min(x % args.maxTestCaseSize + (y / 10), args.maxTestCaseSize)
+				} else {
+					return min((x % args.maxTestCaseSize) * args.maxTestCaseSize / (args.maxAllowableSuccessfulTests % args.maxTestCaseSize) + y / 10, args.maxTestCaseSize)
+				}
+			}
+		}
+
 		return { y in
-			return (args.replay == nil) ? computeSize_(x)(y) : at0(computeSize_)(s: args.replay!.1)(n: x)(d: y)
+			if let (_, sz) = args.replay {
+				return at0(computeSize_)(s: sz)(n: x)(d: y)
+			}
+			return computeSize_(x)(y)
 		}
 	}
 
 
 	let istate = CheckerState(name: args.name
-							, maxAllowableSuccessfulTests:		args.maxSuccess
-							, maxAllowableDiscardedTests:	args.maxDiscard
+							, maxAllowableSuccessfulTests:		args.maxAllowableSuccessfulTests
+							, maxAllowableDiscardedTests:	args.maxAllowableDiscardedTests
 							, computeSize:			computeSize
 							, successfulTestCount:		0
 							, discardedTestCount:	0

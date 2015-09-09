@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8216BAB71B97775100A0D282 /* ComplexSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8216BAB61B97775100A0D282 /* ComplexSpec.swift */; settings = {ASSET_TAGS = (); }; };
-		8216BAB81B97775100A0D282 /* ComplexSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8216BAB61B97775100A0D282 /* ComplexSpec.swift */; settings = {ASSET_TAGS = (); }; };
+		8216BAB71B97775100A0D282 /* ComplexSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8216BAB61B97775100A0D282 /* ComplexSpec.swift */; };
+		8216BAB81B97775100A0D282 /* ComplexSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8216BAB61B97775100A0D282 /* ComplexSpec.swift */; };
 		827749F81B65ABCC00A7965F /* Witness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827749F71B65ABCC00A7965F /* Witness.swift */; };
 		827749F91B65ABCC00A7965F /* Witness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827749F71B65ABCC00A7965F /* Witness.swift */; };
 		82DD8EEC1B4CC88C00B66551 /* Operators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82DD8EEB1B4CC88C00B66551 /* Operators.swift */; };
@@ -338,6 +338,7 @@
 		844FCC84198B320500EB242A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0710;
 				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Robert Widmann";
 				TargetAttributes = {
