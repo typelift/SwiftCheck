@@ -742,14 +742,6 @@ private func bits<N : IntegerType>(n : N) -> Int {
 	return 1 + bits(n / 2)
 }
 
-private func inBounds<A : IntegerType>(fi : (Int -> A)) -> Gen<Int> -> Gen<A> {
-	return { g in
-		return fi <^> g.suchThat { x in
-			return (fi(x) as! Int) == x
-		}
-	}
-}
-
 private func nub<A : Hashable>(xs : [A]) -> [A] {
 	return [A](Set(xs))
 }

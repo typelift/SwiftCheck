@@ -20,7 +20,7 @@
 /// If necessary, arguments can be provided to this function to change the behavior of the testing
 /// mechanism:
 ///
-///     let args = CheckerArguments( replay: Optional.Some((standardRNG, 10)) // Replays all tests with a new generator of size 10
+///     let args = CheckerArguments( replay: Optional.Some((newStdGen(), 10)) // Replays all tests with a new generator of size 10
 ///                                , maxAllowableSuccessfulTests: 200 // Requires twice the normal amount of successes to pass.
 ///                                , maxAllowableDiscardedTests: 0 // Discards are not allowed anymore.
 ///                                , maxTestCaseSize: 1000 // Increase the size of tested values by 10x.
