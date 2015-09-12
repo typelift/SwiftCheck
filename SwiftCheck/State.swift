@@ -6,39 +6,70 @@
 //  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
+/// The internal state of the testing system.
+public struct CheckerState {
+	/// The name bound to the current property (not labels).
+	let name						: String
+	/// The maximum number of successful tests before SwiftCheck gives up.  Defaults to 100.
+	let maxAllowableSuccessfulTests	: Int
+	/// The maximum number of discarded tests before SwiftCheck gives up.
+	let maxAllowableDiscardedTests	: Int
+	/// The function that generates the sizes fed to the generators for each test case.
+	let computeSize					: Int -> Int -> Int
+	/// The count of the number of successful test cases seen so far.
+	let successfulTestCount			: Int
+	/// The count of the number of discarded test cases seen so far.
+	let discardedTestCount			: Int
+	/// A dictionary of labels collected inside the test case.  Each maps to an integer describing
+	/// the number of passed tests.  It is used in conjunction with the number of successful tests
+	/// to print a coverage percentage.
+	let labels						: Dictionary<String, Int>
+	/// A uniqued collection of all the labels collected during the test case.
+	let collected					: [Set<String>]
+	/// Returns whether the test case has fulfilled its expected failure outcome.  If the test case
+	/// fails and it was expected this property returns true.  If the test case doesn't fail and it 
+	/// was not expected to fail this property returns true.  Only when the test case's outcome
+	/// and its failure fulfillment expectation do not match does this property return false.
+	let hasFulfilledExpectedFailure	: Bool
+	/// The Random Number Generator backing the testing session.
+	let randomSeedGenerator			: StdGen
+	/// Returns the number of successful shrinking steps performed so far.
+	let successfulShrinkCount		: Int
+	/// Returns the number of failed shrinking steps since the last successful shrink.
+	let failedShrinkStepDistance		: Int
+	/// Returns the number of failed shrink steps.
+	let failedShrinkStepCount		: Int
+	/// Returns whether the testing system should cease testing altogether.
+	let shouldAbort					: Bool
 
-public struct Terminal {}
-
-public struct State {
-	let name				: String
-	let maxSuccessTests		: Int
-	let maxDiscardedTests	: Int
-	let computeSize			: Int -> Int -> Int
-	let numSuccessTests		: Int
-	let numDiscardedTests	: Int
-	let labels				: Dictionary<String, Int>
-	let collected			: [Set<String>]
-	let expectedFailure		: Bool
-	let randomSeed			: StdGen
-	let numSuccessShrinks	: Int
-	let numTryShrinks		: Int
-	let numTotTryShrinks	: Int
-	let shouldAbort			: Bool
-
-	public init(name : String, maxSuccessTests : Int, maxDiscardedTests : Int, computeSize : Int -> Int -> Int, numSuccessTests : Int, numDiscardedTests : Int, labels : Dictionary<String, Int>, collected : [Set<String>], expectedFailure : Bool, randomSeed : StdGen, numSuccessShrinks : Int, numTryShrinks : Int, numTotTryShrinks : Int, shouldAbort : Bool) {
+	public init(  name							: String
+				, maxAllowableSuccessfulTests	: Int
+				, maxAllowableDiscardedTests	: Int
+				, computeSize					: Int -> Int -> Int
+				, successfulTestCount			: Int
+				, discardedTestCount			: Int
+				, labels						: Dictionary<String, Int>
+				, collected						: [Set<String>]
+				, hasFulfilledExpectedFailure	: Bool
+				, randomSeedGenerator			: StdGen
+				, successfulShrinkCount			: Int
+				, failedShrinkStepDistance		: Int
+				, failedShrinkStepCount			: Int
+				, shouldAbort					: Bool)
+	{
 		self.name = name
-		self.maxSuccessTests = maxSuccessTests
-		self.maxDiscardedTests = maxDiscardedTests
+		self.maxAllowableSuccessfulTests = maxAllowableSuccessfulTests
+		self.maxAllowableDiscardedTests = maxAllowableDiscardedTests
 		self.computeSize = computeSize
-		self.numSuccessTests = numSuccessTests
-		self.numDiscardedTests = numDiscardedTests
+		self.successfulTestCount = successfulTestCount
+		self.discardedTestCount = discardedTestCount
 		self.labels = labels
 		self.collected = collected
-		self.expectedFailure = expectedFailure
-		self.randomSeed = randomSeed
-		self.numSuccessShrinks = numSuccessShrinks
-		self.numTryShrinks = numTryShrinks
-		self.numTotTryShrinks = numTotTryShrinks
+		self.hasFulfilledExpectedFailure = hasFulfilledExpectedFailure
+		self.randomSeedGenerator = randomSeedGenerator
+		self.successfulShrinkCount = successfulShrinkCount
+		self.failedShrinkStepDistance = failedShrinkStepDistance
+		self.failedShrinkStepCount = failedShrinkStepCount
 		self.shouldAbort = shouldAbort
 	}
 }

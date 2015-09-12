@@ -5,6 +5,10 @@ SwiftCheck
 
 QuickCheck for Swift.
 
+For those already familiar with the Haskell library, check out the source.  For
+everybody else, see the [Tutorial Playground](Tutorial.playground) for a
+beginner-level introduction to the major concepts and use-cases of this library.
+ 
 Introduction
 ============
 
@@ -25,7 +29,7 @@ equal to itself, we would express it as such:
 func testAll() {
     // 'property' notation allows us to name our tests.  This becomes important
     // when they fail and SwiftCheck reports it in the console.
-    property["Integer Equality is Reflexive"] = forAll { (i : Int) in
+    property("Integer Equality is Reflexive") <- forAll { (i : Int) in
         return i == i
     }
 }
@@ -38,7 +42,7 @@ Array identity holds under double reversal:
 // Because Swift doesn't allow us to implement `Arbitrary` for certain types,
 // SwiftCheck instead implements 'modifier' types that wrap them.  Here,
 // `ArrayOf<T : Arbitrary>` generates random arrays of values of type `T`.
-property["The reverse of the reverse of an array is that array"] = forAll { (xs : ArrayOf<Int>) in
+property("The reverse of the reverse of an array is that array") <- forAll { (xs : ArrayOf<Int>) in
     // This property is using a number of SwiftCheck's more interesting 
     // features.  `^&&^` is the conjunction operator for properties that turns
     // both properties into a larger property that only holds when both sub-properties
@@ -58,7 +62,7 @@ Because SwiftCheck doesn't require tests to return `Bool`, just `Testable`, we
 can produce tests for complex properties with ease:
 
 ```swift
-property["Shrunken lists of integers always contain [] or [0]"] = forAll { (l : ArrayOf<Int>) in
+property("Shrunken lists of integers always contain [] or [0]") <- forAll { (l : ArrayOf<Int>) in
     // Here we use the Implication Operator `==>` to define a precondition for
     // this test.  If the precondition fails the test is discarded.  If it holds
     // the test proceeds.
@@ -72,7 +76,7 @@ property["Shrunken lists of integers always contain [] or [0]"] = forAll { (l : 
 Properties can even depend on other properties:
 
 ```swift
-property["Gen.oneOf multiple generators picks only given generators"] = forAll { (n1 : Int, n2 : Int) in
+property("Gen.oneOf multiple generators picks only given generators") <- forAll { (n1 : Int, n2 : Int) in
     let g1 = Gen.pure(n1)
     let g2 = Gen.pure(n2)
     // Here we give `forAll` an explicit generator.  Before SwiftCheck was using
@@ -155,7 +159,7 @@ with the following property:
 ```swift
 import SwiftCheck
 
-property["All Prime"] = forAll { (n : Int) in
+property("All Prime") <- forAll { (n : Int) in
     return sieve(n).filter(isPrime) == sieve(n)
 }
 ```
@@ -194,9 +198,7 @@ For example:
 
 ```swift
 import SwiftCheck
-import func Swiftz.<^>
-import func Swiftz.<*>
-
+ 
 public struct ArbitraryFoo {
     let x : Int
     let y : Int
@@ -211,18 +213,14 @@ public struct ArbitraryFoo {
 }
 
 extension ArbitraryFoo : Arbitrary {
-    public static func arbitrary() -> Gen<ArbitraryFoo> {
-        return ArbitraryFoo.create <^> Int.arbitrary() <*> Int.arbitrary()
-    }
-
-    public static func shrink(x : ArbitraryFoo) -> [ArbitraryFoo] {
-        return shrinkNone(x)
+    public static var arbitrary : Gen<ArbitraryFoo> {
+        return ArbitraryFoo.create <^> Int.arbitrary <*> Int.arbitrary
     }
 }
 
 class SimpleSpec : XCTestCase {
     func testAll() {
-        property["ArbitraryFoo Properties are Reflexive"] = forAll { (i : ArbitraryFoo) in
+        property("ArbitraryFoo Properties are Reflexive") <- forAll { (i : ArbitraryFoo) in
             return i.x == i.x && i.y == i.y
         }
     }
@@ -233,18 +231,62 @@ For everything else, SwiftCheck defines a number of combinators to make working
 with custom generators as simple as possible:
 
 ```swift
-let onlyEven = Int.arbitrary().suchThat { $0 % 2 == 0 }
+let onlyEven = Int.arbitrary.suchThat { $0 % 2 == 0 }
 
-let vowels = Gen.elements(["A", "E", "I", "O", "U" ])
+let vowels = Gen.fromElementsOf(["A", "E", "I", "O", "U" ])
 
 let randomHexValue = Gen<UInt>.choose((0, 15))
 
+let uppers : Gen<Character>= Gen<Character>.fromElementsIn("A"..."Z")
+let lowers : Gen<Character> = Gen<Character>.fromElementsIn("a"..."z")
+let numbers : Gen<Character> = Gen<Character>.fromElementsIn("0"..."9")
+ 
 /// This generator will generate `.None` 1/4 of the time and an arbitrary
 /// `.Some` 3/4 of the time
-let weightedOptionals = Gen.frequency([
-    (1, Gen.pure(OptionalOf(Optional<A>.None))),
-    (3, liftM({ OptionalOf(Optional<A>.Some($0)) })(m1: Int.arbitrary()))
+let weightedOptionals = Gen<Int?>.frequency([
+	(1, Gen<Int?>.pure(nil)),
+	(3, Optional.Some <^> Int.arbitrary)
 ])
 ```
+ 
+For instances of many complex or "real world" generators, see 
+[`ComplexSpec.swift`](SwiftCheckTests/ComplexSpec.swift).
 
+System Requirements
+===================
+
+SwiftCheck supports OS X 10.9+ and iOS 7.0+.
+
+Setup
+=====
+
+SwiftCheck can be included one of two ways:
+
+**Using Carthage**
+
+- Add SwiftCheck to your Cartfile
+- Run `carthage update`
+- Drag the relevant copy of SwiftCheck into your project.
+- Expand the Link Binary With Libraries phase
+- Click the + and add SwiftCheck
+- Click the + at the top left corner to add a Copy Files build phase
+- Set the directory to `Frameworks`
+- Click the + and add SwiftCheck
+
+**Framework**
+
+- Drag SwiftCheck.xcodeproj into your project tree
+  as a subproject
+- Under your project's Build Phases, expand Target Dependencies
+- Click the + and add SwiftCheck
+- Expand the Link Binary With Libraries phase
+- Click the + and add SwiftCheck
+- Click the + at the top left corner to add a Copy Files build phase
+- Set the directory to Frameworks
+- Click the + and add SwiftCheck
+
+License
+=======
+
+SwiftCheck is released under the MIT license.
 
