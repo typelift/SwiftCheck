@@ -12,6 +12,7 @@ import XCTest
 class FailureSpec : XCTestCase {
 	private var failCount : Int = 0
 	private let tests : [Property] = [
+		forAll { (_ : Int) in false }.expectFailure.expectFailure,
 		forAll { (_ : Int) in false },
 		forAll { (x : Int) in x != x },
 		forAll { (b : Bool) in !(b || !b) },
