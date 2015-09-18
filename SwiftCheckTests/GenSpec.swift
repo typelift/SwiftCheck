@@ -37,7 +37,7 @@ class GenSpec : XCTestCase {
 			}
 		}
 
-		property("Gen.weighted with N arguments behaves") <- forAll(Gen<Int>.choose((0, 1000))) { n in
+		property("Gen.weighted with N arguments behaves") <- forAll(Gen<Int>.choose((1, 1000))) { n in
 			return forAll(Gen.weighted(Array(count: n, repeatedValue: (1, 0)))) { $0 == 0 }
 		}
 
