@@ -12,9 +12,15 @@ import XCTest
 class FailureSpec : XCTestCase {
 	private var failCount : Int = 0
 	private let tests : [Property] = [
-		forAll { (_ : Int) in return false },
-		forAll { (x : Int) in return x != x },
-		forAll { (b : Bool) in return !(b || !b) },
+		forAll { (_ : Int) in false },
+		forAll { (x : Int) in x != x },
+		forAll { (b : Bool) in !(b || !b) },
+		forAll { (x : Int) in x > (x + 1) },
+		forAll { (x : Int, y : Int, c : Int) in (x > y) ==> x + c < y + c },
+		forAll { (x : Int, y : Int, c : Int) in (x > y) ==> x - c < y - c },
+		forAll { (x : Int, y : Int, c : Int) in (x > y) ==> x * c < y * c },
+		forAll { (x : Int, y : Int, c : Int) in (x > y && c != 0) ==> x / c < y / c },
+		forAll { (x : Int, y : Int, c : Int) in (x > y && c != 0) ==> x / (-c) > y / (-c) },
 	]
 
 	func testProperties() {
