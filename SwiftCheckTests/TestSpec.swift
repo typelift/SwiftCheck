@@ -9,9 +9,22 @@
 import XCTest
 import SwiftCheck
 
+extension Dictionary {
+	init<S : SequenceType where S.Generator.Element == Element>(_ pairs : S) {
+		self.init()
+		var g = pairs.generate()
+		while let (k, v): (Key, Value) = g.next() {
+			self[k] = v
+		}
+	}
+}
+
+
 class TestSpec : XCTestCase {
 	func testAll() {
-		property("Dictionaries behave") <- forAllShrink(Dictionary<String, Int>.arbitrary, shrinker: Dictionary<String, Int>.shrink) { (xs : Dictionary<String, Int>) in
+		let dictionaryGen = Gen<(String, Int)>.zip(String.arbitrary, Int.arbitrary).proliferate().fmap(Dictionary.init)
+
+		property("Dictionaries behave") <- forAllNoShrink(dictionaryGen) { (xs : Dictionary<String, Int>) in
 			return true
 		}
 
