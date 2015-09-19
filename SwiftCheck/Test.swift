@@ -195,6 +195,86 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 	return forAll(genA, pf: { t in forAll(genB, genC, genD, genE, genF, genG, genH, pf: { b, c, d, e, f, g, h in pf(t, b, c, d, e, f, g, h) }) })
 }
 
+/// Given an explicit generator, converts a function to a universally quantified property using the
+/// default shrinker for that type.
+///
+/// This variant of `forAll` does not shrink its argument but allows generators of any type, not
+/// just those that conform to `Arbitrary`.
+@warn_unused_result
+public func forAllNoShrink<A>(gen : Gen<A>, pf : (A -> Testable)) -> Property {
+	return forAllShrink(gen, shrinker: { _ in [A]() }, f: pf)
+}
+
+/// Given 2 explicit generators, converts a function to a universally quantified property using the
+/// default shrinkers for those 2 types.
+///
+/// This variant of `forAll` does not shrink its argument but allows generators of any type, not
+/// just those that conform to `Arbitrary`.
+@warn_unused_result
+public func forAllNoShrink<A, B>(genA : Gen<A>, _ genB : Gen<B>, pf : (A, B) -> Testable) -> Property {
+	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, pf: { b in pf(t, b) }) })
+}
+
+/// Given 3 explicit generators, converts a function to a universally quantified property using the
+/// default shrinkers for those 3 types.
+///
+/// This variant of `forAll` does not shrink its argument but allows generators of any type, not
+/// just those that conform to `Arbitrary`.
+@warn_unused_result
+public func forAllNoShrink<A, B, C>(genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, pf : (A, B, C) -> Testable) -> Property {
+	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, genC, pf: { b, c in pf(t, b, c) }) })
+}
+
+/// Given 4 explicit generators, converts a function to a universally quantified property using the
+/// default shrinkers for those 4 types.
+///
+/// This variant of `forAll` does not shrink its argument but allows generators of any type, not
+/// just those that conform to `Arbitrary`.
+@warn_unused_result
+public func forAllNoShrink<A, B, C, D>(genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, pf : (A, B, C, D) -> Testable) -> Property {
+	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, genC, genD, pf: { b, c, d in pf(t, b, c, d) }) })
+}
+
+/// Given 5 explicit generators, converts a function to a universally quantified property using the
+/// default shrinkers for those 5 types.
+///
+/// This variant of `forAll` does not shrink its argument but allows generators of any type, not
+/// just those that conform to `Arbitrary`.
+@warn_unused_result
+public func forAllNoShrink<A, B, C, D, E>(genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, pf : (A, B, C, D, E) -> Testable) -> Property {
+	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, genC, genD, genE, pf: { b, c, d, e in pf(t, b, c, d, e) }) })
+}
+
+/// Given 6 explicit generators, converts a function to a universally quantified property using the
+/// default shrinkers for those 6 types.
+///
+/// This variant of `forAll` does not shrink its argument but allows generators of any type, not
+/// just those that conform to `Arbitrary`.
+@warn_unused_result
+public func forAllNoShrink<A, B, C, D, E, F>(genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, pf : (A, B, C, D, E, F) -> Testable) -> Property {
+	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, genC, genD, genE, genF, pf: { b, c, d, e, f in pf(t, b, c, d, e, f) }) })
+}
+
+/// Given 7 explicit generators, converts a function to a universally quantified property using the
+/// default shrinkers for those 7 types.
+///
+/// This variant of `forAll` does not shrink its argument but allows generators of any type, not
+/// just those that conform to `Arbitrary`.
+@warn_unused_result
+public func forAllNoShrink<A, B, C, D, E, F, G>(genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, _ genG : Gen<G>, pf : (A, B, C, D, E, F, G) -> Testable) -> Property {
+	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, genC, genD, genE, genF, genG, pf: { b, c, d, e, f, g in pf(t, b, c, d, e, f, g) }) })
+}
+
+/// Given 8 explicit generators, converts a function to a universally quantified property using the
+/// default shrinkers for those 8 types.
+///
+/// This variant of `forAll` does not shrink its argument but allows generators of any type, not
+/// just those that conform to `Arbitrary`.
+@warn_unused_result
+public func forAllNoShrink<A, B, C, D, E, F, G, H>(genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, _ genG : Gen<G>, _ genH : Gen<H>, pf : (A, B, C, D, E, F, G, H) -> Testable) -> Property {
+	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, genC, genD, genE, genF, genG, genH, pf: { b, c, d, e, f, g, h in pf(t, b, c, d, e, f, g, h) }) })
+}
+
 /// Given an explicit generator and shrinker, converts a function to a universally quantified
 /// property.
 @warn_unused_result
