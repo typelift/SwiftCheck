@@ -1,0 +1,47 @@
+//
+//  FailureSpec.swift
+//  SwiftCheck
+//
+//  Created by Robert Widmann on 9/18/15.
+//  Copyright © 2015 Robert Widmann. All rights reserved.
+//
+
+import SwiftCheck
+import XCTest
+
+class FailureSpec : XCTestCase {
+	private var failCount : Int = 0
+	private let tests : [Property] = [
+		forAll { (_ : Int) in false }.expectFailure.expectFailure,
+		forAll { (_ : Int) in false },
+		forAll { (x : Int) in x != x },
+		forAll { (b : Bool) in !(b || !b) },
+		forAll { (x : Int) in x > (x + 1) },
+		forAll { (x : Int, y : Int, c : Int) in (x > y) ==> x + c < y + c },
+		forAll { (x : Int, y : Int, c : Int) in (x > y) ==> x - c < y - c },
+		forAll { (x : Int, y : Int, c : Int) in (x > y) ==> x * c < y * c },
+		forAll { (x : Int, y : Int, c : Int) in (x > y && c != 0) ==> x / c < y / c },
+		forAll { (x : Int, y : Int, c : Int) in (x > y && c != 0) ==> x / (-c) > y / (-c) },
+	]
+
+	func testProperties() {
+		self.tests.forEach { t in
+			property("Fail") <- t
+		}
+	}
+
+	/// h/t @robrix for the suggestion ~( https://github.com/antitypical/Assertions/blob/master/AssertionsTests/AssertionsTests.swift )
+	/// and @ishikawa for the idea ~( https://github.com/antitypical/Assertions/pull/3#issuecomment-76337761 )
+	override func recordFailureWithDescription(message : String, inFile file : String, atLine line : UInt, expected : Bool) {
+		if !expected {
+			assert(false, "Assertion should never throw.");
+		} else {
+//			super.recordFailureWithDescription(message, inFile: file, atLine: line, expected: expected)
+			failCount++;
+		}
+	}
+
+	override func tearDown() {
+		XCTAssert(failCount == tests.count)
+	}
+}
