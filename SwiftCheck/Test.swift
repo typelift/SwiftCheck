@@ -11,7 +11,7 @@
 /// Property Testing is a more static and expressive form of Test-Driven Development that emphasizes
 /// the testability of program properties - A statement or invariant that can be proven to hold when
 /// fed any number of arguments of a particular kind.  It is akin to Fuzz Testing but is made
-/// significantly more power by the primitives in this framework.
+/// significantly more powerful by the primitives in this framework.
 ///
 /// A `Property` in SwiftCheck is more than just `true` and `false`, it is a value that is capable
 /// of producing a framework type called `Prop`, which models individual test cases that themselves

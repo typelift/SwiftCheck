@@ -398,7 +398,7 @@ private func exception(msg : String) -> ErrorType -> TestResult {
 private func props<A>(shrinker : A -> [A], original : A, pf : A -> Testable) -> Rose<Gen<Prop>> {
 	return .MkRose({ pf(original).property.unProperty }, { shrinker(original).map { x1 in
 		return props(shrinker, original: x1, pf: pf)
-		}})
+	}})
 }
 
 private func result(ok : Bool?, reason : String = "") -> TestResult {
