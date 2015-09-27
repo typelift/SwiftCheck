@@ -95,6 +95,23 @@ extension Testable {
 		})
 	}
 
+	/// Inverts the result of a test.  That is, test cases that would pass now fail and vice versa.
+	///
+	/// Discarded tests remain discarded under inversion.
+	public var invert : Property {
+		return self.mapResult { res in
+			return TestResult(ok:			res.ok.map(!)
+							, expect:		res.expect
+							, reason:		res.reason
+							, theException: res.theException
+							, labels:		res.labels
+							, stamp:		res.stamp
+							, callbacks:	res.callbacks
+							, abort:		res.abort
+							, quantifier:	res.quantifier)
+		}
+	}
+
 	/// Modifies a property so that it only will be tested once.
 	public var once : Property {
 		return self.mapResult { res in
@@ -105,7 +122,8 @@ extension Testable {
 							, labels:       res.labels
 							, stamp:        res.stamp
 							, callbacks:    res.callbacks
-							, abort:        true)
+							, abort:        true
+							, quantifier:	res.quantifier)
 		}
 	}
 
@@ -119,7 +137,8 @@ extension Testable {
 							, labels:       res.labels
 							, stamp:        res.stamp
 							, callbacks:    [cb] + res.callbacks
-							, abort:        res.abort)
+							, abort:        res.abort
+							, quantifier:	res.quantifier)
 		}
 	}
 
@@ -188,7 +207,8 @@ extension Testable {
 							, labels:       res.labels
 							, stamp:        res.stamp
 							, callbacks:    res.callbacks + chattyCallbacks(res.callbacks)
-							, abort:        res.abort)
+							, abort:        res.abort
+							, quantifier:	res.quantifier)
 		}
 	}
 
@@ -204,7 +224,8 @@ extension Testable {
 							, labels:       res.labels
 							, stamp:        res.stamp
 							, callbacks:    res.callbacks
-							, abort:        res.abort)
+							, abort:        res.abort
+							, quantifier:	res.quantifier)
 		})
 	}
 
@@ -241,7 +262,8 @@ extension Testable {
 								, labels:       insertWith(max, k: s, v: n, m: res.labels)
 								, stamp:        res.stamp.union([s])
 								, callbacks:    res.callbacks
-								, abort:        res.abort)
+								, abort:        res.abort
+								, quantifier:	res.quantifier)
 			}
 		}
 		return self.property
@@ -279,15 +301,28 @@ public enum CallbackKind {
 }
 
 public enum TestResultMatcher {
-	case MatchResult( ok           : Optional<Bool>
-					, expect       : Bool
-					, reason       : String
-					, theException : Optional<String>
-					, labels       : Dictionary<String, Int>
-					, stamp        : Set<String>
-					, callbacks    : Array<Callback>
-					, abort        : Bool
+	case MatchResult( ok			: Optional<Bool>
+					, expect		: Bool
+					, reason		: String
+					, theException	: Optional<String>
+					, labels		: Dictionary<String, Int>
+					, stamp			: Set<String>
+					, callbacks		: Array<Callback>
+					, abort			: Bool
+					, quantifier	: Quantification
 					)
+}
+
+/// The types of quantification SwiftCheck can perform.
+public enum Quantification {
+	/// Universal Quantification ("for all").
+	case Universal
+	/// Existential Quanfication ("there exists").
+	case Existential
+	/// Uniqueness Quantification ("there exists one and only one")
+//	case Uniqueness
+	/// Counting Quantification ("there exist exactly k")
+//	case Counting
 }
 
 /// A `TestResult` represents the result of performing a single test.
@@ -310,12 +345,14 @@ public struct TestResult {
 	/// Indicates that any further testing of the property should cease.
 	let abort			: Bool
 
+	let quantifier		: Quantification
+
 	/// Destructures a test case into a matcher that can be used in switch statement.
 	public func match() -> TestResultMatcher {
-		return .MatchResult(ok: ok, expect: expect, reason: reason, theException: theException, labels: labels, stamp: stamp, callbacks: callbacks, abort: abort)
+		return .MatchResult(ok: ok, expect: expect, reason: reason, theException: theException, labels: labels, stamp: stamp, callbacks: callbacks, abort: abort, quantifier: quantifier)
 	}
 
-	public init(ok : Optional<Bool>, expect : Bool, reason : String, theException : Optional<String>, labels : Dictionary<String, Int>, stamp : Set<String>, callbacks : [Callback], abort : Bool) {
+	public init(ok : Optional<Bool>, expect : Bool, reason : String, theException : Optional<String>, labels : Dictionary<String, Int>, stamp : Set<String>, callbacks : [Callback], abort : Bool, quantifier : Quantification) {
 		self.ok = ok
 		self.expect = expect
 		self.reason = reason
@@ -324,6 +361,7 @@ public struct TestResult {
 		self.stamp = stamp
 		self.callbacks = callbacks
 		self.abort = abort
+		self.quantifier = quantifier
 	}
 
 	/// Convenience constructor for a passing `TestResult`.
@@ -364,14 +402,16 @@ private func props<A>(shrinker : A -> [A], original : A, pf : A -> Testable) -> 
 }
 
 private func result(ok : Bool?, reason : String = "") -> TestResult {
-	return TestResult(ok: ok,
-					expect: true,
-					reason: reason,
-					theException: .None,
-					labels: [:],
-					stamp: Set(),
-					callbacks: [],
-					abort: false)
+	return TestResult( ok: ok
+					 , expect: true
+					 , reason: reason
+					 , theException: .None
+					 , labels: [:]
+					 , stamp: Set()
+					 , callbacks: []
+					 , abort: false
+					 , quantifier: .Universal
+					 )
 }
 
 private func protectResults(rs : Rose<TestResult>) -> Rose<TestResult> {
@@ -438,7 +478,8 @@ private func addCallbacks(result : TestResult) -> TestResult -> TestResult {
 						, labels:       res.labels
 						, stamp:        res.stamp
 						, callbacks:    result.callbacks + res.callbacks
-						, abort:        res.abort)
+						, abort:        res.abort
+						, quantifier:	res.quantifier)
 	}
 }
 
@@ -451,7 +492,8 @@ private func addLabels(result : TestResult) -> TestResult -> TestResult {
 						, labels:       unionWith(max, l: res.labels, r: result.labels)
 						, stamp:        res.stamp.union(result.stamp)
 						, callbacks:    res.callbacks
-						, abort:        res.abort)
+						, abort:        res.abort
+						, quantifier:	res.quantifier)
 	}
 }
 
@@ -525,31 +567,32 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 			return Rose.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 		}
 		switch result1.ok {
-			case .Some(true):
-				return Rose.pure(result1)
-			case .Some(false):
-				return q.bind { result2 in
-					if !result2.expect {
-						return Rose.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
-					}
-					switch result2.ok {
-						case .Some(true):
-							return Rose.pure(result2)
-						case .Some(false):
-							return Rose.pure(TestResult(ok: .Some(false),
-														expect: true,
-														reason: sep(result1.reason, r: result2.reason),
-														theException: mplus(result1.theException, r: result2.theException),
-														labels: [:],
-														stamp: Set(),
-														callbacks: result1.callbacks + [.AfterFinalFailure(kind: .Counterexample,
-															f: { _ in
-																return print("")
-															})] + result2.callbacks,
-														abort: false))
-						case .None:
-							return Rose.pure(result2)
-					}
+		case .Some(true):
+			return Rose.pure(result1)
+		case .Some(false):
+			return q.bind { result2 in
+				if !result2.expect {
+					return Rose.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
+				}
+				switch result2.ok {
+				case .Some(true):
+					return Rose.pure(result2)
+				case .Some(false):
+					return Rose.pure(TestResult(ok: .Some(false),
+						expect: true,
+						reason: sep(result1.reason, r: result2.reason),
+						theException: mplus(result1.theException, r: result2.theException),
+						labels: [:],
+						stamp: Set(),
+						callbacks: result1.callbacks + [.AfterFinalFailure(kind: .Counterexample,
+							f: { _ in
+								return print("")
+						})] + result2.callbacks,
+						abort: false,
+						quantifier: .Universal))
+				case .None:
+					return Rose.pure(result2)
+				}
 			}
 		case .None:
 			return q.bind { result2 in
@@ -557,10 +600,10 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 					return Rose.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 				}
 				switch result2.ok {
-					case .Some(true):
-						return Rose.pure(result2)
-					default:
-						return Rose.pure(result1)
+				case .Some(true):
+					return Rose.pure(result2)
+				default:
+					return Rose.pure(result1)
 				}
 			}
 		}
