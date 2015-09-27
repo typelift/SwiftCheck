@@ -290,16 +290,18 @@ public func forAllShrink<A>(gen : Gen<A>, shrinker : A -> [A], f : A -> Testable
 /// generator for that type to search for a passing case.  SwiftCheck only runs a limited number of
 /// trials before giving up and failing.
 ///
-/// The nature of Existential Quantification means we have to enumerate over the entire domain of
-/// `A` in order to return a proper value.  Because such a traversal is both impractical and leads
-/// to computationally questionable behavior (infinite loops and the like), SwiftCheck instead
-/// interprets `exists` as a finite search over arbitrarily many values (around 500).  No shrinking
-/// is performed during the search.
+/// The nature of Existential Quantification means SwiftCheck would have to enumerate over the 
+/// entire domain of the type `A` in order to return a proper value.  Because such a traversal is 
+/// both impractical and leads to computationally questionable behavior (infinite loops and the 
+/// like), SwiftCheck instead interprets `exists` as a finite search over arbitrarily many values 
+/// (around 500).  No shrinking is performed during the search.
 ///
-/// It is recommended that you avoid existential quantification and instead reduce your property to
-/// `Skolem Normal Form <https://en.wikipedia.org/wiki/Skolem_normal_form/>`_.  `SNF` involves
-/// turning every `exists` into a function returning the existential value, taking any other
-/// parameters being quantified over as needed.
+/// Existential Quantification should rarely be used, and in practice is usually used for *negative*
+/// statements "there does not exist `foo` such that `bar`". It is recommended that you avoid 
+/// `exists` and instead reduce your property to 
+/// [Skolem Normal Form](https://en.wikipedia.org/wiki/Skolem_normal_form).  `SNF` involves turning
+/// every `exists` into a function returning the existential value, taking any other parameters 
+/// being quantified over as needed.
 public func exists<A : Arbitrary>(pf : A -> Testable) -> Property {
 	return exists(A.arbitrary, pf: pf)
 }

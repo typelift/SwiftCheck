@@ -201,14 +201,14 @@ extension Testable {
 
 		return self.mapResult { res in
 			return TestResult(ok:           res.ok
-				, expect:       res.expect
-				, reason:       res.reason
-				, theException: res.theException
-				, labels:       res.labels
-				, stamp:        res.stamp
-				, callbacks:    res.callbacks + chattyCallbacks(res.callbacks)
-				, abort:        res.abort
-				, quantifier:	res.quantifier)
+							, expect:       res.expect
+							, reason:       res.reason
+							, theException: res.theException
+							, labels:       res.labels
+							, stamp:        res.stamp
+							, callbacks:    res.callbacks + chattyCallbacks(res.callbacks)
+							, abort:        res.abort
+							, quantifier:	res.quantifier)
 		}
 	}
 
@@ -218,14 +218,14 @@ extension Testable {
 	public var expectFailure : Property {
 		return self.mapTotalResult({ res in
 			return TestResult(ok:           res.ok
-				, expect:       false
-				, reason:       res.reason
-				, theException: res.theException
-				, labels:       res.labels
-				, stamp:        res.stamp
-				, callbacks:    res.callbacks
-				, abort:        res.abort
-				, quantifier:	res.quantifier)
+							, expect:       false
+							, reason:       res.reason
+							, theException: res.theException
+							, labels:       res.labels
+							, stamp:        res.stamp
+							, callbacks:    res.callbacks
+							, abort:        res.abort
+							, quantifier:	res.quantifier)
 		})
 	}
 
@@ -256,14 +256,14 @@ extension Testable {
 		if b {
 			return self.mapResult { res in
 				return TestResult(ok:           res.ok
-					, expect:       res.expect
-					, reason:       res.reason
-					, theException: res.theException
-					, labels:       insertWith(max, k: s, v: n, m: res.labels)
-					, stamp:        res.stamp.union([s])
-					, callbacks:    res.callbacks
-					, abort:        res.abort
-					, quantifier:	res.quantifier)
+								, expect:       res.expect
+								, reason:       res.reason
+								, theException: res.theException
+								, labels:       insertWith(max, k: s, v: n, m: res.labels)
+								, stamp:        res.stamp.union([s])
+								, callbacks:    res.callbacks
+								, abort:        res.abort
+								, quantifier:	res.quantifier)
 			}
 		}
 		return self.property
@@ -278,8 +278,8 @@ public func shrinking<A>(shrinker : A -> [A], initial : A, prop : A -> Testable)
 	return Property(promote(props(shrinker, original: initial, pf: prop)).fmap { rs in
 		return Prop(unProp: joinRose(rs.fmap { x in
 			return x.unProp
-			}))
-		})
+		}))
+	})
 }
 
 /// A `Callback` is a block of code that can be run after a test case has finished.  They consist
@@ -301,16 +301,16 @@ public enum CallbackKind {
 }
 
 public enum TestResultMatcher {
-	case MatchResult( ok           : Optional<Bool>
-		, expect		: Bool
-		, reason		: String
-		, theException	: Optional<String>
-		, labels		: Dictionary<String, Int>
-		, stamp			: Set<String>
-		, callbacks		: Array<Callback>
-		, abort			: Bool
-		, quantifier	: Quantification
-	)
+	case MatchResult( ok			: Optional<Bool>
+					, expect		: Bool
+					, reason		: String
+					, theException	: Optional<String>
+					, labels		: Dictionary<String, Int>
+					, stamp			: Set<String>
+					, callbacks		: Array<Callback>
+					, abort			: Bool
+					, quantifier	: Quantification
+					)
 }
 
 /// The types of quantification SwiftCheck can perform.
@@ -472,28 +472,28 @@ internal func unionWith<K : Hashable, V>(f : (V, V) -> V, l : Dictionary<K, V>, 
 private func addCallbacks(result : TestResult) -> TestResult -> TestResult {
 	return { res in
 		return TestResult(ok:           res.ok
-			, expect:       res.expect
-			, reason:       res.reason
-			, theException: res.theException
-			, labels:       res.labels
-			, stamp:        res.stamp
-			, callbacks:    result.callbacks + res.callbacks
-			, abort:        res.abort
-			, quantifier:	res.quantifier)
+						, expect:       res.expect
+						, reason:       res.reason
+						, theException: res.theException
+						, labels:       res.labels
+						, stamp:        res.stamp
+						, callbacks:    result.callbacks + res.callbacks
+						, abort:        res.abort
+						, quantifier:	res.quantifier)
 	}
 }
 
 private func addLabels(result : TestResult) -> TestResult -> TestResult {
 	return { res in
 		return TestResult(ok:           res.ok
-			, expect:       res.expect
-			, reason:       res.reason
-			, theException: res.theException
-			, labels:       unionWith(max, l: res.labels, r: result.labels)
-			, stamp:        res.stamp.union(result.stamp)
-			, callbacks:    res.callbacks
-			, abort:        res.abort
-			, quantifier:	res.quantifier)
+						, expect:       res.expect
+						, reason:       res.reason
+						, theException: res.theException
+						, labels:       unionWith(max, l: res.labels, r: result.labels)
+						, stamp:        res.stamp.union(result.stamp)
+						, callbacks:    res.callbacks
+						, abort:        res.abort
+						, quantifier:	res.quantifier)
 	}
 }
 
