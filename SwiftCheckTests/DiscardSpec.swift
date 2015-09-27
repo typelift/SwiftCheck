@@ -11,7 +11,17 @@ import SwiftCheck
 
 class DiscardSpec : XCTestCase {
 	func testDiscardFailure() {
-		property["P != NP"] = Discard()
-		property["P = NP"] = expectFailure(Discard())
+		property("P != NP") <- Discard()
+		property("P = NP") <- Discard().expectFailure
+
+		let args = CheckerArguments(  replay: Optional.Some((newStdGen(), 10))
+									, maxAllowableSuccessfulTests: 200
+									, maxAllowableDiscardedTests: 0
+									, maxTestCaseSize: 1000
+									)
+
+		property("Discards forbidden", arguments: args) <- forAll { (x : UInt) in
+			return Discard()
+		}.expectFailure
 	}
 }

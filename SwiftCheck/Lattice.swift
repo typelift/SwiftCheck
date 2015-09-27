@@ -69,6 +69,27 @@ extension Double : LatticeType {
 	}
 }
 
+extension AnyForwardIndex : LatticeType {
+	public static var min : AnyForwardIndex {
+		return AnyForwardIndex(Int64.min)
+	}
+
+	public static var max : AnyForwardIndex {
+		return AnyForwardIndex(Int64.max)
+	}
+}
+
+extension AnyRandomAccessIndex : LatticeType {
+	public static var min : AnyRandomAccessIndex {
+		return AnyRandomAccessIndex(Int64.min)
+	}
+
+	public static var max : AnyRandomAccessIndex {
+		return AnyRandomAccessIndex(Int64.max)
+	}
+}
+
+
 /// float.h does not export Float80's limits, nor does the Swift STL.
 // rdar://18404510
 //extension Swift.Float80 : LatticeType {
