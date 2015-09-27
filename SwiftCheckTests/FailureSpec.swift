@@ -14,6 +14,8 @@ class FailureSpec : XCTestCase {
 	private let tests : [Property] = [
 		forAll { (_ : Int) in false }.expectFailure.expectFailure,
 		forAll { (_ : Int) in false },
+		exists { (x : Int) in x != x },
+		exists { (x : Int) in x != 0 },
 		forAll { (x : Int) in x != x },
 		forAll { (b : Bool) in !(b || !b) },
 		forAll { (x : Int) in x > (x + 1) },
