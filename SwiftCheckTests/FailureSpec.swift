@@ -24,6 +24,14 @@ class FailureSpec : XCTestCase {
 		forAll { (x : Int, y : Int, c : Int) in (x > y) ==> x * c < y * c },
 		forAll { (x : Int, y : Int, c : Int) in (x > y && c != 0) ==> x / c < y / c },
 		forAll { (x : Int, y : Int, c : Int) in (x > y && c != 0) ==> x / (-c) > y / (-c) },
+		forAll { (a : Float, b : Float, c : Float) in
+			return exists { (x : Float) in
+				return exists { (y : Float) in
+					return (x != y) ==> { a * pow(x, 2) + b * x + c == a * pow(y, 2) + b * y + c }
+				}
+			}
+		},
+
 	]
 
 	func testProperties() {
