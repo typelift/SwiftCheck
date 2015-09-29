@@ -11,7 +11,7 @@
 /// Property Testing is a more static and expressive form of Test-Driven Development that emphasizes
 /// the testability of program properties - A statement or invariant that can be proven to hold when
 /// fed any number of arguments of a particular kind.  It is akin to Fuzz Testing but is made
-/// significantly more power by the primitives in this framework.
+/// significantly more powerful by the primitives in this framework.
 ///
 /// A `Property` in SwiftCheck is more than just `true` and `false`, it is a value that is capable
 /// of producing a framework type called `Prop`, which models individual test cases that themselves
@@ -44,7 +44,7 @@
 ///     }
 ///
 /// Why require types?  For one, Swift cannot infer the types of local variables because SwiftCheck
-/// uses highly polymorphic testing primitives.  But, more importantly, types are required because 
+/// uses highly polymorphic testing primitives.  But, more importantly, types are required because
 /// SwiftCheck uses them to select the appropriate `Gen`erators and shrinkers for each data type
 /// automagically by default.  Those `Gen`erators and shrinkers are then used to create 100 random
 /// test cases that are evaluated lazily to produce a final result.
@@ -56,7 +56,7 @@
 /// purely illustrative example utilizing a significant portion of SwiftCheck's testing functions:
 ///
 ///     /// This method comes out of SwiftCheck's test suite.
-///     
+///
 ///    `SetOf` is called a "Modifier Type".  To learn more about them see `Modifiers.swift`---+
 ///                                                                                           |
 ///                                                                                           v
@@ -225,7 +225,7 @@ public func forAllNoShrink<A, B, C>(genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen
 	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, genC, pf: { b, c in pf(t, b, c) }) })
 }
 
-/// Given 4 explicit generators, converts a function to a universally quantified property 
+/// Given 4 explicit generators, converts a function to a universally quantified property
 /// for those 4 types.
 ///
 /// This variant of `forAll` does not shrink its argument but allows generators of any type, not
@@ -286,6 +286,43 @@ public func forAllShrink<A>(gen : Gen<A>, shrinker : A -> [A], f : A -> Testable
 	})
 }
 
+/// Converts a function into an existentially quantified property using the default shrinker and
+/// generator for that type to search for a passing case.  SwiftCheck only runs a limited number of
+/// trials before giving up and failing.
+///
+/// The nature of Existential Quantification means SwiftCheck would have to enumerate over the 
+/// entire domain of the type `A` in order to return a proper value.  Because such a traversal is 
+/// both impractical and leads to computationally questionable behavior (infinite loops and the 
+/// like), SwiftCheck instead interprets `exists` as a finite search over arbitrarily many values 
+/// (around 500).  No shrinking is performed during the search.
+///
+/// Existential Quantification should rarely be used, and in practice is usually used for *negative*
+/// statements "there does not exist `foo` such that `bar`". It is recommended that you avoid 
+/// `exists` and instead reduce your property to 
+/// [Skolem Normal Form](https://en.wikipedia.org/wiki/Skolem_normal_form).  `SNF` involves turning
+/// every `exists` into a function returning the existential value, taking any other parameters 
+/// being quantified over as needed.
+public func exists<A : Arbitrary>(pf : A -> Testable) -> Property {
+	return exists(A.arbitrary, pf: pf)
+}
+
+/// Given an explicit generator, converts a function to an existentially quantified property using
+/// the default shrinker for that type.
+public func exists<A : Arbitrary>(gen : Gen<A>, pf : A -> Testable) -> Property {
+	return forAllNoShrink(A.arbitrary, pf: { pf($0).invert }).invert.mapResult { res in
+		return TestResult(ok:			res.ok
+						, expect:		res.expect
+						, reason:		res.reason
+						, theException: res.theException
+						, labels:		res.labels
+						, stamp:		res.stamp
+						, callbacks:	res.callbacks
+						, abort:		res.abort
+						, quantifier:	.Existential)
+	}
+}
+
+
 public func quickCheck(prop : Testable, name : String = "") {
 	quickCheckWithResult(stdArgs(name), p: prop)
 }
@@ -298,25 +335,33 @@ internal func stdArgs(name : String = "") -> CheckerArguments {
 
 internal enum Result {
 	case Success(numTests : Int
-				, labels : [(String, Int)]
-				, output : String
-				)
+		, labels : [(String, Int)]
+		, output : String
+	)
 	case GaveUp(numTests : Int
-				, labels : [(String,Int)]
-				, output : String
-				)
+		, labels : [(String,Int)]
+		, output : String
+	)
 	case Failure(numTests : Int
-				, numShrinks : Int
-				, usedSeed : StdGen
-				, usedSize : Int
-				, reason : String
-				, labels : [(String,Int)]
-				, output : String
-				)
+		, numShrinks : Int
+		, usedSeed : StdGen
+		, usedSize : Int
+		, reason : String
+		, labels : [(String,Int)]
+		, output : String
+	)
+	case ExistentialFailure(numTests: Int
+		, usedSeed : StdGen
+		, usedSize : Int
+		, reason : String
+		, labels : [(String,Int)]
+		, output : String
+		, lastResult : TestResult
+	)
 	case  NoExpectedFailure(numTests : Int
-							, labels : [(String,Int)]
-							, output : String
-							)
+		, labels : [(String,Int)]
+		, output : String
+	)
 }
 
 internal indirect enum Either<L, R> {
@@ -381,7 +426,8 @@ internal func quickCheckWithResult(args : CheckerArguments, p : Testable) -> Res
 							, successfulShrinkCount:	0
 							, failedShrinkStepDistance:		0
 							, failedShrinkStepCount:		0
-							, shouldAbort:			false)
+							, shouldAbort:			false
+							, quantifier:			.Universal)
 	let modP : Property = (p.exhaustive ? p.property.once : p.property)
 	return test(istate, f: modP.unProperty.unGen)
 }
@@ -399,23 +445,36 @@ internal func test(st : CheckerState, f : (StdGen -> Int -> Prop)) -> Result {
 	var state = st
 	while true {
 		switch runATest(state)(f: f) {
-			case let .Left(fail):
-				switch (fail.0, doneTesting(fail.1)(f: f)) {
-					case (.Success(_, _, _), _):
-						return fail.0
-					case let (_, .NoExpectedFailure(numTests, labels, output)):
-						return .NoExpectedFailure(numTests: numTests, labels: labels, output: output)
-					default:
-						return fail.0
+		case let .Left(fail):
+			switch (fail.0, doneTesting(fail.1)(f: f)) {
+			case (.Success(_, _, _), _):
+				return fail.0
+			case let (_, .NoExpectedFailure(numTests, labels, output)):
+				return .NoExpectedFailure(numTests: numTests, labels: labels, output: output)
+			// Existential Failures need explicit propagation.  Existentials increment the
+			// discard count so we check if it has been surpassed.  If it has with any kind
+			// of success we're done.  If no successes are found we've failed checking the
+			// existential and report it as such.  Otherwise turn the testing loop.
+			case (.ExistentialFailure(_, _, _, _, _, _, _), _):
+				if fail.1.discardedTestCount >= fail.1.maxAllowableDiscardedTests && fail.1.successfulTestCount == 0 {
+					return reportExistentialFailure(fail.1, res: fail.0)
+				} else if fail.1.discardedTestCount >= fail.1.maxAllowableDiscardedTests {
+					return doneTesting(fail.1)(f: f)
+				} else {
+					state = fail.1
+					break
 				}
-			case let .Right(lsta):
-				if lsta.successfulTestCount >= lsta.maxAllowableSuccessfulTests || lsta.shouldAbort {
-					return doneTesting(lsta)(f: f)
-				}
-				if lsta.discardedTestCount >= lsta.maxAllowableDiscardedTests || lsta.shouldAbort {
-					return giveUp(lsta)(f: f)
-				}
-				state = lsta
+			default:
+				return fail.0
+			}
+		case let .Right(lsta):
+			if lsta.successfulTestCount >= lsta.maxAllowableSuccessfulTests || lsta.shouldAbort {
+				return doneTesting(lsta)(f: f)
+			}
+			if lsta.discardedTestCount >= lsta.maxAllowableDiscardedTests || lsta.shouldAbort {
+				return giveUp(lsta)(f: f)
+			}
+			state = lsta
 		}
 	}
 }
@@ -429,88 +488,122 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 
 	// Execute the Rose Tree for the test and reduce to .MkRose.
 	switch reduce(f(rnd1)(size).unProp) {
-		case .MkRose(let resC, let ts):
-			let res = resC() // Force the result only once.
-			dispatchAfterTestCallbacks(st, res: res) // Then invoke the post-test callbacks
+	case .MkRose(let resC, let ts):
+		let res = resC() // Force the result only once.
+		dispatchAfterTestCallbacks(st, res: res) // Then invoke the post-test callbacks
 
-			switch res.match() {
-				// Success
-				case .MatchResult(.Some(true), let expect, _, _, let labels, let stamp, _, let abort):
-					let nstate = CheckerState(name:							st.name
-											, maxAllowableSuccessfulTests:	st.maxAllowableSuccessfulTests
-											, maxAllowableDiscardedTests:	st.maxAllowableDiscardedTests
-											, computeSize:					st.computeSize
-											, successfulTestCount:			st.successfulTestCount.successor()
-											, discardedTestCount:			st.discardedTestCount
-											, labels:						unionWith(max, l: st.labels, r: labels)
-											, collected:					[stamp] + st.collected
-											, hasFulfilledExpectedFailure:	expect
-											, randomSeedGenerator:			st.randomSeedGenerator
-											, successfulShrinkCount:		st.successfulShrinkCount
-											, failedShrinkStepDistance:		st.failedShrinkStepDistance
-											, failedShrinkStepCount:		st.failedShrinkStepCount
-											, shouldAbort:			abort)
-					return .Right(nstate)
-				// Discard
-				case .MatchResult(.None, let expect, _, _, let labels, _, _, let abort):
-					let nstate = CheckerState(name:							st.name
-											, maxAllowableSuccessfulTests:	st.maxAllowableSuccessfulTests
-											, maxAllowableDiscardedTests:	st.maxAllowableDiscardedTests
-											, computeSize:					st.computeSize
-											, successfulTestCount:			st.successfulTestCount
-											, discardedTestCount:			st.discardedTestCount.successor()
-											, labels:						unionWith(max, l: st.labels, r: labels)
-											, collected:					st.collected
-											, hasFulfilledExpectedFailure:	expect
-											, randomSeedGenerator:			rnd2
-											, successfulShrinkCount:		st.successfulShrinkCount
-											, failedShrinkStepDistance:		st.failedShrinkStepDistance
-											, failedShrinkStepCount:		st.failedShrinkStepCount
-											, shouldAbort:			abort)
-					return .Right(nstate)
-				// Fail
-				case .MatchResult(.Some(false), let expect, _, _, _, _, _, let abort):
-					if !expect {
-						print("+++ OK, failed as expected. ", terminator: "")
-					} else {
-						print("*** Failed! ", terminator: "")
-					}
-
-					// Attempt a shrink.
-					let (numShrinks, _, _) = findMinimalFailingTestCase(st, res: res, ts: ts())
-
-					if !expect {
-						let s = Result.Success(numTests: st.successfulTestCount.successor(), labels: summary(st), output: "+++ OK, failed as expected. ")
-						return .Left((s, st))
-					}
-
-					let stat = Result.Failure(numTests:		st.successfulTestCount.successor()
-											, numShrinks:	numShrinks
-											, usedSeed:		st.randomSeedGenerator
-											, usedSize:		st.computeSize(st.successfulTestCount)(st.discardedTestCount)
-											, reason:		res.reason
-											, labels:		summary(st)
-											, output:		"*** Failed! ")
-
-					let nstate = CheckerState(name:							st.name
-											, maxAllowableSuccessfulTests:	st.maxAllowableSuccessfulTests
-											, maxAllowableDiscardedTests:	st.maxAllowableDiscardedTests
-											, computeSize:					st.computeSize
-											, successfulTestCount:			st.successfulTestCount
-											, discardedTestCount:			st.discardedTestCount.successor()
-											, labels:						st.labels
-											, collected:					st.collected
-											, hasFulfilledExpectedFailure:	res.expect
-											, randomSeedGenerator:			rnd2
-											, successfulShrinkCount:		st.successfulShrinkCount
-											, failedShrinkStepDistance:		st.failedShrinkStepDistance
-											, failedShrinkStepCount:		st.failedShrinkStepCount
-											, shouldAbort:			abort)
-					return .Left((stat, nstate))
+		switch res.match() {
+			// Success
+		case .MatchResult(.Some(true), let expect, _, _, let labels, let stamp, _, let abort, let quantifier):
+			let nstate = CheckerState(name:							st.name
+									, maxAllowableSuccessfulTests:	st.maxAllowableSuccessfulTests
+									, maxAllowableDiscardedTests:	st.maxAllowableDiscardedTests
+									, computeSize:					st.computeSize
+									, successfulTestCount:			st.successfulTestCount.successor()
+									, discardedTestCount:			st.discardedTestCount
+									, labels:						unionWith(max, l: st.labels, r: labels)
+									, collected:					[stamp] + st.collected
+									, hasFulfilledExpectedFailure:	expect
+									, randomSeedGenerator:			st.randomSeedGenerator
+									, successfulShrinkCount:		st.successfulShrinkCount
+									, failedShrinkStepDistance:		st.failedShrinkStepDistance
+									, failedShrinkStepCount:		st.failedShrinkStepCount
+									, shouldAbort:					abort
+									, quantifier:					quantifier)
+			return .Right(nstate)
+			// Discard
+		case .MatchResult(.None, let expect, _, _, let labels, _, _, let abort, let quantifier):
+			let nstate = CheckerState(name:							st.name
+									, maxAllowableSuccessfulTests:	st.maxAllowableSuccessfulTests
+									, maxAllowableDiscardedTests:	st.maxAllowableDiscardedTests
+									, computeSize:					st.computeSize
+									, successfulTestCount:			st.successfulTestCount
+									, discardedTestCount:			st.discardedTestCount.successor()
+									, labels:						unionWith(max, l: st.labels, r: labels)
+									, collected:					st.collected
+									, hasFulfilledExpectedFailure:	expect
+									, randomSeedGenerator:			rnd2
+									, successfulShrinkCount:		st.successfulShrinkCount
+									, failedShrinkStepDistance:		st.failedShrinkStepDistance
+									, failedShrinkStepCount:		st.failedShrinkStepCount
+									, shouldAbort:					abort
+									, quantifier:					quantifier)
+			return .Right(nstate)
+			// Fail
+		case .MatchResult(.Some(false), let expect, _, _, _, _, _, let abort, let quantifier):
+			if quantifier == .Existential {
+				print("")
+			} else if !expect {
+				print("+++ OK, failed as expected. ", terminator: "")
+			} else {
+				print("*** Failed! ", terminator: "")
 			}
-		default:
-			fatalError("Pattern Match Failed: Rose should have been reduced to MkRose, not IORose.")
-			break
+
+			// Failure of an existential is not necessarily failure of the whole test case,
+			// so treat this like a discard.
+			if quantifier == .Existential {
+				let nstate = CheckerState(name:							st.name
+										, maxAllowableSuccessfulTests:	st.maxAllowableSuccessfulTests
+										, maxAllowableDiscardedTests:	st.maxAllowableDiscardedTests
+										, computeSize:					st.computeSize
+										, successfulTestCount:			st.successfulTestCount
+										, discardedTestCount:			st.discardedTestCount.successor()
+										, labels:						st.labels
+										, collected:					st.collected
+										, hasFulfilledExpectedFailure:	expect
+										, randomSeedGenerator:			rnd2
+										, successfulShrinkCount:		st.successfulShrinkCount
+										, failedShrinkStepDistance:		st.failedShrinkStepDistance
+										, failedShrinkStepCount:		st.failedShrinkStepCount
+										, shouldAbort:					abort
+										, quantifier:					quantifier)
+
+				let resul = Result.ExistentialFailure(numTests: st.successfulTestCount + 1
+													, usedSeed: st.randomSeedGenerator
+													, usedSize: st.computeSize(st.successfulTestCount)(st.discardedTestCount)
+													, reason: "Could not satisfy existential"
+													, labels: summary(st)
+													, output: "*** Failed! "
+													, lastResult: res)
+				return .Left((resul, nstate))
+			}
+
+			// Attempt a shrink.
+			let (numShrinks, _, _) = findMinimalFailingTestCase(st, res: res, ts: ts())
+
+			if !expect {
+				let s = Result.Success(numTests: st.successfulTestCount.successor(), labels: summary(st), output: "+++ OK, failed as expected. ")
+				return .Left((s, st))
+			}
+
+			let stat = Result.Failure(numTests:		st.successfulTestCount.successor()
+									, numShrinks:	numShrinks
+									, usedSeed:		st.randomSeedGenerator
+									, usedSize:		st.computeSize(st.successfulTestCount)(st.discardedTestCount)
+									, reason:		res.reason
+									, labels:		summary(st)
+									, output:		"*** Failed! ")
+
+			let nstate = CheckerState(name:							st.name
+									, maxAllowableSuccessfulTests:	st.maxAllowableSuccessfulTests
+									, maxAllowableDiscardedTests:	st.maxAllowableDiscardedTests
+									, computeSize:					st.computeSize
+									, successfulTestCount:			st.successfulTestCount
+									, discardedTestCount:			st.discardedTestCount.successor()
+									, labels:						st.labels
+									, collected:					st.collected
+									, hasFulfilledExpectedFailure:	res.expect
+									, randomSeedGenerator:			rnd2
+									, successfulShrinkCount:		st.successfulShrinkCount
+									, failedShrinkStepDistance:		st.failedShrinkStepDistance
+									, failedShrinkStepCount:		st.failedShrinkStepCount
+									, shouldAbort:					abort
+									, quantifier:					quantifier)
+			return .Left((stat, nstate))
+		}
+	default:
+		fatalError("Pattern Match Failed: Rose should have been reduced to MkRose, not IORose.")
+		break
 	}
 }
 
@@ -567,24 +660,24 @@ internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts
 		// Try all possible courses of action in this Rose Tree
 		branches.forEach { r in
 			switch reduce(r) {
-				case .MkRose(let resC, let ts1):
-					let res1 = resC()
-					dispatchAfterTestCallbacks(st, res: res1)
+			case .MkRose(let resC, let ts1):
+				let res1 = resC()
+				dispatchAfterTestCallbacks(st, res: res1)
 
-					// Did we fail?  Good!  Failure is healthy.
-					// Try the next set of branches.
-					if res1.ok == .Some(false) {
-						lastResult = res1
-						branches = ts1()
-						cont = true
-						break;
-					}
+				// Did we fail?  Good!  Failure is healthy.
+				// Try the next set of branches.
+				if res1.ok == .Some(false) {
+					lastResult = res1
+					branches = ts1()
+					cont = true
+					break;
+				}
 
-					// Otherwise increment the tried shrink counter and the failed shrink counter.
-					failedShrinkStepDistance++
-					failedShrinkStepCount++
-				default:
-					fatalError("Rose should not have reduced to IO")
+				// Otherwise increment the tried shrink counter and the failed shrink counter.
+				failedShrinkStepDistance++
+				failedShrinkStepCount++
+			default:
+				fatalError("Rose should not have reduced to IO")
 			}
 		}
 
@@ -604,7 +697,8 @@ internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts
 							, successfulShrinkCount:		successfulShrinkCount
 							, failedShrinkStepDistance:		failedShrinkStepDistance
 							, failedShrinkStepCount:		failedShrinkStepCount
-							, shouldAbort:					st.shouldAbort)
+							, shouldAbort:					st.shouldAbort
+							, quantifier:					st.quantifier)
 	return reportMinimumCaseFound(state, res: lastResult)
 }
 
@@ -618,13 +712,28 @@ internal func reportMinimumCaseFound(st : CheckerState, res : TestResult) -> (In
 	return (st.successfulShrinkCount, st.failedShrinkStepCount - st.failedShrinkStepDistance, st.failedShrinkStepDistance)
 }
 
+internal func reportExistentialFailure(st : CheckerState, res : Result) -> Result {
+	switch res {
+	case let .ExistentialFailure(_, _, _, reason, _, _, lastTest):
+		let testMsg = " (after \(st.discardedTestCount) test"
+
+		print("*** Failed! ", terminator: "")
+		print("Proposition: " + st.name)
+		print(reason + pluralize(testMsg, i: st.discardedTestCount) + "):")
+		dispatchAfterFinalFailureCallbacks(st, res: lastTest)
+		return res
+	default:
+		fatalError("Cannot report existential failure on non-failure type \(res)")
+	}
+}
+
 internal func dispatchAfterTestCallbacks(st : CheckerState, res : TestResult) {
 	res.callbacks.forEach { c in
 		switch c {
-			case let .AfterTest(_, f):
-				f(st, res)
-			default:
-				break
+		case let .AfterTest(_, f):
+			f(st, res)
+		default:
+			break
 		}
 	}
 }
@@ -632,10 +741,10 @@ internal func dispatchAfterTestCallbacks(st : CheckerState, res : TestResult) {
 internal func dispatchAfterFinalFailureCallbacks(st : CheckerState, res : TestResult) {
 	res.callbacks.forEach { c in
 		switch c {
-			case let .AfterFinalFailure(_, f):
-				f(st, res)
-			default:
-				break
+		case let .AfterFinalFailure(_, f):
+			f(st, res)
+		default:
+			break
 		}
 	}
 }

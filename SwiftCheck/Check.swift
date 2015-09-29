@@ -83,37 +83,40 @@ public struct CheckerArguments {
 	/// The maximum number of tests cases that can be discarded before testing gives up on the
 	/// property.
 	///
-	/// The default value of this property is 500.  In general, most tests will require less than 
+	/// The default value of this property is 500.  In general, most tests will require less than
 	/// this amount.  `Discard`ed test cases do not affect the passing or failing status of the
 	/// property as a whole.
 	let maxAllowableDiscardedTests : Int
-	/// The limit to the size of all generators in the test.  
+	/// The limit to the size of all generators in the test.
 	///
 	/// The default value of this property is 100.  If "large" values, in magnitude or
 	/// size, are necessary then increase this value, else keep it relatively near the default.  If
 	/// it becomes too small the samples present in the test case will lose diversity.
 	let maxTestCaseSize : Int
 
-	public init( replay : Optional<(StdGen, Int)>
-				, maxAllowableSuccessfulTests : Int
-				, maxAllowableDiscardedTests : Int
-				, maxTestCaseSize : Int) {
-		self = CheckerArguments(replay: replay, maxAllowableSuccessfulTests: maxAllowableSuccessfulTests, maxAllowableDiscardedTests: maxAllowableDiscardedTests, maxTestCaseSize: maxTestCaseSize, name: "")
+	public init(replay : Optional<(StdGen, Int)>
+			, maxAllowableSuccessfulTests : Int
+			, maxAllowableDiscardedTests : Int
+			, maxTestCaseSize : Int
+			)
+	{
+			self = CheckerArguments(replay: replay, maxAllowableSuccessfulTests: maxAllowableSuccessfulTests, maxAllowableDiscardedTests: maxAllowableDiscardedTests, maxTestCaseSize: maxTestCaseSize, name: "")
 	}
 
-	internal init( replay : Optional<(StdGen, Int)>
+	internal init(replay : Optional<(StdGen, Int)>
 				, maxAllowableSuccessfulTests : Int
 				, maxAllowableDiscardedTests : Int
 				, maxTestCaseSize : Int
-				, name : String) {
+				, name : String
+				)
+	{
 
-		self.replay = replay
-		self.maxAllowableSuccessfulTests = maxAllowableSuccessfulTests
-		self.maxAllowableDiscardedTests = maxAllowableDiscardedTests
-		self.maxTestCaseSize = maxTestCaseSize
-		self.name = name
+			self.replay = replay
+			self.maxAllowableSuccessfulTests = maxAllowableSuccessfulTests
+			self.maxAllowableDiscardedTests = maxAllowableDiscardedTests
+			self.maxTestCaseSize = maxTestCaseSize
+			self.name = name
 	}
 
 	internal var name : String
 }
-

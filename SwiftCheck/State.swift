@@ -42,6 +42,8 @@ public struct CheckerState {
 	/// Returns whether the testing system should cease testing altogether.
 	let shouldAbort					: Bool
 
+	let quantifier					: Quantification
+
 	public init(  name							: String
 				, maxAllowableSuccessfulTests	: Int
 				, maxAllowableDiscardedTests	: Int
@@ -55,7 +57,8 @@ public struct CheckerState {
 				, successfulShrinkCount			: Int
 				, failedShrinkStepDistance		: Int
 				, failedShrinkStepCount			: Int
-				, shouldAbort					: Bool)
+				, shouldAbort					: Bool
+				, quantifier					: Quantification)
 	{
 		self.name = name
 		self.maxAllowableSuccessfulTests = maxAllowableSuccessfulTests
@@ -71,5 +74,6 @@ public struct CheckerState {
 		self.failedShrinkStepDistance = failedShrinkStepDistance
 		self.failedShrinkStepCount = failedShrinkStepCount
 		self.shouldAbort = shouldAbort
+		self.quantifier = quantifier
 	}
 }
