@@ -18,4 +18,4 @@ script:
     - if [[ "$TEST_CONFIG" == "RELEASE" ]]; then xcodebuild -project SwiftCheck.xcodeproj -scheme SwiftCheck -sdk macosx ONLY_ACTIVE_ARCH=NO clean build test | xcpretty -c -f `xcpretty-travis-formatter`; fi
     - if [[ "$TEST_CONFIG" == "RELEASE" ]]; then xcodebuild -project SwiftCheck.xcodeproj -scheme SwiftCheck-iOS -sdk iphonesimulator ONLY_ACTIVE_ARCH=NO clean build test | xcpretty -c -f `xcpretty-travis-formatter`; fi
     - if [[ "$TEST_CONFIG" == "CARTHAGE" ]]; then carthage update --verbose --no-use-binaries && carthage build --no-skip-current --configuration Debug; fi
-    - if [[ "$TEST_CONFIG" == "PODS" ]]; then pod lib lint && pod install; fi
+    - if [[ "$TEST_CONFIG" == "PODS" ]]; then pod lib lint; fi
