@@ -282,8 +282,7 @@ public func forAllShrink<A>(gen : Gen<A>, shrinker : A -> [A], f : A throws -> T
 	return Property(gen.bind { x in
 		return shrinking(shrinker, initial: x, prop: { xs  in
 			do {
-				let fs = try f(xs)
-				return fs.counterexample(String(xs))
+				return (try f(xs)).counterexample(String(xs))
 			} catch let e {
 				return TestResult.failed("Test case threw an exception: \"" + String(e) + "\"")
 			}
@@ -327,7 +326,7 @@ public func exists<A : Arbitrary>(gen : Gen<A>, pf : A throws -> Testable) -> Pr
 	}
 }
 
-
+/// Tests a property and prints the results to stdout.
 public func quickCheck(prop : Testable, name : String = "") {
 	quickCheckWithResult(stdArgs(name), p: prop)
 }
