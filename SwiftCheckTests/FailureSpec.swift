@@ -36,7 +36,8 @@ class FailureSpec : XCTestCase {
 			}
 		},
 		forAll { (_ : Int) in throw SwiftCheckError.Bogus },
-		forAll { (_ : Int) in throw SwiftCheckError.Bogus }.expectFailure.expectFailure,
+		forAll { (_ : Int, _ : Float, _ : Int) in throw SwiftCheckError.Bogus }.expectFailure.expectFailure,
+		exists { (_ : Int) in throw SwiftCheckError.Bogus },
 	]
 
 	func testProperties() {
