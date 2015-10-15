@@ -38,6 +38,10 @@ class PropertySpec : XCTestCase {
 			return n != n
 		}.invert
 
+		property("Invert turns throwing properties to passing properties") <- forAll { (n : Int) in
+			throw SwiftCheckError.Bogus
+		}.invert
+
 		property("Invert does not affect discards") <- forAll { (n : Int) in
 			return Discard()
 		}.invert
