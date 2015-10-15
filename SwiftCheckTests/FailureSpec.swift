@@ -9,6 +9,10 @@
 import SwiftCheck
 import XCTest
 
+enum SwiftCheckError : ErrorType {
+	case Bogus
+}
+
 class FailureSpec : XCTestCase {
 	private var failCount : Int = 0
 	private let tests : [Property] = [
@@ -31,7 +35,8 @@ class FailureSpec : XCTestCase {
 				}
 			}
 		},
-
+		forAll { (_ : Int) in throw SwiftCheckError.Bogus },
+		forAll { (_ : Int) in throw SwiftCheckError.Bogus }.expectFailure.expectFailure,
 	]
 
 	func testProperties() {
