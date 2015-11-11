@@ -50,17 +50,31 @@ class GenSpec : XCTestCase {
 				return Discard()
 			}
 			let l = Set(xss)
-			return forAll(Gen<Int>.fromElementsOf(xss)) { l.contains($0) }
+			return forAll(Gen<[Int]>.fromElementsOf(xss)) { l.contains($0) }
 		}
 
 		property("Gen.fromElementsOf only generates the elements of the given array") <- forAll { (n1 : Int, n2 : Int) in
-			return forAll(Gen<Int>.fromElementsOf([n1, n2])) { $0 == n1 || $0 == n2 }
+			return forAll(Gen<[Int]>.fromElementsOf([n1, n2])) { $0 == n1 || $0 == n2 }
 		}
 
-		property("Gen.fromElementsOf only generates the elements of the given interval") <- forAll { (n1 : Int, n2 : Int) in
+		property("Gen.fromElementsIn only generates the elements of the given interval") <- forAll { (n1 : Int, n2 : Int) in
 			return (n1 < n2) ==> {
 				let interval = n1...n2
-				return forAll(Gen<Int>.fromElementsOf(n1...n2)) { interval.contains($0) }
+				return forAll(Gen<[Int]>.fromElementsIn(n1...n2)) { interval.contains($0) }
+			}
+		}
+
+		property("Gen.fromInitialSegmentsOf produces only prefixes of the generated array") <- forAll { (xs : Array<Int>) in
+			return !xs.isEmpty ==> {
+				return forAllNoShrink(Gen<[Int]>.fromInitialSegmentsOf(xs)) { (ys : Array<Int>) in
+					return xs.startsWith(ys)
+				}
+			}
+		}
+
+		property("Gen.fromShufflingElementsOf produces only permutations of the generated array") <- forAll { (xs : Array<Int>) in
+			return forAllNoShrink(Gen<[Int]>.fromShufflingElementsOf(xs)) { (ys : Array<Int>) in
+				return (xs.count == ys.count) ^&&^ (xs.sort() == ys.sort())
 			}
 		}
 
@@ -87,7 +101,27 @@ class GenSpec : XCTestCase {
 			return $0.getArray.isEmpty
 		}
 
-		property("Gen.suchThat in series obeys both predicates.") <- {
+		property("Gen.resize bounds sizes for integers") <- forAll { (x : Int) in
+			var n : Int = 0
+			return forAll(Gen<Int>.sized { xx in
+				n = xx
+				return Int.arbitrary
+			}) { (x : Int) in
+				return x <= n
+			}
+		}
+
+		property("Gen.resize bounds count for arrays") <- forAll { (x : Int) in
+			var n : Int = 0
+			return forAllNoShrink(Gen<[Int]>.sized { xx in
+				n = xx
+				return [Int].arbitrary
+			}) { (xs : [Int]) in
+				return xs.count <= n
+			}
+		}
+
+		property("Gen.suchThat in series obeys both predicates") <- {
 			let g = String.arbitrary.suchThat({ !$0.isEmpty }).suchThat({ $0.rangeOfString(",") == nil })
 			return forAll(g) { str in
 				return !(str.isEmpty || str.rangeOfString(",") != nil)
