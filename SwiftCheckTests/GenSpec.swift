@@ -106,17 +106,17 @@ class GenSpec : XCTestCase {
 			return forAll(Gen<Int>.sized { xx in
 				n = xx
 				return Int.arbitrary
-			}) { (x : Int) in
+			}.resize(n)) { (x : Int) in
 				return x <= n
 			}
 		}
 
 		property("Gen.resize bounds count for arrays") <- forAll { (x : Int) in
 			var n : Int = 0
-			return forAllNoShrink(Gen<[Int]>.sized { xx in
+			return forAllNoShrink(Gen<[Int]>.sized({ xx in
 				n = xx
 				return [Int].arbitrary
-			}) { (xs : [Int]) in
+			}).resize(n)) { (xs : [Int]) in
 				return xs.count <= n
 			}
 		}
