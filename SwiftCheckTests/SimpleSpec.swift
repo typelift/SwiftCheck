@@ -27,7 +27,6 @@ extension ArbitraryFoo : Arbitrary {
 	}
 }
 
-
 class SimpleSpec : XCTestCase {
 	func testAll() {
 		property("Integer Equality is Reflexive") <- forAll { (i : Int8) in
