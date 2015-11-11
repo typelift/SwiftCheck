@@ -6,7 +6,6 @@
 //  Copyright © 2015 TypeLift. All rights reserved.
 //
 
-import XCTest
 import SwiftCheck
 
 extension Dictionary {
