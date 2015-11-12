@@ -328,14 +328,10 @@ public func exists<A : Arbitrary>(gen : Gen<A>, pf : A throws -> Testable) -> Pr
 
 /// Tests a property and prints the results to stdout.
 public func quickCheck(prop : Testable, name : String = "") {
-	quickCheckWithResult(stdArgs(name), p: prop)
+	quickCheckWithResult(CheckerArguments(name: name), p: prop)
 }
 
 /// MARK: - Implementation Details
-
-internal func stdArgs(name : String = "") -> CheckerArguments {
-	return CheckerArguments(replay: .None, maxAllowableSuccessfulTests: 100, maxAllowableDiscardedTests: 500, maxTestCaseSize: 100, name: name)
-}
 
 internal enum Result {
 	case Success(numTests : Int
