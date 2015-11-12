@@ -460,10 +460,8 @@ internal func test(st : CheckerState, f : (StdGen -> Int -> Prop)) -> Result {
 			// of success we're done.  If no successes are found we've failed checking the
 			// existential and report it as such.  Otherwise turn the testing loop.
 			case (.ExistentialFailure(_, _, _, _, _, _, _), _):
-				if fail.1.discardedTestCount >= fail.1.maxAllowableDiscardedTests && fail.1.successfulTestCount == 0 {
+				if fail.1.successfulTestCount == 0 || fail.1.discardedTestCount >= fail.1.maxAllowableDiscardedTests {
 					return reportExistentialFailure(fail.1, res: fail.0)
-				} else if fail.1.discardedTestCount >= fail.1.maxAllowableDiscardedTests {
-					return doneTesting(fail.1)(f: f)
 				} else {
 					state = fail.1
 					break
@@ -536,7 +534,7 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 			// Fail
 		case .MatchResult(.Some(false), let expect, _, _, _, _, _, let abort, let quantifier):
 			if quantifier == .Existential {
-				print("")
+//				print("")
 			} else if !expect {
 				print("+++ OK, failed as expected. ", terminator: "")
 			} else {
@@ -562,14 +560,18 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 										, shouldAbort:					abort
 										, quantifier:					quantifier)
 
-				let resul = Result.ExistentialFailure(numTests: st.successfulTestCount + 1
-													, usedSeed: st.randomSeedGenerator
-													, usedSize: st.computeSize(st.successfulTestCount)(st.discardedTestCount)
-													, reason: "Could not satisfy existential"
-													, labels: summary(st)
-													, output: "*** Failed! "
-													, lastResult: res)
-				return .Left((resul, nstate))
+				/// However, some existentials outlive their usefulness
+				if nstate.discardedTestCount >= nstate.maxAllowableDiscardedTests {
+					let resul = Result.ExistentialFailure(numTests: st.successfulTestCount.successor()
+						, usedSeed: st.randomSeedGenerator
+						, usedSize: st.computeSize(st.successfulTestCount)(st.discardedTestCount)
+						, reason: "Could not satisfy existential"
+						, labels: summary(st)
+						, output: "*** Failed! "
+						, lastResult: res)
+					return .Left((resul, nstate))
+				}
+				return .Right(nstate)
 			}
 
 			// Attempt a shrink.
