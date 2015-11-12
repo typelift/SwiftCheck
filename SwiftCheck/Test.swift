@@ -622,7 +622,7 @@ internal func doneTesting(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Res
 
 internal func giveUp(st: CheckerState)(f : (StdGen -> Int -> Prop)) -> Result {
 	printDistributionGraph(st)
-	return Result.GaveUp(numTests: st.successfulTestCount, labels: summary(st), output: "")
+	return .GaveUp(numTests: st.successfulTestCount, labels: summary(st), output: "")
 }
 
 // Interface to shrinking loop.  Returns (number of shrinks performed, number of failed shrinks,
