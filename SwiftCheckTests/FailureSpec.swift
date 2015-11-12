@@ -7,7 +7,6 @@
 //
 
 import SwiftCheck
-import XCTest
 
 enum SwiftCheckError : ErrorType {
 	case Bogus

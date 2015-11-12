@@ -6,7 +6,6 @@
 //  Copyright © 2015 Robert Widmann. All rights reserved.
 //
 
-import XCTest
 import SwiftCheck
 
 let upper : Gen<Character>= Gen<Character>.fromElementsIn("A"..."Z")

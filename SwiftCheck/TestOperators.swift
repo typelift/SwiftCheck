@@ -117,4 +117,4 @@ public func ^||^(p1 : Testable, p2 : Testable) -> Property {
 	return disjoin(p1.property, p2.property)
 }
 
-import func XCTest.XCTFail
+@exported import XCTest

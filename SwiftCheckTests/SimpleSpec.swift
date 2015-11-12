@@ -6,7 +6,6 @@
 //  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
-import XCTest
 import SwiftCheck
 
 public struct ArbitraryFoo {
@@ -27,7 +26,6 @@ extension ArbitraryFoo : Arbitrary {
 		return ArbitraryFoo.create <^> Int.arbitrary <*> Int.arbitrary
 	}
 }
-
 
 class SimpleSpec : XCTestCase {
 	func testAll() {

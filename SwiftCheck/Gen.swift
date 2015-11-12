@@ -54,23 +54,22 @@ public struct Gen<A> {
 	/// parameter.
 	///
 	/// The input array is required to be non-empty.
-	public static func fromInitialSegmentsOf(xs : [A]) -> Gen<A> {
+	public static func fromInitialSegmentsOf<S>(xs : [S]) -> Gen<[S]> {
 		assert(!xs.isEmpty, "Gen.fromInitialSegmentsOf used with empty list")
 
-		let k = Double(xs.count)
-		return sized({ n in
-			let m = max(1, size(k)(m: n))
-			return Gen.fromElementsOf(xs[0 ..< m])
+		return Gen<[S]>.sized({ n in
+			let ss = xs[xs.startIndex..<max(xs.startIndex.successor(), size(xs.endIndex)(m: n))]
+			return Gen<[S]>.pure([S](ss))
 		})
 	}
 
 	/// Constructs a Generator that produces permutations of a given array.
-	public static func fromShufflingElementsOf(xs : [A]) -> Gen<[A]> {
+	public static func fromShufflingElementsOf<S>(xs : [S]) -> Gen<[S]> {
 		if xs.isEmpty {
-			return Gen<[A]>.pure([])
+			return Gen<[S]>.pure([])
 		}
 
-		return Gen<(A, [A])>.fromElementsOf(selectOne(xs)).bind { (y, ys) in
+		return Gen<(S, [S])>.fromElementsOf(selectOne(xs)).bind { (y, ys) in
 			return Gen.fromShufflingElementsOf(ys).fmap { [y] + $0 }
 		}
 	}
@@ -388,9 +387,9 @@ private func attemptBoundedTry<A>(gen: Gen<A>, k : Int, n : Int, p: A -> Bool) -
 	}
 }
 
-private func size(k : Double)(m : Int) -> Int {
+private func size<S : IntegerType>(k : S)(m : Int) -> Int {
 	let n = Double(m)
-	return Int((log(n + 1)) * k / log(100))
+	return Int((log(n + 1)) * Double(k.toIntMax()) / log(100))
 }
 
 private func selectOne<A>(xs : [A]) -> [(A, [A])] {
