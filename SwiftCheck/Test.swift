@@ -284,7 +284,7 @@ public func forAllShrink<A>(gen : Gen<A>, shrinker : A -> [A], f : A throws -> T
 			do {
 				return (try f(xs)).counterexample(String(xs))
 			} catch let e {
-				return TestResult.failed("Test case threw an exception: \"" + String(e) + "\"")
+				return TestResult.failed("Test case threw an exception: \"\(e)\"").counterexample(String(xs))
 			}
 		}).unProperty
 	})
