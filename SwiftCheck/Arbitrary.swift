@@ -94,14 +94,6 @@ extension Int : Arbitrary {
 	}
 }
 
-//private func inBounds<A : IntegerType>(fi : (Int -> A)) -> Gen<A.IntegerLiteralType> -> Gen<A> {
-//	return { g in
-//		return fi <^> g.suchThat { x in
-//			return (fi(x) as! A.IntegerLiteralType) == x
-//		}
-//	}
-//}
-
 extension Int8 : Arbitrary {
 	public static var arbitrary : Gen<Int8> {
 		return Gen.sized { n in
