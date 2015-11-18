@@ -144,7 +144,7 @@ extension Int64 : Arbitrary {
 
 extension UInt : Arbitrary {
 	public static var arbitrary : Gen<UInt> {
-		return Gen.sized { n in Gen<UInt64>.choose((0, UInt(n))) }
+		return Gen.sized { n in Gen<UInt>.choose((0, UInt(n))) }
 	}
 
 	public static func shrink(x : UInt) -> [UInt] {
