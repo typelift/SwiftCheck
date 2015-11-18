@@ -475,10 +475,3 @@ extension NonNegative : CoArbitrary {
 	}
 }
 
-private func inBounds<A : IntegerType where A.IntegerLiteralType == Int>(fi : (Int -> A)) -> Gen<Int> -> Gen<A> {
-	return { g in
-		return fi <^> g.suchThat { x in
-			return (fi(x) as! Int) == x
-		}
-	}
-}

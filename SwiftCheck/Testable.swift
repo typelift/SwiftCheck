@@ -35,7 +35,7 @@ public struct Property : Testable {
 	let unProperty : Gen<Prop>
 
 	public init(_ val : Gen<Prop>) {
-		self.unProperty = val;
+		self.unProperty = val
 	}
 
 	public var property : Property {

@@ -6,8 +6,6 @@
 //  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
-import Darwin
-
 /// A type that implements random generation and shrinking of values.
 ///
 /// While testing, SwiftCheck will invoke `arbitrary()` a given amount of times (usually 100 if the
@@ -73,7 +71,7 @@ extension IntegerType {
 
 extension Bool : Arbitrary {
 	public static var arbitrary : Gen<Bool> {
-		return Gen.sized { _ in Gen.pure((arc4random() % 2) == 1) }
+		return Gen<Bool>.choose((false, true))
 	}
 
 	public static func shrink(x : Bool) -> [Bool] {
@@ -87,7 +85,7 @@ extension Bool : Arbitrary {
 extension Int : Arbitrary {
 	public static var arbitrary : Gen<Int> {
 		return Gen.sized { n in
-			return Bool.arbitrary.fmap { ($0 ? 1 : -1) * Int(arc4random_uniform(UInt32(n))) }
+			return Gen<Int>.choose((-n, n))
 		}
 	}
 
@@ -99,7 +97,7 @@ extension Int : Arbitrary {
 extension Int8 : Arbitrary {
 	public static var arbitrary : Gen<Int8> {
 		return Gen.sized { n in
-			return Bool.arbitrary.fmap { ($0 ? 1 : -1) * Int8(arc4random_uniform(UInt32(n))) }
+			return Gen<Int8>.choose((Int8(truncatingBitPattern: -n), Int8(truncatingBitPattern: n)))
 		}
 	}
 
@@ -111,7 +109,7 @@ extension Int8 : Arbitrary {
 extension Int16 : Arbitrary {
 	public static var arbitrary : Gen<Int16> {
 		return Gen.sized { n in
-			return Bool.arbitrary.fmap { ($0 ? 1 : -1) * Int16(arc4random_uniform(UInt32(n))) }
+			return Gen<Int16>.choose((Int16(truncatingBitPattern: -n), Int16(truncatingBitPattern: n)))
 		}
 	}
 
@@ -123,7 +121,7 @@ extension Int16 : Arbitrary {
 extension Int32 : Arbitrary {
 	public static var arbitrary : Gen<Int32> {
 		return Gen.sized { n in
-			return Bool.arbitrary.fmap { ($0 ? 1 : -1) * Int32(arc4random_uniform(UInt32(n))) }
+			return Gen<Int32>.choose((Int32(truncatingBitPattern: -n), Int32(truncatingBitPattern: n)))
 		}
 	}
 
@@ -135,7 +133,7 @@ extension Int32 : Arbitrary {
 extension Int64 : Arbitrary {
 	public static var arbitrary : Gen<Int64> {
 		return Gen.sized { n in
-			return Bool.arbitrary.fmap { ($0 ? 1 : -1) * Int64(arc4random_uniform(UInt32(n))) }
+			return Gen<Int64>.choose((Int64(-n), Int64(n)))
 		}
 	}
 
@@ -146,7 +144,7 @@ extension Int64 : Arbitrary {
 
 extension UInt : Arbitrary {
 	public static var arbitrary : Gen<UInt> {
-		return Gen.sized { n in Gen<UInt>.pure(UInt(arc4random_uniform(UInt32(abs(n))))) }
+		return Gen.sized { n in Gen<UInt>.choose((0, UInt(n))) }
 	}
 
 	public static func shrink(x : UInt) -> [UInt] {
@@ -156,9 +154,9 @@ extension UInt : Arbitrary {
 
 extension UInt8 : Arbitrary {
 	public static var arbitrary : Gen<UInt8> {
-		return Gen.sized({ n in
-			return Gen.sized { n in Gen<UInt8>.pure(UInt8(arc4random_uniform(UInt32(abs(n))))) }
-		})
+		return Gen.sized { n in
+			return Gen.sized { n in Gen<UInt8>.choose((0, UInt8(truncatingBitPattern: n))) }
+		}
 	}
 
 	public static func shrink(x : UInt8) -> [UInt8] {
@@ -168,7 +166,7 @@ extension UInt8 : Arbitrary {
 
 extension UInt16 : Arbitrary {
 	public static var arbitrary : Gen<UInt16> {
-		return Gen.sized { n in Gen<UInt16>.pure(UInt16(arc4random_uniform(UInt32(abs(n))))) }
+		return Gen.sized { n in Gen<UInt16>.choose((0, UInt16(truncatingBitPattern: n))) }
 	}
 
 	public static func shrink(x : UInt16) -> [UInt16] {
@@ -178,7 +176,7 @@ extension UInt16 : Arbitrary {
 
 extension UInt32 : Arbitrary {
 	public static var arbitrary : Gen<UInt32> {
-		return Gen.sized { n in Gen<UInt32>.pure(arc4random_uniform(UInt32(abs(n)))) }
+		return Gen.sized { n in Gen<UInt32>.choose((0, UInt32(truncatingBitPattern: n))) }
 	}
 
 	public static func shrink(x : UInt32) -> [UInt32] {
@@ -188,7 +186,7 @@ extension UInt32 : Arbitrary {
 
 extension UInt64 : Arbitrary {
 	public static var arbitrary : Gen<UInt64> {
-		return Gen.sized { n in Gen<UInt64>.pure(UInt64(arc4random_uniform(UInt32(abs(n))))) }
+		return Gen.sized { n in Gen<UInt64>.choose((0, UInt64(n))) }
 	}
 
 	public static func shrink(x : UInt64) -> [UInt64] {
@@ -198,12 +196,16 @@ extension UInt64 : Arbitrary {
 
 extension Float : Arbitrary {
 	public static var arbitrary : Gen<Float> {
-		return Gen.sized({ n in
+		let precision : Int64 = 9999999999999
+
+		return Gen.sized { n in
 			if n == 0 {
 				return Gen<Float>.pure(0.0)
 			}
-			return Gen<Float>.pure(Float(-n) + Float(arc4random()) / Float(UINT32_MAX / UInt32((n)*2)))
-		})
+			return Gen<(Int64, Int64)>.zip(Gen<Int64>.choose((Int64(-n) * precision, Int64(n) * precision)), Gen<Int64>.choose((1, precision))) >>- { (a, b) in
+				return Gen<Float>.pure(Float(a) / Float(b))
+			}
+		}
 	}
 
 	public static func shrink(x : Float) -> [Float] {
@@ -219,12 +221,16 @@ extension Float : Arbitrary {
 
 extension Double : Arbitrary {
 	public static var arbitrary : Gen<Double> {
-		return Gen.sized({ n in
+		let precision : Int64 = 9999999999999
+
+		return Gen.sized { n in
 			if n == 0 {
 				return Gen<Double>.pure(0.0)
 			}
-			return Gen<Double>.pure(Double(-n) + Double(arc4random()) / Double(UINT32_MAX / UInt32(n*2)))
-		})
+			return Gen<(Int64, Int64)>.zip(Gen<Int64>.choose((Int64(-n) * precision, Int64(n) * precision)), Gen<Int64>.choose((1, precision))) >>- { (a, b) in
+				return Gen<Double>.pure(Double(a) / Double(b))
+			}
+		}
 	}
 
 	public static func shrink(x : Double) -> [Double] {
@@ -251,7 +257,7 @@ extension UnicodeScalar : Arbitrary {
 
 extension String : Arbitrary {
 	public static var arbitrary : Gen<String> {
-		let chars = Gen.sized({ n in Character.arbitrary.proliferateSized(n) })
+		let chars = Gen.sized(Character.arbitrary.proliferateSized)
 		return chars >>- (Gen<String>.pure • String.init)
 	}
 
