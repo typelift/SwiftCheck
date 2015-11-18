@@ -58,9 +58,9 @@ extension Testable {
 
 	/// Applies a function that modifies the property generator's size.
 	public func mapSize(f : Int -> Int) -> Property {
-		return Property(Gen.sized({ n in
+		return Property(Gen.sized { n in
 			return self.property.unProperty.resize(f(n))
-		}))
+		})
 	}
 
 	/// Applies a function that modifies the result of a test case.
@@ -79,9 +79,9 @@ extension Testable {
 
 	/// Applies a function that modifies the underlying Rose Tree that a test case has generated.
 	public func mapRoseResult(f : Rose<TestResult> -> Rose<TestResult>) -> Property {
-		return self.mapProp({ t in
+		return self.mapProp { t in
 			return Prop(unProp: f(t.unProp))
-		})
+		}
 	}
 
 	/// Modifies a property so it will not shrink when it fails.

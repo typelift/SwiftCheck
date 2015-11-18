@@ -154,9 +154,9 @@ extension UInt : Arbitrary {
 
 extension UInt8 : Arbitrary {
 	public static var arbitrary : Gen<UInt8> {
-		return Gen.sized({ n in
+		return Gen.sized { n in
 			return Gen.sized { n in Gen<UInt8>.choose((0, UInt8(truncatingBitPattern: n))) }
-		})
+		}
 	}
 
 	public static func shrink(x : UInt8) -> [UInt8] {
@@ -265,7 +265,7 @@ extension UnicodeScalar : Arbitrary {
 
 extension String : Arbitrary {
 	public static var arbitrary : Gen<String> {
-		let chars = Gen.sized({ n in Character.arbitrary.proliferateSized(n) })
+		let chars = Gen.sized(Character.arbitrary.proliferateSized)
 		return chars >>- (Gen<String>.pure • String.init)
 	}
 

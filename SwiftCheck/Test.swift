@@ -653,7 +653,7 @@ internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts
 	while cont {
 		/// If we're out of branches we're out of options.
 		if branches.isEmpty {
-			break;
+			break
 		}
 
 		cont = false
@@ -672,7 +672,7 @@ internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts
 					lastResult = res1
 					branches = ts1()
 					cont = true
-					break;
+					break
 				}
 
 				// Otherwise increment the tried shrink counter and the failed shrink counter.
