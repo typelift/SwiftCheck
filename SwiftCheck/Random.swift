@@ -118,49 +118,54 @@ extension UnicodeScalar : RandomType {
 
 extension Int : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int, Int), gen : G) -> (Int, G) {
-		let (min, max) = range
+		let (minl, maxl) = range
+		let (min, max) = (Int64(minl), Int64(maxl))
 		let (r, g) = gen.next
-		let result = (r % ((max + 1) - min)) + min
+		let result = (Int64(r) % ((max + 1) - min)) + min
 
-		return (result, g)
+		return (Int(truncatingBitPattern: result), g)
 	}
 }
 
 extension Int8 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int8, Int8), gen : G) -> (Int8, G) {
-		let (min, max) = range
+		let (minl, maxl) = range
+		let (min, max) = (Int64(minl), Int64(maxl))
 		let (r, g) = gen.next
-		let result = (r % ((max + 1) - min)) + min
+		let result = (Int64(r) % ((max + 1) - min)) + min
 
-		return (result, g)
+		return (Int8(truncatingBitPattern: result), g)
 	}
 }
 
 extension Int16 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int16, Int16), gen : G) -> (Int16, G) {
-		let (min, max) = range
+		let (minl, maxl) = range
+		let (min, max) = (Int64(minl), Int64(maxl))
 		let (r, g) = gen.next
-		let result = (r % ((max + 1) - min)) + min
+		let result = (Int64(r) % ((max + 1) - min)) + min
 
-		return (result, g)
+		return (Int16(truncatingBitPattern: result), g)
 	}
 }
 
 extension Int32 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int32, Int32), gen : G) -> (Int32, G) {
-		let (min, max) = range
+		let (minl, maxl) = range
+		let (min, max) = (Int64(minl), Int64(maxl))
 		let (r, g) = gen.next
-		let result = (r % ((max + 1) - min)) + min
+		let result = (Int64(r) % ((max + 1) - min)) + min
 
-		return (result, g)
+		return (Int32(truncatingBitPattern: result), g)
 	}
 }
 
 extension Int64 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int64, Int64), gen : G) -> (Int64, G) {
-		let (min, max) = range
+		let (minl, maxl) = range
+		let (min, max) = (Int64(minl), Int64(maxl))
 		let (r, g) = gen.next
-		let result = (r % ((max + 1) - min)) + min
+		let result = (Int64(r) % ((max + 1) - min)) + min
 
 		return (result, g)
 	}

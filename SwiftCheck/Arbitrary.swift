@@ -196,17 +196,13 @@ extension UInt64 : Arbitrary {
 
 extension Float : Arbitrary {
 	public static var arbitrary : Gen<Float> {
-		#if !(arch(x86_64) || arch(arm64))
-			let precision : Int = 999999999
-		#else
-			let precision : Int = 9999999999999
-		#endif
+		let precision : Int64 = 9999999999999
 
 		return Gen.sized { n in
 			if n == 0 {
 				return Gen<Float>.pure(0.0)
 			}
-			return Gen<(Int, Int)>.zip(Gen<Int>.choose(((-n) * precision, n * precision)), Gen<Int>.choose((1, precision))) >>- { (a, b) in
+			return Gen<(Int64, Int64)>.zip(Gen<Int64>.choose((Int64(-n) * precision, Int64(n) * precision)), Gen<Int64>.choose((1, precision))) >>- { (a, b) in
 				return Gen<Float>.pure(Float(a) / Float(b))
 			}
 		}
@@ -225,17 +221,13 @@ extension Float : Arbitrary {
 
 extension Double : Arbitrary {
 	public static var arbitrary : Gen<Double> {
-	#if !(arch(x86_64) || arch(arm64))
-		let precision : Int = 999999999
-	#else
-		let precision : Int = 9999999999999
-	#endif
+		let precision : Int64 = 9999999999999
 
 		return Gen.sized { n in
 			if n == 0 {
 				return Gen<Double>.pure(0.0)
 			}
-			return Gen<(Int, Int)>.zip(Gen<Int>.choose(((-n) * precision, n * precision)), Gen<Int>.choose((1, precision))) >>- { (a, b) in
+			return Gen<(Int64, Int64)>.zip(Gen<Int64>.choose((Int64(-n) * precision, Int64(n) * precision)), Gen<Int64>.choose((1, precision))) >>- { (a, b) in
 				return Gen<Double>.pure(Double(a) / Double(b))
 			}
 		}
