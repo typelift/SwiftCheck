@@ -358,7 +358,7 @@ internal enum Result {
 		, output : String
 		, lastResult : TestResult
 	)
-	case  NoExpectedFailure(numTests : Int
+	case NoExpectedFailure(numTests : Int
 		, labels : [(String,Int)]
 		, output : String
 	)
