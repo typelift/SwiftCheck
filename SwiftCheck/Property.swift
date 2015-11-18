@@ -183,6 +183,7 @@ extension Testable {
 				case .Some(false):
 					print("\nFailed: ", terminator: "")
 					printLabels(res)
+					print("Pass the seed values \(st.randomSeedGenerator) to replay the test.")
 				default:
 					print("\nDiscarded: ", terminator: "")
 					printLabels(res)

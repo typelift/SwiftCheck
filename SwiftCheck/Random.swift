@@ -31,24 +31,29 @@ public let standardRNG : StdGen = mkStdRNG(time(nil))
 /// repeatable results, by starting with a specified initial random number generator, or to get 
 /// different results on each run by using the system-initialised generator or by supplying a seed 
 /// from some other source.
-public struct StdGen : RandomGeneneratorType {
+public struct StdGen : RandomGeneneratorType, CustomStringConvertible {
 	let seed1 : Int
 	let seed2 : Int
 
-	/// Creates a `StdGen` initialized at the given seed.
-	public init(replaySeed : Int) {
+	/// Creates a `StdGen` initialized at the given seeds that is suitable for replaying of tests.
+	public init(_ replaySeed1 : Int, _ replaySeed2 : Int) {
+		self.seed1 = replaySeed1
+		self.seed2 = replaySeed2
+	}
+
+	/// Convenience to create a `StdGen` from a given integer.
+	public init(_ o : Int) {
 		func mkStdGen32(sMaybeNegative : Int) -> StdGen {
 			let s       = sMaybeNegative & Int.max
 			let (q, s1) = (s / 2147483562, s % 2147483562)
 			let s2      = q % 2147483398
 			return StdGen((s1 + 1), (s2 + 1))
 		}
-		self = mkStdGen32(replaySeed)
+		self = mkStdGen32(o)
 	}
 
-	init(_ seed1 : Int, _ seed2 : Int) {
-		self.seed1 = seed1
-		self.seed2 = seed2
+	public var description : String {
+		return "\(self.seed1) \(self.seed2)"
 	}
 
 	public var next : (Int, StdGen) {

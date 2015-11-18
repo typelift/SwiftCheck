@@ -10,16 +10,16 @@ import SwiftCheck
 
 class ReplaySpec : XCTestCase {
 	func testProperties() {
-		property("Test is replayed at specific args") <- forAll { (seed : Int, size : Int) in
-			let replayArgs = CheckerArguments(replay: .Some(StdGen(replaySeed: seed), size))
+		property("Test is replayed at specific args") <- forAll { (seedl : Int, seedr : Int, size : Int) in
+			let replayArgs = CheckerArguments(replay: .Some(StdGen(seedl, seedr), size))
 			var foundArgs : [Int] = []
-			property("Replay at \(seed), \(size)", arguments: replayArgs) <- forAll { (x : Int) in
+			property("Replay at \(seedl), \(seedr)", arguments: replayArgs) <- forAll { (x : Int) in
 				foundArgs.append(x)
 				return true
 			}
 
 			var foundArgs2 : [Int] = []
-			property("Replay at \(seed), \(size)", arguments: replayArgs) <- forAll { (x : Int) in
+			property("Replay at \(seedl), \(seedr)", arguments: replayArgs) <- forAll { (x : Int) in
 				foundArgs2.append(x)
 				return foundArgs.contains(x)
 			}
