@@ -120,9 +120,9 @@ extension Int : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int, Int), gen : G) -> (Int, G) {
 		let (min, max) = range
 		let (r, g) = gen.next
-		let result = (r % ((max + 1) - min)) + min;
+		let result = (r % ((max + 1) - min)) + min
 
-		return (result, g);
+		return (result, g)
 	}
 }
 
@@ -130,9 +130,9 @@ extension Int8 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int8, Int8), gen : G) -> (Int8, G) {
 		let (min, max) = range
 		let (r, g) = gen.next
-		let result = (r % ((max + 1) - min)) + min;
+		let result = (r % ((max + 1) - min)) + min
 
-		return (result, g);
+		return (result, g)
 	}
 }
 
@@ -140,9 +140,9 @@ extension Int16 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int16, Int16), gen : G) -> (Int16, G) {
 		let (min, max) = range
 		let (r, g) = gen.next
-		let result = (r % ((max + 1) - min)) + min;
+		let result = (r % ((max + 1) - min)) + min
 
-		return (result, g);
+		return (result, g)
 	}
 }
 
@@ -150,9 +150,9 @@ extension Int32 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int32, Int32), gen : G) -> (Int32, G) {
 		let (min, max) = range
 		let (r, g) = gen.next
-		let result = (r % ((max + 1) - min)) + min;
+		let result = (r % ((max + 1) - min)) + min
 
-		return (result, g);
+		return (result, g)
 	}
 }
 
@@ -160,9 +160,9 @@ extension Int64 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int64, Int64), gen : G) -> (Int64, G) {
 		let (min, max) = range
 		let (r, g) = gen.next
-		let result = (r % ((max + 1) - min)) + min;
+		let result = (r % ((max + 1) - min)) + min
 
-		return (result, g);
+		return (result, g)
 	}
 }
 
@@ -170,9 +170,9 @@ extension UInt : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt, UInt), gen : G) -> (UInt, G) {
 		let (min, max) = range
 		let (r, g) = gen.next
-		let result = (UInt(r) % ((max + 1) - min)) + min;
+		let result = (UInt(r) % ((max + 1) - min)) + min
 
-		return (result, g);
+		return (result, g)
 	}
 }
 
@@ -180,9 +180,9 @@ extension UInt8 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt8, UInt8), gen : G) -> (UInt8, G) {
 		let (min, max) = range
 		let (r, g) = gen.next
-		let result = (UInt8(truncatingBitPattern: r) % ((max + 1) - min)) + min;
+		let result = (UInt8(truncatingBitPattern: r) % ((max + 1) - min)) + min
 
-		return (result, g);
+		return (result, g)
 	}
 }
 
@@ -190,9 +190,9 @@ extension UInt16 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt16, UInt16), gen : G) -> (UInt16, G) {
 		let (min, max) = range
 		let (r, g) = gen.next
-		let result = (UInt16(truncatingBitPattern: r) % ((max + 1) - min)) + min;
+		let result = (UInt16(truncatingBitPattern: r) % ((max + 1) - min)) + min
 
-		return (result, g);
+		return (result, g)
 	}
 }
 
@@ -200,9 +200,9 @@ extension UInt32 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt32, UInt32), gen : G) -> (UInt32, G) {
 		let (min, max) = range
 		let (r, g) = gen.next
-		let result = (UInt32(truncatingBitPattern: r) % ((max + 1) - min)) + min;
+		let result = (UInt32(truncatingBitPattern: r) % ((max + 1) - min)) + min
 
-		return (result, g);
+		return (result, g)
 	}
 }
 
@@ -210,9 +210,9 @@ extension UInt64 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt64, UInt64), gen : G) -> (UInt64, G) {
 		let (min, max) = range
 		let (r, g) = gen.next
-		let result = (UInt64(r) % ((max + 1) - min)) + min;
+		let result = (UInt64(r) % ((max + 1) - min)) + min
 
-		return (result, g);
+		return (result, g)
 	}
 }
 
@@ -221,9 +221,9 @@ extension Float : RandomType {
 		let (min, max) = range
 		let (r, g) = gen.next
 		let fr = Float(r)
-		let result = (fr % ((max + 1) - min)) + min;
+		let result = (fr % ((max + 1) - min)) + min
 
-		return (result, g);
+		return (result, g)
 	}
 }
 
@@ -232,9 +232,9 @@ extension Double : RandomType {
 		let (min, max) = range
 		let (r, g) = gen.next
 		let dr = Double(r)
-		let result = (dr % ((max + 1) - min)) + min;
+		let result = (dr % ((max + 1) - min)) + min
 
-		return (result, g);
+		return (result, g)
 	}
 }
 
@@ -250,9 +250,10 @@ private func mkStdRNG(o : Int) -> StdGen {
 
 	let ct = Int(clock())
 	var tt = timespec()
-	clock_gettime(0, &tt);
+	clock_gettime(0, &tt)
 	let (sec, psec) = (tt.tv_sec, tt.tv_nsec)
-	return mkStdGen32(Int(sec) * 12345 + psec + ct + o)
+	let (ll, _) = Int.multiplyWithOverflow(Int(sec), 12345)
+	return mkStdGen32(ll + psec + ct + o)
 }
 
 private func clock_gettime(_ : Int, _ t : UnsafeMutablePointer<timespec>) -> Int {
@@ -264,5 +265,5 @@ private func clock_gettime(_ : Int, _ t : UnsafeMutablePointer<timespec>) -> Int
 	t.memory.tv_sec  = now.tv_sec
 	t.memory.tv_nsec = Int(now.tv_usec) * 1000
 
-	return 0;
+	return 0
 }
