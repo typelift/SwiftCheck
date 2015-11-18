@@ -27,18 +27,21 @@ public protocol RandomGeneneratorType {
 /// A library-provided standard random number generator.
 public let standardRNG : StdGen = mkStdRNG(time(nil))
 
-/// 
+/// `StdGen` represents a pseudo-random number generator. The library makes it possible to generate
+/// repeatable results, by starting with a specified initial random number generator, or to get 
+/// different results on each run by using the system-initialised generator or by supplying a seed 
+/// from some other source.
 public struct StdGen : RandomGeneneratorType {
 	let seed1 : Int
 	let seed2 : Int
 
-	/// Creates a
+	/// Creates a `StdGen` initialized at the given seed.
 	public init(replaySeed : Int) {
 		func mkStdGen32(sMaybeNegative : Int) -> StdGen {
 			let s       = sMaybeNegative & Int.max
 			let (q, s1) = (s / 2147483562, s % 2147483562)
 			let s2      = q % 2147483398
-			return StdGen((s1+1), (s2+1))
+			return StdGen((s1 + 1), (s2 + 1))
 		}
 		self = mkStdGen32(replaySeed)
 	}
