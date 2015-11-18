@@ -175,7 +175,7 @@ Test Case '-[SwiftCheckTests.PrimeSpec testAll]' started.
 Indicating that our sieve has failed on the input number 4.  A quick look back
 at the comments describing the sieve reveals the mistake immediately:
 
-```
+```diff
 - for i in stride(from: 2 * p, to: n, by: p) {
 + for i in stride(from: 2 * p, through: n, by: p) {
 ```
