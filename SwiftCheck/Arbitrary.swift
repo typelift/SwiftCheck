@@ -196,7 +196,11 @@ extension UInt64 : Arbitrary {
 
 extension Float : Arbitrary {
 	public static var arbitrary : Gen<Float> {
-		let precision = 9999999999999
+		#if !(arch(x86_64) || arch(arm64))
+			let precision : Int = 999999999
+		#else
+			let precision : Int = 9999999999999
+		#endif
 
 		return Gen.sized { n in
 			if n == 0 {
@@ -221,7 +225,11 @@ extension Float : Arbitrary {
 
 extension Double : Arbitrary {
 	public static var arbitrary : Gen<Double> {
-		let precision = 9999999999999
+	#if !(arch(x86_64) || arch(arm64))
+		let precision : Int = 999999999
+	#else
+		let precision : Int = 9999999999999
+	#endif
 
 		return Gen.sized { n in
 			if n == 0 {
