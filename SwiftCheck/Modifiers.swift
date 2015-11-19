@@ -286,7 +286,7 @@ extension ArrowOf : CustomReflectable {
 }
 
 /// Generates two isomorphic Swift function from T to U and back again.
-public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol<Equatable, CoArbitrary, Arbitrary>> : Arbitrary, CustomStringConvertible {
+public final class IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol<Equatable, CoArbitrary, Arbitrary>> : Arbitrary, CustomStringConvertible {
 	private var table : Dictionary<T, U>
 	private var embed : T -> U
 	private var project : U -> T
@@ -305,25 +305,25 @@ public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol
 		self.project = project
 	}
 
-	public init(_ embed : (T -> U), _ project : (U -> T)) {
+	public convenience init(_ embed : (T -> U), _ project : (U -> T)) {
 		self.init(Dictionary(), { (_ : T) -> U in return undefined() }, { (_ : U) -> T in return undefined() })
 
-		self.embed = { t in
-			if let v = self.table[t] {
+		self.embed = { [weak self] t in
+			if let v = self!.table[t] {
 				return v
 			}
 			let y = embed(t)
-			self.table[t] = y
+			self!.table[t] = y
 			return y
 		}
 
-		self.project = { u in
-			let ts = self.table.filter { $1 == u }.map { $0.0 }
-			if let k = ts.first, _ = self.table[k] {
+		self.project = { [weak self] u in
+			let ts = self!.table.filter { $1 == u }.map { $0.0 }
+			if let k = ts.first, _ = self!.table[k] {
 				return k
 			}
 			let y = project(u)
-			self.table[y] = u
+			self!.table[y] = u
 			return y
 		}
 	}
