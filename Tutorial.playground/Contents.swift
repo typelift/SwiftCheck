@@ -263,9 +263,7 @@ let hostname = Gen<Character>.oneOf([
 
 //: Finally, the RFC says the TLD for the address can only consist of lowercase letters with a length larger than 1.
 
-//                                                       Email addresses ending in '.' are invalid.
-//                                                          ------------------------------------
-let tld = lowerCaseLetters.proliferateNonEmpty().suchThat({ $0[$0.endIndex.predecessor()] != "." }).fmap(String.init)
+let tld = lowerCaseLetters.proliferateNonEmpty().suchThat({ $0.count > 1 }).fmap(String.init)
 
 //: So now we've got all the pieces together, so how do we put them together to make the final generator?  Well, how
 //: about some glue?
