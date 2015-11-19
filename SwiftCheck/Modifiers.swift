@@ -227,39 +227,23 @@ extension SetOf : CoArbitrary {
 }
 
 /// Generates pointers of varying size of random values of type T.
-public final class PointerOf<T : Arbitrary> : Arbitrary {
-	private var ptr : UnsafeMutablePointer<T>
-	public let size : Int
+public struct PointerOf<T : Arbitrary> : Arbitrary, CustomStringConvertible {
+	private let _impl : PointerOfImpl<T>
 
 	public var getPointer : UnsafePointer<T> {
-		return UnsafePointer(self.ptr)
+		return UnsafePointer(self._impl.ptr)
+	}
+
+	public var size : Int {
+		return self._impl.size
 	}
 
 	public var description : String {
-		return "\(self.ptr)"
-	}
-
-	private init(_ ptr : UnsafeMutablePointer<T>, _ size : Int) {
-		self.ptr = ptr
-		self.size = size
-	}
-
-	deinit {
-		if self.size > 0 && self.ptr != nil {
-			self.ptr.dealloc(self.size)
-			self.ptr = nil
-		}
+		return self._impl.description
 	}
 
 	public static var arbitrary : Gen<PointerOf<T>> {
-		return Gen.sized { n in
-			if n <= 0 {
-				return Gen.pure(PointerOf(nil, 0))
-			}
-			let pt = UnsafeMutablePointer<T>.alloc(n)
-			let gt = pt.initializeFrom <^> sequence(Array((0..<n)).map { _ in T.arbitrary })
-			return gt.fmap { _ in PointerOf(pt, n) }
-		}
+		return PointerOfImpl.arbitrary.fmap(PointerOf.init)
 	}
 }
 
@@ -277,6 +261,15 @@ public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbi
 
 	public static var arbitrary : Gen<ArrowOf<T, U>> {
 		return ArrowOfImpl<T, U>.arbitrary.fmap(ArrowOf.init)
+	}
+}
+
+extension ArrowOf : CustomReflectable {
+	public func customMirror() -> Mirror {
+		return Mirror(self, children: [
+			"types": "\(T.self) -> \(U.self)",
+			"currentMap": self._impl.table,
+		])
 	}
 }
 
@@ -298,6 +291,16 @@ public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol
 
 	public static var arbitrary : Gen<IsoOf<T, U>> {
 		return IsoOfImpl<T, U>.arbitrary.fmap(IsoOf.init)
+	}
+}
+
+extension IsoOf : CustomReflectable {
+	public func customMirror() -> Mirror {
+		return Mirror(self, children: [
+			"embed": "\(T.self) -> \(U.self)",
+			"project": "\(U.self) -> \(T.self)",
+			"currentMap": self._impl.table,
+		])
 	}
 }
 
@@ -455,15 +458,6 @@ private final class ArrowOfImpl<T : protocol<Hashable, CoArbitrary>, U : Arbitra
 	}
 }
 
-extension ArrowOfImpl : CustomReflectable {
-	func customMirror() -> Mirror {
-		return Mirror(self, children: [
-			"types": "\(T.self) -> \(U.self)",
-			"currentMap": self.table,
-		])
-	}
-}
-
 private final class IsoOfImpl<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol<Equatable, CoArbitrary, Arbitrary>> : Arbitrary, CustomStringConvertible {
 	var table : Dictionary<T, U>
 	var embed : T -> U
@@ -529,13 +523,35 @@ private final class IsoOfImpl<T : protocol<Hashable, CoArbitrary, Arbitrary>, U 
 	}
 }
 
-extension IsoOfImpl : CustomReflectable {
-	func customMirror() -> Mirror {
-		return Mirror(self, children: [
-			"embed": "\(T.self) -> \(U.self)",
-			"project": "\(U.self) -> \(T.self)",
-			"currentMap": self.table,
-		])
+private final class PointerOfImpl<T : Arbitrary> : Arbitrary {
+	var ptr : UnsafeMutablePointer<T>
+	let size : Int
+
+	var description : String {
+		return "\(self.ptr)"
+	}
+
+	init(_ ptr : UnsafeMutablePointer<T>, _ size : Int) {
+		self.ptr = ptr
+		self.size = size
+	}
+
+	deinit {
+		if self.size > 0 && self.ptr != nil {
+			self.ptr.dealloc(self.size)
+			self.ptr = nil
+		}
+	}
+
+	static var arbitrary : Gen<PointerOfImpl<T>> {
+		return Gen.sized { n in
+			if n <= 0 {
+				return Gen.pure(PointerOfImpl(nil, 0))
+			}
+			let pt = UnsafeMutablePointer<T>.alloc(n)
+			let gt = pt.initializeFrom <^> sequence(Array((0..<n)).map { _ in T.arbitrary })
+			return gt.fmap { _ in PointerOfImpl(pt, n) }
+		}
 	}
 }
 
