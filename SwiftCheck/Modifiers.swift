@@ -226,53 +226,41 @@ extension SetOf : CoArbitrary {
 	}
 }
 
-/// Generates a Swift function from T to U.
-public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbitrary, CustomStringConvertible {
-	private var table : Dictionary<T, U>
-	private var arr : T -> U
-	public var getArrow : T -> U {
-		return self.arr
+/// Generates pointers of varying size of random values of type T.
+public struct PointerOf<T : Arbitrary> : Arbitrary, CustomStringConvertible {
+	private let _impl : PointerOfImpl<T>
+
+	public var getPointer : UnsafePointer<T> {
+		return UnsafePointer(self._impl.ptr)
 	}
 
-	private init (_ table : Dictionary<T, U>, _ arr : (T -> U)) {
-		self.table = table
-		self.arr = arr
-	}
-
-	public init(_ arr : (T -> U)) {
-		self.init(Dictionary(), { (_ : T) -> U in return undefined() })
-
-		self.arr = { x in
-			if let v = self.table[x] {
-				return v
-			}
-			let y = arr(x)
-			self.table[x] = y
-			return y
-		}
+	public var size : Int {
+		return self._impl.size
 	}
 
 	public var description : String {
-		return "\(T.self) -> \(U.self)"
+		return self._impl.description
+	}
+
+	public static var arbitrary : Gen<PointerOf<T>> {
+		return PointerOfImpl.arbitrary.fmap(PointerOf.init)
+	}
+}
+
+/// Generates a Swift function from T to U.
+public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbitrary, CustomStringConvertible {
+	private let _impl : ArrowOfImpl<T, U>
+
+	public var getArrow : T -> U {
+		return self._impl.arr
+	}
+
+	public var description : String {
+		return self._impl.description
 	}
 
 	public static var arbitrary : Gen<ArrowOf<T, U>> {
-		return ArrowOf.init <^> promote({ a in
-			return T.coarbitrary(a)(U.arbitrary)
-		})
-	}
-
-	public static func shrink(f : ArrowOf<T, U>) -> [ArrowOf<T, U>] {
-		return f.table.flatMap { (x, y) in
-			return U.shrink(y).map({ (y2 : U) -> ArrowOf<T, U> in
-				return ArrowOf<T, U>({ (z : T) -> U in
-					if x == z {
-						return y2
-					}
-					return f.arr(z)
-				})
-			})
-		}
+		return ArrowOfImpl<T, U>.arbitrary.fmap(ArrowOf.init)
 	}
 }
 
@@ -280,82 +268,29 @@ extension ArrowOf : CustomReflectable {
 	public func customMirror() -> Mirror {
 		return Mirror(self, children: [
 			"types": "\(T.self) -> \(U.self)",
-			"currentMap": self.table,
+			"currentMap": self._impl.table,
 		])
 	}
 }
 
 /// Generates two isomorphic Swift function from T to U and back again.
 public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol<Equatable, CoArbitrary, Arbitrary>> : Arbitrary, CustomStringConvertible {
-	private var table : Dictionary<T, U>
-	private var embed : T -> U
-	private var project : U -> T
+	private let _impl : IsoOfImpl<T, U>
 
 	public var getTo : T -> U {
-		return embed
+		return self._impl.embed
 	}
 
 	public var getFrom : U -> T {
-		return project
-	}
-
-	private init (_ table : Dictionary<T, U>, _ embed : (T -> U), _ project : (U -> T)) {
-		self.table = table
-		self.embed = embed
-		self.project = project
-	}
-
-	public init(_ embed : (T -> U), _ project : (U -> T)) {
-		self.init(Dictionary(), { (_ : T) -> U in return undefined() }, { (_ : U) -> T in return undefined() })
-
-		self.embed = { t in
-			if let v = self.table[t] {
-				return v
-			}
-			let y = embed(t)
-			self.table[t] = y
-			return y
-		}
-
-		self.project = { u in
-			let ts = self.table.filter { $1 == u }.map { $0.0 }
-			if let k = ts.first, _ = self.table[k] {
-				return k
-			}
-			let y = project(u)
-			self.table[y] = u
-			return y
-		}
+		return self._impl.project
 	}
 
 	public var description : String {
-		return "IsoOf<\(T.self) -> \(U.self), \(U.self) -> \(T.self)>"
+		return self._impl.description
 	}
 
 	public static var arbitrary : Gen<IsoOf<T, U>> {
-		return Gen<(T -> U, U -> T)>.zip(promote({ a in
-			return T.coarbitrary(a)(U.arbitrary)
-		}), promote({ a in
-			return U.coarbitrary(a)(T.arbitrary)
-		})).fmap { IsoOf($0, $1) }
-	}
-
-	public static func shrink(f : IsoOf<T, U>) -> [IsoOf<T, U>] {
-		return f.table.flatMap { (x, y) in
-			return Zip2Sequence(T.shrink(x), U.shrink(y)).map({ (y1 , y2) -> IsoOf<T, U> in
-				return IsoOf<T, U>({ (z : T) -> U in
-					if x == z {
-						return y2
-					}
-					return f.embed(z)
-				}, { (z : U) -> T in
-					if y == z {
-						return y1
-					}
-					return f.project(z)
-				})
-			})
-		}
+		return IsoOfImpl<T, U>.arbitrary.fmap(IsoOf.init)
 	}
 }
 
@@ -364,13 +299,9 @@ extension IsoOf : CustomReflectable {
 		return Mirror(self, children: [
 			"embed": "\(T.self) -> \(U.self)",
 			"project": "\(U.self) -> \(T.self)",
-			"currentMap": self.table,
+			"currentMap": self._impl.table,
 		])
 	}
-}
-
-private func undefined<A>() -> A {
-	fatalError("")
 }
 
 public struct Large<A : protocol<RandomType, LatticeType, IntegerType>> : Arbitrary {
@@ -472,6 +403,155 @@ public struct NonNegative<A : protocol<Arbitrary, IntegerType>> : Arbitrary, Cus
 extension NonNegative : CoArbitrary {
 	public static func coarbitrary<C>(x : NonNegative) -> (Gen<C> -> Gen<C>) {
 		return x.getNonNegative.coarbitraryIntegral()
+	}
+}
+
+/// Implementation Details
+
+private func undefined<A>() -> A {
+	fatalError("")
+}
+
+private final class ArrowOfImpl<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbitrary, CustomStringConvertible {
+	private var table : Dictionary<T, U>
+	private var arr : T -> U
+
+	init (_ table : Dictionary<T, U>, _ arr : (T -> U)) {
+		self.table = table
+		self.arr = arr
+	}
+
+	convenience init(_ arr : (T -> U)) {
+		self.init(Dictionary(), { (_ : T) -> U in return undefined() })
+
+		self.arr = { [unowned self] x in
+			if let v = self.table[x] {
+				return v
+			}
+			let y = arr(x)
+			self.table[x] = y
+			return y
+		}
+	}
+
+	var description : String {
+		return "\(T.self) -> \(U.self)"
+	}
+
+	static var arbitrary : Gen<ArrowOfImpl<T, U>> {
+		return ArrowOfImpl.init <^> promote { a in
+			return T.coarbitrary(a)(U.arbitrary)
+		}
+	}
+
+	static func shrink(f : ArrowOfImpl<T, U>) -> [ArrowOfImpl<T, U>] {
+		return f.table.flatMap { (x, y) in
+			return U.shrink(y).map({ (y2 : U) -> ArrowOfImpl<T, U> in
+				return ArrowOfImpl<T, U>({ (z : T) -> U in
+					if x == z {
+						return y2
+					}
+					return f.arr(z)
+				})
+			})
+		}
+	}
+}
+
+private final class IsoOfImpl<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol<Equatable, CoArbitrary, Arbitrary>> : Arbitrary, CustomStringConvertible {
+	var table : Dictionary<T, U>
+	var embed : T -> U
+	var project : U -> T
+
+	init (_ table : Dictionary<T, U>, _ embed : (T -> U), _ project : (U -> T)) {
+		self.table = table
+		self.embed = embed
+		self.project = project
+	}
+
+	convenience init(_ embed : (T -> U), _ project : (U -> T)) {
+		self.init(Dictionary(), { (_ : T) -> U in return undefined() }, { (_ : U) -> T in return undefined() })
+
+		self.embed = { [unowned self] t in
+			if let v = self.table[t] {
+				return v
+			}
+			let y = embed(t)
+			self.table[t] = y
+			return y
+		}
+
+		self.project = { [unowned self] u in
+			let ts = self.table.filter { $1 == u }.map { $0.0 }
+			if let k = ts.first, _ = self.table[k] {
+				return k
+			}
+			let y = project(u)
+			self.table[y] = u
+			return y
+		}
+	}
+
+	var description : String {
+		return "IsoOf<\(T.self) -> \(U.self), \(U.self) -> \(T.self)>"
+	}
+
+	static var arbitrary : Gen<IsoOfImpl<T, U>> {
+		return Gen<(T -> U, U -> T)>.zip(promote({ a in
+			return T.coarbitrary(a)(U.arbitrary)
+		}), promote({ a in
+			return U.coarbitrary(a)(T.arbitrary)
+		})).fmap { IsoOfImpl($0, $1) }
+	}
+
+	static func shrink(f : IsoOfImpl<T, U>) -> [IsoOfImpl<T, U>] {
+		return f.table.flatMap { (x, y) in
+			return Zip2Sequence(T.shrink(x), U.shrink(y)).map({ (y1 , y2) -> IsoOfImpl<T, U> in
+				return IsoOfImpl<T, U>({ (z : T) -> U in
+					if x == z {
+						return y2
+					}
+					return f.embed(z)
+				}, { (z : U) -> T in
+						if y == z {
+							return y1
+						}
+						return f.project(z)
+				})
+			})
+		}
+	}
+}
+
+private final class PointerOfImpl<T : Arbitrary> : Arbitrary {
+	var ptr : UnsafeMutablePointer<T>
+	let size : Int
+
+	var description : String {
+		return "\(self.ptr)"
+	}
+
+	init(_ ptr : UnsafeMutablePointer<T>, _ size : Int) {
+		self.ptr = ptr
+		self.size = size
+	}
+
+	deinit {
+		if self.size > 0 && self.ptr != nil {
+			self.ptr.dealloc(self.size)
+			self.ptr = nil
+		}
+	}
+
+	static var arbitrary : Gen<PointerOfImpl<T>> {
+		return Gen.sized { n in
+			if n <= 0 {
+				return Gen.pure(PointerOfImpl(nil, 0))
+			}
+			let pt = UnsafeMutablePointer<T>.alloc(n)
+			let gt = pt.initializeFrom <^> sequence(Array((0..<n)).map { _ in T.arbitrary })
+			return gt.fmap { _ in PointerOfImpl(pt, n) }
+		}
 	}
 }
 

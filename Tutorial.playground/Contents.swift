@@ -250,8 +250,10 @@ let allowedLocalCharacters : Gen<Character> = Gen<Character>.oneOf([
 //: Now we need a `String` made of these characters. so we'll just `proliferate` an array of characters and `fmap`
 //: to get a `String` back.
 
-let localEmail = allowedLocalCharacters.proliferateNonEmpty().fmap(String.init)
-
+let localEmail = allowedLocalCharacters
+	.proliferateNonEmpty() // Make a non-empty array of characters
+	.suchThat({ $0[$0.endIndex.predecessor()] != "." }) // Such that the last character isn't a dot.
+	.fmap(String.init) // Then make a string.
 //: The RFC says that the host name can only consist of lowercase letters, numbers, and dashes.  We'll skip some
 //: steps here and combine both steps into one big generator.
 
