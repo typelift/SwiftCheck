@@ -18,6 +18,10 @@ class ModifierSpec : XCTestCase {
 			return Static<Int>.shrink(x).isEmpty
 		}
 
+		property("Pointers behave") <- forAll { (x : PointerOf<Int>) in
+			return x.getPointer == nil || x.size != 0
+		}
+
 		property("Positive propositions only generate positive numbers") <- forAll { (x : Positive<Int>) in
 			return x.getPositive > 0
 		}
