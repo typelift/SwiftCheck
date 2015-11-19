@@ -369,10 +369,6 @@ extension IsoOf : CustomReflectable {
 	}
 }
 
-private func undefined<A>() -> A {
-	fatalError("")
-}
-
 public struct Large<A : protocol<RandomType, LatticeType, IntegerType>> : Arbitrary {
 	public let getLarge : A
 
@@ -473,5 +469,9 @@ extension NonNegative : CoArbitrary {
 	public static func coarbitrary<C>(x : NonNegative) -> (Gen<C> -> Gen<C>) {
 		return x.getNonNegative.coarbitraryIntegral()
 	}
+}
+
+private func undefined<A>() -> A {
+	fatalError("")
 }
 
