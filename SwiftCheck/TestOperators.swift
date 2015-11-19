@@ -11,8 +11,8 @@ infix operator <- {}
 /// Binds a Testable value to a property.
 public func <-(checker : AssertiveQuickCheck, @autoclosure(escaping) test : () -> Testable) {
 	switch quickCheckWithResult(checker.args, p: test()) {
-	case let .Failure(_, _, _, _, reason, _, _):
-		XCTFail(reason, file: checker.file, line: checker.line)
+	case let .Failure(_, sz, seed, _, reason, _, _):
+		XCTFail(reason + "; Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
 	case .NoExpectedFailure(_, _, _):
 		XCTFail("Expected property to fail but it didn't.", file: checker.file, line: checker.line)
 	default:
@@ -23,8 +23,8 @@ public func <-(checker : AssertiveQuickCheck, @autoclosure(escaping) test : () -
 /// Binds a Testable value to a property.
 public func <-(checker : AssertiveQuickCheck, test : () -> Testable) {
 	switch quickCheckWithResult(checker.args, p: test()) {
-	case let .Failure(_, _, _, _, reason, _, _):
-		XCTFail(reason, file: checker.file, line: checker.line)
+	case let .Failure(_, sz, seed, _, reason, _, _):
+		XCTFail(reason + "; Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
 	case .NoExpectedFailure(_, _, _):
 		XCTFail("Expected property to fail but it didn't.", file: checker.file, line: checker.line)
 	default:
