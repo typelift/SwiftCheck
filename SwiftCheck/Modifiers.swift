@@ -227,7 +227,7 @@ extension SetOf : CoArbitrary {
 }
 
 /// Generates a Swift function from T to U.
-public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbitrary, CustomStringConvertible {
+public final class ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbitrary, CustomStringConvertible {
 	private var table : Dictionary<T, U>
 	private var arr : T -> U
 	public var getArrow : T -> U {
@@ -239,15 +239,15 @@ public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbi
 		self.arr = arr
 	}
 
-	public init(_ arr : (T -> U)) {
+	public convenience init(_ arr : (T -> U)) {
 		self.init(Dictionary(), { (_ : T) -> U in return undefined() })
 
-		self.arr = { x in
-			if let v = self.table[x] {
+		self.arr = { [weak self] x in
+			if let v = self!.table[x] {
 				return v
 			}
 			let y = arr(x)
-			self.table[x] = y
+			self!.table[x] = y
 			return y
 		}
 	}
@@ -257,9 +257,9 @@ public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbi
 	}
 
 	public static var arbitrary : Gen<ArrowOf<T, U>> {
-		return ArrowOf.init <^> promote({ a in
+		return ArrowOf.init <^> promote { a in
 			return T.coarbitrary(a)(U.arbitrary)
-		})
+		}
 	}
 
 	public static func shrink(f : ArrowOf<T, U>) -> [ArrowOf<T, U>] {
