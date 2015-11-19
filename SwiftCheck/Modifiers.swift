@@ -226,6 +226,43 @@ extension SetOf : CoArbitrary {
 	}
 }
 
+/// Generates pointers of varying size of random values of type T.
+public final class PointerOf<T : Arbitrary> : Arbitrary {
+	private var ptr : UnsafeMutablePointer<T>
+	public let size : Int
+
+	public var getPointer : UnsafePointer<T> {
+		return UnsafePointer(self.ptr)
+	}
+
+	public var description : String {
+		return "\(self.ptr)"
+	}
+
+	private init(_ ptr : UnsafeMutablePointer<T>, _ size : Int) {
+		self.ptr = ptr
+		self.size = size
+	}
+
+	deinit {
+		if self.size > 0 && self.ptr != nil {
+			self.ptr.dealloc(self.size)
+			self.ptr = nil
+		}
+	}
+
+	public static var arbitrary : Gen<PointerOf<T>> {
+		return Gen.sized { n in
+			if n <= 0 {
+				return Gen.pure(PointerOf(nil, 0))
+			}
+			let pt = UnsafeMutablePointer<T>.alloc(n)
+			let gt = pt.initializeFrom <^> sequence(Array((0..<n)).map { _ in T.arbitrary })
+			return gt.fmap { _ in PointerOf(pt, n) }
+		}
+	}
+}
+
 /// Generates a Swift function from T to U.
 public final class ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbitrary, CustomStringConvertible {
 	private var table : Dictionary<T, U>
