@@ -421,12 +421,12 @@ private final class ArrowOfImpl<T : protocol<Hashable, CoArbitrary>, U : Arbitra
 	convenience init(_ arr : (T -> U)) {
 		self.init(Dictionary(), { (_ : T) -> U in return undefined() })
 
-		self.arr = { [weak self] x in
-			if let v = self!.table[x] {
+		self.arr = { [unowned self] x in
+			if let v = self.table[x] {
 				return v
 			}
 			let y = arr(x)
-			self!.table[x] = y
+			self.table[x] = y
 			return y
 		}
 	}
@@ -478,22 +478,22 @@ private final class IsoOfImpl<T : protocol<Hashable, CoArbitrary, Arbitrary>, U 
 	convenience init(_ embed : (T -> U), _ project : (U -> T)) {
 		self.init(Dictionary(), { (_ : T) -> U in return undefined() }, { (_ : U) -> T in return undefined() })
 
-		self.embed = { [weak self] t in
-			if let v = self!.table[t] {
+		self.embed = { [unowned self] t in
+			if let v = self.table[t] {
 				return v
 			}
 			let y = embed(t)
-			self!.table[t] = y
+			self.table[t] = y
 			return y
 		}
 
-		self.project = { [weak self] u in
-			let ts = self!.table.filter { $1 == u }.map { $0.0 }
-			if let k = ts.first, _ = self!.table[k] {
+		self.project = { [unowned self] u in
+			let ts = self.table.filter { $1 == u }.map { $0.0 }
+			if let k = ts.first, _ = self.table[k] {
 				return k
 			}
 			let y = project(u)
-			self!.table[y] = u
+			self.table[y] = u
 			return y
 		}
 	}
