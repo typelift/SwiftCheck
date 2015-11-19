@@ -264,145 +264,40 @@ public final class PointerOf<T : Arbitrary> : Arbitrary {
 }
 
 /// Generates a Swift function from T to U.
-public final class ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbitrary, CustomStringConvertible {
-	private var table : Dictionary<T, U>
-	private var arr : T -> U
+public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbitrary, CustomStringConvertible {
+	private let _impl : ArrowOfImpl<T, U>
+
 	public var getArrow : T -> U {
-		return self.arr
-	}
-
-	private init (_ table : Dictionary<T, U>, _ arr : (T -> U)) {
-		self.table = table
-		self.arr = arr
-	}
-
-	public convenience init(_ arr : (T -> U)) {
-		self.init(Dictionary(), { (_ : T) -> U in return undefined() })
-
-		self.arr = { [weak self] x in
-			if let v = self!.table[x] {
-				return v
-			}
-			let y = arr(x)
-			self!.table[x] = y
-			return y
-		}
+		return self._impl.arr
 	}
 
 	public var description : String {
-		return "\(T.self) -> \(U.self)"
+		return self._impl.description
 	}
 
 	public static var arbitrary : Gen<ArrowOf<T, U>> {
-		return ArrowOf.init <^> promote { a in
-			return T.coarbitrary(a)(U.arbitrary)
-		}
-	}
-
-	public static func shrink(f : ArrowOf<T, U>) -> [ArrowOf<T, U>] {
-		return f.table.flatMap { (x, y) in
-			return U.shrink(y).map({ (y2 : U) -> ArrowOf<T, U> in
-				return ArrowOf<T, U>({ (z : T) -> U in
-					if x == z {
-						return y2
-					}
-					return f.arr(z)
-				})
-			})
-		}
-	}
-}
-
-extension ArrowOf : CustomReflectable {
-	public func customMirror() -> Mirror {
-		return Mirror(self, children: [
-			"types": "\(T.self) -> \(U.self)",
-			"currentMap": self.table,
-		])
+		return ArrowOfImpl<T, U>.arbitrary.fmap(ArrowOf.init)
 	}
 }
 
 /// Generates two isomorphic Swift function from T to U and back again.
-public final class IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol<Equatable, CoArbitrary, Arbitrary>> : Arbitrary, CustomStringConvertible {
-	private var table : Dictionary<T, U>
-	private var embed : T -> U
-	private var project : U -> T
+public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol<Equatable, CoArbitrary, Arbitrary>> : Arbitrary, CustomStringConvertible {
+	private let _impl : IsoOfImpl<T, U>
 
 	public var getTo : T -> U {
-		return embed
+		return self._impl.embed
 	}
 
 	public var getFrom : U -> T {
-		return project
-	}
-
-	private init (_ table : Dictionary<T, U>, _ embed : (T -> U), _ project : (U -> T)) {
-		self.table = table
-		self.embed = embed
-		self.project = project
-	}
-
-	public convenience init(_ embed : (T -> U), _ project : (U -> T)) {
-		self.init(Dictionary(), { (_ : T) -> U in return undefined() }, { (_ : U) -> T in return undefined() })
-
-		self.embed = { [weak self] t in
-			if let v = self!.table[t] {
-				return v
-			}
-			let y = embed(t)
-			self!.table[t] = y
-			return y
-		}
-
-		self.project = { [weak self] u in
-			let ts = self!.table.filter { $1 == u }.map { $0.0 }
-			if let k = ts.first, _ = self!.table[k] {
-				return k
-			}
-			let y = project(u)
-			self!.table[y] = u
-			return y
-		}
+		return self._impl.project
 	}
 
 	public var description : String {
-		return "IsoOf<\(T.self) -> \(U.self), \(U.self) -> \(T.self)>"
+		return self._impl.description
 	}
 
 	public static var arbitrary : Gen<IsoOf<T, U>> {
-		return Gen<(T -> U, U -> T)>.zip(promote({ a in
-			return T.coarbitrary(a)(U.arbitrary)
-		}), promote({ a in
-			return U.coarbitrary(a)(T.arbitrary)
-		})).fmap { IsoOf($0, $1) }
-	}
-
-	public static func shrink(f : IsoOf<T, U>) -> [IsoOf<T, U>] {
-		return f.table.flatMap { (x, y) in
-			return Zip2Sequence(T.shrink(x), U.shrink(y)).map({ (y1 , y2) -> IsoOf<T, U> in
-				return IsoOf<T, U>({ (z : T) -> U in
-					if x == z {
-						return y2
-					}
-					return f.embed(z)
-				}, { (z : U) -> T in
-					if y == z {
-						return y1
-					}
-					return f.project(z)
-				})
-			})
-		}
-	}
-}
-
-extension IsoOf : CustomReflectable {
-	public func customMirror() -> Mirror {
-		return Mirror(self, children: [
-			"embed": "\(T.self) -> \(U.self)",
-			"project": "\(U.self) -> \(T.self)",
-			"currentMap": self.table,
-		])
+		return IsoOfImpl<T, U>.arbitrary.fmap(IsoOf.init)
 	}
 }
 
@@ -508,7 +403,139 @@ extension NonNegative : CoArbitrary {
 	}
 }
 
+/// Implementation Details
+
 private func undefined<A>() -> A {
 	fatalError("")
+}
+
+private final class ArrowOfImpl<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbitrary, CustomStringConvertible {
+	private var table : Dictionary<T, U>
+	private var arr : T -> U
+
+	init (_ table : Dictionary<T, U>, _ arr : (T -> U)) {
+		self.table = table
+		self.arr = arr
+	}
+
+	convenience init(_ arr : (T -> U)) {
+		self.init(Dictionary(), { (_ : T) -> U in return undefined() })
+
+		self.arr = { [weak self] x in
+			if let v = self!.table[x] {
+				return v
+			}
+			let y = arr(x)
+			self!.table[x] = y
+			return y
+		}
+	}
+
+	var description : String {
+		return "\(T.self) -> \(U.self)"
+	}
+
+	static var arbitrary : Gen<ArrowOfImpl<T, U>> {
+		return ArrowOfImpl.init <^> promote { a in
+			return T.coarbitrary(a)(U.arbitrary)
+		}
+	}
+
+	static func shrink(f : ArrowOfImpl<T, U>) -> [ArrowOfImpl<T, U>] {
+		return f.table.flatMap { (x, y) in
+			return U.shrink(y).map({ (y2 : U) -> ArrowOfImpl<T, U> in
+				return ArrowOfImpl<T, U>({ (z : T) -> U in
+					if x == z {
+						return y2
+					}
+					return f.arr(z)
+				})
+			})
+		}
+	}
+}
+
+extension ArrowOfImpl : CustomReflectable {
+	func customMirror() -> Mirror {
+		return Mirror(self, children: [
+			"types": "\(T.self) -> \(U.self)",
+			"currentMap": self.table,
+		])
+	}
+}
+
+private final class IsoOfImpl<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol<Equatable, CoArbitrary, Arbitrary>> : Arbitrary, CustomStringConvertible {
+	var table : Dictionary<T, U>
+	var embed : T -> U
+	var project : U -> T
+
+	init (_ table : Dictionary<T, U>, _ embed : (T -> U), _ project : (U -> T)) {
+		self.table = table
+		self.embed = embed
+		self.project = project
+	}
+
+	convenience init(_ embed : (T -> U), _ project : (U -> T)) {
+		self.init(Dictionary(), { (_ : T) -> U in return undefined() }, { (_ : U) -> T in return undefined() })
+
+		self.embed = { [weak self] t in
+			if let v = self!.table[t] {
+				return v
+			}
+			let y = embed(t)
+			self!.table[t] = y
+			return y
+		}
+
+		self.project = { [weak self] u in
+			let ts = self!.table.filter { $1 == u }.map { $0.0 }
+			if let k = ts.first, _ = self!.table[k] {
+				return k
+			}
+			let y = project(u)
+			self!.table[y] = u
+			return y
+		}
+	}
+
+	var description : String {
+		return "IsoOf<\(T.self) -> \(U.self), \(U.self) -> \(T.self)>"
+	}
+
+	static var arbitrary : Gen<IsoOfImpl<T, U>> {
+		return Gen<(T -> U, U -> T)>.zip(promote({ a in
+			return T.coarbitrary(a)(U.arbitrary)
+		}), promote({ a in
+			return U.coarbitrary(a)(T.arbitrary)
+		})).fmap { IsoOfImpl($0, $1) }
+	}
+
+	static func shrink(f : IsoOfImpl<T, U>) -> [IsoOfImpl<T, U>] {
+		return f.table.flatMap { (x, y) in
+			return Zip2Sequence(T.shrink(x), U.shrink(y)).map({ (y1 , y2) -> IsoOfImpl<T, U> in
+				return IsoOfImpl<T, U>({ (z : T) -> U in
+					if x == z {
+						return y2
+					}
+					return f.embed(z)
+				}, { (z : U) -> T in
+						if y == z {
+							return y1
+						}
+						return f.project(z)
+				})
+			})
+		}
+	}
+}
+
+extension IsoOfImpl : CustomReflectable {
+	func customMirror() -> Mirror {
+		return Mirror(self, children: [
+			"embed": "\(T.self) -> \(U.self)",
+			"project": "\(U.self) -> \(T.self)",
+			"currentMap": self.table,
+		])
+	}
 }
 
