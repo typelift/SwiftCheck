@@ -57,10 +57,10 @@ public struct Gen<A> {
 	public static func fromInitialSegmentsOf<S>(xs : [S]) -> Gen<[S]> {
 		assert(!xs.isEmpty, "Gen.fromInitialSegmentsOf used with empty list")
 
-		return Gen<[S]>.sized({ n in
+		return Gen<[S]>.sized { n in
 			let ss = xs[xs.startIndex..<max(xs.startIndex.successor(), size(xs.endIndex)(m: n))]
 			return Gen<[S]>.pure([S](ss))
-		})
+		}
 	}
 
 	/// Constructs a Generator that produces permutations of a given array.
@@ -76,7 +76,7 @@ public struct Gen<A> {
 
 	/// Constructs a generator that depends on a size parameter.
 	public static func sized(f : Int -> Gen<A>) -> Gen<A> {
-		return Gen(unGen:{ r in
+		return Gen(unGen: { r in
 			return { n in
 				return f(n).unGen(r)(n)
 			}
@@ -190,25 +190,25 @@ extension Gen {
 	/// attempts are encoded in the form of an `Optional` where values satisfying the predicate are
 	/// wrapped in `.Some` and failing values are `.None`.
 	public func suchThatOptional(p : A -> Bool) -> Gen<Optional<A>> {
-		return Gen<Optional<A>>.sized({ n in
+		return Gen<Optional<A>>.sized { n in
 			return attemptBoundedTry(self, k: 0, n: max(n, 1), p: p)
-		})
+		}
 	}
 
 	/// Modifies a Generator such that it produces arrays with a length determined by the receiver's
 	/// size parameter.
 	public func proliferate() -> Gen<[A]> {
-		return Gen<[A]>.sized({ n in
+		return Gen<[A]>.sized { n in
 			return Gen.choose((0, n)) >>- self.proliferateSized
-		})
+		}
 	}
 
 	/// Modifies a Generator such that it produces non-empty arrays with a length determined by the
 	/// receiver's size parameter.
 	public func proliferateNonEmpty() -> Gen<[A]> {
-		return Gen<[A]>.sized({ n in
+		return Gen<[A]>.sized { n in
 			return Gen.choose((1, max(1, n))) >>- self.proliferateSized
-		})
+		}
 	}
 
 	/// Modifies a Generator such that it only produces arrays of a given length.
@@ -276,11 +276,11 @@ extension Gen /*: Applicative*/ {
 ///
 /// Promotes function application to a Generator of functions applied to a Generator of values.
 public func <*> <A, B>(fn : Gen<A -> B>, g : Gen<A>) -> Gen<B> {
-	return Gen(unGen: { r in
-		return { n in
-			return fn.unGen(r)(n)(g.unGen(r)(n))
+	return fn >>- { x1 in
+		return g >>- { x2 in
+			return Gen.pure(x1(x2))
 		}
-	})
+	}
 }
 
 extension Gen /*: Monad*/ {

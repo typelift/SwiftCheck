@@ -222,6 +222,7 @@
 			isa = PBXGroup;
 			children = (
 				848076671AF5D6A100CBE3EF /* BooleanIdentitySpec.swift */,
+				8216BAB61B97775100A0D282 /* ComplexSpec.swift */,
 				84572C201A6DBA1C00241F68 /* DiscardSpec.swift */,
 				821B76CC1BC4449300AF97D6 /* FailureSpec.swift */,
 				8445C4A91B16D37800280089 /* GenSpec.swift */,
@@ -230,7 +231,6 @@
 				82A6679E1BFD299500EBCDFA /* ReplaySpec.swift */,
 				8445C4AC1B17E48300280089 /* ShrinkSpec.swift */,
 				844FCCC8198EFF9B00EB242A /* SimpleSpec.swift */,
-				8216BAB61B97775100A0D282 /* ComplexSpec.swift */,
 				84B9E4A61B3A0EB900C8739E /* TestSpec.swift */,
 				844FCC9D198B320500EB242A /* Supporting Files */,
 			);
@@ -687,10 +687,12 @@
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
 					"$(inherited)",
 				);
+				GCC_OPTIMIZATION_LEVEL = s;
 				INFOPLIST_FILE = SwiftCheckTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.codafi.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 			};
 			name = Release;
 		};

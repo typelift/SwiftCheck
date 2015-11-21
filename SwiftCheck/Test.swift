@@ -371,7 +371,7 @@ internal indirect enum Either<L, R> {
 
 internal func quickCheckWithResult(args : CheckerArguments, p : Testable) -> Result {
 	func roundTo(n : Int)(m : Int) -> Int {
-		return (m / m) * m
+		return (n / m) * m
 	}
 
 	func rnd() -> StdGen {
@@ -414,20 +414,20 @@ internal func quickCheckWithResult(args : CheckerArguments, p : Testable) -> Res
 
 
 	let istate = CheckerState(name: args.name
-							, maxAllowableSuccessfulTests:		args.maxAllowableSuccessfulTests
+							, maxAllowableSuccessfulTests:	args.maxAllowableSuccessfulTests
 							, maxAllowableDiscardedTests:	args.maxAllowableDiscardedTests
-							, computeSize:			computeSize
-							, successfulTestCount:		0
-							, discardedTestCount:	0
-							, labels:				[:]
-							, collected:			[]
-							, hasFulfilledExpectedFailure:		false
+							, computeSize:					computeSize
+							, successfulTestCount:			0
+							, discardedTestCount:			0
+							, labels:						[:]
+							, collected:					[]
+							, hasFulfilledExpectedFailure:	false
 							, randomSeedGenerator:			rnd()
-							, successfulShrinkCount:	0
+							, successfulShrinkCount:		0
 							, failedShrinkStepDistance:		0
 							, failedShrinkStepCount:		0
-							, shouldAbort:			false
-							, quantifier:			.Universal)
+							, shouldAbort:					false
+							, quantifier:					.Universal)
 	let modP : Property = (p.exhaustive ? p.property.once : p.property)
 	return test(istate, f: modP.unProperty.unGen)
 }
@@ -502,7 +502,7 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 									, labels:						unionWith(max, l: st.labels, r: labels)
 									, collected:					[stamp] + st.collected
 									, hasFulfilledExpectedFailure:	expect
-									, randomSeedGenerator:			st.randomSeedGenerator
+									, randomSeedGenerator:			rnd2
 									, successfulShrinkCount:		st.successfulShrinkCount
 									, failedShrinkStepDistance:		st.failedShrinkStepDistance
 									, failedShrinkStepCount:		st.failedShrinkStepCount
