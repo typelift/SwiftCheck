@@ -282,7 +282,7 @@ private func mkStdRNG(o : Int) -> StdGen {
 	clock_gettime(0, &tt)
 	let (sec, psec) = (tt.tv_sec, tt.tv_nsec)
 	let (ll, _) = Int.multiplyWithOverflow(Int(sec), 12345)
-	return mkStdGen32(ll + psec + ct + o)
+	return mkStdGen32(Int.addWithOverflow(ll, Int.addWithOverflow(psec, Int.addWithOverflow(ct, o).0).0).0)
 }
 
 private func clock_gettime(_ : Int, _ t : UnsafeMutablePointer<timespec>) -> Int {
