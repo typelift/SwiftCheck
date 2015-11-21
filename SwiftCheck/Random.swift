@@ -24,9 +24,6 @@ public protocol RandomGeneneratorType {
 	var split : (Self, Self) { get }
 }
 
-/// A library-provided standard random number generator.
-public let standardRNG : StdGen = mkStdRNG(time(nil))
-
 /// `StdGen` represents a pseudo-random number generator. The library makes it possible to generate
 /// repeatable results, by starting with a specified initial random number generator, or to get 
 /// different results on each run by using the system-initialised generator or by supplying a seed 
@@ -85,8 +82,13 @@ public struct StdGen : RandomGeneneratorType, CustomStringConvertible {
 	}
 }
 
+private var theStdGen : StdGen = mkStdRNG(0)
+
+/// A library-provided standard random number generator.
 public func newStdGen() -> StdGen {
-	return standardRNG.split.1
+	let (left, right) = theStdGen.split
+	theStdGen = left
+	return right
 }
 
 /// Types that can generate random versions of themselves.
