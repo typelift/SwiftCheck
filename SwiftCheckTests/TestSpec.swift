@@ -12,7 +12,7 @@ extension Dictionary {
 	init<S : SequenceType where S.Generator.Element == Element>(_ pairs : S) {
 		self.init()
 		var g = pairs.generate()
-		while let (k, v): (Key, Value) = g.next() {
+		while let (k, v) : (Key, Value) = g.next() {
 			self[k] = v
 		}
 	}
