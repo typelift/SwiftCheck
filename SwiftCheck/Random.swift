@@ -95,7 +95,7 @@ public protocol RandomType {
 }
 
 /// Generates a random value from a LatticeType random type.
-public func random<A : protocol<LatticeType, RandomType>, G : RandomGeneneratorType>(gen : G) -> (A, G) {
+public func randomBound<A : protocol<LatticeType, RandomType>, G : RandomGeneneratorType>(gen : G) -> (A, G) {
 	return A.randomInRange((A.min, A.max), gen: gen)
 }
 
@@ -127,127 +127,141 @@ extension UnicodeScalar : RandomType {
 extension Int : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int, Int), gen : G) -> (Int, G) {
 		let (minl, maxl) = range
-		let (min, max) = (Int64(minl), Int64(maxl))
-		let (r, g) = gen.next
-		let result = (Int64(r) % ((max + 1) - min)) + min
-
-		return (Int(truncatingBitPattern: result), g)
+		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
+		return (Int(truncatingBitPattern: bb), gg)
 	}
 }
 
 extension Int8 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int8, Int8), gen : G) -> (Int8, G) {
 		let (minl, maxl) = range
-		let (min, max) = (Int64(minl), Int64(maxl))
-		let (r, g) = gen.next
-		let result = (Int64(r) % ((max + 1) - min)) + min
-
-		return (Int8(truncatingBitPattern: result), g)
+		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
+		return (Int8(truncatingBitPattern: bb), gg)
 	}
 }
 
 extension Int16 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int16, Int16), gen : G) -> (Int16, G) {
 		let (minl, maxl) = range
-		let (min, max) = (Int64(minl), Int64(maxl))
-		let (r, g) = gen.next
-		let result = (Int64(r) % ((max + 1) - min)) + min
-
-		return (Int16(truncatingBitPattern: result), g)
+		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
+		return (Int16(truncatingBitPattern: bb), gg)
 	}
 }
 
 extension Int32 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int32, Int32), gen : G) -> (Int32, G) {
 		let (minl, maxl) = range
-		let (min, max) = (Int64(minl), Int64(maxl))
-		let (r, g) = gen.next
-		let result = (Int64(r) % ((max + 1) - min)) + min
-
-		return (Int32(truncatingBitPattern: result), g)
+		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
+		return (Int32(truncatingBitPattern: bb), gg)
 	}
 }
 
 extension Int64 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int64, Int64), gen : G) -> (Int64, G) {
-		let (minl, maxl) = range
-		let (min, max) = (Int64(minl), Int64(maxl))
-		let (r, g) = gen.next
-		let result = (Int64(r) % ((max + 1) - min)) + min
+		let (l, h) = range
+		if l > h {
+			return Int64.randomInRange((h, l), gen: gen)
+		} else {
+			let (genlo, genhi) : (Int64, Int64) = (1, 2147483562)
+			let b = genhi - genlo + 1
 
-		return (result, g)
+			let q : Int64 = 1000
+			let k = h - l + 1
+			let magtgt = k * q
+
+			func entropize(mag : Int64, _ v : Int64, _ g : G) -> (Int64, G) {
+				if mag >= magtgt {
+					return (v, g)
+				} else {
+					let (x, g_) = g.next
+					let v_ = (v * b + (Int64(x) - genlo))
+					return entropize(mag * b, v_, g_)
+				}
+			}
+
+			let (v, rng_) = entropize(1, 0, gen)
+			return (l + (v % k), rng_)
+		}
 	}
 }
 
 extension UInt : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt, UInt), gen : G) -> (UInt, G) {
-		let (min, max) = range
-		let (r, g) = gen.next
-		let result = (UInt(r) % ((max + 1) - min)) + min
-
-		return (result, g)
+		let (minl, maxl) = range
+		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
+		return (UInt(truncatingBitPattern: bb), gg)
 	}
 }
 
 extension UInt8 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt8, UInt8), gen : G) -> (UInt8, G) {
-		let (min, max) = range
-		let (r, g) = gen.next
-		let result = (UInt8(truncatingBitPattern: r) % ((max + 1) - min)) + min
-
-		return (result, g)
+		let (minl, maxl) = range
+		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
+		return (UInt8(truncatingBitPattern: bb), gg)
 	}
 }
 
 extension UInt16 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt16, UInt16), gen : G) -> (UInt16, G) {
-		let (min, max) = range
-		let (r, g) = gen.next
-		let result = (UInt16(truncatingBitPattern: r) % ((max + 1) - min)) + min
-
-		return (result, g)
+		let (minl, maxl) = range
+		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
+		return (UInt16(truncatingBitPattern: bb), gg)
 	}
 }
 
 extension UInt32 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt32, UInt32), gen : G) -> (UInt32, G) {
-		let (min, max) = range
-		let (r, g) = gen.next
-		let result = (UInt32(truncatingBitPattern: r) % ((max + 1) - min)) + min
-
-		return (result, g)
+		let (minl, maxl) = range
+		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
+		return (UInt32(truncatingBitPattern: bb), gg)
 	}
 }
 
 extension UInt64 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt64, UInt64), gen : G) -> (UInt64, G) {
-		let (min, max) = range
-		let (r, g) = gen.next
-		let result = (UInt64(r) % ((max + 1) - min)) + min
-
-		return (result, g)
+		let (minl, maxl) = range
+		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
+		return (UInt64(bb), gg)
 	}
 }
 
 extension Float : RandomType {
-	public static func randomInRange<G : RandomGeneneratorType>(range : (Float, Float), gen : G) -> (Float, G) {
-		let (min, max) = range
-		let (r, g) = gen.next
-		let fr = Float(r)
-		let result = (fr % ((max + 1) - min)) + min
+	public static func random<G : RandomGeneneratorType>(rng : G) -> (Float, G) {
+		let (x, rng_) : (Int32, G) = randomBound(rng)
+		let twoto24 = Int32(2) ^ Int32(24)
+		let mask24 = twoto24 - 1
 
-		return (result, g)
+		return (Float(mask24 & (x)) / Float(twoto24), rng_)
+	}
+
+	public static func randomInRange<G : RandomGeneneratorType>(range : (Float, Float), gen : G) -> (Float, G) {
+		let (l, h) = range
+		if l > h {
+			return Float.randomInRange((h , l), gen: gen)
+		} else {
+			let (coef, g_) = Float.random(gen)
+			return (2.0 * (0.5 * l + coef * (0.5 * h - 0.5 * l)), g_)
+		}
 	}
 }
 
 extension Double : RandomType {
-	public static func randomInRange<G : RandomGeneneratorType>(range : (Double, Double), gen : G) -> (Double, G) {
-		let (min, max) = range
-		let (r, g) = gen.next
-		let dr = Double(r)
-		let result = (dr % ((max + 1) - min)) + min
+	public static func random<G : RandomGeneneratorType>(rng : G) -> (Double, G) {
+		let (x, rng_) : (Int64, G) = randomBound(rng)
+		let twoto53 = Int64(2) ^ Int64(53)
+		let mask53 = twoto53 - 1
 
-		return (result, g)
+		return (Double(mask53 & (x)) / Double(twoto53), rng_)
+	}
+
+	public static func randomInRange<G : RandomGeneneratorType>(range : (Double, Double), gen : G) -> (Double, G) {
+		let (l, h) = range
+		if l > h {
+			return Double.randomInRange((h , l), gen: gen)
+		} else {
+			let (coef, g_) = Double.random(gen)
+			return (2.0 * (0.5 * l + coef * (0.5 * h - 0.5 * l)), g_)
+		}
 	}
 }
 

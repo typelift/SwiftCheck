@@ -190,25 +190,25 @@ extension Gen {
 	/// attempts are encoded in the form of an `Optional` where values satisfying the predicate are
 	/// wrapped in `.Some` and failing values are `.None`.
 	public func suchThatOptional(p : A -> Bool) -> Gen<Optional<A>> {
-		return Gen<Optional<A>>.sized({ n in
+		return Gen<Optional<A>>.sized { n in
 			return attemptBoundedTry(self, k: 0, n: max(n, 1), p: p)
-		})
+		}
 	}
 
 	/// Modifies a Generator such that it produces arrays with a length determined by the receiver's
 	/// size parameter.
 	public func proliferate() -> Gen<[A]> {
-		return Gen<[A]>.sized({ n in
+		return Gen<[A]>.sized { n in
 			return Gen.choose((0, n)) >>- self.proliferateSized
-		})
+		}
 	}
 
 	/// Modifies a Generator such that it produces non-empty arrays with a length determined by the
 	/// receiver's size parameter.
 	public func proliferateNonEmpty() -> Gen<[A]> {
-		return Gen<[A]>.sized({ n in
+		return Gen<[A]>.sized { n in
 			return Gen.choose((1, max(1, n))) >>- self.proliferateSized
-		})
+		}
 	}
 
 	/// Modifies a Generator such that it only produces arrays of a given length.

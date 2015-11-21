@@ -202,9 +202,10 @@ extension Float : Arbitrary {
 			if n == 0 {
 				return Gen<Float>.pure(0.0)
 			}
-			return Gen<(Int64, Int64)>.zip(Gen<Int64>.choose((Int64(-n) * precision, Int64(n) * precision)), Gen<Int64>.choose((1, precision))) >>- { (a, b) in
-				return Gen<Float>.pure(Float(a) / Float(b))
-			}
+
+			return Gen<Int64>.choose((Int64(-n) * precision, Int64(n) * precision))
+				>>- { a in Gen<Int64>.choose((1, precision))
+					>>- { b in Gen<Float>.pure(Float(a) / Float(b)) } }
 		}
 	}
 
@@ -227,9 +228,10 @@ extension Double : Arbitrary {
 			if n == 0 {
 				return Gen<Double>.pure(0.0)
 			}
-			return Gen<(Int64, Int64)>.zip(Gen<Int64>.choose((Int64(-n) * precision, Int64(n) * precision)), Gen<Int64>.choose((1, precision))) >>- { (a, b) in
-				return Gen<Double>.pure(Double(a) / Double(b))
-			}
+
+			return Gen<Int64>.choose((Int64(-n) * precision, Int64(n) * precision))
+				>>- { a in Gen<Int64>.choose((1, precision))
+					>>- { b in Gen<Double>.pure(Double(a) / Double(b)) } }
 		}
 	}
 
