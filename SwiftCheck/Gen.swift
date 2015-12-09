@@ -33,6 +33,7 @@ public struct Gen<A> {
 	/// only that value.
 	///
 	/// The input collection is required to be non-empty.
+	@effects(readnone)
 	public static func fromElementsOf<S : Indexable where S.Index : protocol<Comparable, RandomType>>(xs : S) -> Gen<S._Element> {
 		return Gen.fromElementsIn(xs.startIndex...xs.endIndex.advancedBy(-1)).fmap { i in
 			return xs[i]
@@ -43,6 +44,7 @@ public struct Gen<A> {
 	/// that value.
 	///
 	/// The input interval is required to be non-empty.
+	@effects(readnone)
 	public static func fromElementsIn<S : IntervalType where S.Bound : RandomType>(xs : S) -> Gen<S.Bound> {
 		assert(!xs.isEmpty, "Gen.fromElementsOf used with empty interval")
 
@@ -54,6 +56,7 @@ public struct Gen<A> {
 	/// parameter.
 	///
 	/// The input array is required to be non-empty.
+	@effects(readnone)
 	public static func fromInitialSegmentsOf<S>(xs : [S]) -> Gen<[S]> {
 		assert(!xs.isEmpty, "Gen.fromInitialSegmentsOf used with empty list")
 
@@ -64,6 +67,7 @@ public struct Gen<A> {
 	}
 
 	/// Constructs a Generator that produces permutations of a given array.
+	@effects(readnone)
 	public static func fromShufflingElementsOf<S>(xs : [S]) -> Gen<[S]> {
 		if xs.isEmpty {
 			return Gen<[S]>.pure([])
@@ -75,6 +79,7 @@ public struct Gen<A> {
 	}
 
 	/// Constructs a generator that depends on a size parameter.
+	@effects(readnone)
 	public static func sized(f : Int -> Gen<A>) -> Gen<A> {
 		return Gen(unGen: { r in
 			return { n in
@@ -89,6 +94,7 @@ public struct Gen<A> {
 	/// `A`.  For example:
 	///
 	///     Gen<UInt32>.choose((32, 255)) >>- (Gen<Character>.pure • Character.init • UnicodeScalar.init)
+	@effects(readnone)
 	public static func choose<A : RandomType>(rng : (A, A)) -> Gen<A> {
 		return Gen<A>(unGen: { s in
 			return { (_) in
@@ -103,6 +109,7 @@ public struct Gen<A> {
 	///
 	/// If control over the distribution of generators is needed, see `Gen.frequency` or 
 	/// `Gen.weighted`.
+	@effects(readnone)
 	public static func oneOf<S : CollectionType where S.Generator.Element == Gen<A>, S.Index : protocol<RandomType, BidirectionalIndexType>>(gs : S) -> Gen<A> {
 		assert(gs.count != 0, "oneOf used with empty list")
 
@@ -116,6 +123,7 @@ public struct Gen<A> {
 	///
 	/// Only use this function when you need to assign uneven "weights" to each generator.  If all
 	/// generators need to have an equal chance of being selected, use `Gen.oneOf`.
+	@effects(readnone)
 	public static func frequency<S : SequenceType where S.Generator.Element == (Int, Gen<A>)>(xs : S) -> Gen<A> {
 		let xs: [(Int, Gen<A>)] = Array(xs)
 		assert(xs.count != 0, "frequency used with empty list")
@@ -132,11 +140,13 @@ public struct Gen<A> {
 	/// and `Gen.fromElementsIn` but for any type rather than only Generators.  It can help in cases
 	/// where your `Gen.from*` call contains only `Gen.pure` calls by allowing you to remove every
 	/// `.pure` in favor of a direct list of values.
+	@effects(readnone)
 	public static func weighted<S : SequenceType where S.Generator.Element == (Int, A)>(xs : S) -> Gen<A> {
 		return frequency(xs.map { ($0, Gen.pure($1)) })
 	}
 
 	/// Zips together 2 generators of type `A` and `B` into a generator of pairs `(A, B)`.
+	@effects(readnone)
 	public static func zip<A, B>(gen1 : Gen<A>, _ gen2 : Gen<B>) -> Gen<(A, B)> {
 		return gen1.bind { l in
 			return gen2.bind { r in
@@ -150,6 +160,7 @@ public struct Gen<A> {
 
 extension Gen {
 	/// Shakes up the receiver's internal Random Number Generator with a seed.
+	@effects(readnone)
 	public func variant<S : IntegerType>(seed : S) -> Gen<A> {
 		return Gen(unGen: { r in
 			return { n in
@@ -159,6 +170,7 @@ extension Gen {
 	}
 
 	/// Modifies a Generator to always use a given size.
+	@effects(readnone)
 	public func resize(n : Int) -> Gen<A> {
 		return Gen(unGen: { r in
 			return { (_) in
@@ -173,6 +185,7 @@ extension Gen {
 	/// Because the Generator will spin until it reaches a non-failing case, executing a condition
 	/// that fails more often than it succeeds may result in a space leak.  At that point, it is
 	/// better to use `suchThatOptional` or `.invert` the test case.
+	@effects(readnone)
 	public func suchThat(p : A -> Bool) -> Gen<A> {
 		return self.suchThatOptional(p).bind { mx in
 			switch mx {
@@ -189,6 +202,7 @@ extension Gen {
 	/// Modifies a Generator such that it attempts to generate values that satisfy a predicate.  All
 	/// attempts are encoded in the form of an `Optional` where values satisfying the predicate are
 	/// wrapped in `.Some` and failing values are `.None`.
+	@effects(readnone)
 	public func suchThatOptional(p : A -> Bool) -> Gen<Optional<A>> {
 		return Gen<Optional<A>>.sized { n in
 			return attemptBoundedTry(self, k: 0, n: max(n, 1), p: p)
@@ -197,6 +211,7 @@ extension Gen {
 
 	/// Modifies a Generator such that it produces arrays with a length determined by the receiver's
 	/// size parameter.
+	@effects(readnone)
 	public func proliferate() -> Gen<[A]> {
 		return Gen<[A]>.sized { n in
 			return Gen.choose((0, n)) >>- self.proliferateSized
@@ -205,6 +220,7 @@ extension Gen {
 
 	/// Modifies a Generator such that it produces non-empty arrays with a length determined by the
 	/// receiver's size parameter.
+	@effects(readnone)
 	public func proliferateNonEmpty() -> Gen<[A]> {
 		return Gen<[A]>.sized { n in
 			return Gen.choose((1, max(1, n))) >>- self.proliferateSized
@@ -212,6 +228,7 @@ extension Gen {
 	}
 
 	/// Modifies a Generator such that it only produces arrays of a given length.
+	@effects(readnone)
 	public func proliferateSized(k : Int) -> Gen<[A]> {
 		return sequence(Array<Gen<A>>(count: k, repeatedValue: self))
 	}
@@ -223,6 +240,7 @@ extension Gen /*: Functor*/ {
 	typealias B = Swift.Any
 
 	/// Returns a new generator that applies a given function to any outputs the receiver creates.
+	@effects(readnone)
 	public func fmap<B>(f : (A -> B)) -> Gen<B> {
 		return f <^> self
 	}
@@ -235,6 +253,7 @@ extension Gen /*: Functor*/ {
 /// example, you might have a Generator of `Character` values that you then `.proliferate()` into an
 /// `Array` of `Character`s.  You can then use `fmap` to convert that generator of `Array`s to a
 /// generator of `String`s.
+@effects(readnone)
 public func <^> <A, B>(f : A -> B, g : Gen<A>) -> Gen<B> {
 	return Gen(unGen: { r in
 		return { n in
@@ -247,6 +266,7 @@ extension Gen /*: Applicative*/ {
 	typealias FAB = Gen<A -> B>
 
 	/// Lifts a value into a generator that will only generate that value.
+	@effects(readnone)
 	public static func pure(a : A) -> Gen<A> {
 		return Gen(unGen: { (_) in
 			return { (_) in
@@ -257,6 +277,7 @@ extension Gen /*: Applicative*/ {
 
 	/// Given a generator of functions, applies any generated function to any outputs the receiver
 	/// creates.
+	@effects(readnone)
 	public func ap<B>(fn : Gen<A -> B>) -> Gen<B> {
 		return fn <*> self
 	}
@@ -275,6 +296,7 @@ extension Gen /*: Applicative*/ {
 /// the zipped function to the zipped value.
 ///
 /// Promotes function application to a Generator of functions applied to a Generator of values.
+@effects(readnone)
 public func <*> <A, B>(fn : Gen<A -> B>, g : Gen<A>) -> Gen<B> {
 	return fn >>- { x1 in
 		return g >>- { x2 in
@@ -290,6 +312,7 @@ extension Gen /*: Monad*/ {
 	/// `bind` allows for the creation of Generators that depend on other generators.  One might, 
 	/// for example, use a Generator of integers to control the length of a Generator of strings, or
 	/// use it to choose a random index into a Generator of arrays.
+	@effects(readnone)
 	public func bind<B>(fn : A -> Gen<B>) -> Gen<B> {
 		return self >>- fn
 	}
@@ -301,6 +324,7 @@ extension Gen /*: Monad*/ {
 /// `bind` allows for the creation of Generators that depend on other generators.  One might,
 /// for example, use a Generator of integers to control the length of a Generator of strings, or
 /// use it to choose a random index into a Generator of arrays.
+@effects(readnone)
 public func >>- <A, B>(m : Gen<A>, fn : A -> Gen<B>) -> Gen<B> {
 	return Gen(unGen: { r in
 		return { n in
@@ -317,6 +341,7 @@ public func >>- <A, B>(m : Gen<A>, fn : A -> Gen<B>) -> Gen<B> {
 /// The array that is created is guaranteed to use each of the given Generators in the order they 
 /// were given to the function exactly once.  Thus all arrays generated are of the same rank as the
 /// array that was given.
+@effects(readnone)
 public func sequence<A>(ms : [Gen<A>]) -> Gen<[A]> {
 	return ms.reduce(Gen<[A]>.pure([]), combine: { y, x in
 		return x.bind { x1 in
@@ -328,6 +353,7 @@ public func sequence<A>(ms : [Gen<A>]) -> Gen<[A]> {
 }
 
 /// Flattens a generator of generators by one level.
+@effects(readnone)
 public func join<A>(rs : Gen<Gen<A>>) -> Gen<A> {
 	return rs.bind { x in
 		return x
@@ -335,6 +361,7 @@ public func join<A>(rs : Gen<Gen<A>>) -> Gen<A> {
 }
 
 /// Lifts a function from some A to some R to a function from generators of A to generators of R.
+@effects(readnone)
 public func liftM<A, R>(f : A -> R)(m1 : Gen<A>) -> Gen<R> {
 	return m1.bind{ x1 in
 		return Gen.pure(f(x1))
@@ -342,6 +369,7 @@ public func liftM<A, R>(f : A -> R)(m1 : Gen<A>) -> Gen<R> {
 }
 
 /// Promotes a rose of generators to a generator of rose values.
+@effects(readnone)
 public func promote<A>(x : Rose<Gen<A>>) -> Gen<Rose<A>> {
 	return delay().bind { (let eval : Gen<A> -> A) in
 		return Gen<Rose<A>>.pure(liftM(eval)(m1: x))
@@ -349,12 +377,14 @@ public func promote<A>(x : Rose<Gen<A>>) -> Gen<Rose<A>> {
 }
 
 /// Promotes a function returning generators to a generator of functions.
+@effects(readnone)
 public func promote<A, B>(m : A -> Gen<B>) -> Gen<A -> B> {
 	return delay().bind { (let eval : Gen<B> -> B) in
 		return Gen<A -> B>.pure({ x in eval(m(x)) })
 	}
 }
 
+@effects(readnone)
 internal func delay<A>() -> Gen<Gen<A> -> A> {
 	return Gen(unGen: { r in
 		return { n in
@@ -369,12 +399,14 @@ internal func delay<A>() -> Gen<Gen<A> -> A> {
 
 import func Darwin.log
 
+@effects(readnone)
 private func vary<S : IntegerType>(k : S)(r : StdGen) -> StdGen {
 	let s = r.split
 	let gen = ((k % 2) == 0) ? s.0 : s.1
 	return (k == (k / 2)) ? gen : vary(k / 2)(r: r)
 }
 
+@effects(readnone)
 private func attemptBoundedTry<A>(gen: Gen<A>, k : Int, n : Int, p: A -> Bool) -> Gen<Optional<A>> {
 	if n == 0 {
 		return Gen.pure(.None)
@@ -387,11 +419,13 @@ private func attemptBoundedTry<A>(gen: Gen<A>, k : Int, n : Int, p: A -> Bool) -
 	}
 }
 
+@effects(readnone)
 private func size<S : IntegerType>(k : S)(m : Int) -> Int {
 	let n = Double(m)
 	return Int((log(n + 1)) * Double(k.toIntMax()) / log(100))
 }
 
+@effects(readnone)
 private func selectOne<A>(xs : [A]) -> [(A, [A])] {
 	if xs.isEmpty {
 		return []
@@ -401,6 +435,7 @@ private func selectOne<A>(xs : [A]) -> [(A, [A])] {
 	return [(y, ys)] + selectOne(ys).map({ t in (t.0, [y] + t.1) })
 }
 
+@effects(readnone)
 private func pick<A>(n : Int)(lst : [(Int, Gen<A>)]) -> Gen<A> {
 	let (k, x) = lst[0]
 	let tl = Array<(Int, Gen<A>)>(lst[1..<lst.count])
