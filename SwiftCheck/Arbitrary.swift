@@ -74,6 +74,7 @@ extension Bool : Arbitrary {
 		return Gen<Bool>.choose((false, true))
 	}
 
+	@effects(readnone)
 	public static func shrink(x : Bool) -> [Bool] {
 		if x {
 			return [false]
@@ -89,6 +90,7 @@ extension Int : Arbitrary {
 		}
 	}
 
+	@effects(readnone)
 	public static func shrink(x : Int) -> [Int] {
 		return x.shrinkIntegral
 	}
@@ -101,6 +103,7 @@ extension Int8 : Arbitrary {
 		}
 	}
 
+	@effects(readnone)
 	public static func shrink(x : Int8) -> [Int8] {
 		return x.shrinkIntegral
 	}
@@ -113,6 +116,7 @@ extension Int16 : Arbitrary {
 		}
 	}
 
+	@effects(readnone)
 	public static func shrink(x : Int16) -> [Int16] {
 		return x.shrinkIntegral
 	}
@@ -125,6 +129,7 @@ extension Int32 : Arbitrary {
 		}
 	}
 
+	@effects(readnone)
 	public static func shrink(x : Int32) -> [Int32] {
 		return x.shrinkIntegral
 	}
@@ -137,6 +142,7 @@ extension Int64 : Arbitrary {
 		}
 	}
 
+	@effects(readnone)
 	public static func shrink(x : Int64) -> [Int64] {
 		return x.shrinkIntegral
 	}
@@ -147,6 +153,7 @@ extension UInt : Arbitrary {
 		return Gen.sized { n in Gen<UInt>.choose((0, UInt(n))) }
 	}
 
+	@effects(readnone)
 	public static func shrink(x : UInt) -> [UInt] {
 		return x.shrinkIntegral
 	}
@@ -159,6 +166,7 @@ extension UInt8 : Arbitrary {
 		}
 	}
 
+	@effects(readnone)
 	public static func shrink(x : UInt8) -> [UInt8] {
 		return x.shrinkIntegral
 	}
@@ -169,6 +177,7 @@ extension UInt16 : Arbitrary {
 		return Gen.sized { n in Gen<UInt16>.choose((0, UInt16(truncatingBitPattern: n))) }
 	}
 
+	@effects(readnone)
 	public static func shrink(x : UInt16) -> [UInt16] {
 		return x.shrinkIntegral
 	}
@@ -179,6 +188,7 @@ extension UInt32 : Arbitrary {
 		return Gen.sized { n in Gen<UInt32>.choose((0, UInt32(truncatingBitPattern: n))) }
 	}
 
+	@effects(readnone)
 	public static func shrink(x : UInt32) -> [UInt32] {
 		return x.shrinkIntegral
 	}
@@ -189,6 +199,7 @@ extension UInt64 : Arbitrary {
 		return Gen.sized { n in Gen<UInt64>.choose((0, UInt64(n))) }
 	}
 
+	@effects(readnone)
 	public static func shrink(x : UInt64) -> [UInt64] {
 		return x.shrinkIntegral
 	}
@@ -209,6 +220,7 @@ extension Float : Arbitrary {
 		}
 	}
 
+	@effects(readnone)
 	public static func shrink(x : Float) -> [Float] {
 		return unfoldr({ i in
 			if i == 0.0 {
@@ -235,6 +247,7 @@ extension Double : Arbitrary {
 		}
 	}
 
+	@effects(readnone)
 	public static func shrink(x : Double) -> [Double] {
 		return unfoldr({ i in
 			if i == 0.0 {
@@ -251,6 +264,7 @@ extension UnicodeScalar : Arbitrary {
 		return UInt32.arbitrary.bind(Gen<UnicodeScalar>.pure • UnicodeScalar.init)
 	}
 
+	@effects(readnone)
 	public static func shrink(x : UnicodeScalar) -> [UnicodeScalar] {
 		let s : UnicodeScalar = UnicodeScalar(UInt32(towlower(Int32(x.value))))
 		return nub([ "a", "b", "c", s, "A", "B", "C", "1", "2", "3", "\n", " " ]).filter { $0 < x }
@@ -263,6 +277,7 @@ extension String : Arbitrary {
 		return chars >>- (Gen<String>.pure • String.init)
 	}
 
+	@effects(readnone)
 	public static func shrink(s : String) -> [String] {
 		return [Character].shrink([Character](s.characters)).map(String.init)
 	}
@@ -273,6 +288,7 @@ extension Character : Arbitrary {
 		return Gen<UInt32>.choose((32, 255)) >>- (Gen<Character>.pure • Character.init • UnicodeScalar.init)
 	}
 
+	@effects(readnone)
 	public static func shrink(x : Character) -> [Character] {
 		let ss = String(x).unicodeScalars
 		return UnicodeScalar.shrink(ss[ss.startIndex]).map(Character.init)
@@ -292,6 +308,7 @@ extension Array where Element : Arbitrary {
 		}
 	}
 
+	@effects(readnone)
 	public static func shrink(bl : Array<Element>) -> [[Element]] {
 		return Int.shrink(bl.count).reverse().flatMap({ k in removes(k.successor(), n: bl.count, xs: bl) }) + shrinkOne(bl)
 	}
@@ -312,6 +329,7 @@ extension AnyBidirectionalCollection where Element : Arbitrary {
 		return AnyBidirectionalCollection.init <^> [Element].arbitrary
 	}
 
+	@effects(readnone)
 	public static func shrink(bl : AnyBidirectionalCollection<Element>) -> [AnyBidirectionalCollection<Element>] {
 		return [Element].shrink([Element](bl)).map(AnyBidirectionalCollection.init)
 	}
@@ -344,6 +362,7 @@ extension AnySequence where Element : Arbitrary {
 		return AnySequence.init <^> [Element].arbitrary
 	}
 
+	@effects(readnone)
 	public static func shrink(bl : AnySequence<Element>) -> [AnySequence<Element>] {
 		return [Element].shrink([Element](bl)).map(AnySequence.init)
 	}
@@ -364,6 +383,7 @@ extension ArraySlice where Element : Arbitrary {
 		return ArraySlice.init <^> [Element].arbitrary
 	}
 
+	@effects(readnone)
 	public static func shrink(bl : ArraySlice<Element>) -> [ArraySlice<Element>] {
 		return [Element].shrink([Element](bl)).map(ArraySlice.init)
 	}
@@ -404,6 +424,7 @@ extension Optional where Wrapped : Arbitrary {
 		])
 	}
 
+	@effects(readnone)
 	public static func shrink(bl : Optional<Wrapped>) -> [Optional<Wrapped>] {
 		if let x = bl {
 			return [.None] + Wrapped.shrink(x).map(Optional<Wrapped>.Some)
@@ -427,6 +448,7 @@ extension ContiguousArray where Element : Arbitrary {
 		return ContiguousArray.init <^> [Element].arbitrary
 	}
 
+	@effects(readnone)
 	public static func shrink(bl : ContiguousArray<Element>) -> [ContiguousArray<Element>] {
 		return [Element].shrink([Element](bl)).map(ContiguousArray.init)
 	}
@@ -452,6 +474,7 @@ extension Dictionary where Key : Arbitrary, Value : Arbitrary {
 		}
 	}
 
+	@effects(readnone)
 	public static func shrink(d : Dictionary<Key, Value>) -> [Dictionary<Key, Value>] {
 		return d.map { Dictionary(Zip2Sequence(Key.shrink($0), Value.shrink($1))) }
 	}
@@ -482,6 +505,7 @@ extension HalfOpenInterval where Bound : protocol<Comparable, Arbitrary> {
 		}
 	}
 
+	@effects(readnone)
 	public static func shrink(bl : HalfOpenInterval<Bound>) -> [HalfOpenInterval<Bound>] {
 		return zip(Bound.shrink(bl.start), Bound.shrink(bl.end)).map(HalfOpenInterval.init)
 	}
@@ -492,6 +516,7 @@ extension ImplicitlyUnwrappedOptional where Wrapped : Arbitrary {
 		return ImplicitlyUnwrappedOptional.init <^> Optional<Wrapped>.arbitrary
 	}
 
+	@effects(readnone)
 	public static func shrink(bl : ImplicitlyUnwrappedOptional<Wrapped>) -> [ImplicitlyUnwrappedOptional<Wrapped>] {
 		return Optional<Wrapped>.shrink(bl).map(ImplicitlyUnwrappedOptional.init)
 	}
@@ -528,6 +553,7 @@ extension Range where Element : protocol<ForwardIndexType, Comparable, Arbitrary
 		}
 	}
 
+	@effects(readnone)
 	public static func shrink(bl : Range<Element>) -> [Range<Element>] {
 		return Zip2Sequence(Element.shrink(bl.startIndex), Element.shrink(bl.endIndex)).map(Range.init)
 	}
@@ -542,6 +568,7 @@ extension Repeat where Element : Arbitrary {
 extension Repeat : WitnessedArbitrary {
 	public typealias Param = Element
 
+	@effects(readnone)
 	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (Repeat<Element> -> Testable)) -> Property {
 		return forAllShrink(Repeat<A>.arbitrary, shrinker: { _ in [] }, f: { bl in
 			let xs = bl.map(wit)
@@ -563,6 +590,7 @@ extension Set where Element : protocol<Arbitrary, Hashable> {
 		}
 	}
 
+	@effects(readnone)
 	public static func shrink(s : Set<Element>) -> [Set<Element>] {
 		return [Element].shrink([Element](s)).map(Set.init)
 	}
@@ -600,6 +628,7 @@ public func coarbitraryPrintable<A, B>(x : A) -> Gen<B> -> Gen<B> {
 }
 
 extension Bool : CoArbitrary {
+	@effects(readnone)
 	public static func coarbitrary<C>(x : Bool) -> Gen<C> -> Gen<C> {
 		return { g in
 			if x {
@@ -611,12 +640,14 @@ extension Bool : CoArbitrary {
 }
 
 extension UnicodeScalar : CoArbitrary {
+	@effects(readnone)
 	public static func coarbitrary<C>(x : UnicodeScalar) -> Gen<C> -> Gen<C> {
 		return UInt32.coarbitrary(x.value)
 	}
 }
 
 extension Character : CoArbitrary {
+	@effects(readnone)
 	public static func coarbitrary<C>(x : Character) -> (Gen<C> -> Gen<C>) {
 		let ss = String(x).unicodeScalars
 		return UnicodeScalar.coarbitrary(ss[ss.startIndex])
@@ -624,6 +655,7 @@ extension Character : CoArbitrary {
 }
 
 extension String : CoArbitrary {
+	@effects(readnone)
 	public static func coarbitrary<C>(x : String) -> (Gen<C> -> Gen<C>) {
 		if x.isEmpty {
 			return { $0.variant(0) }
@@ -633,60 +665,70 @@ extension String : CoArbitrary {
 }
 
 extension Int : CoArbitrary {
+	@effects(readnone)
 	public static func coarbitrary<C>(x : Int) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension Int8 : CoArbitrary {
+	@effects(readnone)
 	public static func coarbitrary<C>(x : Int8) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension Int16 : CoArbitrary {
+	@effects(readnone)
 	public static func coarbitrary<C>(x : Int16) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension Int32 : CoArbitrary {
+	@effects(readnone)
 	public static func coarbitrary<C>(x : Int32) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension Int64 : CoArbitrary {
+	@effects(readnone)
 	public static func coarbitrary<C>(x : Int64) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension UInt : CoArbitrary {
+	@effects(readnone)
 	public static func coarbitrary<C>(x : UInt) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension UInt8 : CoArbitrary {
+	@effects(readnone)
 	public static func coarbitrary<C>(x : UInt8) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension UInt16 : CoArbitrary {
+	@effects(readnone)
 	public static func coarbitrary<C>(x : UInt16) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension UInt32 : CoArbitrary {
+	@effects(readnone)
 	public static func coarbitrary<C>(x : UInt32) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension UInt64 : CoArbitrary {
+	@effects(readnone)
 	public static func coarbitrary<C>(x : UInt64) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
@@ -694,18 +736,21 @@ extension UInt64 : CoArbitrary {
 
 // In future, implement these with Ratios like QuickCheck.
 extension Float : CoArbitrary {
+	@effects(readnone)
 	public static func coarbitrary<C>(x : Float) -> (Gen<C> -> Gen<C>) {
 		return Int64(x).coarbitraryIntegral()
 	}
 }
 
 extension Double : CoArbitrary {
+	@effects(readnone)
 	public static func coarbitrary<C>(x : Double) -> (Gen<C> -> Gen<C>) {
 		return Int64(x).coarbitraryIntegral()
 	}
 }
 
 extension Array : CoArbitrary {
+	@effects(readnone)
 	public static func coarbitrary<C>(a : [Element]) -> (Gen<C> -> Gen<C>) {
 		if a.isEmpty {
 			return { $0.variant(0) }
@@ -715,6 +760,7 @@ extension Array : CoArbitrary {
 }
 
 extension Dictionary : CoArbitrary {
+	@effects(readnone)
 	public static func coarbitrary<C>(x : Dictionary<Key, Value>) -> (Gen<C> -> Gen<C>) {
 		if x.isEmpty {
 			return { $0.variant(0) }
@@ -724,6 +770,7 @@ extension Dictionary : CoArbitrary {
 }
 
 extension Optional : CoArbitrary {
+	@effects(readnone)
 	public static func coarbitrary<C>(x : Optional<Wrapped>) -> (Gen<C> -> Gen<C>) {
 		if let _ = x {
 			return { $0.variant(0) }
@@ -733,6 +780,7 @@ extension Optional : CoArbitrary {
 }
 
 extension Set : CoArbitrary {
+	@effects(readnone)
 	public static func coarbitrary<C>(x : Set<Element>) -> (Gen<C> -> Gen<C>) {
 		if x.isEmpty {
 			return { $0.variant(0) }
@@ -743,6 +791,7 @@ extension Set : CoArbitrary {
 
 /// MARK: - Implementation Details
 
+@effects(readnone)
 private func bits<N : IntegerType>(n : N) -> Int {
 	if n / 2 == 0 {
 		return 0
@@ -750,10 +799,12 @@ private func bits<N : IntegerType>(n : N) -> Int {
 	return 1 + bits(n / 2)
 }
 
+@effects(readnone)
 private func nub<A : Hashable>(xs : [A]) -> [A] {
 	return [A](Set(xs))
 }
 
+@effects(readnone)
 private func unfoldr<A, B>(f : B -> Optional<(A, B)>, initial : B) -> [A] {
 	var acc = [A]()
 	var ini = initial
@@ -764,6 +815,7 @@ private func unfoldr<A, B>(f : B -> Optional<(A, B)>, initial : B) -> [A] {
 	return acc
 }
 
+@effects(readnone)
 private func removes<A : Arbitrary>(k : Int, n : Int, xs : [A]) -> [[A]] {
 	let xs1 = take(k, xs: xs)
 	let xs2 = drop(k, xs: xs)
@@ -777,16 +829,19 @@ private func removes<A : Arbitrary>(k : Int, n : Int, xs : [A]) -> [[A]] {
 	}
 }
 
+@effects(readnone)
 private func take<T>(num : Int, xs : [T]) -> [T] {
 	let n = (num < xs.count) ? num : xs.count
 	return [T](xs[0..<n])
 }
 
+@effects(readnone)
 private func drop<T>(num : Int, xs : [T]) -> [T] {
 	let n = (num < xs.count) ? num : xs.count
 	return [T](xs[n..<xs.endIndex])
 }
 
+@effects(readnone)
 private func shrinkOne<A : Arbitrary>(xs : [A]) -> [[A]] {
 	if xs.isEmpty {
 		return []

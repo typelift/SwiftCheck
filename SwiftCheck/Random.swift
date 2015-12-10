@@ -85,6 +85,7 @@ public struct StdGen : RandomGeneneratorType, CustomStringConvertible {
 private var theStdGen : StdGen = mkStdRNG(0)
 
 /// A library-provided standard random number generator.
+@effects(readwrite)
 public func newStdGen() -> StdGen {
 	let (left, right) = theStdGen.split
 	theStdGen = left
@@ -102,6 +103,7 @@ public func randomBound<A : protocol<LatticeType, RandomType>, G : RandomGenener
 }
 
 extension Bool : RandomType {
+	@effects(readnone)
 	public static func randomInRange<G : RandomGeneneratorType>(range: (Bool, Bool), gen: G) -> (Bool, G) {
 		let (x, gg) = Int.randomInRange((range.0 ? 1 : 0, range.1 ? 1 : 0), gen: gen)
 		return (x == 1, gg)
@@ -109,6 +111,7 @@ extension Bool : RandomType {
 }
 
 extension Character : RandomType {
+	@effects(readnone)
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Character, Character), gen : G) -> (Character, G) {
 		let (min, max) = range
 		let minc = String(min).unicodeScalars.first!
@@ -120,6 +123,7 @@ extension Character : RandomType {
 }
 
 extension UnicodeScalar : RandomType {
+	@effects(readnone)
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UnicodeScalar, UnicodeScalar), gen : G) -> (UnicodeScalar, G) {
 		let (val, gg) = UInt32.randomInRange((range.0.value, range.1.value), gen: gen)
 		return (UnicodeScalar(val), gg)
@@ -127,6 +131,7 @@ extension UnicodeScalar : RandomType {
 }
 
 extension Int : RandomType {
+	@effects(readnone)
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int, Int), gen : G) -> (Int, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
@@ -135,6 +140,7 @@ extension Int : RandomType {
 }
 
 extension Int8 : RandomType {
+	@effects(readnone)
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int8, Int8), gen : G) -> (Int8, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
@@ -143,6 +149,7 @@ extension Int8 : RandomType {
 }
 
 extension Int16 : RandomType {
+	@effects(readnone)
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int16, Int16), gen : G) -> (Int16, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
@@ -151,6 +158,7 @@ extension Int16 : RandomType {
 }
 
 extension Int32 : RandomType {
+	@effects(readnone)
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int32, Int32), gen : G) -> (Int32, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
@@ -159,6 +167,7 @@ extension Int32 : RandomType {
 }
 
 extension Int64 : RandomType {
+	@effects(readnone)
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int64, Int64), gen : G) -> (Int64, G) {
 		let (l, h) = range
 		if l > h {
@@ -188,6 +197,7 @@ extension Int64 : RandomType {
 }
 
 extension UInt : RandomType {
+	@effects(readnone)
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt, UInt), gen : G) -> (UInt, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
@@ -196,6 +206,7 @@ extension UInt : RandomType {
 }
 
 extension UInt8 : RandomType {
+	@effects(readnone)
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt8, UInt8), gen : G) -> (UInt8, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
@@ -204,6 +215,7 @@ extension UInt8 : RandomType {
 }
 
 extension UInt16 : RandomType {
+	@effects(readnone)
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt16, UInt16), gen : G) -> (UInt16, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
@@ -212,6 +224,7 @@ extension UInt16 : RandomType {
 }
 
 extension UInt32 : RandomType {
+	@effects(readnone)
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt32, UInt32), gen : G) -> (UInt32, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
@@ -228,6 +241,7 @@ extension UInt64 : RandomType {
 }
 
 extension Float : RandomType {
+	@effects(readnone)
 	public static func random<G : RandomGeneneratorType>(rng : G) -> (Float, G) {
 		let (x, rng_) : (Int32, G) = randomBound(rng)
 		let twoto24 = Int32(2) ^ Int32(24)
@@ -236,6 +250,7 @@ extension Float : RandomType {
 		return (Float(mask24 & (x)) / Float(twoto24), rng_)
 	}
 
+	@effects(readnone)
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Float, Float), gen : G) -> (Float, G) {
 		let (l, h) = range
 		if l > h {
@@ -248,6 +263,7 @@ extension Float : RandomType {
 }
 
 extension Double : RandomType {
+	@effects(readnone)
 	public static func random<G : RandomGeneneratorType>(rng : G) -> (Double, G) {
 		let (x, rng_) : (Int64, G) = randomBound(rng)
 		let twoto53 = Int64(2) ^ Int64(53)
@@ -256,6 +272,7 @@ extension Double : RandomType {
 		return (Double(mask53 & (x)) / Double(twoto53), rng_)
 	}
 
+	@effects(readnone)
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Double, Double), gen : G) -> (Double, G) {
 		let (l, h) = range
 		if l > h {
@@ -269,12 +286,13 @@ extension Double : RandomType {
 
 /// Implementation Details Follow
 
+@effects(readnone)
 private func mkStdRNG(o : Int) -> StdGen {
 	func mkStdGen32(sMaybeNegative : Int) -> StdGen {
 		let s       = sMaybeNegative & Int.max
 		let (q, s1) = (s / 2147483562, s % 2147483562)
 		let s2      = q % 2147483398
-		return StdGen(s1+1, s2+1)
+		return StdGen(s1 + 1, s2 + 1)
 	}
 
 	let ct = Int(clock())
@@ -285,6 +303,7 @@ private func mkStdRNG(o : Int) -> StdGen {
 	return mkStdGen32(Int.addWithOverflow(ll, Int.addWithOverflow(psec, Int.addWithOverflow(ct, o).0).0).0)
 }
 
+@effects(readwrite)
 private func clock_gettime(_ : Int, _ t : UnsafeMutablePointer<timespec>) -> Int {
 	var now : timeval = timeval()
 	let rv = gettimeofday(&now, nil)
