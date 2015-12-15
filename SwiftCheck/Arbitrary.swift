@@ -544,6 +544,39 @@ extension LazySequence where Base : protocol<SequenceType, Arbitrary> {
 	}
 }
 
+extension Mirror : Arbitrary {
+	public static var arbitrary : Gen<Mirror> {
+		let genAny : Gen<Any> = Gen<Any>.oneOf([
+			Bool.arbitrary.fmap(asAny),
+			Int.arbitrary.fmap(asAny),
+			Int8.arbitrary.fmap(asAny),
+			Int64.arbitrary.fmap(asAny),
+			UInt.arbitrary.fmap(asAny),
+			UInt8.arbitrary.fmap(asAny),
+			UInt64.arbitrary.fmap(asAny),
+			Float.arbitrary.fmap(asAny),
+			Double.arbitrary.fmap(asAny),
+			UnicodeScalar.arbitrary.fmap(asAny),
+			String.arbitrary.fmap(asAny),
+			Character.arbitrary.fmap(asAny),
+		])
+
+		let genAnyWitnessed : Gen<Any> = Gen<Any>.oneOf([
+			Optional<Int>.arbitrary.fmap(asAny),
+			ImplicitlyUnwrappedOptional<Int>.arbitrary.fmap(asAny),
+			Range<Int>.arbitrary.fmap(asAny),
+			Repeat<Int>.arbitrary.fmap(asAny),
+			Array<Int>.arbitrary.fmap(asAny),
+			Set<Int>.arbitrary.fmap(asAny),
+		])
+
+		return Gen<Any>.oneOf([
+			genAny,
+			genAnyWitnessed,
+		]).fmap(Mirror.init)
+	}
+}
+
 extension Range where Element : protocol<ForwardIndexType, Comparable, Arbitrary> {
 	public static var arbitrary : Gen<Range<Element>> {
 		return Element.arbitrary.bind { l in
@@ -790,6 +823,11 @@ extension Set : CoArbitrary {
 }
 
 /// MARK: - Implementation Details
+
+@effects(readnone)
+private func asAny<T>(x : T) -> Any {
+	return x
+}
 
 @effects(readnone)
 private func bits<N : IntegerType>(n : N) -> Int {
