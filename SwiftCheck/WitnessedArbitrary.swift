@@ -1,0 +1,355 @@
+//
+//  WitnessedArbitrary.swift
+//  SwiftCheck
+//
+//  Created by Robert Widmann on 12/15/15.
+//  Copyright © 2015 Robert Widmann. All rights reserved.
+//
+
+extension Array where Element : Arbitrary {
+	public static var arbitrary : Gen<Array<Element>> {
+		return Gen.sized { n in
+			return Gen<Int>.choose((0, n)).bind { k in
+				if k == 0 {
+					return Gen.pure([])
+				}
+
+				return sequence((0...k).map { _ in Element.arbitrary })
+			}
+		}
+	}
+
+	@effects(readnone)
+	public static func shrink(bl : Array<Element>) -> [[Element]] {
+		return Int.shrink(bl.count).reverse().flatMap({ k in removes(k.successor(), n: bl.count, xs: bl) }) + shrinkOne(bl)
+	}
+}
+
+extension Array : WitnessedArbitrary {
+	public typealias Param = Element
+
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : ([Element] -> Testable)) -> Property {
+		return forAllShrink([A].arbitrary, shrinker: [A].shrink, f: { bl in
+			return pf(bl.map(wit))
+		})
+	}
+}
+
+extension AnyBidirectionalCollection where Element : Arbitrary {
+	public static var arbitrary : Gen<AnyBidirectionalCollection<Element>> {
+		return AnyBidirectionalCollection.init <^> [Element].arbitrary
+	}
+
+	@effects(readnone)
+	public static func shrink(bl : AnyBidirectionalCollection<Element>) -> [AnyBidirectionalCollection<Element>] {
+		return [Element].shrink([Element](bl)).map(AnyBidirectionalCollection.init)
+	}
+}
+
+extension AnyBidirectionalCollection : WitnessedArbitrary {
+	public typealias Param = Element
+
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (AnyBidirectionalCollection<Element> -> Testable)) -> Property {
+		return forAllShrink(AnyBidirectionalCollection<A>.arbitrary, shrinker: AnyBidirectionalCollection<A>.shrink, f: { bl in
+			return pf(AnyBidirectionalCollection<Element>(bl.map(wit)))
+		})
+	}
+}
+
+extension AnySequence where Element : Arbitrary {
+	public static var arbitrary : Gen<AnySequence<Element>> {
+		return AnySequence.init <^> [Element].arbitrary
+	}
+
+	@effects(readnone)
+	public static func shrink(bl : AnySequence<Element>) -> [AnySequence<Element>] {
+		return [Element].shrink([Element](bl)).map(AnySequence.init)
+	}
+}
+
+extension AnySequence : WitnessedArbitrary {
+	public typealias Param = Element
+
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (AnySequence<Element> -> Testable)) -> Property {
+		return forAllShrink(AnySequence<A>.arbitrary, shrinker: AnySequence<A>.shrink, f: { bl in
+			return pf(AnySequence<Element>(bl.map(wit)))
+		})
+	}
+}
+
+extension ArraySlice where Element : Arbitrary {
+	public static var arbitrary : Gen<ArraySlice<Element>> {
+		return ArraySlice.init <^> [Element].arbitrary
+	}
+
+	@effects(readnone)
+	public static func shrink(bl : ArraySlice<Element>) -> [ArraySlice<Element>] {
+		return [Element].shrink([Element](bl)).map(ArraySlice.init)
+	}
+}
+
+extension ArraySlice : WitnessedArbitrary {
+	public typealias Param = Element
+
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (ArraySlice<Element> -> Testable)) -> Property {
+		return forAllShrink(ArraySlice<A>.arbitrary, shrinker: ArraySlice<A>.shrink, f: { bl in
+			return pf(ArraySlice<Element>(bl.map(wit)))
+		})
+	}
+}
+
+extension CollectionOfOne where Element : Arbitrary {
+	public static var arbitrary : Gen<CollectionOfOne<Element>> {
+		return CollectionOfOne.init <^> Element.arbitrary
+	}
+}
+
+extension CollectionOfOne : WitnessedArbitrary {
+	public typealias Param = Element
+
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (CollectionOfOne<Element> -> Testable)) -> Property {
+		return forAllShrink(CollectionOfOne<A>.arbitrary, shrinker: { _ in [] }, f: { (bl : CollectionOfOne<A>) -> Testable in
+			return pf(CollectionOfOne<Element>(wit(bl[.Zero])))
+		})
+	}
+}
+
+/// Generates an Optional of arbitrary values of type A.
+extension Optional where Wrapped : Arbitrary {
+	public static var arbitrary : Gen<Optional<Wrapped>> {
+		return Gen<Optional<Wrapped>>.frequency([
+			(1, Gen<Optional<Wrapped>>.pure(.None)),
+			(3, liftM(Optional<Wrapped>.Some)(m1: Wrapped.arbitrary)),
+		])
+	}
+
+	@effects(readnone)
+	public static func shrink(bl : Optional<Wrapped>) -> [Optional<Wrapped>] {
+		if let x = bl {
+			return [.None] + Wrapped.shrink(x).map(Optional<Wrapped>.Some)
+		}
+		return []
+	}
+}
+
+extension Optional : WitnessedArbitrary {
+	public typealias Param = Wrapped
+
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Wrapped)(pf : (Optional<Wrapped> -> Testable)) -> Property {
+		return forAllShrink(Optional<A>.arbitrary, shrinker: Optional<A>.shrink, f: { bl in
+			return pf(bl.map(wit))
+		})
+	}
+}
+
+extension ContiguousArray where Element : Arbitrary {
+	public static var arbitrary : Gen<ContiguousArray<Element>> {
+		return ContiguousArray.init <^> [Element].arbitrary
+	}
+
+	@effects(readnone)
+	public static func shrink(bl : ContiguousArray<Element>) -> [ContiguousArray<Element>] {
+		return [Element].shrink([Element](bl)).map(ContiguousArray.init)
+	}
+}
+
+extension ContiguousArray : WitnessedArbitrary {
+	public typealias Param = Element
+
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (ContiguousArray<Element> -> Testable)) -> Property {
+		return forAllShrink(ContiguousArray<A>.arbitrary, shrinker: ContiguousArray<A>.shrink, f: { bl in
+			return pf(ContiguousArray<Element>(bl.map(wit)))
+		})
+	}
+}
+
+/// Generates an dictionary of arbitrary keys and values.
+extension Dictionary where Key : Arbitrary, Value : Arbitrary {
+	public static var arbitrary : Gen<Dictionary<Key, Value>> {
+		return [Key].arbitrary.bind { k in
+			return [Value].arbitrary.bind { v in
+				return Gen.pure(Dictionary(Zip2Sequence(k, v)))
+			}
+		}
+	}
+
+	@effects(readnone)
+	public static func shrink(d : Dictionary<Key, Value>) -> [Dictionary<Key, Value>] {
+		return d.map { Dictionary(Zip2Sequence(Key.shrink($0), Value.shrink($1))) }
+	}
+}
+
+extension Dictionary {
+	init<S : SequenceType where S.Generator.Element == Element>(_ pairs : S) {
+		self.init()
+		var g = pairs.generate()
+		while let (k, v): (Key, Value) = g.next() {
+			self[k] = v
+		}
+	}
+}
+
+extension EmptyCollection : Arbitrary {
+	public static var arbitrary : Gen<EmptyCollection<Element>> {
+		return Gen.pure(EmptyCollection())
+	}
+}
+
+extension HalfOpenInterval where Bound : protocol<Comparable, Arbitrary> {
+	public static var arbitrary : Gen<HalfOpenInterval<Bound>> {
+		return Bound.arbitrary.bind { l in
+			return Bound.arbitrary.bind { r in
+				return Gen.pure(HalfOpenInterval(min(l, r), max(l, r)))
+			}
+		}
+	}
+
+	@effects(readnone)
+	public static func shrink(bl : HalfOpenInterval<Bound>) -> [HalfOpenInterval<Bound>] {
+		return zip(Bound.shrink(bl.start), Bound.shrink(bl.end)).map(HalfOpenInterval.init)
+	}
+}
+
+extension ImplicitlyUnwrappedOptional where Wrapped : Arbitrary {
+	public static var arbitrary : Gen<ImplicitlyUnwrappedOptional<Wrapped>> {
+		return ImplicitlyUnwrappedOptional.init <^> Optional<Wrapped>.arbitrary
+	}
+
+	@effects(readnone)
+	public static func shrink(bl : ImplicitlyUnwrappedOptional<Wrapped>) -> [ImplicitlyUnwrappedOptional<Wrapped>] {
+		return Optional<Wrapped>.shrink(bl).map(ImplicitlyUnwrappedOptional.init)
+	}
+}
+
+extension ImplicitlyUnwrappedOptional : WitnessedArbitrary {
+	public typealias Param = Wrapped
+
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Wrapped)(pf : (ImplicitlyUnwrappedOptional<Wrapped> -> Testable)) -> Property {
+		return forAllShrink(ImplicitlyUnwrappedOptional<A>.arbitrary, shrinker: ImplicitlyUnwrappedOptional<A>.shrink, f: { bl in
+			return pf(bl.map(wit))
+		})
+	}
+}
+
+extension LazyCollection where Base : protocol<CollectionType, Arbitrary>, Base.Index : ForwardIndexType {
+	public static var arbitrary : Gen<LazyCollection<Base>> {
+		return LazyCollection<Base>.arbitrary
+	}
+}
+
+extension LazySequence where Base : protocol<SequenceType, Arbitrary> {
+	public static var arbitrary : Gen<LazySequence<Base>> {
+		return LazySequence<Base>.arbitrary
+	}
+}
+
+extension Range where Element : protocol<ForwardIndexType, Comparable, Arbitrary> {
+	public static var arbitrary : Gen<Range<Element>> {
+		return Element.arbitrary.bind { l in
+			return Element.arbitrary.bind { r in
+				return Gen.pure(Range(start: min(l, r), end: max(l, r)))
+			}
+		}
+	}
+
+	@effects(readnone)
+	public static func shrink(bl : Range<Element>) -> [Range<Element>] {
+		return Zip2Sequence(Element.shrink(bl.startIndex), Element.shrink(bl.endIndex)).map(Range.init)
+	}
+}
+
+extension Repeat where Element : Arbitrary {
+	public static var arbitrary : Gen<Repeat<Element>> {
+		return Repeat.init <^> Gen<Any>.zip(Int.arbitrary, Element.arbitrary)
+	}
+}
+
+extension Repeat : WitnessedArbitrary {
+	public typealias Param = Element
+
+	@effects(readnone)
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (Repeat<Element> -> Testable)) -> Property {
+		return forAllShrink(Repeat<A>.arbitrary, shrinker: { _ in [] }, f: { bl in
+			let xs = bl.map(wit)
+			return pf(Repeat<Element>(count: xs.count, repeatedValue: xs.first!))
+		})
+	}
+}
+
+extension Set where Element : protocol<Arbitrary, Hashable> {
+	public static var arbitrary : Gen<Set<Element>> {
+		return Gen.sized { n in
+			return Gen<Int>.choose((0, n)).bind { k in
+				if k == 0 {
+					return Gen.pure(Set([]))
+				}
+
+				return Set.init <^> sequence(Array((0...k)).map { _ in Element.arbitrary })
+			}
+		}
+	}
+
+	@effects(readnone)
+	public static func shrink(s : Set<Element>) -> [Set<Element>] {
+		return [Element].shrink([Element](s)).map(Set.init)
+	}
+}
+
+extension Set : WitnessedArbitrary {
+	public typealias Param = Element
+
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (Set<Element> -> Testable)) -> Property {
+		return forAll { (xs : [A]) in
+			return pf(Set<Element>(xs.map(wit)))
+		}
+	}
+}
+
+// MARK: - Implementation Details Follow
+
+@effects(readnone)
+private func bits<N : IntegerType>(n : N) -> Int {
+	if n / 2 == 0 {
+		return 0
+	}
+	return 1 + bits(n / 2)
+}
+
+@effects(readnone)
+private func removes<A : Arbitrary>(k : Int, n : Int, xs : [A]) -> [[A]] {
+	let xs1 = take(k, xs: xs)
+	let xs2 = drop(k, xs: xs)
+
+	if k > n {
+		return []
+	} else if xs2.isEmpty {
+		return [[]]
+	} else {
+		return [xs2] + removes(k, n: n - k, xs: xs2).map({ xs1 + $0 })
+	}
+}
+
+@effects(readnone)
+private func take<T>(num : Int, xs : [T]) -> [T] {
+	let n = (num < xs.count) ? num : xs.count
+	return [T](xs[0..<n])
+}
+
+@effects(readnone)
+private func drop<T>(num : Int, xs : [T]) -> [T] {
+	let n = (num < xs.count) ? num : xs.count
+	return [T](xs[n..<xs.endIndex])
+}
+
+@effects(readnone)
+private func shrinkOne<A : Arbitrary>(xs : [A]) -> [[A]] {
+	if xs.isEmpty {
+		return []
+	} else if let x = xs.first {
+		let xss = [A](xs[1..<xs.endIndex])
+		let a = A.shrink(x).map({ [$0] + xss })
+		let b = shrinkOne(xss).map({ [x] + $0 })
+		return a + b
+	}
+	fatalError("Array could not produce a first element")
+}
