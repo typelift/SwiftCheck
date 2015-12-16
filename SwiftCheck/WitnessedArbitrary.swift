@@ -120,7 +120,7 @@ extension Optional where Wrapped : Arbitrary {
 		return Gen<Optional<Wrapped>>.frequency([
 			(1, Gen<Optional<Wrapped>>.pure(.None)),
 			(3, liftM(Optional<Wrapped>.Some)(m1: Wrapped.arbitrary)),
-			])
+		])
 	}
 
 	@effects(readnone)
@@ -258,7 +258,7 @@ extension Mirror : Arbitrary {
 			UnicodeScalar.arbitrary.fmap(asAny),
 			String.arbitrary.fmap(asAny),
 			Character.arbitrary.fmap(asAny),
-			])
+		])
 
 		let genAnyWitnessed : Gen<Any> = Gen<Any>.oneOf([
 			Optional<Int>.arbitrary.fmap(asAny),
@@ -272,7 +272,7 @@ extension Mirror : Arbitrary {
 		return Gen<Any>.oneOf([
 			genAny,
 			genAnyWitnessed,
-			]).fmap(Mirror.init)
+		]).fmap(Mirror.init)
 	}
 }
 
