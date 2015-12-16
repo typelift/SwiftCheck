@@ -17,6 +17,10 @@
 		82A667A01BFD299500EBCDFA /* ReplaySpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82A6679E1BFD299500EBCDFA /* ReplaySpec.swift */; };
 		82DD8EEC1B4CC88C00B66551 /* Operators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82DD8EEB1B4CC88C00B66551 /* Operators.swift */; };
 		82DD8EED1B4CC88C00B66551 /* Operators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82DD8EEB1B4CC88C00B66551 /* Operators.swift */; };
+		82ED49DF1C210D85008E9595 /* CoArbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82ED49DE1C210D85008E9595 /* CoArbitrary.swift */; };
+		82ED49E01C210D85008E9595 /* CoArbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82ED49DE1C210D85008E9595 /* CoArbitrary.swift */; };
+		82ED49E21C210DEE008E9595 /* WitnessedArbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82ED49E11C210DEE008E9595 /* WitnessedArbitrary.swift */; };
+		82ED49E31C210DEE008E9595 /* WitnessedArbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82ED49E11C210DEE008E9595 /* WitnessedArbitrary.swift */; };
 		841408BB1B1A85A900BA2B6C /* SwiftCheck.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		842015111AF5C91C00F1F3CD /* Lattice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842015101AF5C91C00F1F3CD /* Lattice.swift */; };
 		8445C4A31B16897200280089 /* DiscardSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C201A6DBA1C00241F68 /* DiscardSpec.swift */; };
@@ -102,6 +106,8 @@
 		827749F71B65ABCC00A7965F /* Witness.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Witness.swift; sourceTree = "<group>"; usesTabs = 1; };
 		82A6679E1BFD299500EBCDFA /* ReplaySpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReplaySpec.swift; sourceTree = "<group>"; };
 		82DD8EEB1B4CC88C00B66551 /* Operators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Operators.swift; path = Carthage/Checkouts/Operadics/Operators.swift; sourceTree = SOURCE_ROOT; usesTabs = 1; };
+		82ED49DE1C210D85008E9595 /* CoArbitrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoArbitrary.swift; sourceTree = "<group>"; };
+		82ED49E11C210DEE008E9595 /* WitnessedArbitrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WitnessedArbitrary.swift; sourceTree = "<group>"; };
 		842015101AF5C91C00F1F3CD /* Lattice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Lattice.swift; sourceTree = "<group>"; usesTabs = 1; };
 		8445C4A91B16D37800280089 /* GenSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GenSpec.swift; sourceTree = "<group>"; usesTabs = 1; };
 		8445C4AC1B17E48300280089 /* ShrinkSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShrinkSpec.swift; sourceTree = "<group>"; usesTabs = 1; };
@@ -191,6 +197,7 @@
 			isa = PBXGroup;
 			children = (
 				844FCCA9198B323800EB242A /* Arbitrary.swift */,
+				82ED49DE1C210D85008E9595 /* CoArbitrary.swift */,
 				84572C241A6DBAA800241F68 /* Check.swift */,
 				844FCCAB198B32DC00EB242A /* Gen.swift */,
 				842015101AF5C91C00F1F3CD /* Lattice.swift */,
@@ -204,6 +211,7 @@
 				84572C2A1A6DBABA00241F68 /* Testable.swift */,
 				8450D2491AF8003700095EF6 /* TestOperators.swift */,
 				827749F71B65ABCC00A7965F /* Witness.swift */,
+				82ED49E11C210DEE008E9595 /* WitnessedArbitrary.swift */,
 				D46395B51B1A94D200AA1B65 /* Equatable.swift */,
 				844FCC90198B320500EB242A /* Supporting Files */,
 			);
@@ -435,6 +443,8 @@
 				8450D24A1AF8003800095EF6 /* TestOperators.swift in Sources */,
 				844FCCB4198B39F300EB242A /* State.swift in Sources */,
 				827749F81B65ABCC00A7965F /* Witness.swift in Sources */,
+				82ED49DF1C210D85008E9595 /* CoArbitrary.swift in Sources */,
+				82ED49E21C210DEE008E9595 /* WitnessedArbitrary.swift in Sources */,
 				844FCCC7198EFB4700EB242A /* Rose.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -475,6 +485,8 @@
 				84DF761B1B0BD58100C912B0 /* State.swift in Sources */,
 				84DF761C1B0BD58100C912B0 /* Test.swift in Sources */,
 				827749F91B65ABCC00A7965F /* Witness.swift in Sources */,
+				82ED49E01C210D85008E9595 /* CoArbitrary.swift in Sources */,
+				82ED49E31C210DEE008E9595 /* WitnessedArbitrary.swift in Sources */,
 				84DF761D1B0BD58100C912B0 /* Testable.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
