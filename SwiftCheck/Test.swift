@@ -633,9 +633,10 @@ internal func giveUp(st: CheckerState)(f : (StdGen -> Int -> Prop)) -> Result {
 // This ridiculously stateful looping nonsense is due to limitations of the Swift unroller and, more
 // importantly, ARC.  This has been written with recursion in the past, and it was fabulous and
 // beautiful, but it generated useless objects that ARC couldn't release on the order of Gigabytes
-// for complex shrinks (much like `split` in the Swift STL), and was slow as hell.  This way we stay
-// in one stack frame no matter what and give ARC a chance to cleanup after us.  Plus we get to
-// stay within a reasonable ~50-100 megabytes for truly horrendous tests that used to eat 8 gigs.
+// for complex shrinks (much like `split` in the Swift Standard Library), and was slow as hell.  
+// This way we stay in one stack frame no matter what and give ARC a chance to cleanup after us.  
+// Plus we get to stay within a reasonable ~50-100 megabytes for truly horrendous tests that used to
+/// eat 8 gigs.
 internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
 	if let e = res.theException {
 		fatalError("Test failed due to exception: \(e)")
