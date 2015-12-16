@@ -307,6 +307,31 @@ extension AnyRandomAccessIndex : Arbitrary {
 	}
 }
 
+extension Mirror : Arbitrary {
+	public static var arbitrary : Gen<Mirror> {
+		let genAny : Gen<Any> = Gen<Any>.oneOf([
+			Bool.arbitrary.fmap(asAny),
+			Int.arbitrary.fmap(asAny),
+			UInt.arbitrary.fmap(asAny),
+			Float.arbitrary.fmap(asAny),
+			Double.arbitrary.fmap(asAny),
+			Character.arbitrary.fmap(asAny),
+		])
+
+		let genAnyWitnessed : Gen<Any> = Gen<Any>.oneOf([
+			Optional<Int>.arbitrary.fmap(asAny),
+			Array<Int>.arbitrary.fmap(asAny),
+			Set<Int>.arbitrary.fmap(asAny),
+		])
+
+		return Gen<Any>.oneOf([
+			genAny,
+			genAnyWitnessed,
+		]).fmap(Mirror.init)
+	}
+}
+
+
 // MARK: - Implementation Details Follow
 
 @effects(readnone)
