@@ -308,11 +308,6 @@ extension Set : WitnessedArbitrary {
 // MARK: - Implementation Details Follow
 
 @effects(readnone)
-private func asAny<T>(x : T) -> Any {
-	return x
-}
-
-@effects(readnone)
 private func bits<N : IntegerType>(n : N) -> Int {
 	if n / 2 == 0 {
 		return 0

@@ -335,6 +335,11 @@ extension Mirror : Arbitrary {
 // MARK: - Implementation Details Follow
 
 @effects(readnone)
+private func asAny<T>(x : T) -> Any {
+	return x
+}
+
+@effects(readnone)
 private func nub<A : Hashable>(xs : [A]) -> [A] {
 	return [A](Set(xs))
 }
