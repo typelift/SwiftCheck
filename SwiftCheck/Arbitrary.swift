@@ -209,13 +209,16 @@ extension Float : Arbitrary {
 	public static var arbitrary : Gen<Float> {
 		let precision : Int64 = 9999999999999
 
-		return Gen.sized { n in
+		return Gen<Float>.sized { n in
 			if n == 0 {
 				return Gen<Float>.pure(0.0)
 			}
 
-			return Gen<Int64>.choose((Int64(-n) * precision, Int64(n) * precision))
-				>>- { a in Gen<Int64>.choose((1, precision))
+			let numerator = Gen<Int64>.choose((Int64(-n) * precision, Int64(n) * precision))
+			let denominator = Gen<Int64>.choose((1, precision))
+
+			return numerator
+				>>- { a in denominator
 					>>- { b in Gen<Float>.pure(Float(a) / Float(b)) } }
 		}
 	}
@@ -236,13 +239,16 @@ extension Double : Arbitrary {
 	public static var arbitrary : Gen<Double> {
 		let precision : Int64 = 9999999999999
 
-		return Gen.sized { n in
+		return Gen<Double>.sized { n in
 			if n == 0 {
 				return Gen<Double>.pure(0.0)
 			}
 
-			return Gen<Int64>.choose((Int64(-n) * precision, Int64(n) * precision))
-				>>- { a in Gen<Int64>.choose((1, precision))
+			let numerator = Gen<Int64>.choose((Int64(-n) * precision, Int64(n) * precision))
+			let denominator = Gen<Int64>.choose((1, precision))
+
+			return numerator
+				>>- { a in denominator
 					>>- { b in Gen<Double>.pure(Double(a) / Double(b)) } }
 		}
 	}
@@ -267,7 +273,7 @@ extension UnicodeScalar : Arbitrary {
 	@effects(readnone)
 	public static func shrink(x : UnicodeScalar) -> [UnicodeScalar] {
 		let s : UnicodeScalar = UnicodeScalar(UInt32(towlower(Int32(x.value))))
-		return nub([ "a", "b", "c", s, "A", "B", "C", "1", "2", "3", "\n", " " ]).filter { $0 < x }
+		return [ "a", "b", "c", s, "A", "B", "C", "1", "2", "3", "\n", " " ].nub.filter { $0 < x }
 	}
 }
 
@@ -339,9 +345,10 @@ private func asAny<T>(x : T) -> Any {
 	return x
 }
 
-@effects(readnone)
-private func nub<A : Hashable>(xs : [A]) -> [A] {
-	return [A](Set(xs))
+extension Array where Element : Hashable {
+	private var nub : [Element] {
+		return [Element](Set(self))
+	}
 }
 
 @effects(readnone)
