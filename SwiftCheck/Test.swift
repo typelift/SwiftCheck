@@ -755,10 +755,8 @@ internal func dispatchAfterFinalFailureCallbacks(st : CheckerState, res : TestRe
 }
 
 internal func summary(s : CheckerState) -> [(String, Int)] {
-	let l = s.collected
-		.flatMap({ l in l.map({ "," + $0 }).filter({ !$0.isEmpty }) })
-		.sort()
-		.groupBy(==)
+	let lff : [String] = s.collected.flatMap({ l in l.map({ s in "," + s }).filter({ xs in !xs.isEmpty }) })
+	let l : [[String]] = lff.sort().groupBy(==)
 	return l.map { ss in (ss.first!, ss.count * 100 / s.successfulTestCount) }
 }
 
