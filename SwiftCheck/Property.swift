@@ -500,6 +500,31 @@ internal func unionWith<K : Hashable, V>(f : (V, V) -> V, l : Dictionary<K, V>, 
 }
 
 @effects(readnone)
+private func sep(l : String, r : String) -> String {
+	if l.isEmpty {
+		return r
+	}
+
+	if r.isEmpty {
+		return l
+	}
+	return l + ", " + r
+}
+
+@effects(readnone)
+private func mplus(l : Optional<String>, r : Optional<String>) -> Optional<String> {
+	if let ls = l, rs = r {
+		return .Some(ls + rs)
+	}
+
+	if l == nil {
+		return r
+	}
+
+	return l
+}
+
+@effects(readnone)
 private func addCallbacks(result : TestResult) -> TestResult -> TestResult {
 	return { res in
 		return TestResult(ok:           res.ok
@@ -573,46 +598,23 @@ private func conj(k : TestResult -> TestResult, xs : [Rose<TestResult>]) -> Rose
 
 @effects(readnone)
 private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult> {
-	func sep(l : String, r : String) -> String {
-		if l.isEmpty {
-			return r
-		}
-
-		if r.isEmpty {
-			return l
-		}
-		return l + ", " + r
-	}
-
-	func mplus(l : Optional<String>, r : Optional<String>) -> Optional<String> {
-		if let ls = l, rs = r {
-			return .Some(ls + rs)
-		}
-
-		if l == nil {
-			return r
-		}
-
-		return l
-	}
-
 	return p.bind { result1 in
 		if !result1.expect {
-			return Rose.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
+			return Rose<TestResult>.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 		}
 		switch result1.ok {
 		case .Some(true):
-			return Rose.pure(result1)
+			return Rose<TestResult>.pure(result1)
 		case .Some(false):
-			return q.bind { result2 in
+			return q.bind { (result2 : TestResult) in
 				if !result2.expect {
-					return Rose.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
+					return Rose<TestResult>.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 				}
 				switch result2.ok {
 				case .Some(true):
-					return Rose.pure(result2)
+					return Rose<TestResult>.pure(result2)
 				case .Some(false):
-					return Rose.pure(TestResult(ok: .Some(false),
+					return Rose<TestResult>.pure(TestResult(ok: .Some(false),
 						expect: true,
 						reason: sep(result1.reason, r: result2.reason),
 						theException: mplus(result1.theException, r: result2.theException),
@@ -625,19 +627,19 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 						abort: false,
 						quantifier: .Universal))
 				case .None:
-					return Rose.pure(result2)
+					return Rose<TestResult>.pure(result2)
 				}
 			}
 		case .None:
-			return q.bind { result2 in
+			return q.bind { (result2 : TestResult) in
 				if !result2.expect {
-					return Rose.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
+					return Rose<TestResult>.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 				}
 				switch result2.ok {
 				case .Some(true):
-					return Rose.pure(result2)
+					return Rose<TestResult>.pure(result2)
 				default:
-					return Rose.pure(result1)
+					return Rose<TestResult>.pure(result1)
 				}
 			}
 		}
