@@ -432,7 +432,8 @@ private func selectOne<A>(xs : [A]) -> [(A, [A])] {
 	}
 	let y = xs.first!
 	let ys = Array(xs[1..<xs.endIndex])
-	return [(y, ys)] + selectOne(ys).map({ t in (t.0, [y] + t.1) })
+	let rec : [(A, Array<A>)] = selectOne(ys).map({ t in (t.0, [y] + t.1) })
+	return [(y, ys)] + rec
 }
 
 @effects(readnone)
