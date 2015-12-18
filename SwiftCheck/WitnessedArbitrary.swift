@@ -317,8 +317,8 @@ private func bits<N : IntegerType>(n : N) -> Int {
 
 @effects(readnone)
 private func removes<A : Arbitrary>(k : Int, n : Int, xs : [A]) -> [[A]] {
-	let xs1 = take(k, xs: xs)
-	let xs2 = drop(k, xs: xs)
+	let xs1 : [A] = take(k, xs: xs)
+	let xs2 : [A] = drop(k, xs: xs)
 
 	if k > n {
 		return []
