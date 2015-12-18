@@ -754,13 +754,13 @@ internal func dispatchAfterFinalFailureCallbacks(st : CheckerState, res : TestRe
 	}
 }
 
-internal func summary(s : CheckerState) -> [(String, Int)] {
+private func summary(s : CheckerState) -> [(String, Int)] {
 	let lff : [String] = s.collected.flatMap({ l in l.map({ s in "," + s }).filter({ xs in !xs.isEmpty }) })
 	let l : [[String]] = lff.sort().groupBy(==)
 	return l.map { ss in (ss.first!, ss.count * 100 / s.successfulTestCount) }
 }
 
-internal func labelPercentage(l : String, st : CheckerState) -> Int {
+private func labelPercentage(l : String, st : CheckerState) -> Int {
 	let occur = st.collected.flatMap(Array.init).filter { $0 == l }
 	return (100 * occur.count) / st.maxAllowableSuccessfulTests
 }
@@ -778,17 +778,17 @@ internal func printLabels(st : TestResult) {
 	}
 }
 
-internal func printDistributionGraph(st : CheckerState) {
-	func showP(n : Int) -> String {
-		return (n < 10 ? " " : "") + "\(n)" + "%"
-	}
+private func showP(n : Int) -> String {
+	return (n < 10 ? " " : "") + "\(n)" + "%"
+}
 
-	let gAllLabels = st.collected.map({ (s : Set<String>) in
+private func printDistributionGraph(st : CheckerState) {
+	let gAllLabels : [String] = st.collected.map({ (s : Set<String>) in
 		return Array(s).filter({ t in st.labels[t] == .Some(0) }).reduce("", combine: { (l : String, r : String) in l + ", " + r })
 	})
-	let gAll = gAllLabels.filter({ !$0.isEmpty }).sort().groupBy(==)
-	let gPrint = gAll.map({ ss in showP((ss.count * 100) / st.successfulTestCount) + ss.first! })
-	let allLabels = Array(gPrint.sort().reverse())
+	let gAll : [[String]] = gAllLabels.filter({ !$0.isEmpty }).sort().groupBy(==)
+	let gPrint : [String] = gAll.map({ ss in showP((ss.count * 100) / st.successfulTestCount) + ss.first! })
+	let allLabels : [String] = Array(gPrint.sort().reverse())
 
 	var covers = [String]()
 	st.labels.forEach { (l, reqP) in

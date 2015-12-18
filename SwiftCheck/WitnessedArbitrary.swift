@@ -21,7 +21,8 @@ extension Array where Element : Arbitrary {
 
 	@effects(readnone)
 	public static func shrink(bl : Array<Element>) -> [[Element]] {
-		return Int.shrink(bl.count).reverse().flatMap({ k in removes(k.successor(), n: bl.count, xs: bl) }) + shrinkOne(bl)
+		let rec : [[Element]] = shrinkOne(bl)
+		return Int.shrink(bl.count).reverse().flatMap({ k in removes(k.successor(), n: bl.count, xs: bl) }) + rec
 	}
 }
 
@@ -126,7 +127,8 @@ extension Optional where Wrapped : Arbitrary {
 	@effects(readnone)
 	public static func shrink(bl : Optional<Wrapped>) -> [Optional<Wrapped>] {
 		if let x = bl {
-			return [.None] + Wrapped.shrink(x).map(Optional<Wrapped>.Some)
+			let rec : [Optional<Wrapped>] = Wrapped.shrink(x).map(Optional<Wrapped>.Some)
+			return [.None] + rec
 		}
 		return []
 	}
@@ -325,7 +327,8 @@ private func removes<A : Arbitrary>(k : Int, n : Int, xs : [A]) -> [[A]] {
 	} else if xs2.isEmpty {
 		return [[]]
 	} else {
-		return [xs2] + removes(k, n: n - k, xs: xs2).map({ xs1 + $0 })
+		let rec : [[A]] = removes(k, n: n - k, xs: xs2).map({ xs1 + $0 })
+		return [xs2] + rec
 	}
 }
 
@@ -344,11 +347,11 @@ private func drop<T>(num : Int, xs : [T]) -> [T] {
 @effects(readnone)
 private func shrinkOne<A : Arbitrary>(xs : [A]) -> [[A]] {
 	if xs.isEmpty {
-		return []
-	} else if let x = xs.first {
+		return [[A]]()
+	} else if let x : A = xs.first {
 		let xss = [A](xs[1..<xs.endIndex])
-		let a = A.shrink(x).map({ [$0] + xss })
-		let b = shrinkOne(xss).map({ [x] + $0 })
+		let a : [[A]] = A.shrink(x).map({ [$0] + xss })
+		let b : [[A]] = shrinkOne(xss).map({ [x] + $0 })
 		return a + b
 	}
 	fatalError("Array could not produce a first element")

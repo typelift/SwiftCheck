@@ -614,16 +614,17 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 				case .Some(true):
 					return Rose<TestResult>.pure(result2)
 				case .Some(false):
+					let callbacks : [Callback] = [.AfterFinalFailure(kind: .Counterexample,
+						f: { _ in
+							return print("")
+					})]
 					return Rose<TestResult>.pure(TestResult(ok: .Some(false),
 						expect: true,
 						reason: sep(result1.reason, r: result2.reason),
 						theException: mplus(result1.theException, r: result2.theException),
 						labels: [:],
 						stamp: Set(),
-						callbacks: result1.callbacks + [.AfterFinalFailure(kind: .Counterexample,
-							f: { _ in
-								return print("")
-						})] + result2.callbacks,
+						callbacks: result1.callbacks + callbacks + result2.callbacks,
 						abort: false,
 						quantifier: .Universal))
 				case .None:
