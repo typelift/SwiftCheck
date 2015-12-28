@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		70E99AE61C31AF29003A9C00 /* NSDataSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E99AE51C31AF29003A9C00 /* NSDataSpec.swift */; };
 		8216BAB71B97775100A0D282 /* ComplexSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8216BAB61B97775100A0D282 /* ComplexSpec.swift */; };
 		8216BAB81B97775100A0D282 /* ComplexSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8216BAB61B97775100A0D282 /* ComplexSpec.swift */; };
 		821B76CD1BC4449300AF97D6 /* FailureSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821B76CC1BC4449300AF97D6 /* FailureSpec.swift */; };
@@ -101,6 +102,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		70E99AE51C31AF29003A9C00 /* NSDataSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDataSpec.swift; sourceTree = "<group>"; };
 		8216BAB61B97775100A0D282 /* ComplexSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComplexSpec.swift; sourceTree = "<group>"; };
 		821B76CC1BC4449300AF97D6 /* FailureSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FailureSpec.swift; sourceTree = "<group>"; };
 		827749F71B65ABCC00A7965F /* Witness.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Witness.swift; sourceTree = "<group>"; usesTabs = 1; };
@@ -240,6 +242,7 @@
 				8445C4AC1B17E48300280089 /* ShrinkSpec.swift */,
 				844FCCC8198EFF9B00EB242A /* SimpleSpec.swift */,
 				84B9E4A61B3A0EB900C8739E /* TestSpec.swift */,
+				70E99AE51C31AF29003A9C00 /* NSDataSpec.swift */,
 				844FCC9D198B320500EB242A /* Supporting Files */,
 			);
 			path = SwiftCheckTests;
@@ -463,6 +466,7 @@
 				821B76CD1BC4449300AF97D6 /* FailureSpec.swift in Sources */,
 				8445C4A51B16897200280089 /* BooleanIdentitySpec.swift in Sources */,
 				82A6679F1BFD299500EBCDFA /* ReplaySpec.swift in Sources */,
+				70E99AE61C31AF29003A9C00 /* NSDataSpec.swift in Sources */,
 				844FCCC9198EFF9B00EB242A /* SimpleSpec.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
