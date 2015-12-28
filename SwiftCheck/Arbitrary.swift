@@ -74,7 +74,6 @@ extension Bool : Arbitrary {
 		return Gen<Bool>.choose((false, true))
 	}
 
-	@effects(readnone)
 	public static func shrink(x : Bool) -> [Bool] {
 		if x {
 			return [false]
@@ -90,7 +89,6 @@ extension Int : Arbitrary {
 		}
 	}
 
-	@effects(readnone)
 	public static func shrink(x : Int) -> [Int] {
 		return x.shrinkIntegral
 	}
@@ -103,7 +101,6 @@ extension Int8 : Arbitrary {
 		}
 	}
 
-	@effects(readnone)
 	public static func shrink(x : Int8) -> [Int8] {
 		return x.shrinkIntegral
 	}
@@ -116,7 +113,6 @@ extension Int16 : Arbitrary {
 		}
 	}
 
-	@effects(readnone)
 	public static func shrink(x : Int16) -> [Int16] {
 		return x.shrinkIntegral
 	}
@@ -129,7 +125,6 @@ extension Int32 : Arbitrary {
 		}
 	}
 
-	@effects(readnone)
 	public static func shrink(x : Int32) -> [Int32] {
 		return x.shrinkIntegral
 	}
@@ -142,7 +137,6 @@ extension Int64 : Arbitrary {
 		}
 	}
 
-	@effects(readnone)
 	public static func shrink(x : Int64) -> [Int64] {
 		return x.shrinkIntegral
 	}
@@ -153,7 +147,6 @@ extension UInt : Arbitrary {
 		return Gen.sized { n in Gen<UInt>.choose((0, UInt(n))) }
 	}
 
-	@effects(readnone)
 	public static func shrink(x : UInt) -> [UInt] {
 		return x.shrinkIntegral
 	}
@@ -166,7 +159,6 @@ extension UInt8 : Arbitrary {
 		}
 	}
 
-	@effects(readnone)
 	public static func shrink(x : UInt8) -> [UInt8] {
 		return x.shrinkIntegral
 	}
@@ -177,7 +169,6 @@ extension UInt16 : Arbitrary {
 		return Gen.sized { n in Gen<UInt16>.choose((0, UInt16(truncatingBitPattern: n))) }
 	}
 
-	@effects(readnone)
 	public static func shrink(x : UInt16) -> [UInt16] {
 		return x.shrinkIntegral
 	}
@@ -188,7 +179,6 @@ extension UInt32 : Arbitrary {
 		return Gen.sized { n in Gen<UInt32>.choose((0, UInt32(truncatingBitPattern: n))) }
 	}
 
-	@effects(readnone)
 	public static func shrink(x : UInt32) -> [UInt32] {
 		return x.shrinkIntegral
 	}
@@ -199,7 +189,6 @@ extension UInt64 : Arbitrary {
 		return Gen.sized { n in Gen<UInt64>.choose((0, UInt64(n))) }
 	}
 
-	@effects(readnone)
 	public static func shrink(x : UInt64) -> [UInt64] {
 		return x.shrinkIntegral
 	}
@@ -223,7 +212,6 @@ extension Float : Arbitrary {
 		}
 	}
 
-	@effects(readnone)
 	public static func shrink(x : Float) -> [Float] {
 		return unfoldr({ i in
 			if i == 0.0 {
@@ -253,7 +241,6 @@ extension Double : Arbitrary {
 		}
 	}
 
-	@effects(readnone)
 	public static func shrink(x : Double) -> [Double] {
 		return unfoldr({ i in
 			if i == 0.0 {
@@ -270,7 +257,6 @@ extension UnicodeScalar : Arbitrary {
 		return UInt32.arbitrary.bind(Gen<UnicodeScalar>.pure • UnicodeScalar.init)
 	}
 
-	@effects(readnone)
 	public static func shrink(x : UnicodeScalar) -> [UnicodeScalar] {
 		let s : UnicodeScalar = UnicodeScalar(UInt32(towlower(Int32(x.value))))
 		return [ "a", "b", "c", s, "A", "B", "C", "1", "2", "3", "\n", " " ].nub.filter { $0 < x }
@@ -283,7 +269,6 @@ extension String : Arbitrary {
 		return chars >>- (Gen<String>.pure • String.init)
 	}
 
-	@effects(readnone)
 	public static func shrink(s : String) -> [String] {
 		return [Character].shrink([Character](s.characters)).map(String.init)
 	}
@@ -294,7 +279,6 @@ extension Character : Arbitrary {
 		return Gen<UInt32>.choose((32, 255)) >>- (Gen<Character>.pure • Character.init • UnicodeScalar.init)
 	}
 
-	@effects(readnone)
 	public static func shrink(x : Character) -> [Character] {
 		let ss = String(x).unicodeScalars
 		return UnicodeScalar.shrink(ss[ss.startIndex]).map(Character.init)
@@ -340,7 +324,6 @@ extension Mirror : Arbitrary {
 
 // MARK: - Implementation Details Follow
 
-@effects(readnone)
 private func asAny<T>(x : T) -> Any {
 	return x
 }
@@ -351,7 +334,6 @@ extension Array where Element : Hashable {
 	}
 }
 
-@effects(readnone)
 private func unfoldr<A, B>(f : B -> Optional<(A, B)>, initial : B) -> [A] {
 	var acc = [A]()
 	var ini = initial

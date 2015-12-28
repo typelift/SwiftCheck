@@ -19,7 +19,6 @@ extension Array where Element : Arbitrary {
 		}
 	}
 
-	@effects(readnone)
 	public static func shrink(bl : Array<Element>) -> [[Element]] {
 		let rec : [[Element]] = shrinkOne(bl)
 		return Int.shrink(bl.count).reverse().flatMap({ k in removes(k.successor(), n: bl.count, xs: bl) }) + rec
@@ -41,7 +40,6 @@ extension AnyBidirectionalCollection where Element : Arbitrary {
 		return AnyBidirectionalCollection.init <^> [Element].arbitrary
 	}
 
-	@effects(readnone)
 	public static func shrink(bl : AnyBidirectionalCollection<Element>) -> [AnyBidirectionalCollection<Element>] {
 		return [Element].shrink([Element](bl)).map(AnyBidirectionalCollection.init)
 	}
@@ -62,7 +60,6 @@ extension AnySequence where Element : Arbitrary {
 		return AnySequence.init <^> [Element].arbitrary
 	}
 
-	@effects(readnone)
 	public static func shrink(bl : AnySequence<Element>) -> [AnySequence<Element>] {
 		return [Element].shrink([Element](bl)).map(AnySequence.init)
 	}
@@ -83,7 +80,6 @@ extension ArraySlice where Element : Arbitrary {
 		return ArraySlice.init <^> [Element].arbitrary
 	}
 
-	@effects(readnone)
 	public static func shrink(bl : ArraySlice<Element>) -> [ArraySlice<Element>] {
 		return [Element].shrink([Element](bl)).map(ArraySlice.init)
 	}
@@ -124,7 +120,6 @@ extension Optional where Wrapped : Arbitrary {
 		])
 	}
 
-	@effects(readnone)
 	public static func shrink(bl : Optional<Wrapped>) -> [Optional<Wrapped>] {
 		if let x = bl {
 			let rec : [Optional<Wrapped>] = Wrapped.shrink(x).map(Optional<Wrapped>.Some)
@@ -149,7 +144,6 @@ extension ContiguousArray where Element : Arbitrary {
 		return ContiguousArray.init <^> [Element].arbitrary
 	}
 
-	@effects(readnone)
 	public static func shrink(bl : ContiguousArray<Element>) -> [ContiguousArray<Element>] {
 		return [Element].shrink([Element](bl)).map(ContiguousArray.init)
 	}
@@ -175,7 +169,6 @@ extension Dictionary where Key : Arbitrary, Value : Arbitrary {
 		}
 	}
 
-	@effects(readnone)
 	public static func shrink(d : Dictionary<Key, Value>) -> [Dictionary<Key, Value>] {
 		return d.map { Dictionary(Zip2Sequence(Key.shrink($0), Value.shrink($1))) }
 	}
@@ -206,7 +199,6 @@ extension HalfOpenInterval where Bound : protocol<Comparable, Arbitrary> {
 		}
 	}
 
-	@effects(readnone)
 	public static func shrink(bl : HalfOpenInterval<Bound>) -> [HalfOpenInterval<Bound>] {
 		return zip(Bound.shrink(bl.start), Bound.shrink(bl.end)).map(HalfOpenInterval.init)
 	}
@@ -217,7 +209,6 @@ extension ImplicitlyUnwrappedOptional where Wrapped : Arbitrary {
 		return ImplicitlyUnwrappedOptional.init <^> Optional<Wrapped>.arbitrary
 	}
 
-	@effects(readnone)
 	public static func shrink(bl : ImplicitlyUnwrappedOptional<Wrapped>) -> [ImplicitlyUnwrappedOptional<Wrapped>] {
 		return Optional<Wrapped>.shrink(bl).map(ImplicitlyUnwrappedOptional.init)
 	}
@@ -254,7 +245,6 @@ extension Range where Element : protocol<ForwardIndexType, Comparable, Arbitrary
 		}
 	}
 
-	@effects(readnone)
 	public static func shrink(bl : Range<Element>) -> [Range<Element>] {
 		return Zip2Sequence(Element.shrink(bl.startIndex), Element.shrink(bl.endIndex)).map(Range.init)
 	}
@@ -269,7 +259,6 @@ extension Repeat where Element : Arbitrary {
 extension Repeat : WitnessedArbitrary {
 	public typealias Param = Element
 
-	@effects(readnone)
 	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (Repeat<Element> -> Testable)) -> Property {
 		return forAllShrink(Repeat<A>.arbitrary, shrinker: { _ in [] }, f: { bl in
 			let xs = bl.map(wit)
@@ -291,7 +280,6 @@ extension Set where Element : protocol<Arbitrary, Hashable> {
 		}
 	}
 
-	@effects(readnone)
 	public static func shrink(s : Set<Element>) -> [Set<Element>] {
 		return [Element].shrink([Element](s)).map(Set.init)
 	}
@@ -309,7 +297,6 @@ extension Set : WitnessedArbitrary {
 
 // MARK: - Implementation Details Follow
 
-@effects(readnone)
 private func bits<N : IntegerType>(n : N) -> Int {
 	if n / 2 == 0 {
 		return 0
@@ -317,7 +304,6 @@ private func bits<N : IntegerType>(n : N) -> Int {
 	return 1 + bits(n / 2)
 }
 
-@effects(readnone)
 private func removes<A : Arbitrary>(k : Int, n : Int, xs : [A]) -> [[A]] {
 	let xs1 : [A] = take(k, xs: xs)
 	let xs2 : [A] = drop(k, xs: xs)
@@ -332,19 +318,16 @@ private func removes<A : Arbitrary>(k : Int, n : Int, xs : [A]) -> [[A]] {
 	}
 }
 
-@effects(readnone)
 private func take<T>(num : Int, xs : [T]) -> [T] {
 	let n = (num < xs.count) ? num : xs.count
 	return [T](xs[0..<n])
 }
 
-@effects(readnone)
 private func drop<T>(num : Int, xs : [T]) -> [T] {
 	let n = (num < xs.count) ? num : xs.count
 	return [T](xs[n..<xs.endIndex])
 }
 
-@effects(readnone)
 private func shrinkOne<A : Arbitrary>(xs : [A]) -> [[A]] {
 	if xs.isEmpty {
 		return [[A]]()

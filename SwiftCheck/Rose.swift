@@ -26,13 +26,11 @@ extension Rose /*: Functor*/ {
 	///
 	/// For `.MkRose` branches the computation is applied to the node's value then application
 	/// recurses into the sub-trees.  For `.IORose` branches the map is suspended.
-	@effects(readnone)
 	public func fmap<B>(f : (A -> B)) -> Rose<B> {
 		return f <^> self
 	}
 }
 
-@effects(readnone)
 public func <^> <A, B>(f : A -> B, g : Rose<A>) -> Rose<B> {
 	switch g {
 		case .MkRose(let root, let children):
@@ -46,7 +44,6 @@ extension Rose /*: Applicative*/ {
 	typealias FAB = Rose<A -> B>
 
 	/// Lifts a value into a Rose Tree.
-	@effects(readnone)
 	public static func pure(a : A) -> Rose<A> {
 		return .MkRose({ a }, { [] })
 	}
@@ -56,13 +53,11 @@ extension Rose /*: Applicative*/ {
 	/// For `.MkRose` branches the computation is applied to the node's value then application
 	/// recurses into the sub-trees.  For `.IORose` the branch is reduced to a `.MkRose` and
 	/// applied, executing all side-effects along the way.
-	@effects(readnone)
 	public func ap<B>(fn : Rose<A -> B>) -> Rose<B> {
 		return fn <*> self
 	}
 }
 
-@effects(readnone)
 public func <*> <A, B>(fn : Rose<A -> B>, g : Rose<A>) -> Rose<B> {
 	switch fn {
 		case .MkRose(let f, _):
@@ -74,19 +69,16 @@ public func <*> <A, B>(fn : Rose<A -> B>, g : Rose<A>) -> Rose<B> {
 
 extension Rose /*: Monad*/ {
 	/// Maps the values in the receiver to Rose Trees and joins them all together.
-	@effects(readnone)
 	public func bind<B>(fn : A -> Rose<B>) -> Rose<B> {
 		return self >>- fn
 	}
 }
 
-@effects(readnone)
 public func >>- <A, B>(m : Rose<A>, fn : A -> Rose<B>) -> Rose<B> {
 	return joinRose(m.fmap(fn))
 }
 
 /// Lifts functions to functions over Rose Trees.
-@effects(readnone)
 public func liftM<A, R>(f : A -> R)(m1 : Rose<A>) -> Rose<R> {
 	return m1.bind { x1 in
 		return Rose.pure(f(x1))
@@ -99,7 +91,6 @@ public func liftM<A, R>(f : A -> R)(m1 : Rose<A>) -> Rose<R> {
 /// the node dictates the behavior of the join.  For `.IORose` sub-trees The join is suspended.  For
 /// `.MkRose` the result is the value at the sub-tree node and a recursive call to join the branch's
 /// tree to its sub-trees.
-@effects(readnone)
 public func joinRose<A>(rs : Rose<Rose<A>>) -> Rose<A> {
 	switch rs {
 		case .IORose(let rs):
@@ -116,7 +107,6 @@ public func joinRose<A>(rs : Rose<Rose<A>>) -> Rose<A> {
 
 /// Reduces a rose tree by evaluating all `.IORose` branches until the first `.MkRose` branch is
 /// encountered.  That branch is then returned.
-@effects(readnone)
 public func reduce(rs : Rose<TestResult>) -> Rose<TestResult> {
 	switch rs {
 		case .MkRose(_, _):
@@ -127,7 +117,6 @@ public func reduce(rs : Rose<TestResult>) -> Rose<TestResult> {
 }
 
 /// Case analysis for a Rose Tree.
-@effects(readnone)
 public func onRose<A>(f : (A -> [Rose<A>] -> Rose<A>))(rs : Rose<A>) -> Rose<A> {
 	switch rs {
 		case .MkRose(let x, let rs):
@@ -138,7 +127,6 @@ public func onRose<A>(f : (A -> [Rose<A>] -> Rose<A>))(rs : Rose<A>) -> Rose<A> 
 }
 
 /// Sequences an array of Rose Trees into a Rose Tree of an array.
-@effects(readnone)
 public func sequence<A>(ms : [Rose<A>]) -> Rose<[A]> {
 	return ms.reduce(Rose<[A]>.pure([]), combine: { n, m in
 		return m.bind { x in
@@ -151,7 +139,6 @@ public func sequence<A>(ms : [Rose<A>]) -> Rose<[A]> {
 
 /// Sequences the result of mapping values to Rose trees into a single rose tree of an array of
 /// values.
-@effects(readnone)
 public func mapM<A, B>(f : A -> Rose<B>, xs : [A]) -> Rose<[B]> {
 	return sequence(xs.map(f))
 }
