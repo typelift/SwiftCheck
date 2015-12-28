@@ -49,7 +49,6 @@ infix operator ==> {
 
 /// Models implication for properties.  That is, the property holds if the first argument is false
 /// (in which case the test case is discarded), or if the given property holds.
-@effects(readnone)
 public func ==>(b : Bool, @autoclosure p : () -> Testable) -> Property {
 	if b {
 		return p().property
@@ -59,7 +58,6 @@ public func ==>(b : Bool, @autoclosure p : () -> Testable) -> Property {
 
 /// Models implication for properties.  That is, the property holds if the first argument is false
 /// (in which case the test case is discarded), or if the given property holds.
-@effects(readnone)
 public func ==>(b : Bool, p : () -> Testable) -> Property {
 	if b {
 		return p().property
@@ -72,7 +70,6 @@ infix operator ==== {
 }
 
 /// Like equality but prints a verbose description when it fails.
-@effects(readnone)
 public func ====<A where A : Equatable>(x : A, y : A) -> Property {
 	return (x == y).counterexample(String(x) + "/=" + String(y))
 }
@@ -89,7 +86,6 @@ infix operator <?> {
 /// test cases need to be distinct from one another.  In addition to shrunken test cases, upon
 /// failure SwiftCheck will print a distribution map for the property that shows a percentage
 /// success rate for the property.
-@effects(readnone)
 public func <?>(p : Testable, s : String) -> Property {
 	return p.label(s)
 }
@@ -103,7 +99,6 @@ infix operator ^&&^ {
 ///
 /// Conjoined properties succeed only when both sub-properties succeed and fail when one or more
 /// sub-properties fail.
-@effects(readnone)
 public func ^&&^(p1 : Testable, p2 : Testable) -> Property {
 	return conjoin(p1.property, p2.property)
 }
@@ -118,7 +113,6 @@ infix operator ^||^ {
 ///
 /// Disjoined properties succeed only when one or more sub-properties succeed and fail when both
 /// sub-properties fail.
-@effects(readnone)
 public func ^||^(p1 : Testable, p2 : Testable) -> Property {
 	return disjoin(p1.property, p2.property)
 }

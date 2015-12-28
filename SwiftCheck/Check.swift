@@ -31,7 +31,6 @@
 ///     }
 ///
 /// If no arguments are provided, or nil is given, SwiftCheck will select an internal default.
-@effects(readnone)
 public func property(msg : String, arguments : CheckerArguments? = nil, file : String = __FILE__, line : UInt = __LINE__) -> AssertiveQuickCheck {
 	return AssertiveQuickCheck(msg: msg, file: file, line: line, args: arguments ?? CheckerArguments(name: msg))
 }
@@ -52,7 +51,6 @@ public struct AssertiveQuickCheck {
 
 /// The interface for properties to be run through SwiftCheck without an XCTest assert.  The
 /// property will still generate console output during testing.
-@effects(readnone)
 public func reportProperty(msg : String, arguments : CheckerArguments? = nil, file : String = __FILE__, line : UInt = __LINE__) -> ReportiveQuickCheck {
 	return ReportiveQuickCheck(msg: msg, file: file, line: line, args: arguments ?? CheckerArguments(name: msg))
 }

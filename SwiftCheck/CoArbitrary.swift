@@ -34,7 +34,6 @@ public func coarbitraryPrintable<A, B>(x : A) -> Gen<B> -> Gen<B> {
 }
 
 extension Bool : CoArbitrary {
-	@effects(readnone)
 	public static func coarbitrary<C>(x : Bool) -> Gen<C> -> Gen<C> {
 		return { g in
 			if x {
@@ -46,14 +45,12 @@ extension Bool : CoArbitrary {
 }
 
 extension UnicodeScalar : CoArbitrary {
-	@effects(readnone)
 	public static func coarbitrary<C>(x : UnicodeScalar) -> Gen<C> -> Gen<C> {
 		return UInt32.coarbitrary(x.value)
 	}
 }
 
 extension Character : CoArbitrary {
-	@effects(readnone)
 	public static func coarbitrary<C>(x : Character) -> (Gen<C> -> Gen<C>) {
 		let ss = String(x).unicodeScalars
 		return UnicodeScalar.coarbitrary(ss[ss.startIndex])
@@ -61,7 +58,6 @@ extension Character : CoArbitrary {
 }
 
 extension String : CoArbitrary {
-	@effects(readnone)
 	public static func coarbitrary<C>(x : String) -> (Gen<C> -> Gen<C>) {
 		if x.isEmpty {
 			return { $0.variant(0) }
@@ -71,70 +67,60 @@ extension String : CoArbitrary {
 }
 
 extension Int : CoArbitrary {
-	@effects(readnone)
 	public static func coarbitrary<C>(x : Int) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension Int8 : CoArbitrary {
-	@effects(readnone)
 	public static func coarbitrary<C>(x : Int8) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension Int16 : CoArbitrary {
-	@effects(readnone)
 	public static func coarbitrary<C>(x : Int16) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension Int32 : CoArbitrary {
-	@effects(readnone)
 	public static func coarbitrary<C>(x : Int32) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension Int64 : CoArbitrary {
-	@effects(readnone)
 	public static func coarbitrary<C>(x : Int64) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension UInt : CoArbitrary {
-	@effects(readnone)
 	public static func coarbitrary<C>(x : UInt) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension UInt8 : CoArbitrary {
-	@effects(readnone)
 	public static func coarbitrary<C>(x : UInt8) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension UInt16 : CoArbitrary {
-	@effects(readnone)
 	public static func coarbitrary<C>(x : UInt16) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension UInt32 : CoArbitrary {
-	@effects(readnone)
 	public static func coarbitrary<C>(x : UInt32) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension UInt64 : CoArbitrary {
-	@effects(readnone)
 	public static func coarbitrary<C>(x : UInt64) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
@@ -142,21 +128,18 @@ extension UInt64 : CoArbitrary {
 
 // In future, implement these with Ratios like QuickCheck.
 extension Float : CoArbitrary {
-	@effects(readnone)
 	public static func coarbitrary<C>(x : Float) -> (Gen<C> -> Gen<C>) {
 		return Int64(x).coarbitraryIntegral()
 	}
 }
 
 extension Double : CoArbitrary {
-	@effects(readnone)
 	public static func coarbitrary<C>(x : Double) -> (Gen<C> -> Gen<C>) {
 		return Int64(x).coarbitraryIntegral()
 	}
 }
 
 extension Array : CoArbitrary {
-	@effects(readnone)
 	public static func coarbitrary<C>(a : [Element]) -> (Gen<C> -> Gen<C>) {
 		if a.isEmpty {
 			return { $0.variant(0) }
@@ -166,7 +149,6 @@ extension Array : CoArbitrary {
 }
 
 extension Dictionary : CoArbitrary {
-	@effects(readnone)
 	public static func coarbitrary<C>(x : Dictionary<Key, Value>) -> (Gen<C> -> Gen<C>) {
 		if x.isEmpty {
 			return { $0.variant(0) }
@@ -176,7 +158,6 @@ extension Dictionary : CoArbitrary {
 }
 
 extension Optional : CoArbitrary {
-	@effects(readnone)
 	public static func coarbitrary<C>(x : Optional<Wrapped>) -> (Gen<C> -> Gen<C>) {
 		if let _ = x {
 			return { $0.variant(0) }
@@ -186,7 +167,6 @@ extension Optional : CoArbitrary {
 }
 
 extension Set : CoArbitrary {
-	@effects(readnone)
 	public static func coarbitrary<C>(x : Set<Element>) -> (Gen<C> -> Gen<C>) {
 		if x.isEmpty {
 			return { $0.variant(0) }
