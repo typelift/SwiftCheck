@@ -514,10 +514,15 @@ struct ArbitraryEmail : Arbitrary {
 	// Here we use `emailGen` to generate our cases out of convenience, but there are much 
 	// more efficient ways we could have done this.  See `Modifiers.swift` for examples.
 	static func shrink(tt : ArbitraryEmail) -> [ArbitraryEmail] {
-		return emailGen.suchThat({ $0.unicodeScalars.count <= (tt.getEmail.unicodeScalars.count / 2) }) // Halve the size of the input address for efficient shrinking.
-						.proliferateNonEmpty() // Proliferate an array 
-						.generate // Generate
-						.map(ArbitraryEmail.init) // Then wrap in our Modifier Type
+		// If we're down to 1 character addresses, we probably should stop shrinking.
+		if (tt.getEmail.unicodeScalars.indexOf("\u{0040}") == tt.getEmail.unicodeScalars.startIndex.successor()) {
+			return []
+		}
+		print(tt.getEmail)
+		return emailGen.resize(tt.getEmail.unicodeScalars.count / 2) // Halve the size of the previous addresses
+					.proliferateSized(2) // Proliferate a small array of alternatives
+					.generate // Generate
+					.map(ArbitraryEmail.init) // Then wrap in our Modifier Type
 	}
 }
 
@@ -626,7 +631,7 @@ reportProperty("All Prime") <- forAll { (n : Positive<Int>) in
 //:
 //:     *** Failed! Proposition: All Prime
 //:     Falsifiable (after 11 tests and 2 shrinks):
-//:     Positive( 4 ) // or Positive( 10 )
+//:     Positive( 4 ) // or Positive( 9 )
 //:     0
 //:
 //: What's wrong here?
@@ -692,6 +697,45 @@ property("All Prime") <- forAll { (n : Positive<Int>) in
 	// Sieving Properly then filtering for primes is the same as just Sieving, right?
 	return sieveProperly(n.getPositive).filter(isPrime) == sieveProperly(n.getPositive)
 }
+
+//; # One More Thing
+
+//: When working with failing tests, it's often tough to be able to replicate the exact conditions
+//: that cause a failure or a bug.  With SwiftCheck, that is now a thing of the past.  The framework
+//: comes with a replay mechanism that allows the arguments that lead to a failing test to be generated
+//: in exactly the same order, with exactly the same values, as they did the first time.  When a test
+//: fails, SwiftCheck will present a helpful message that looks something like this in Xcode:
+
+//: > failed - Falsifiable; Replay with 123456789 123456789
+
+//: Or this message in your log:
+
+//: > Pass the seed values 123456789 123456789 to replay the test.
+
+//: These are called *seeds*, and they can be fed back into the property that generated them to 
+//: activate the replay feature.  For example, here's an annoying test to debug because it only fails
+//: every so often on one particular value:
+
+reportProperty("Screw this value in particular") <- forAll { (n : UInt) in
+	if (n == 42) {
+		return false
+	}
+
+	return true
+}
+
+//: But with a replay seed of (1391985334, 382376411) we can always reproduce the failure because
+//: 42 will always be generated as the first value.  We've turned on verbose mode to demonstrate this.
+
+/// By passing this argument to the test, SwiftCheck will automatically use the given seed values and
+/// size to completely replicate a particular set of values that caused the first test to fail.
+let replayArgs = CheckerArguments(replay: (StdGen(1391985334, 382376411), 100))
+reportProperty("Replay", arguments: replayArgs) <- forAll { (n : UInt) in
+	if (n == 42) {
+		return false
+	}
+	return true
+}.verbose
 
 //: # Conclusion
 
