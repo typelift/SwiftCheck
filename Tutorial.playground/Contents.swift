@@ -270,19 +270,12 @@ let tld = lowerCaseLetters.proliferateNonEmpty().suchThat({ $0.count > 1 }).fmap
 //: So now we've got all the pieces together, so how do we put them together to make the final generator?  Well, how
 //: about some glue?
 
-// Concatenates 5 strings together in order.
-func glue5(l : String)(m : String)(m2 : String)(m3 : String)(r : String) -> String {
-	return l + m + m2 + m3 + r
+// Concatenates an array of `String` `Gen`erators together in order.
+func glue(parts : [Gen<String>]) -> Gen<String> {
+	return sequence(parts).fmap { ps in ps.reduce("", combine: +) }
 }
 
-//: This big thing looks a bit complicated, let's go through it part by part:
-
-//:            +--- Here's our glue function.
-//:            |     +--- This says we're "lifting" and mapping that function over all these pieces.
-//:            |     |              +--- Here's our "platforms" from before.
-//:            |     |              |
-//:            v     v              v
-let emailGen = glue5 <^> localEmail <*> Gen.pure("@") <*> hostname <*> Gen.pure(".") <*> tld
+let emailGen = glue([localEmail, Gen.pure("@"), hostname, Gen.pure("."), tld])
 
 //: And we're done!
 
@@ -510,20 +503,6 @@ struct ArbitraryEmail : Arbitrary {
 	init(email : String) { self.getEmail = email }
 
 	static var arbitrary : Gen<ArbitraryEmail> { return emailGen.fmap(ArbitraryEmail.init) }
-
-	// Here we use `emailGen` to generate our cases out of convenience, but there are much 
-	// more efficient ways we could have done this.  See `Modifiers.swift` for examples.
-	static func shrink(tt : ArbitraryEmail) -> [ArbitraryEmail] {
-		// If we're down to 1 character addresses, we probably should stop shrinking.
-		if (tt.getEmail.unicodeScalars.indexOf("\u{0040}") == tt.getEmail.unicodeScalars.startIndex.successor()) {
-			return []
-		}
-		print(tt.getEmail)
-		return emailGen.resize(tt.getEmail.unicodeScalars.count / 2) // Halve the size of the previous addresses
-					.proliferateSized(2) // Proliferate a small array of alternatives
-					.generate // Generate
-					.map(ArbitraryEmail.init) // Then wrap in our Modifier Type
-	}
 }
 
 // Let's be wrong for the sake of example
