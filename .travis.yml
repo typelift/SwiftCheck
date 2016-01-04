@@ -6,8 +6,9 @@ env:
 
 before_install: true
 install: true
-script: 
+script:
     - if [[ "$TEST_CONFIG" == "RELEASE" ]]; then script/cibuild SwiftCheck SwiftCheck-iOS ; fi
+    - if [[ "$TEST_CONFIG" == "RELEASE" ]]; then xcodebuild test -scheme SwiftCheck-tvOS -destination 'platform=tvOS Simulator,name=Apple TV 1080p' ; fi
     - if [[ "$TEST_CONFIG" == "PODS" ]]; then pod lib lint; fi
 notifications:
   webhooks:

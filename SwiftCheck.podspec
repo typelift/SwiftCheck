@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name        = "SwiftCheck"
-    s.version     = "0.4.1"
+    s.version     = "0.4.4"
     s.summary     = "QuickCheck for Swift."
     s.homepage    = "https://github.com/typelift/SwiftCheck"
     s.license     = { :type => "MIT", :text => <<-LICENSE
@@ -33,6 +33,7 @@ Pod::Spec.new do |s|
     s.requires_arc = true
     s.osx.deployment_target = "10.9"
     s.ios.deployment_target = "8.0"
+    s.tvos.deployment_target = "9.0"
     s.framework = "XCTest"
     s.source   = { :git => "https://github.com/typelift/SwiftCheck.git", :tag => "v#{s.version}", :submodules => true }
     s.source_files = "SwiftCheck/*.swift", "**/Operadics/*.swift"

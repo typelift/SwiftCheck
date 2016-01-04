@@ -11,6 +11,37 @@
 		8216BAB81B97775100A0D282 /* ComplexSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8216BAB61B97775100A0D282 /* ComplexSpec.swift */; };
 		821B76CD1BC4449300AF97D6 /* FailureSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821B76CC1BC4449300AF97D6 /* FailureSpec.swift */; };
 		821B76CE1BC4449300AF97D6 /* FailureSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821B76CC1BC4449300AF97D6 /* FailureSpec.swift */; };
+		8240CCBB1C3A123700EF4D29 /* SwiftCheck.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8240CCB11C3A123600EF4D29 /* SwiftCheck.framework */; };
+		8240CCC81C3A124B00EF4D29 /* Arbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCA9198B323800EB242A /* Arbitrary.swift */; };
+		8240CCC91C3A124B00EF4D29 /* CoArbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82ED49DE1C210D85008E9595 /* CoArbitrary.swift */; };
+		8240CCCA1C3A124B00EF4D29 /* Check.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C241A6DBAA800241F68 /* Check.swift */; };
+		8240CCCB1C3A124B00EF4D29 /* Gen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCAB198B32DC00EB242A /* Gen.swift */; };
+		8240CCCC1C3A124B00EF4D29 /* Lattice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842015101AF5C91C00F1F3CD /* Lattice.swift */; };
+		8240CCCD1C3A124B00EF4D29 /* Modifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F2C4F61A7AD43F00316E5F /* Modifiers.swift */; };
+		8240CCCE1C3A124B00EF4D29 /* Operators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82DD8EEB1B4CC88C00B66551 /* Operators.swift */; };
+		8240CCCF1C3A124B00EF4D29 /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCAD198B367000EB242A /* Property.swift */; };
+		8240CCD01C3A124B00EF4D29 /* Random.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCC2198EC4F000EB242A /* Random.swift */; };
+		8240CCD11C3A124B00EF4D29 /* Rose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCC6198EFB4700EB242A /* Rose.swift */; };
+		8240CCD21C3A124B00EF4D29 /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCB3198B39F300EB242A /* State.swift */; };
+		8240CCD31C3A124B00EF4D29 /* Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCAF198B36BE00EB242A /* Test.swift */; };
+		8240CCD41C3A124B00EF4D29 /* Testable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C2A1A6DBABA00241F68 /* Testable.swift */; };
+		8240CCD51C3A124B00EF4D29 /* TestOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8450D2491AF8003700095EF6 /* TestOperators.swift */; };
+		8240CCD61C3A124B00EF4D29 /* Witness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827749F71B65ABCC00A7965F /* Witness.swift */; };
+		8240CCD71C3A124B00EF4D29 /* WitnessedArbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82ED49E11C210DEE008E9595 /* WitnessedArbitrary.swift */; };
+		8240CCD81C3A124B00EF4D29 /* Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46395B51B1A94D200AA1B65 /* Equatable.swift */; };
+		8240CCD91C3A125800EF4D29 /* SwiftCheck.h in Headers */ = {isa = PBXBuildFile; fileRef = 844FCC92198B320500EB242A /* SwiftCheck.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		8240CCDB1C3A126800EF4D29 /* SwiftCheck.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8240CCB11C3A123600EF4D29 /* SwiftCheck.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		8240CCDC1C3A12AB00EF4D29 /* BooleanIdentitySpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848076671AF5D6A100CBE3EF /* BooleanIdentitySpec.swift */; };
+		8240CCDD1C3A12AB00EF4D29 /* ComplexSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8216BAB61B97775100A0D282 /* ComplexSpec.swift */; };
+		8240CCDE1C3A12AB00EF4D29 /* DiscardSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84572C201A6DBA1C00241F68 /* DiscardSpec.swift */; };
+		8240CCDF1C3A12AB00EF4D29 /* FailureSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821B76CC1BC4449300AF97D6 /* FailureSpec.swift */; };
+		8240CCE01C3A12AB00EF4D29 /* GenSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8445C4A91B16D37800280089 /* GenSpec.swift */; };
+		8240CCE11C3A12AB00EF4D29 /* PropertySpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EA2C381B2287200001FB3F /* PropertySpec.swift */; };
+		8240CCE21C3A12AB00EF4D29 /* ModifierSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8480AB2C1A7B0A9700C6162D /* ModifierSpec.swift */; };
+		8240CCE31C3A12AB00EF4D29 /* ReplaySpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82A6679E1BFD299500EBCDFA /* ReplaySpec.swift */; };
+		8240CCE41C3A12AB00EF4D29 /* ShrinkSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8445C4AC1B17E48300280089 /* ShrinkSpec.swift */; };
+		8240CCE51C3A12AB00EF4D29 /* SimpleSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844FCCC8198EFF9B00EB242A /* SimpleSpec.swift */; };
+		8240CCE61C3A12AB00EF4D29 /* TestSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B9E4A61B3A0EB900C8739E /* TestSpec.swift */; };
 		827749F81B65ABCC00A7965F /* Witness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827749F71B65ABCC00A7965F /* Witness.swift */; };
 		827749F91B65ABCC00A7965F /* Witness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827749F71B65ABCC00A7965F /* Witness.swift */; };
 		82A6679F1BFD299500EBCDFA /* ReplaySpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82A6679E1BFD299500EBCDFA /* ReplaySpec.swift */; };
@@ -71,6 +102,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		8240CCBC1C3A123700EF4D29 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 844FCC84198B320500EB242A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8240CCB01C3A123600EF4D29;
+			remoteInfo = "SwiftCheck-tvOS";
+		};
 		844FCC9A198B320500EB242A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 844FCC84198B320500EB242A /* Project object */;
@@ -88,6 +126,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		8240CCDA1C3A126100EF4D29 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				8240CCDB1C3A126800EF4D29 /* SwiftCheck.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		841408BA1B1A859B00BA2B6C /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -103,6 +151,8 @@
 /* Begin PBXFileReference section */
 		8216BAB61B97775100A0D282 /* ComplexSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComplexSpec.swift; sourceTree = "<group>"; };
 		821B76CC1BC4449300AF97D6 /* FailureSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FailureSpec.swift; sourceTree = "<group>"; };
+		8240CCB11C3A123600EF4D29 /* SwiftCheck.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCheck.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8240CCBA1C3A123700EF4D29 /* SwiftCheck-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SwiftCheck-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		827749F71B65ABCC00A7965F /* Witness.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Witness.swift; sourceTree = "<group>"; usesTabs = 1; };
 		82A6679E1BFD299500EBCDFA /* ReplaySpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReplaySpec.swift; sourceTree = "<group>"; };
 		82DD8EEB1B4CC88C00B66551 /* Operators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Operators.swift; path = Carthage/Checkouts/Operadics/Operators.swift; sourceTree = SOURCE_ROOT; usesTabs = 1; };
@@ -139,6 +189,21 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		8240CCAD1C3A123600EF4D29 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8240CCB71C3A123700EF4D29 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8240CCBB1C3A123700EF4D29 /* SwiftCheck.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		844FCC89198B320500EB242A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -189,6 +254,8 @@
 				844FCC98198B320500EB242A /* SwiftCheckTests.xctest */,
 				84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */,
 				84DF76021B0BD54600C912B0 /* SwiftCheck-iOSTests.xctest */,
+				8240CCB11C3A123600EF4D29 /* SwiftCheck.framework */,
+				8240CCBA1C3A123700EF4D29 /* SwiftCheck-tvOSTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -256,6 +323,14 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		8240CCAE1C3A123600EF4D29 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8240CCD91C3A125800EF4D29 /* SwiftCheck.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		844FCC8A198B320500EB242A /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -275,6 +350,43 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		8240CCB01C3A123600EF4D29 /* SwiftCheck-tvOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8240CCC61C3A123700EF4D29 /* Build configuration list for PBXNativeTarget "SwiftCheck-tvOS" */;
+			buildPhases = (
+				8240CCAC1C3A123600EF4D29 /* Sources */,
+				8240CCAD1C3A123600EF4D29 /* Frameworks */,
+				8240CCAE1C3A123600EF4D29 /* Headers */,
+				8240CCAF1C3A123600EF4D29 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "SwiftCheck-tvOS";
+			productName = "SwiftCheck-tvOS";
+			productReference = 8240CCB11C3A123600EF4D29 /* SwiftCheck.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		8240CCB91C3A123700EF4D29 /* SwiftCheck-tvOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8240CCC71C3A123700EF4D29 /* Build configuration list for PBXNativeTarget "SwiftCheck-tvOSTests" */;
+			buildPhases = (
+				8240CCB61C3A123700EF4D29 /* Sources */,
+				8240CCB71C3A123700EF4D29 /* Frameworks */,
+				8240CCB81C3A123700EF4D29 /* Resources */,
+				8240CCDA1C3A126100EF4D29 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8240CCBD1C3A123700EF4D29 /* PBXTargetDependency */,
+			);
+			name = "SwiftCheck-tvOSTests";
+			productName = "SwiftCheck-tvOSTests";
+			productReference = 8240CCBA1C3A123700EF4D29 /* SwiftCheck-tvOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		844FCC8C198B320500EB242A /* SwiftCheck */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 844FCCA3198B320500EB242A /* Build configuration list for PBXNativeTarget "SwiftCheck" */;
@@ -354,10 +466,16 @@
 		844FCC84198B320500EB242A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0710;
+				LastSwiftUpdateCheck = 0720;
 				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Robert Widmann";
 				TargetAttributes = {
+					8240CCB01C3A123600EF4D29 = {
+						CreatedOnToolsVersion = 7.2;
+					};
+					8240CCB91C3A123700EF4D29 = {
+						CreatedOnToolsVersion = 7.2;
+					};
 					844FCC8C198B320500EB242A = {
 						CreatedOnToolsVersion = 6.0;
 					};
@@ -389,11 +507,27 @@
 				844FCC97198B320500EB242A /* SwiftCheckTests */,
 				84DF75F71B0BD54600C912B0 /* SwiftCheck-iOS */,
 				84DF76011B0BD54600C912B0 /* SwiftCheck-iOSTests */,
+				8240CCB01C3A123600EF4D29 /* SwiftCheck-tvOS */,
+				8240CCB91C3A123700EF4D29 /* SwiftCheck-tvOSTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		8240CCAF1C3A123600EF4D29 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8240CCB81C3A123700EF4D29 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		844FCC8B198B320500EB242A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -425,6 +559,48 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		8240CCAC1C3A123600EF4D29 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8240CCC81C3A124B00EF4D29 /* Arbitrary.swift in Sources */,
+				8240CCC91C3A124B00EF4D29 /* CoArbitrary.swift in Sources */,
+				8240CCCA1C3A124B00EF4D29 /* Check.swift in Sources */,
+				8240CCCB1C3A124B00EF4D29 /* Gen.swift in Sources */,
+				8240CCCC1C3A124B00EF4D29 /* Lattice.swift in Sources */,
+				8240CCCD1C3A124B00EF4D29 /* Modifiers.swift in Sources */,
+				8240CCCE1C3A124B00EF4D29 /* Operators.swift in Sources */,
+				8240CCCF1C3A124B00EF4D29 /* Property.swift in Sources */,
+				8240CCD01C3A124B00EF4D29 /* Random.swift in Sources */,
+				8240CCD11C3A124B00EF4D29 /* Rose.swift in Sources */,
+				8240CCD21C3A124B00EF4D29 /* State.swift in Sources */,
+				8240CCD31C3A124B00EF4D29 /* Test.swift in Sources */,
+				8240CCD41C3A124B00EF4D29 /* Testable.swift in Sources */,
+				8240CCD51C3A124B00EF4D29 /* TestOperators.swift in Sources */,
+				8240CCD61C3A124B00EF4D29 /* Witness.swift in Sources */,
+				8240CCD71C3A124B00EF4D29 /* WitnessedArbitrary.swift in Sources */,
+				8240CCD81C3A124B00EF4D29 /* Equatable.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8240CCB61C3A123700EF4D29 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8240CCDC1C3A12AB00EF4D29 /* BooleanIdentitySpec.swift in Sources */,
+				8240CCDD1C3A12AB00EF4D29 /* ComplexSpec.swift in Sources */,
+				8240CCDE1C3A12AB00EF4D29 /* DiscardSpec.swift in Sources */,
+				8240CCDF1C3A12AB00EF4D29 /* FailureSpec.swift in Sources */,
+				8240CCE01C3A12AB00EF4D29 /* GenSpec.swift in Sources */,
+				8240CCE11C3A12AB00EF4D29 /* PropertySpec.swift in Sources */,
+				8240CCE21C3A12AB00EF4D29 /* ModifierSpec.swift in Sources */,
+				8240CCE31C3A12AB00EF4D29 /* ReplaySpec.swift in Sources */,
+				8240CCE41C3A12AB00EF4D29 /* ShrinkSpec.swift in Sources */,
+				8240CCE51C3A12AB00EF4D29 /* SimpleSpec.swift in Sources */,
+				8240CCE61C3A12AB00EF4D29 /* TestSpec.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		844FCC88198B320500EB242A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -512,6 +688,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		8240CCBD1C3A123700EF4D29 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8240CCB01C3A123600EF4D29 /* SwiftCheck-tvOS */;
+			targetProxy = 8240CCBC1C3A123700EF4D29 /* PBXContainerItemProxy */;
+		};
 		844FCC9B198B320500EB242A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 844FCC8C198B320500EB242A /* SwiftCheck */;
@@ -525,6 +706,98 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		8240CCC21C3A123700EF4D29 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=appletvsimulator*]" = "";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				GCC_NO_COMMON_BLOCKS = YES;
+				INFOPLIST_FILE = SwiftCheck/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.typelift.SwiftCheck;
+				PRODUCT_NAME = SwiftCheck;
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = "";
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 9.0;
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Debug;
+		};
+		8240CCC31C3A123700EF4D29 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=appletvsimulator*]" = "";
+				COPY_PHASE_STRIP = NO;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				GCC_NO_COMMON_BLOCKS = YES;
+				INFOPLIST_FILE = SwiftCheck/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.typelift.SwiftCheck;
+				PRODUCT_NAME = SwiftCheck;
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = "";
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 9.0;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Release;
+		};
+		8240CCC41C3A123700EF4D29 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_NO_COMMON_BLOCKS = YES;
+				INFOPLIST_FILE = SwiftCheckTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.typelift.SwiftCheck-tvOSTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				TVOS_DEPLOYMENT_TARGET = 9.0;
+			};
+			name = Debug;
+		};
+		8240CCC51C3A123700EF4D29 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				INFOPLIST_FILE = SwiftCheckTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.typelift.SwiftCheck-tvOSTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				TVOS_DEPLOYMENT_TARGET = 9.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		844FCCA1198B320500EB242A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -739,6 +1012,8 @@
 				SWIFT_INSTALL_OBJC_HEADER = NO;
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "";
 				TARGETED_DEVICE_FAMILY = "1,2,3";
+				TVOS_DEPLOYMENT_TARGET = 9.0;
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
 			};
 			name = Debug;
 		};
@@ -769,7 +1044,9 @@
 				SWIFT_INSTALL_OBJC_HEADER = NO;
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "";
 				TARGETED_DEVICE_FAMILY = "1,2,3";
+				TVOS_DEPLOYMENT_TARGET = 9.0;
 				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
 			};
 			name = Release;
 		};
@@ -815,6 +1092,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		8240CCC61C3A123700EF4D29 /* Build configuration list for PBXNativeTarget "SwiftCheck-tvOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8240CCC21C3A123700EF4D29 /* Debug */,
+				8240CCC31C3A123700EF4D29 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8240CCC71C3A123700EF4D29 /* Build configuration list for PBXNativeTarget "SwiftCheck-tvOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8240CCC41C3A123700EF4D29 /* Debug */,
+				8240CCC51C3A123700EF4D29 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		844FCC87198B320500EB242A /* Build configuration list for PBXProject "SwiftCheck" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
