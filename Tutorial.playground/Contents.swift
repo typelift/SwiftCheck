@@ -203,7 +203,6 @@ generatorBoundedSizeArrays.generate
 //: * `<*>` is an alias for `ap`
 //: * `>>-` is an alias for `bind`
 
-// <^> is backwards for aesthetic and historical purposes.  Its true use will be revealled soon.
 let fromTwoToSix_ = { $0 + 1 } <^> fromOnetoFive
 
 fromTwoToSix_.generate
@@ -218,16 +217,6 @@ generatorBoundedSizeArrays_.generate
 generatorBoundedSizeArrays_.generate
 generatorBoundedSizeArrays_.generate
 
-//: Now that you've seen what generators can do, we'll use all we've learned to create a generator 
-//: that produces email addresses.  To do this, we'll need one more operator/method notated `<*>` or
-//: `ap`. `ap` comes from 
-//: [Applicative Functors](http://staff.city.ac.uk/~ross/papers/Applicative.html) and is used to 
-//: "zip together" `Gen`erators of functions with `Gen`erators of of values.  Unlike `zip`, when
-//: a function gets paired with a value the latter is applied to the former to produce a new
-//: value.  For our purposes, we don't even need that definition.  We can think of `ap` like
-//: a platform that a lifted value can ride atop as a function is carried through.  You'll
-//: see what this means in detail shortly.
-//:
 //: For our purposes, we will say that an email address consists of 3 parts: A local part, a 
 //: hostname, and a Top-Level Domain each separated by an `@`, and a `.` respectively.
 //:
@@ -270,19 +259,12 @@ let tld = lowerCaseLetters.proliferateNonEmpty().suchThat({ $0.count > 1 }).fmap
 //: So now we've got all the pieces together, so how do we put them together to make the final generator?  Well, how
 //: about some glue?
 
-// Concatenates 5 strings together in order.
-func glue5(l : String)(m : String)(m2 : String)(m3 : String)(r : String) -> String {
-	return l + m + m2 + m3 + r
+// Concatenates an array of `String` `Gen`erators together in order.
+func glue(parts : [Gen<String>]) -> Gen<String> {
+	return sequence(parts).fmap { $0.reduce("", combine: +) }
 }
 
-//: This big thing looks a bit complicated, let's go through it part by part:
-
-//:            +--- Here's our glue function.
-//:            |     +--- This says we're "lifting" and mapping that function over all these pieces.
-//:            |     |              +--- Here's our "platforms" from before.
-//:            |     |              |
-//:            v     v              v
-let emailGen = glue5 <^> localEmail <*> Gen.pure("@") <*> hostname <*> Gen.pure(".") <*> tld
+let emailGen = glue([localEmail, Gen.pure("@"), hostname, Gen.pure("."), tld])
 
 //: And we're done!
 
@@ -510,15 +492,6 @@ struct ArbitraryEmail : Arbitrary {
 	init(email : String) { self.getEmail = email }
 
 	static var arbitrary : Gen<ArbitraryEmail> { return emailGen.fmap(ArbitraryEmail.init) }
-
-	// Here we use `emailGen` to generate our cases out of convenience, but there are much 
-	// more efficient ways we could have done this.  See `Modifiers.swift` for examples.
-	static func shrink(tt : ArbitraryEmail) -> [ArbitraryEmail] {
-		return emailGen.suchThat({ $0.unicodeScalars.count <= (tt.getEmail.unicodeScalars.count / 2) }) // Halve the size of the input address for efficient shrinking.
-						.proliferateNonEmpty() // Proliferate an array 
-						.generate // Generate
-						.map(ArbitraryEmail.init) // Then wrap in our Modifier Type
-	}
 }
 
 // Let's be wrong for the sake of example
@@ -626,7 +599,7 @@ reportProperty("All Prime") <- forAll { (n : Positive<Int>) in
 //:
 //:     *** Failed! Proposition: All Prime
 //:     Falsifiable (after 11 tests and 2 shrinks):
-//:     Positive( 4 ) // or Positive( 10 )
+//:     Positive( 4 ) // or Positive( 9 )
 //:     0
 //:
 //: What's wrong here?
@@ -692,6 +665,45 @@ property("All Prime") <- forAll { (n : Positive<Int>) in
 	// Sieving Properly then filtering for primes is the same as just Sieving, right?
 	return sieveProperly(n.getPositive).filter(isPrime) == sieveProperly(n.getPositive)
 }
+
+//; # One More Thing
+
+//: When working with failing tests, it's often tough to be able to replicate the exact conditions
+//: that cause a failure or a bug.  With SwiftCheck, that is now a thing of the past.  The framework
+//: comes with a replay mechanism that allows the arguments that lead to a failing test to be generated
+//: in exactly the same order, with exactly the same values, as they did the first time.  When a test
+//: fails, SwiftCheck will present a helpful message that looks something like this in Xcode:
+
+//: > failed - Falsifiable; Replay with 123456789 123456789
+
+//: Or this message in your log:
+
+//: > Pass the seed values 123456789 123456789 to replay the test.
+
+//: These are called *seeds*, and they can be fed back into the property that generated them to 
+//: activate the replay feature.  For example, here's an annoying test to debug because it only fails
+//: every so often on one particular value:
+
+reportProperty("Screw this value in particular") <- forAll { (n : UInt) in
+	if (n == 42) {
+		return false
+	}
+
+	return true
+}
+
+//: But with a replay seed of (1391985334, 382376411) we can always reproduce the failure because
+//: 42 will always be generated as the first value.  We've turned on verbose mode to demonstrate this.
+
+/// By passing this argument to the test, SwiftCheck will automatically use the given seed values and
+/// size to completely replicate a particular set of values that caused the first test to fail.
+let replayArgs = CheckerArguments(replay: (StdGen(1391985334, 382376411), 100))
+reportProperty("Replay", arguments: replayArgs) <- forAll { (n : UInt) in
+	if (n == 42) {
+		return false
+	}
+	return true
+}.verbose
 
 //: # Conclusion
 
