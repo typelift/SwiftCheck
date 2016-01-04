@@ -203,7 +203,6 @@ generatorBoundedSizeArrays.generate
 //: * `<*>` is an alias for `ap`
 //: * `>>-` is an alias for `bind`
 
-// <^> is backwards for aesthetic and historical purposes.  Its true use will be revealled soon.
 let fromTwoToSix_ = { $0 + 1 } <^> fromOnetoFive
 
 fromTwoToSix_.generate
@@ -218,16 +217,6 @@ generatorBoundedSizeArrays_.generate
 generatorBoundedSizeArrays_.generate
 generatorBoundedSizeArrays_.generate
 
-//: Now that you've seen what generators can do, we'll use all we've learned to create a generator 
-//: that produces email addresses.  To do this, we'll need one more operator/method notated `<*>` or
-//: `ap`. `ap` comes from 
-//: [Applicative Functors](http://staff.city.ac.uk/~ross/papers/Applicative.html) and is used to 
-//: "zip together" `Gen`erators of functions with `Gen`erators of of values.  Unlike `zip`, when
-//: a function gets paired with a value the latter is applied to the former to produce a new
-//: value.  For our purposes, we don't even need that definition.  We can think of `ap` like
-//: a platform that a lifted value can ride atop as a function is carried through.  You'll
-//: see what this means in detail shortly.
-//:
 //: For our purposes, we will say that an email address consists of 3 parts: A local part, a 
 //: hostname, and a Top-Level Domain each separated by an `@`, and a `.` respectively.
 //:
@@ -272,7 +261,7 @@ let tld = lowerCaseLetters.proliferateNonEmpty().suchThat({ $0.count > 1 }).fmap
 
 // Concatenates an array of `String` `Gen`erators together in order.
 func glue(parts : [Gen<String>]) -> Gen<String> {
-	return sequence(parts).fmap { ps in ps.reduce("", combine: +) }
+	return sequence(parts).fmap { $0.reduce("", combine: +) }
 }
 
 let emailGen = glue([localEmail, Gen.pure("@"), hostname, Gen.pure("."), tld])
