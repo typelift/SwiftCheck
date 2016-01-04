@@ -7,7 +7,7 @@ env:
 before_install: true
 install: true
 script: 
-    - if [[ "$TEST_CONFIG" == "RELEASE" ]]; then script/cibuild SwiftCheck SwiftCheck-iOS ; fi
+    - if [[ "$TEST_CONFIG" == "RELEASE" ]]; then script/cibuild SwiftCheck SwiftCheck-iOS SwiftCheck-tvOS ; fi
     - if [[ "$TEST_CONFIG" == "PODS" ]]; then pod lib lint; fi
 notifications:
   webhooks:
