@@ -16,6 +16,27 @@
 public enum Rose<A> {
 	case MkRose(() -> A, () -> [Rose<A>])
 	case IORose(() -> Rose<A>)
+
+	/// Case analysis for a Rose Tree.
+	public func onRose(f : (A, [Rose<A>]) -> Rose<A>) -> Rose<A> {
+		switch self {
+		case .MkRose(let x, let rs):
+			return f(x(), rs())
+		case .IORose(let m):
+			return .IORose({ m().onRose(f) })
+		}
+	}
+
+	/// Reduces a rose tree by evaluating all `.IORose` branches until the first `.MkRose` branch is
+	/// encountered.  That branch is then returned.
+	public var reduce : Rose<A> {
+		switch self {
+		case .MkRose(_, _):
+			return self
+		case .IORose(let m):
+			return m().reduce
+		}
+	}
 }
 
 extension Rose /*: Functor*/ {
@@ -102,27 +123,6 @@ public func joinRose<A>(rs : Rose<Rose<A>>) -> Rose<A> {
 				case .MkRose(let x, let ts):
 					return .MkRose(x, { rs().map(joinRose) + ts() })
 			}
-	}
-}
-
-/// Reduces a rose tree by evaluating all `.IORose` branches until the first `.MkRose` branch is
-/// encountered.  That branch is then returned.
-public func reduce(rs : Rose<TestResult>) -> Rose<TestResult> {
-	switch rs {
-		case .MkRose(_, _):
-			return rs
-		case .IORose(let m):
-			return reduce(m())
-	}
-}
-
-/// Case analysis for a Rose Tree.
-public func onRose<A>(f : (A -> [Rose<A>] -> Rose<A>))(rs : Rose<A>) -> Rose<A> {
-	switch rs {
-		case .MkRose(let x, let rs):
-			return f(x())(rs())
-		case .IORose(let m):
-			return .IORose({ onRose(f)(rs: m()) })
 	}
 }
 

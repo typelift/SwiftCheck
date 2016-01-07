@@ -86,13 +86,11 @@ extension Testable {
 
 	/// Modifies a property so it will not shrink when it fails.
 	public var noShrinking : Property {
-		return self.mapRoseResult({ rs in
-			return onRose({ res in
-				return { (_) in
-					return .MkRose({ res }, { [] })
-				}
-			})(rs: rs)
-		})
+		return self.mapRoseResult { rs in
+			return rs.onRose { res, _ in
+				return .MkRose({ res }, { [] })
+			}
+		}
 	}
 
 	/// Inverts the result of a test.  That is, test cases that would pass now fail and vice versa.
@@ -217,7 +215,7 @@ extension Testable {
 	///
 	/// If the property does not fail, SwiftCheck will report an error.
 	public var expectFailure : Property {
-		return self.mapTotalResult({ res in
+		return self.mapTotalResult { res in
 			return TestResult(ok:           res.ok
 							, expect:       false
 							, reason:       res.reason
@@ -227,7 +225,7 @@ extension Testable {
 							, callbacks:    res.callbacks
 							, abort:        res.abort
 							, quantifier:	res.quantifier)
-		})
+		}
 	}
 
 	/// Attaches a label to a property.
@@ -416,13 +414,11 @@ private func result(ok : Bool?, reason : String = "") -> TestResult {
 }
 
 private func protectResults(rs : Rose<TestResult>) -> Rose<TestResult> {
-	return onRose({ x in
-		return { rs in
-			return .IORose({
-				return .MkRose(protectResult({ x }), { rs.map(protectResults) })
-			})
-		}
-	})(rs: rs)
+	return rs.onRose { x, rs in
+		return .IORose({
+			return .MkRose(protectResult({ x }), { rs.map(protectResults) })
+		})
+	}
 }
 
 internal func protectRose(f : () throws -> Rose<TestResult>) -> (() -> Rose<TestResult>) {
@@ -526,7 +522,7 @@ private func conj(k : TestResult -> TestResult, xs : [Rose<TestResult>]) -> Rose
 		return Rose.MkRose({ k(TestResult.succeeded) }, { [] })
 	} else if let p = xs.first {
 		return .IORose(/*protectRose*/({
-			let rose = reduce(p)
+			let rose = p.reduce
 			switch rose {
 			case .MkRose(let result, _):
 				if !result().expect {
@@ -539,7 +535,7 @@ private func conj(k : TestResult -> TestResult, xs : [Rose<TestResult>]) -> Rose
 				case .Some(false):
 					return rose
 				case .None:
-					let rose2 = reduce(conj(addCallbacks(result()) • k, xs: [Rose<TestResult>](xs[1..<xs.endIndex])))
+					let rose2 = conj(addCallbacks(result()) • k, xs: [Rose<TestResult>](xs[1..<xs.endIndex])).reduce
 					switch rose2 {
 					case .MkRose(let result2, _):
 						switch result2().ok {

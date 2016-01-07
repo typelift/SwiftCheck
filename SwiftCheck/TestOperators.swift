@@ -10,7 +10,7 @@ infix operator <- {}
 
 /// Binds a Testable value to a property.
 public func <-(checker : AssertiveQuickCheck, @autoclosure(escaping) test : () -> Testable) {
-	switch quickCheckWithResult(checker.args, p: test()) {
+	switch quickCheckWithResult(checker.args, test()) {
 	case let .Failure(_, sz, seed, _, reason, _, _):
 		XCTFail(reason + "; Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
 	case .NoExpectedFailure(_, _, _):
@@ -22,7 +22,7 @@ public func <-(checker : AssertiveQuickCheck, @autoclosure(escaping) test : () -
 
 /// Binds a Testable value to a property.
 public func <-(checker : AssertiveQuickCheck, test : () -> Testable) {
-	switch quickCheckWithResult(checker.args, p: test()) {
+	switch quickCheckWithResult(checker.args, test()) {
 	case let .Failure(_, sz, seed, _, reason, _, _):
 		XCTFail(reason + "; Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
 	case .NoExpectedFailure(_, _, _):
@@ -34,12 +34,12 @@ public func <-(checker : AssertiveQuickCheck, test : () -> Testable) {
 
 /// Binds a Testable value to a property.
 public func <-(checker : ReportiveQuickCheck, test : () -> Testable) {
-	quickCheckWithResult(checker.args, p: test())
+	quickCheckWithResult(checker.args, test())
 }
 
 /// Binds a Testable value to a property.
 public func <-(checker : ReportiveQuickCheck, @autoclosure(escaping) test : () -> Testable) {
-	quickCheckWithResult(checker.args, p: test())
+	quickCheckWithResult(checker.args, test())
 }
 
 infix operator ==> {
