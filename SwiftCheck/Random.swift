@@ -82,7 +82,7 @@ public struct StdGen : Equatable, RandomGeneneratorType, CustomStringConvertible
 	}
 }
 
-public func ==(l : StdGen, r : StdGen) -> Bool {
+public func == (l : StdGen, r : StdGen) -> Bool {
 	return l.seed1 == r.seed1 && l.seed2 == r.seed2
 }
 

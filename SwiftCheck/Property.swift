@@ -51,39 +51,6 @@ public func conjamb(ps : () -> Testable...) -> Property {
 }
 
 extension Testable {
-	/// Applies a function that modifies the property generator's inner `Prop`.
-	public func mapProp(f : Prop -> Prop) -> Property {
-		return Property(f <^> self.property.unProperty)
-	}
-
-	/// Applies a function that modifies the property generator's size.
-	public func mapSize(f : Int -> Int) -> Property {
-		return Property(Gen.sized { n in
-			return self.property.unProperty.resize(f(n))
-		})
-	}
-
-	/// Applies a function that modifies the result of a test case.
-	public func mapTotalResult(f : TestResult -> TestResult) -> Property {
-		return self.mapRoseResult { rs in
-			return protectResults(f <^> rs)
-		}
-	}
-
-	/// Applies a function that modifies the result of a test case.
-	public func mapResult(f : TestResult -> TestResult) -> Property {
-		return self.mapRoseResult { rs in
-			return f <^> rs
-		}
-	}
-
-	/// Applies a function that modifies the underlying Rose Tree that a test case has generated.
-	public func mapRoseResult(f : Rose<TestResult> -> Rose<TestResult>) -> Property {
-		return self.mapProp { t in
-			return Prop(unProp: f(t.unProp))
-		}
-	}
-
 	/// Modifies a property so it will not shrink when it fails.
 	public var noShrinking : Property {
 		return self.mapRoseResult { rs in
@@ -266,6 +233,39 @@ extension Testable {
 			}
 		}
 		return self.property
+	}
+
+	/// Applies a function that modifies the property generator's inner `Prop`.
+	public func mapProp(f : Prop -> Prop) -> Property {
+		return Property(f <^> self.property.unProperty)
+	}
+
+	/// Applies a function that modifies the property generator's size.
+	public func mapSize(f : Int -> Int) -> Property {
+		return Property(Gen.sized { n in
+			return self.property.unProperty.resize(f(n))
+			})
+	}
+
+	/// Applies a function that modifies the result of a test case.
+	public func mapTotalResult(f : TestResult -> TestResult) -> Property {
+		return self.mapRoseResult { rs in
+			return protectResults(f <^> rs)
+		}
+	}
+
+	/// Applies a function that modifies the result of a test case.
+	public func mapResult(f : TestResult -> TestResult) -> Property {
+		return self.mapRoseResult { rs in
+			return f <^> rs
+		}
+	}
+
+	/// Applies a function that modifies the underlying Rose Tree that a test case has generated.
+	public func mapRoseResult(f : Rose<TestResult> -> Rose<TestResult>) -> Property {
+		return self.mapProp { t in
+			return Prop(unProp: f(t.unProp))
+		}
 	}
 }
 
