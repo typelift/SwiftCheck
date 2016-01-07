@@ -337,7 +337,7 @@ public func join<A>(rs : Gen<Gen<A>>) -> Gen<A> {
 }
 
 /// Lifts a function from some A to some R to a function from generators of A to generators of R.
-public func liftM<A, R>(f : A -> R)(m1 : Gen<A>) -> Gen<R> {
+public func liftM<A, R>(f : A -> R, _ m1 : Gen<A>) -> Gen<R> {
 	return m1.bind{ x1 in
 		return Gen.pure(f(x1))
 	}
@@ -346,7 +346,7 @@ public func liftM<A, R>(f : A -> R)(m1 : Gen<A>) -> Gen<R> {
 /// Promotes a rose of generators to a generator of rose values.
 public func promote<A>(x : Rose<Gen<A>>) -> Gen<Rose<A>> {
 	return delay().bind { (let eval : Gen<A> -> A) in
-		return Gen<Rose<A>>.pure(liftM(eval)(m1: x))
+		return Gen<Rose<A>>.pure(liftM(eval, x))
 	}
 }
 

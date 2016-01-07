@@ -116,7 +116,7 @@ extension Optional where Wrapped : Arbitrary {
 	public static var arbitrary : Gen<Optional<Wrapped>> {
 		return Gen<Optional<Wrapped>>.frequency([
 			(1, Gen<Optional<Wrapped>>.pure(.None)),
-			(3, liftM(Optional<Wrapped>.Some)(m1: Wrapped.arbitrary)),
+			(3, liftM(Optional<Wrapped>.Some, Wrapped.arbitrary)),
 		])
 	}
 

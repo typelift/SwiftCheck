@@ -100,7 +100,7 @@ public func >>- <A, B>(m : Rose<A>, fn : A -> Rose<B>) -> Rose<B> {
 }
 
 /// Lifts functions to functions over Rose Trees.
-public func liftM<A, R>(f : A -> R)(m1 : Rose<A>) -> Rose<R> {
+public func liftM<A, R>(f : A -> R, _ m1 : Rose<A>) -> Rose<R> {
 	return m1.bind { x1 in
 		return Rose.pure(f(x1))
 	}
