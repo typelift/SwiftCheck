@@ -131,6 +131,31 @@ extension ArrayOf : CoArbitrary {
 	}
 }
 
+/// Generates a sorted array of arbitrary values of type A.
+public struct OrderedArrayOf<A : protocol<Arbitrary, Comparable>> : Arbitrary, CustomStringConvertible {
+	public let getOrderedArray : [A]
+	public var getContiguousArray : ContiguousArray<A> {
+		return ContiguousArray(self.getOrderedArray)
+	}
+
+	public init(_ array : [A]) {
+		self.getOrderedArray = array.sort()
+	}
+
+	public var description : String {
+		return "\(self.getOrderedArray)"
+	}
+
+	public static var arbitrary : Gen<OrderedArrayOf<A>> {
+		return OrderedArrayOf.init <^> Array<A>.arbitrary
+	}
+
+	public static func shrink(bl : OrderedArrayOf<A>) -> [OrderedArrayOf<A>] {
+		return Array<A>.shrink(bl.getOrderedArray).filter({ $0.sort() == $0 }).map(OrderedArrayOf.init)
+	}
+}
+
+
 /// Generates an dictionary of arbitrary keys and values.
 public struct DictionaryOf<K : protocol<Hashable, Arbitrary>, V : Arbitrary> : Arbitrary, CustomStringConvertible {
 	public let getDictionary : Dictionary<K, V>
