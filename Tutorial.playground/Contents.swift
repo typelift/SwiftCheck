@@ -520,7 +520,7 @@ func sieve(n : Int) -> [Int] {
 		return []
 	}
 
-	var marked : [Bool] = (0...n).map({ _ in false })
+	var marked : [Bool] = (0...n).map { _ in false }
 	marked[0] = true
 	marked[1] = true
 
@@ -623,7 +623,7 @@ func sieveProperly(n : Int) -> [Int] {
 		return []
 	}
 
-	var marked : [Bool] = (0...n).map({ _ in false })
+	var marked : [Bool] = (0...n).map { _ in false }
 	marked[0] = true
 	marked[1] = true
 
