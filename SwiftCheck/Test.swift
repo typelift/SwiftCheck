@@ -328,7 +328,7 @@ public func exists<A : Arbitrary>(gen : Gen<A>, pf : A throws -> Testable) -> Pr
 
 /// Tests a property and prints the results to stdout.
 public func quickCheck(prop : Testable, name : String = "") {
-	quickCheckWithResult(CheckerArguments(name: name), p: prop)
+	quickCheckWithResult(CheckerArguments(name: name), prop)
 }
 
 /// MARK: - Implementation Details
@@ -369,7 +369,7 @@ internal indirect enum Either<L, R> {
 	case Right(R)
 }
 
-internal func quickCheckWithResult(args : CheckerArguments, p : Testable) -> Result {
+internal func quickCheckWithResult(args : CheckerArguments, _ p : Testable) -> Result {
 	func roundTo(n : Int)(m : Int) -> Int {
 		return (n / m) * m
 	}
@@ -441,12 +441,12 @@ internal func quickCheckWithResult(args : CheckerArguments, p : Testable) -> Res
 // - doneTesting: Invoked when testing the property fails or succeeds once and for all.
 // - giveUp: When the number of discarded tests exceeds the number given in the arguments we just
 //           give up turning the run loop to prevent excessive generation.
-internal func test(st : CheckerState, f : (StdGen -> Int -> Prop)) -> Result {
+internal func test(st : CheckerState, f : (StdGen, Int) -> Prop) -> Result {
 	var state = st
 	while true {
 		switch runATest(state)(f: f) {
 		case let .Left(fail):
-			switch (fail.0, doneTesting(fail.1)(f: f)) {
+			switch (fail.0, doneTesting(fail.1)) {
 			case (.Success(_, _, _), _):
 				return fail.0
 			case let (_, .NoExpectedFailure(numTests, labels, output)):
@@ -467,10 +467,10 @@ internal func test(st : CheckerState, f : (StdGen -> Int -> Prop)) -> Result {
 			}
 		case let .Right(lsta):
 			if lsta.successfulTestCount >= lsta.maxAllowableSuccessfulTests || lsta.shouldAbort {
-				return doneTesting(lsta)(f: f)
+				return doneTesting(lsta)
 			}
 			if lsta.discardedTestCount >= lsta.maxAllowableDiscardedTests || lsta.shouldAbort {
-				return giveUp(lsta)(f: f)
+				return giveUp(lsta)
 			}
 			state = lsta
 		}
@@ -480,12 +480,12 @@ internal func test(st : CheckerState, f : (StdGen -> Int -> Prop)) -> Result {
 // Executes a single test of the property given an initial state and the generator function.
 //
 // On success the next state is returned.  On failure the final result and state are returned.
-internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either<(Result, CheckerState), CheckerState> {
+internal func runATest(st : CheckerState)(f : (StdGen, Int) -> Prop) -> Either<(Result, CheckerState), CheckerState> {
 	let size = st.computeSize(st.successfulTestCount)(st.discardedTestCount)
 	let (rnd1, rnd2) = st.randomSeedGenerator.split
 
 	// Execute the Rose Tree for the test and reduce to .MkRose.
-	switch reduce(f(rnd1)(size).unProp) {
+	switch f(rnd1, size).unProp.reduce {
 	case .MkRose(let resC, let ts):
 		let res = resC() // Force the result only once.
 		dispatchAfterTestCallbacks(st, res: res) // Then invoke the post-test callbacks
@@ -609,7 +609,7 @@ internal func runATest(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Either
 	}
 }
 
-internal func doneTesting(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Result {
+internal func doneTesting(st : CheckerState) -> Result {
 	if st.hasFulfilledExpectedFailure {
 		print("*** Passed " + "\(st.successfulTestCount)" + pluralize(" test", i: st.successfulTestCount))
 		printDistributionGraph(st)
@@ -620,7 +620,7 @@ internal func doneTesting(st : CheckerState)(f : (StdGen -> Int -> Prop)) -> Res
 	}
 }
 
-internal func giveUp(st: CheckerState)(f : (StdGen -> Int -> Prop)) -> Result {
+internal func giveUp(st: CheckerState) -> Result {
 	printDistributionGraph(st)
 	return .GaveUp(numTests: st.successfulTestCount, labels: summary(st), output: "")
 }
@@ -662,7 +662,7 @@ internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts
 
 		// Try all possible courses of action in this Rose Tree
 		branches.forEach { r in
-			switch reduce(r) {
+			switch r.reduce {
 			case .MkRose(let resC, let ts1):
 				let res1 = resC()
 				dispatchAfterTestCallbacks(st, res: res1)

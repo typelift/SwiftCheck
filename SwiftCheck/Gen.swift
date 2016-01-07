@@ -14,11 +14,11 @@
 public struct Gen<A> {
 	/// The function underlying the receiver.
 	///
-	///         +--- An RNG
-	///         |         +--- The size of generated values.
-	///         |         |
-	///         v         v
-	let unGen : StdGen -> Int -> A
+	///          +--- An RNG
+	///          |       +--- The size of generated values.
+	///          |       |
+	///          v       v
+	let unGen : (StdGen, Int) -> A
 
 	/// Generates a value.
 	///
@@ -27,7 +27,7 @@ public struct Gen<A> {
 	/// tests in general.
 	public var generate : A {
 		let r = newStdGen()
-		return unGen(r)(30)
+		return unGen(r, 30)
 	}
 
 	/// Generates some example values.
@@ -86,10 +86,8 @@ public struct Gen<A> {
 
 	/// Constructs a generator that depends on a size parameter.
 	public static func sized(f : Int -> Gen<A>) -> Gen<A> {
-		return Gen(unGen: { r in
-			return { n in
-				return f(n).unGen(r)(n)
-			}
+		return Gen(unGen: { r, n in
+			return f(n).unGen(r, n)
 		})
 	}
 
@@ -100,11 +98,8 @@ public struct Gen<A> {
 	///
 	///     Gen<UInt32>.choose((32, 255)) >>- (Gen<Character>.pure • Character.init • UnicodeScalar.init)
 	public static func choose<A : RandomType>(rng : (A, A)) -> Gen<A> {
-		return Gen<A>(unGen: { s in
-			return { (_) in
-				let (x, _) = A.randomInRange(rng, gen: s)
-				return x
-			}
+		return Gen<A>(unGen: { s, _ in
+			return A.randomInRange(rng, gen: s).0
 		})
 	}
 
@@ -161,19 +156,15 @@ public struct Gen<A> {
 extension Gen {
 	/// Shakes up the receiver's internal Random Number Generator with a seed.
 	public func variant<S : IntegerType>(seed : S) -> Gen<A> {
-		return Gen(unGen: { r in
-			return { n in
-				return self.unGen(vary(seed)(r: r))(n)
-			}
+		return Gen(unGen: { r, n in
+			return self.unGen(vary(seed)(r: r), n)
 		})
 	}
 
 	/// Modifies a Generator to always use a given size.
 	public func resize(n : Int) -> Gen<A> {
-		return Gen(unGen: { r in
-			return { (_) in
-				return self.unGen(r)(n)
-			}
+		return Gen(unGen: { r, _ in
+			return self.unGen(r, n)
 		})
 	}
 
@@ -253,10 +244,8 @@ extension Gen /*: Functor*/ {
 /// `Array` of `Character`s.  You can then use `fmap` to convert that generator of `Array`s to a
 /// generator of `String`s.
 public func <^> <A, B>(f : A -> B, g : Gen<A>) -> Gen<B> {
-	return Gen(unGen: { r in
-		return { n in
-			return f(g.unGen(r)(n))
-		}
+	return Gen(unGen: { r, n in
+		return f(g.unGen(r, n))
 	})
 }
 
@@ -265,10 +254,8 @@ extension Gen /*: Applicative*/ {
 
 	/// Lifts a value into a generator that will only generate that value.
 	public static func pure(a : A) -> Gen<A> {
-		return Gen(unGen: { (_) in
-			return { (_) in
-				return a
-			}
+		return Gen(unGen: { _ in
+			return a
 		})
 	}
 
@@ -319,12 +306,10 @@ extension Gen /*: Monad*/ {
 /// for example, use a Generator of integers to control the length of a Generator of strings, or
 /// use it to choose a random index into a Generator of arrays.
 public func >>- <A, B>(m : Gen<A>, fn : A -> Gen<B>) -> Gen<B> {
-	return Gen(unGen: { r in
-		return { n in
-			let (r1, r2) = r.split
-			let m2 = fn(m.unGen(r1)(n))
-			return m2.unGen(r2)(n)
-		}
+	return Gen(unGen: { r, n in
+		let (r1, r2) = r.split
+		let m2 = fn(m.unGen(r1, n))
+		return m2.unGen(r2, n)
 	})
 }
 
@@ -373,11 +358,9 @@ public func promote<A, B>(m : A -> Gen<B>) -> Gen<A -> B> {
 }
 
 internal func delay<A>() -> Gen<Gen<A> -> A> {
-	return Gen(unGen: { r in
-		return { n in
-			return { g in
-				return g.unGen(r)(n)
-			}
+	return Gen(unGen: { r, n in
+		return { g in
+			return g.unGen(r, n)
 		}
 	})
 }
