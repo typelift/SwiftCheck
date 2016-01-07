@@ -40,14 +40,11 @@ public enum Rose<A> {
 }
 
 extension Rose /*: Functor*/ {
-	typealias B = Swift.Any
-	typealias FB = Rose<B>
-
 	/// Maps a function over all the nodes of a Rose Tree.
 	///
 	/// For `.MkRose` branches the computation is applied to the node's value then application
 	/// recurses into the sub-trees.  For `.IORose` branches the map is suspended.
-	public func fmap<B>(f : (A -> B)) -> Rose<B> {
+	public func map<B>(f : (A -> B)) -> Rose<B> {
 		return f <^> self
 	}
 }
@@ -55,15 +52,13 @@ extension Rose /*: Functor*/ {
 public func <^> <A, B>(f : A -> B, g : Rose<A>) -> Rose<B> {
 	switch g {
 		case .MkRose(let root, let children):
-			return .MkRose({ f(root()) }, { children().map() { $0.fmap(f) } })
+			return .MkRose({ f(root()) }, { children().map() { $0.map(f) } })
 		case .IORose(let rs):
-			return .IORose({ rs().fmap(f) })
+			return .IORose({ rs().map(f) })
 	}
 }
 
 extension Rose /*: Applicative*/ {
-	typealias FAB = Rose<A -> B>
-
 	/// Lifts a value into a Rose Tree.
 	public static func pure(a : A) -> Rose<A> {
 		return .MkRose({ a }, { [] })
@@ -82,7 +77,7 @@ extension Rose /*: Applicative*/ {
 public func <*> <A, B>(fn : Rose<A -> B>, g : Rose<A>) -> Rose<B> {
 	switch fn {
 		case .MkRose(let f, _):
-			return g.fmap(f())
+			return g.map(f())
 		case .IORose(let rs):
 			return g.ap(rs()) ///EEWW, EW, EW, EW, EW, EW
 	}
@@ -90,18 +85,18 @@ public func <*> <A, B>(fn : Rose<A -> B>, g : Rose<A>) -> Rose<B> {
 
 extension Rose /*: Monad*/ {
 	/// Maps the values in the receiver to Rose Trees and joins them all together.
-	public func bind<B>(fn : A -> Rose<B>) -> Rose<B> {
+	public func flatMap<B>(fn : A -> Rose<B>) -> Rose<B> {
 		return self >>- fn
 	}
 }
 
 public func >>- <A, B>(m : Rose<A>, fn : A -> Rose<B>) -> Rose<B> {
-	return joinRose(m.fmap(fn))
+	return joinRose(m.map(fn))
 }
 
 /// Lifts functions to functions over Rose Trees.
 public func liftM<A, R>(f : A -> R, _ m1 : Rose<A>) -> Rose<R> {
-	return m1.bind { x1 in
+	return m1.flatMap { x1 in
 		return Rose.pure(f(x1))
 	}
 }
@@ -129,8 +124,8 @@ public func joinRose<A>(rs : Rose<Rose<A>>) -> Rose<A> {
 /// Sequences an array of Rose Trees into a Rose Tree of an array.
 public func sequence<A>(ms : [Rose<A>]) -> Rose<[A]> {
 	return ms.reduce(Rose<[A]>.pure([]), combine: { n, m in
-		return m.bind { x in
-			return n.bind { xs in
+		return m.flatMap { x in
+			return n.flatMap { xs in
 				return Rose<[A]>.pure([x] + xs)
 			}
 		}

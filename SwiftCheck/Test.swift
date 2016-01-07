@@ -279,7 +279,7 @@ public func forAllNoShrink<A, B, C, D, E, F, G, H>(genA : Gen<A>, _ genB : Gen<B
 /// property.
 @warn_unused_result
 public func forAllShrink<A>(gen : Gen<A>, shrinker : A -> [A], f : A throws -> Testable) -> Property {
-	return Property(gen.bind { x in
+	return Property(gen.flatMap { x in
 		return shrinking(shrinker, initial: x, prop: { xs  in
 			do {
 				return (try f(xs)).counterexample(String(xs))

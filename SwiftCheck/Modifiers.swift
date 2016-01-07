@@ -227,7 +227,7 @@ public struct SetOf<A : protocol<Hashable, Arbitrary>> : Arbitrary, CustomString
 
 	public static var arbitrary : Gen<SetOf<A>> {
 		return Gen.sized { n in
-			return Gen<Int>.choose((0, n)).bind { k in
+			return Gen<Int>.choose((0, n)).flatMap { k in
 				if k == 0 {
 					return Gen.pure(SetOf(Set([])))
 				}
@@ -268,7 +268,7 @@ public struct PointerOf<T : Arbitrary> : Arbitrary, CustomStringConvertible {
 	}
 
 	public static var arbitrary : Gen<PointerOf<T>> {
-		return PointerOfImpl.arbitrary.fmap(PointerOf.init)
+		return PointerOfImpl.arbitrary.map(PointerOf.init)
 	}
 }
 
@@ -285,7 +285,7 @@ public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbi
 	}
 
 	public static var arbitrary : Gen<ArrowOf<T, U>> {
-		return ArrowOfImpl<T, U>.arbitrary.fmap(ArrowOf.init)
+		return ArrowOfImpl<T, U>.arbitrary.map(ArrowOf.init)
 	}
 }
 
@@ -315,7 +315,7 @@ public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol
 	}
 
 	public static var arbitrary : Gen<IsoOf<T, U>> {
-		return IsoOfImpl<T, U>.arbitrary.fmap(IsoOf.init)
+		return IsoOfImpl<T, U>.arbitrary.map(IsoOf.init)
 	}
 }
 
@@ -341,7 +341,7 @@ public struct Large<A : protocol<RandomType, LatticeType, IntegerType>> : Arbitr
 	}
 
 	public static var arbitrary : Gen<Large<A>> {
-		return Gen<A>.choose((A.min, A.max)).fmap(Large.init)
+		return Gen<A>.choose((A.min, A.max)).map(Large.init)
 	}
 
 	public static func shrink(bl : Large<A>) -> [Large<A>] {
@@ -362,7 +362,7 @@ public struct Positive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary, C
 	}
 
 	public static var arbitrary : Gen<Positive<A>> {
-		return A.arbitrary.fmap(Positive.init • abs).suchThat { $0.getPositive > 0 }
+		return A.arbitrary.map(Positive.init • abs).suchThat { $0.getPositive > 0 }
 	}
 
 	public static func shrink(bl : Positive<A>) -> [Positive<A>] {
@@ -526,7 +526,7 @@ private final class IsoOfImpl<T : protocol<Hashable, CoArbitrary, Arbitrary>, U 
 			return T.coarbitrary(a)(U.arbitrary)
 		}), promote({ a in
 			return U.coarbitrary(a)(T.arbitrary)
-		})).fmap { IsoOfImpl($0, $1) }
+		})).map { IsoOfImpl($0, $1) }
 	}
 
 	static func shrink(f : IsoOfImpl<T, U>) -> [IsoOfImpl<T, U>] {
@@ -575,7 +575,7 @@ private final class PointerOfImpl<T : Arbitrary> : Arbitrary {
 			}
 			let pt = UnsafeMutablePointer<T>.alloc(n)
 			let gt = pt.initializeFrom <^> sequence(Array((0..<n)).map { _ in T.arbitrary })
-			return gt.fmap { _ in PointerOfImpl(pt, n) }
+			return gt.map { _ in PointerOfImpl(pt, n) }
 		}
 	}
 }

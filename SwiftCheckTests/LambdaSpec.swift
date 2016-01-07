@@ -13,7 +13,7 @@ struct Name : Arbitrary, Equatable, Hashable, CustomStringConvertible {
 
 	static var arbitrary : Gen<Name> {
 		let gc : Gen<Character> = Gen<Character>.fromElementsIn("a"..."z")
-		return gc.fmap { Name(unName: String($0)) }
+		return gc.map { Name(unName: String($0)) }
 	}
 
 	var description : String {
@@ -30,8 +30,8 @@ func == (l : Name, r : Name) -> Bool {
 }
 
 private func liftM2<A, B, C>(f : (A, B) -> C, _ m1 : Gen<A>, _ m2 : Gen<B>) -> Gen<C> {
-	return m1.bind { x1 in
-		return m2.bind { x2 in
+	return m1.flatMap { x1 in
+		return m2.flatMap { x2 in
 			return Gen.pure(f(x1, x2))
 		}
 	}

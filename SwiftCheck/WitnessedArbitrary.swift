@@ -9,7 +9,7 @@
 extension Array where Element : Arbitrary {
 	public static var arbitrary : Gen<Array<Element>> {
 		return Gen.sized { n in
-			return Gen<Int>.choose((0, n)).bind { k in
+			return Gen<Int>.choose((0, n)).flatMap { k in
 				if k == 0 {
 					return Gen.pure([])
 				}
@@ -162,8 +162,8 @@ extension ContiguousArray : WitnessedArbitrary {
 /// Generates an dictionary of arbitrary keys and values.
 extension Dictionary where Key : Arbitrary, Value : Arbitrary {
 	public static var arbitrary : Gen<Dictionary<Key, Value>> {
-		return [Key].arbitrary.bind { k in
-			return [Value].arbitrary.bind { v in
+		return [Key].arbitrary.flatMap { k in
+			return [Value].arbitrary.flatMap { v in
 				return Gen.pure(Dictionary(Zip2Sequence(k, v)))
 			}
 		}
@@ -192,8 +192,8 @@ extension EmptyCollection : Arbitrary {
 
 extension HalfOpenInterval where Bound : protocol<Comparable, Arbitrary> {
 	public static var arbitrary : Gen<HalfOpenInterval<Bound>> {
-		return Bound.arbitrary.bind { l in
-			return Bound.arbitrary.bind { r in
+		return Bound.arbitrary.flatMap { l in
+			return Bound.arbitrary.flatMap { r in
 				return Gen.pure(HalfOpenInterval(min(l, r), max(l, r)))
 			}
 		}
@@ -238,8 +238,8 @@ extension LazySequence where Base : protocol<SequenceType, Arbitrary> {
 
 extension Range where Element : protocol<ForwardIndexType, Comparable, Arbitrary> {
 	public static var arbitrary : Gen<Range<Element>> {
-		return Element.arbitrary.bind { l in
-			return Element.arbitrary.bind { r in
+		return Element.arbitrary.flatMap { l in
+			return Element.arbitrary.flatMap { r in
 				return Gen.pure(Range(start: min(l, r), end: max(l, r)))
 			}
 		}
@@ -270,7 +270,7 @@ extension Repeat : WitnessedArbitrary {
 extension Set where Element : protocol<Arbitrary, Hashable> {
 	public static var arbitrary : Gen<Set<Element>> {
 		return Gen.sized { n in
-			return Gen<Int>.choose((0, n)).bind { k in
+			return Gen<Int>.choose((0, n)).flatMap { k in
 				if k == 0 {
 					return Gen.pure(Set([]))
 				}

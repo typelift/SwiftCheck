@@ -44,7 +44,7 @@ public struct Gen<A> {
 	///
 	/// The input collection is required to be non-empty.
 	public static func fromElementsOf<S : Indexable where S.Index : protocol<Comparable, RandomType>>(xs : S) -> Gen<S._Element> {
-		return Gen.fromElementsIn(xs.startIndex...xs.endIndex.advancedBy(-1)).fmap { i in
+		return Gen.fromElementsIn(xs.startIndex...xs.endIndex.advancedBy(-1)).map { i in
 			return xs[i]
 		}
 	}
@@ -79,8 +79,8 @@ public struct Gen<A> {
 			return Gen<[S]>.pure([])
 		}
 
-		return Gen<(S, [S])>.fromElementsOf(selectOne(xs)).bind { (y, ys) in
-			return Gen.fromShufflingElementsOf(ys).fmap { [y] + $0 }
+		return Gen<(S, [S])>.fromElementsOf(selectOne(xs)).flatMap { (y, ys) in
+			return Gen.fromShufflingElementsOf(ys).map { [y] + $0 }
 		}
 	}
 
@@ -125,7 +125,7 @@ public struct Gen<A> {
 		let xs: [(Int, Gen<A>)] = Array(xs)
 		assert(xs.count != 0, "frequency used with empty list")
 
-		return choose((1, xs.map({ $0.0 }).reduce(0, combine: +))).bind { l in
+		return choose((1, xs.map({ $0.0 }).reduce(0, combine: +))).flatMap { l in
 			return pick(l)(lst: xs)
 		}
 	}
@@ -143,8 +143,8 @@ public struct Gen<A> {
 
 	/// Zips together 2 generators of type `A` and `B` into a generator of pairs `(A, B)`.
 	public static func zip<A, B>(gen1 : Gen<A>, _ gen2 : Gen<B>) -> Gen<(A, B)> {
-		return gen1.bind { l in
-			return gen2.bind { r in
+		return gen1.flatMap { l in
+			return gen2.flatMap { r in
 				return Gen<(A, B)>.pure((l, r))
 			}
 		}
@@ -182,7 +182,7 @@ extension Gen {
 	/// that fails more often than it succeeds may result in a space leak.  At that point, it is
 	/// better to use `suchThatOptional` or `.invert` the test case.
 	public func suchThat(p : A -> Bool) -> Gen<A> {
-		return self.suchThatOptional(p).bind { mx in
+		return self.suchThatOptional(p).flatMap { mx in
 			switch mx {
 			case .Some(let x):
 				return Gen.pure(x)
@@ -228,10 +228,8 @@ extension Gen {
 /// MARK: Instances
 
 extension Gen /*: Functor*/ {
-	typealias B = Swift.Any
-
 	/// Returns a new generator that applies a given function to any outputs the receiver creates.
-	public func fmap<B>(f : (A -> B)) -> Gen<B> {
+	public func map<B>(f : (A -> B)) -> Gen<B> {
 		return f <^> self
 	}
 }
@@ -250,8 +248,6 @@ public func <^> <A, B>(f : A -> B, g : Gen<A>) -> Gen<B> {
 }
 
 extension Gen /*: Applicative*/ {
-	typealias FAB = Gen<A -> B>
-
 	/// Lifts a value into a generator that will only generate that value.
 	public static func pure(a : A) -> Gen<A> {
 		return Gen(unGen: { _ in
@@ -294,7 +290,7 @@ extension Gen /*: Monad*/ {
 	/// `bind` allows for the creation of Generators that depend on other generators.  One might, 
 	/// for example, use a Generator of integers to control the length of a Generator of strings, or
 	/// use it to choose a random index into a Generator of arrays.
-	public func bind<B>(fn : A -> Gen<B>) -> Gen<B> {
+	public func flatMap<B>(fn : A -> Gen<B>) -> Gen<B> {
 		return self >>- fn
 	}
 }
@@ -321,8 +317,8 @@ public func >>- <A, B>(m : Gen<A>, fn : A -> Gen<B>) -> Gen<B> {
 /// array that was given.
 public func sequence<A>(ms : [Gen<A>]) -> Gen<[A]> {
 	return ms.reduce(Gen<[A]>.pure([]), combine: { y, x in
-		return x.bind { x1 in
-			return y.bind { xs in
+		return x.flatMap { x1 in
+			return y.flatMap { xs in
 				return Gen<[A]>.pure([x1] + xs)
 			}
 		}
@@ -331,28 +327,28 @@ public func sequence<A>(ms : [Gen<A>]) -> Gen<[A]> {
 
 /// Flattens a generator of generators by one level.
 public func join<A>(rs : Gen<Gen<A>>) -> Gen<A> {
-	return rs.bind { x in
+	return rs.flatMap { x in
 		return x
 	}
 }
 
 /// Lifts a function from some A to some R to a function from generators of A to generators of R.
 public func liftM<A, R>(f : A -> R, _ m1 : Gen<A>) -> Gen<R> {
-	return m1.bind{ x1 in
+	return m1.flatMap{ x1 in
 		return Gen.pure(f(x1))
 	}
 }
 
 /// Promotes a rose of generators to a generator of rose values.
 public func promote<A>(x : Rose<Gen<A>>) -> Gen<Rose<A>> {
-	return delay().bind { (let eval : Gen<A> -> A) in
+	return delay().flatMap { (let eval : Gen<A> -> A) in
 		return Gen<Rose<A>>.pure(liftM(eval, x))
 	}
 }
 
 /// Promotes a function returning generators to a generator of functions.
 public func promote<A, B>(m : A -> Gen<B>) -> Gen<A -> B> {
-	return delay().bind { (let eval : Gen<B> -> B) in
+	return delay().flatMap { (let eval : Gen<B> -> B) in
 		return Gen<A -> B>.pure({ x in eval(m(x)) })
 	}
 }
@@ -379,7 +375,7 @@ private func attemptBoundedTry<A>(gen: Gen<A>, k : Int, n : Int, p: A -> Bool) -
 	if n == 0 {
 		return Gen.pure(.None)
 	}
-	return gen.resize(2 * k + n).bind { (let x : A) -> Gen<Optional<A>> in
+	return gen.resize(2 * k + n).flatMap { (let x : A) -> Gen<Optional<A>> in
 		if p(x) {
 			return Gen.pure(.Some(x))
 		}

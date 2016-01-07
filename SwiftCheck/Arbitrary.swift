@@ -254,7 +254,7 @@ extension Double : Arbitrary {
 
 extension UnicodeScalar : Arbitrary {
 	public static var arbitrary : Gen<UnicodeScalar> {
-		return UInt32.arbitrary.bind(Gen<UnicodeScalar>.pure • UnicodeScalar.init)
+		return UInt32.arbitrary.flatMap(Gen<UnicodeScalar>.pure • UnicodeScalar.init)
 	}
 
 	public static func shrink(x : UnicodeScalar) -> [UnicodeScalar] {
@@ -287,37 +287,37 @@ extension Character : Arbitrary {
 
 extension AnyForwardIndex : Arbitrary {
 	public static var arbitrary : Gen<AnyForwardIndex> {
-		return Gen<Int64>.choose((1, Int64.max)).bind(Gen<AnyForwardIndex>.pure • AnyForwardIndex.init)
+		return Gen<Int64>.choose((1, Int64.max)).flatMap(Gen<AnyForwardIndex>.pure • AnyForwardIndex.init)
 	}
 }
 
 extension AnyRandomAccessIndex : Arbitrary {
 	public static var arbitrary : Gen<AnyRandomAccessIndex> {
-		return Gen<Int64>.choose((1, Int64.max)).bind(Gen<AnyRandomAccessIndex>.pure • AnyRandomAccessIndex.init)
+		return Gen<Int64>.choose((1, Int64.max)).flatMap(Gen<AnyRandomAccessIndex>.pure • AnyRandomAccessIndex.init)
 	}
 }
 
 extension Mirror : Arbitrary {
 	public static var arbitrary : Gen<Mirror> {
 		let genAny : Gen<Any> = Gen<Any>.oneOf([
-			Bool.arbitrary.fmap(asAny),
-			Int.arbitrary.fmap(asAny),
-			UInt.arbitrary.fmap(asAny),
-			Float.arbitrary.fmap(asAny),
-			Double.arbitrary.fmap(asAny),
-			Character.arbitrary.fmap(asAny),
+			Bool.arbitrary.map(asAny),
+			Int.arbitrary.map(asAny),
+			UInt.arbitrary.map(asAny),
+			Float.arbitrary.map(asAny),
+			Double.arbitrary.map(asAny),
+			Character.arbitrary.map(asAny),
 		])
 
 		let genAnyWitnessed : Gen<Any> = Gen<Any>.oneOf([
-			Optional<Int>.arbitrary.fmap(asAny),
-			Array<Int>.arbitrary.fmap(asAny),
-			Set<Int>.arbitrary.fmap(asAny),
+			Optional<Int>.arbitrary.map(asAny),
+			Array<Int>.arbitrary.map(asAny),
+			Set<Int>.arbitrary.map(asAny),
 		])
 
 		return Gen<Any>.oneOf([
 			genAny,
 			genAnyWitnessed,
-		]).fmap(Mirror.init)
+		]).map(Mirror.init)
 	}
 }
 

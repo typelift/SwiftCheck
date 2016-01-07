@@ -149,12 +149,12 @@ class GenSpec : XCTestCase {
 		let lawfulArrowGen = Gen<Gen<ArrowOf<Int, Int>>>.fromElementsOf(ArrowOf<Int, Int>.arbitrary.proliferateSized(10).generate.map(Gen.pure))
 
 		property("Gen obeys the Functor identity law") <- forAllNoShrink(lawfulGen) { (x : Gen<Int>) in
-			return (x.fmap(id)) == id(x)
+			return (x.map(id)) == id(x)
 		}
 
 		property("Gen obeys the Functor composition law") <- forAll { (f : ArrowOf<Int, Int>, g : ArrowOf<Int, Int>) in
 			return forAllNoShrink(lawfulGen) { (x : Gen<Int>) in
-				return ((f.getArrow • g.getArrow) <^> x) == (x.fmap(g.getArrow).fmap(f.getArrow))
+				return ((f.getArrow • g.getArrow) <^> x) == (x.map(g.getArrow).map(f.getArrow))
 			}
 		}
 
@@ -163,14 +163,14 @@ class GenSpec : XCTestCase {
 		}
 
 		property("Gen obeys the first Applicative composition law") <- forAllNoShrink(lawfulArrowGen, lawfulArrowGen, lawfulGen) { (fl : Gen<ArrowOf<Int, Int>>, gl : Gen<ArrowOf<Int, Int>>, x : Gen<Int>) in
-			let f = fl.fmap({ $0.getArrow })
-			let g = gl.fmap({ $0.getArrow })
+			let f = fl.map({ $0.getArrow })
+			let g = gl.map({ $0.getArrow })
 			return (curry(•) <^> f <*> g <*> x) == (f <*> (g <*> x))
 		}
 
 		property("Gen obeys the second Applicative composition law") <- forAllNoShrink(lawfulArrowGen, lawfulArrowGen, lawfulGen) { (fl : Gen<ArrowOf<Int, Int>>, gl : Gen<ArrowOf<Int, Int>>, x : Gen<Int>) in
-			let f = fl.fmap({ $0.getArrow })
-			let g = gl.fmap({ $0.getArrow })
+			let f = fl.map({ $0.getArrow })
+			let g = gl.map({ $0.getArrow })
 			return (Gen.pure(curry(•)) <*> f <*> g <*> x) == (f <*> (g <*> x))
 		}
 

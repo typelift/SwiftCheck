@@ -17,8 +17,8 @@
 /// When conjoining properties all calls to `expectFailure` will fail.
 public func conjoin(ps : Testable...) -> Property {
 	return Property(sequence(ps.map({ (p : Testable) in
-		return p.property.unProperty.fmap { $0.unProp }
-	})).bind({ roses in
+		return p.property.unProperty.map { $0.unProp }
+	})).flatMap({ roses in
 		return Gen.pure(Prop(unProp: conj(id, xs: roses)))
 	}))
 }
@@ -33,8 +33,8 @@ public func conjoin(ps : Testable...) -> Property {
 /// When disjoining properties all calls to `expectFailure` will fail.
 public func disjoin(ps : Testable...) -> Property {
 	return Property(sequence(ps.map({ (p : Testable) in
-		return p.property.unProperty.fmap { $0.unProp }
-	})).bind({ roses in
+		return p.property.unProperty.map { $0.unProp }
+	})).flatMap({ roses in
 		return Gen.pure(Prop(unProp: roses.reduce(.MkRose({ TestResult.failed() }, { [] }), combine: disj)))
 	}))
 }
@@ -274,8 +274,8 @@ extension Testable {
 /// Shrinking is handled automatically by SwiftCheck.  Invoking this function is only necessary
 /// when you must override the default behavior.
 public func shrinking<A>(shrinker : A -> [A], initial : A, prop : A -> Testable) -> Property {
-	return Property(promote(props(shrinker, original: initial, pf: prop)).fmap { rs in
-		return Prop(unProp: joinRose(rs.fmap { x in
+	return Property(promote(props(shrinker, original: initial, pf: prop)).map { rs in
+		return Prop(unProp: joinRose(rs.map { x in
 			return x.unProp
 		}))
 	})
@@ -559,7 +559,7 @@ private func conj(k : TestResult -> TestResult, xs : [Rose<TestResult>]) -> Rose
 }
 
 private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult> {
-	return p.bind { result1 in
+	return p.flatMap { result1 in
 		if !result1.expect {
 			return Rose<TestResult>.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 		}
@@ -567,7 +567,7 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 		case .Some(true):
 			return Rose<TestResult>.pure(result1)
 		case .Some(false):
-			return q.bind { (result2 : TestResult) in
+			return q.flatMap { (result2 : TestResult) in
 				if !result2.expect {
 					return Rose<TestResult>.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 				}
@@ -593,7 +593,7 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 				}
 			}
 		case .None:
-			return q.bind { (result2 : TestResult) in
+			return q.flatMap { (result2 : TestResult) in
 				if !result2.expect {
 					return Rose<TestResult>.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 				}
