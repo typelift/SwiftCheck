@@ -28,7 +28,7 @@ public protocol RandomGeneneratorType {
 /// repeatable results, by starting with a specified initial random number generator, or to get 
 /// different results on each run by using the system-initialised generator or by supplying a seed 
 /// from some other source.
-public struct StdGen : RandomGeneneratorType, CustomStringConvertible {
+public struct StdGen : Equatable, RandomGeneneratorType, CustomStringConvertible {
 	let seed1 : Int
 	let seed2 : Int
 
@@ -80,6 +80,10 @@ public struct StdGen : RandomGeneneratorType, CustomStringConvertible {
 	public var genRange : (Int, Int) {
 		return (Int.min, Int.max)
 	}
+}
+
+public func ==(l : StdGen, r : StdGen) -> Bool {
+	return l.seed1 == r.seed1 && l.seed2 == r.seed2
 }
 
 private var theStdGen : StdGen = mkStdRNG(0)
