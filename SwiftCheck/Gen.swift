@@ -22,11 +22,21 @@ public struct Gen<A> {
 
 	/// Generates a value.
 	///
-	/// This method exists as a convenience mostly to test generators.  It will always generate with
-	/// size 30.
+	/// This property exists as a convenience mostly to test generators.  In practice, you should
+	/// never use this property because it hinders the replay functionality and the robustness of
+	/// tests in general.
 	public var generate : A {
 		let r = newStdGen()
 		return unGen(r)(30)
+	}
+
+	/// Generates some example values.
+	///
+	/// This property exists as a convenience mostly to test generators.  In practice, you should
+	/// never use this property because it hinders the replay functionality and the robustness of
+	/// tests in general.
+	public var sample : [A] {
+		return sequence((2...20).map { self.resize($0) }).generate
 	}
 
 	/// Constructs a Generator that selects a random value from the given collection and produces 
@@ -165,6 +175,13 @@ extension Gen {
 				return self.unGen(r)(n)
 			}
 		})
+	}
+
+	/// Modifiers a Generator's size parameter by transforming it with the given function.
+	public func scale(f : Int -> Int) -> Gen<A> {
+		return Gen.sized { n in
+			return self.resize(f(n))
+		}
 	}
 
 	/// Modifies a Generator such that it only returns values that satisfy a predicate.  When the
