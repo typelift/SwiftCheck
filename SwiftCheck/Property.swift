@@ -208,7 +208,7 @@ extension Testable {
 	/// distribution map for the property that shows a percentage success rate 
 	/// for the property.
 	public func label(s : String) -> Property {
-		return self.classify(true, s: s)
+		return self.classify(true, label: s)
 	}
 
 	/// Labels a property with a printable value.
@@ -217,8 +217,8 @@ extension Testable {
 	}
 
 	/// Conditionally labels a property with a value.
-	public func classify(b : Bool, s : String) -> Property {
-		return self.cover(b, n: 0, s: s)
+	public func classify(b : Bool, label : String) -> Property {
+		return self.cover(b, percentage: 0, label: label)
 	}
 
 	/// Checks that at least the given proportion of successful test cases 
@@ -226,15 +226,15 @@ extension Testable {
 	///
 	/// Discarded tests (i.e. ones with a false precondition) do not affect 
 	/// coverage.
-	public func cover(b : Bool, n : Int, s : String) -> Property {
+	public func cover(b : Bool, percentage : Int, label : String) -> Property {
 		if b {
 			return self.mapResult { res in
 				return TestResult(ok:           res.ok
 								, expect:       res.expect
 								, reason:       res.reason
 								, theException: res.theException
-								, labels:       insertWith(max, k: s, v: n, m: res.labels)
-								, stamp:        res.stamp.union([s])
+								, labels:       insertWith(max, k: label, v: percentage, m: res.labels)
+								, stamp:        res.stamp.union([label])
 								, callbacks:    res.callbacks
 								, abort:        res.abort
 								, quantifier:	res.quantifier)

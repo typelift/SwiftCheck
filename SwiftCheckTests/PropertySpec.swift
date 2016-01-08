@@ -23,6 +23,8 @@ func ==(l : Property, r : Property) -> Bool {
 		return true
 	case (.NoExpectedFailure(_, _, _), .NoExpectedFailure(_, _, _)):
 		return true
+	case (.InsufficientCoverage(_, _, _), .InsufficientCoverage(_, _, _)):
+		return true
 	default:
 		return false
 	}
@@ -78,6 +80,10 @@ class PropertySpec : XCTestCase {
 		property("Existential Quantification works") <- exists { (x : Int) in
 			return true
 		}
+
+		property("Cover reports failures properly") <- forAll { (s : Set<Int>) in
+			return (s.count == [Int](s).count).cover(s.count >= 15, percentage: 60, label: "large")
+		}.expectFailure
 
 		property("Prop ==> true") <- forAllNoShrink(Bool.arbitrary, Gen.pure(true)) { (p1, p2) in
 			let p = p2 ==> p1

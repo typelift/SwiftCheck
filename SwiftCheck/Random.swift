@@ -181,7 +181,7 @@ extension Int64 : RandomType {
 			let b = genhi - genlo + 1
 
 			let q : Int64 = 1000
-			let k = h - l + 1
+			let k = Int64.subtractWithOverflow(h, l).0 + 1
 			let magtgt = k * q
 
 			func entropize(mag : Int64, _ v : Int64, _ g : G) -> (Int64, G) {

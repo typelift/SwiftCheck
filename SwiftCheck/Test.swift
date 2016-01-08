@@ -378,6 +378,10 @@ internal enum Result {
 		, labels : [(String,Int)]
 		, output : String
 	)
+	case InsufficientCoverage(numTests : Int
+		, labels : [(String,Int)]
+		, output : String
+	)
 }
 
 internal indirect enum Either<L, R> {
@@ -594,13 +598,24 @@ internal func runATest(st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Ei
 }
 
 internal func doneTesting(st : CheckerState) -> Result {
-	if st.hasFulfilledExpectedFailure {
+	if !st.hasFulfilledExpectedFailure {
+		if insufficientCoverage(st) {
+			print("+++ OK, failed as expected. ")
+			print("*** Insufficient coverage after " + "\(st.successfulTestCount)" + pluralize(" test", i: st.successfulTestCount))
+			printDistributionGraph(st)
+			return .Success(numTests: st.successfulTestCount, labels: summary(st), output: "")
+		}
+		
+		printDistributionGraph(st)
+		return .NoExpectedFailure(numTests: st.successfulTestCount, labels: summary(st), output: "")
+	} else if insufficientCoverage(st) {
+		print("*** Insufficient coverage after " + "\(st.successfulTestCount)" + pluralize(" test", i: st.successfulTestCount))
+		printDistributionGraph(st)
+		return .InsufficientCoverage(numTests: st.successfulTestCount, labels: summary(st), output: "")
+	} else {
 		print("*** Passed " + "\(st.successfulTestCount)" + pluralize(" test", i: st.successfulTestCount))
 		printDistributionGraph(st)
 		return .Success(numTests: st.successfulTestCount, labels: summary(st), output: "")
-	} else {
-		printDistributionGraph(st)
-		return .NoExpectedFailure(numTests: st.successfulTestCount, labels: summary(st), output: "")
 	}
 }
 
@@ -806,6 +821,12 @@ private func pluralize(s : String, i : Int) -> String {
 		return s
 	}
 	return s + "s"
+}
+
+private func insufficientCoverage(st : CheckerState) -> Bool {
+	return st.labels
+			.map({ (l, reqP) in labelPercentage(l, st: st) < reqP })
+			.reduce(false, combine: { $0 || $1 })
 }
 
 extension Array {
