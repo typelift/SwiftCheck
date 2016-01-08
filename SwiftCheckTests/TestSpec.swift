@@ -21,7 +21,7 @@ extension Dictionary {
 
 class TestSpec : XCTestCase {
 	func testAll() {
-		let dictionaryGen = Gen<(String, Int)>.zip(String.arbitrary, Int.arbitrary).proliferate().map(Dictionary.init)
+		let dictionaryGen = Gen<(String, Int)>.zip(String.arbitrary, Int.arbitrary).proliferate.map(Dictionary.init)
 
 		property("Dictionaries behave") <- forAllNoShrink(dictionaryGen) { (xs : Dictionary<String, Int>) in
 			return true

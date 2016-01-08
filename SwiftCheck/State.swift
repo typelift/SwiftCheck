@@ -17,7 +17,7 @@ public struct CheckerState {
 	let maxAllowableDiscardedTests	: Int
 	/// The function that generates the sizes fed to the generators for each 
 	/// test case.
-	let computeSize					: Int -> Int -> Int
+	let computeSize					: (Int, Int) -> Int
 	/// The count of the number of successful test cases seen so far.
 	let successfulTestCount			: Int
 	/// The count of the number of discarded test cases seen so far.
@@ -42,7 +42,7 @@ public struct CheckerState {
 	let successfulShrinkCount		: Int
 	/// Returns the number of failed shrinking steps since the last successful 
 	/// shrink.
-	let failedShrinkStepDistance		: Int
+	let failedShrinkStepDistance	: Int
 	/// Returns the number of failed shrink steps.
 	let failedShrinkStepCount		: Int
 	/// Returns whether the testing system should cease testing altogether.
@@ -50,10 +50,11 @@ public struct CheckerState {
 
 	let quantifier					: Quantification
 
+	let arguments					: CheckerArguments
 	public init(  name							: String
 				, maxAllowableSuccessfulTests	: Int
 				, maxAllowableDiscardedTests	: Int
-				, computeSize					: Int -> Int -> Int
+				, computeSize					: (Int, Int) -> Int
 				, successfulTestCount			: Int
 				, discardedTestCount			: Int
 				, labels						: Dictionary<String, Int>
@@ -64,7 +65,8 @@ public struct CheckerState {
 				, failedShrinkStepDistance		: Int
 				, failedShrinkStepCount			: Int
 				, shouldAbort					: Bool
-				, quantifier					: Quantification)
+				, quantifier					: Quantification
+				, arguments						: CheckerArguments)
 	{
 		self.name = name
 		self.maxAllowableSuccessfulTests = maxAllowableSuccessfulTests
@@ -81,5 +83,6 @@ public struct CheckerState {
 		self.failedShrinkStepCount = failedShrinkStepCount
 		self.shouldAbort = shouldAbort
 		self.quantifier = quantifier
+		self.arguments = arguments
 	}
 }

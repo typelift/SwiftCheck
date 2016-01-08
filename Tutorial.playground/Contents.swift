@@ -153,23 +153,23 @@ oneToFiveEven.generate
 oneToFiveEven.generate
 
 // `proliferate` turns a generator of single elements into a generator of arrays of those elements. 
-let characterArray = uppersAndLowers.proliferate()
+let characterArray = uppersAndLowers.proliferate
 
 characterArray.generate
 characterArray.generate
 characterArray.generate
 
 /// `proliferateNonEmpty` works like `proliferate` but guarantees the generated array is never empty.
-let oddLengthArrays = fromOnetoFive.proliferateNonEmpty().suchThat { $0.count % 2 == 1 }
+let oddLengthArrays = fromOnetoFive.proliferateNonEmpty.suchThat { $0.count % 2 == 1 }
 
 oddLengthArrays.generate.count
 oddLengthArrays.generate.count
 oddLengthArrays.generate.count
 
-//: Generators also admit functional methods like `map` and `flatMap`, but with different names than
+
+// //: Generators also admit functional methods like `map` and `flatMap`, but with different names than
 //: you might be used to.
-
-// `map` works exactly like Array's `map` method; it applies the function to any 
+`map` works exactly like Array's `map` method; it applies the function to any 
 // values it generates.
 let fromTwoToSix = fromOnetoFive.map { $0 + 1 }
 
@@ -194,16 +194,16 @@ generatorBoundedSizeArrays.generate
 generatorBoundedSizeArrays.generate
 generatorBoundedSizeArrays.generate
 generatorBoundedSizeArrays.generate
-generatorBoundedSizeArrays.generate//: Because SwiftCheck is based on the functional concepts in our other library 
+generatorBoundedSizeArrays.generate
+
+
+l//: Because SwiftCheck is based on the functional concepts in our other library 
 //: [Swiftz](https://github.com/typelift/Swiftz), each of these functions has an operator alias:
 //:
 //: * `<^>` is an alias for `fmap`
 //: * `<*>` is an alias for `ap`
 //: * `>>-` is an alias for `bind`
-
-
-
-let fromTwoToSix_ = { $0 + 1 } <^> fromOnetoFive
+et fromTwoToSix_ = { $0 + 1 } <^> fromOnetoFive
 
 fromTwoToSix_.generate
 fromTwoToSix_.generate
@@ -215,51 +215,51 @@ let generatorBoundedSizeArrays_ = fromOnetoFive >>- { len in
 
 generatorBoundedSizeArrays_.generate
 generatorBoundedSizeArrays_.generate
-generatorBoundedSizeArrays_.generate//: For our purposes, we will say that an email address consists of 3 parts: A local part, a 
+generatorBoundedSizeArrays_.generate
+
+
+l//: For our purposes, we will say that an email address consists of 3 parts: A local part, a 
 //: hostname, and a Top-Level Domain each separated by an `@`, and a `.` respectively.
 //:
 //: According to RFC 2822, the local part can consist of uppercase characters, lowercase letters, 
 //: numbers, and certain kinds of special characters.  We already have generators for upper and 
 //: lower cased letters, so all we need are special characters and a more complete number generator:
+et numeric : Gen<Character> = Gen<Character>.fromElementsIn("0"..."9")
+let special : Gen<Character> = Gen<Character>.fromElementsOf(["!", "#", "$", "%", "&", "'", "*", "+", "-", "/", "=", "?", "^", "_", "`", "{", "|", "}", "~", "."])
 
 
-
-let numeric : Gen<Character> = Gen<Character>.fromElementsIn("0"..."9")
-let special : Gen<Character> = Gen<Character>.fromElementsOf(["!", "#", "$", "%", "&", "'", "*", "+", "-", "/", "=", "?", "^", "_", "`", "{", "|", "}", "~", "."])//: Now for the actual generator
-
-
-
-let allowedLocalCharacters : Gen<Character> = Gen<Character>.oneOf([
+l//: Now for the actual generator
+et allowedLocalCharacters : Gen<Character> = Gen<Character>.oneOf([
 	upperCaseLetters,
 	lowerCaseLetters,
 	numeric,
 	special,
-])//: Now we need a `String` made of these characters. so we'll just `proliferate` an array of characters and `fmap`
+])
+
+
+l//: Now we need a `String` made of these characters. so we'll just `proliferate` an array of characters and `fmap`
 //: to get a `String` back.
-
-
-
-let localEmail = allowedLocalCharacters
-	.proliferateNonEmpty() // Make a non-empty array of characters
+et localEmail = allowedLocalCharacters
+	.proliferateNonEmpty // Make a non-empty array of characters
 	.suchThat({ $0[$0.endIndex.predecessor()] != "." }) // Such that the last character isn't a dot.
-	.map(String.init) // Then make a string.//: The RFC says that the host name can only consist of lowercase letters, numbers, and dashes.  We'll skip some
+	.map(String.init) // Then make a string.
+
+let //: The RFC says that the host name can only consist of lowercase letters, numbers, and dashes.  We'll skip some
 //: steps here and combine both steps into one big generator.
-
-
-let hostname = Gen<Character>.oneOf([
+hostname = Gen<Character>.oneOf([
 	lowerCaseLetters,
 	numeric,
 	Gen.pure("-"),
-]).proliferateNonEmpty().map(String.init)
-
-//: Finally, the RFC says the TLD for the address can only consist of lowercase letters with a length larger than 1.
-
-let tld = lowerCaseLetters.proliferateNonEmpty().suchThat({ $0.count > 1 }).map(String.init)
+]).proliferateNonEmpty.map(String.init)
 
 
-//: So now we've got all the pieces together, so how do we put them together to make the final generator?  Well, how
+let tld//: Finally, the RFC says the TLD for the address can only consist of lowercase letters with a length larger than 1.
+ = lowerCaseLetters.proliferateNonEmpty.suchThat({ $0.count > 1 }).map(String.init)
+
+
+// Concate//: So now we've got all the pieces together, so how do we put them together to make the final generator?  Well, how
 //: about some glue?
-// Concatenates an array of `String` `Gen`erators together in order.
+nates an array of `String` `Gen`erators together in order.
 func glue(parts : [Gen<String>]) -> Gen<String> {
 	return sequence(parts).map { $0.reduce("", combine: +) }
 }
@@ -267,15 +267,16 @@ func glue(parts : [Gen<String>]) -> Gen<String> {
 let emailGen = glue([localEmail, Gen.pure("@"), hostname, Gen.pure("."), tld])
 
 
-///: And we're done!
-/ Yes, these are in fact, all valid email addresses.
+// Yes, the//: And we're done!
+se are in fact, all valid email addresses.
 emailGen.generate
 emailGen.generate
 emailGen.generate
 
 
 
-//: By now you may be asking "why do we need all of this in the first place?  Can't we just apply 
+//
+//     //: By now you may be asking "why do we need all of this in the first place?  Can't we just apply 
 //: the parts to the function to get back a result?"  Well, we do it because we aren't working with 
 //: `Character`s or `String`s or `Array`s, we're working with `Gen<String>`.  And we can't apply 
 //: `Gen<String>` to a function that expects `String`, that wouldn't make any sense - and it would 
@@ -284,16 +285,15 @@ emailGen.generate
 //:
 //: Complex cases like the above are rare in practice.  Most of the time you won't even need to use
 //: generators at all!  This brings us to one of the most important parts of SwiftCheck:
-///: # Arbitrary
-///: Here at TypeLift, we believe that Types are the most useful part of a program.  So when we were
+p//: # Arbitrary
+u//: Here at TypeLift, we believe that Types are the most useful part of a program.  So when we were
 //: writing SwiftCheck, we thought about just using `Gen` everywhere and making instance methods on 
 //: values that would ask them to generate a "next" value.  But that would have been incredibly 
 //: boring!  Instead, we wrote a protocol called `Arbitrary` and let Types, not values, do all the 
 //: work.
 //:
 //: The `Arbitrary` protocol looks like this:
-
-//     public protocol Arbitrary {
+blic protocol Arbitrary {
 //         /// The generator for this particular type.
 //         ///
 //         /// This function should call out to any sources of randomness or state necessary to generate
@@ -303,18 +303,18 @@ emailGen.generate
 //     }
 //
 
-i//: There's our old friend, `Gen`!  So, an `Arbitrary` type is a type that can give us a generator 
+import clas//: There's our old friend, `Gen`!  So, an `Arbitrary` type is a type that can give us a generator 
 //: to create `Arbitrary` values.  SwiftCheck defines `Arbitrary` instances for the majority of 
 //: types in the Swift Standard Library in the ways you might expect e.g. The `Arbitrary` instance 
 //: for `Int` calls `arc4random_uniform`.
 //:
 //: We'll take this opportunity here to show you how to use Arbitrary for any types you might happen
 //: to write yourself.  But before that, let's try to write an `Arbitrary` instance for `NSDate`.
-mport class Foundation.NSDate
+s Foundation.NSDate
 
-////: Here's the obvious way to do it
-
-// extension NSDate : Arbitrary {
+//
+// extens//: Here's the obvious way to do it
+ion NSDate : Arbitrary {
 //     public static var arbitrary : Gen<NSDate> {
 //         return Gen.oneOf([
 //             Gen.pure(NSDate()),
@@ -326,11 +326,11 @@ mport class Foundation.NSDate
 // }
 //
 
-s//: But this doesn't work!  Swift won't let us extend `NSDate` directly because we use `Gen<Self>` 
+struct Arbi//: But this doesn't work!  Swift won't let us extend `NSDate` directly because we use `Gen<Self>` 
 //: in the wrong position.  What to do?
 //:
 //: Let's write a wrapper!
-truct ArbitraryDate : Arbitrary {
+traryDate : Arbitrary {
 	let getDate : NSDate
 
 	init(date : NSDate) { self.getDate = date }
@@ -349,13 +349,13 @@ ArbitraryDate.arbitrary.generate.getDate
 ArbitraryDate.arbitrary.generate.getDate
 
 
-pu//: What we've just written is called a `Modifier Type`; a wrapper around one type that we can't 
+public struc//: What we've just written is called a `Modifier Type`; a wrapper around one type that we can't 
 //: generate with another that we can.
 //:
 //: SwiftCheck uses this strategy for a few of the more "difficult" types in the Swift STL, but
 //: we also use them in more benign ways too.  For example, we can write a modifier type that only 
 //: generates positive numbers:
-blic struct ArbitraryPositive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary {
+t ArbitraryPositive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary {
 	public let getPositive : A
 
 	public init(_ pos : A) { self.getPositive = pos }
@@ -371,8 +371,8 @@ ArbitraryPositive<Int>.arbitrary.generate.getPositive
 
 
 //
-//: # Quantifiers
-///: What we've seen so far are the building blocks we need to introduce the final part of the 
+//     fun//: # Quantifiers
+c//: What we've seen so far are the building blocks we need to introduce the final part of the 
 //: library: The actual testing interface.  The last concept we'll introduce is *Quantifiers*.
 //:
 //: A Quantifier is a contract that serves as a guarantee that a property holds when the given
@@ -381,13 +381,13 @@ ArbitraryPositive<Int>.arbitrary.generate.getPositive
 //: requires type annotations for all value positions being requested.  There is only one quantifier
 //: in SwiftCheck, `forAll`.  As its name implies, `forAll` will produce random data and your spec 
 //: must pass "for all" of the values.  Here's what it looks like:
-/     func forAll<A : Arbitrary>(_ : (A... -> Bool)) -> Property
+ forAll<A : Arbitrary>(_ : (A... -> Bool)) -> Property
 //
 
-// //: The actual type of `forAll` is much more general and expressive than this, but for now this will do.
+//     + This//: The actual type of `forAll` is much more general and expressive than this, but for now this will do.
 //:
 //: Here is an example of a simple property
-    + This is "Property Notation".  It allows you to give your properties a name and instructs SwiftCheck to test it.
+ is "Property Notation".  It allows you to give your properties a name and instructs SwiftCheck to test it.
 //     |                                                          + This backwards arrow binds a property name and a property to each other.
 //     |                                                          |
 //     v                                                          v
@@ -398,8 +398,8 @@ property("The reverse of the reverse of an array is that array") <- forAll { (xs
 // From now on, all of our examples will take the form above.
 
 
-// //: Because `forAll` is variadic it works for a large number and variety of types too:
-                                          +--- This Modifier Type produces Arrays of Integers.
+//           //: Because `forAll` is variadic it works for a large number and variety of types too:
+                                +--- This Modifier Type produces Arrays of Integers.
 //                                           |                    +--- This Modifier Type generates functions.  That's right, SwiftCheck
 //                                           |                    |    can generate *functions*!!
 //                                           v                    v
@@ -418,7 +418,7 @@ property("DeMorgan's Law") <- forAll { (x : Bool, y : Bool) in
 }
 
 
-// //: The thing to notice about all of these examples is that there isn't a `Gen`erator in sight.  Not
+// `reportPro//: The thing to notice about all of these examples is that there isn't a `Gen`erator in sight.  Not
 //: once did we have to invoke `.generate` or have to construct a generator.  We simply told the 
 //: `forAll` block how many variables we wanted and of what type and SwiftCheck automagically went 
 //: out and was able to produce random values.
@@ -427,7 +427,7 @@ property("DeMorgan's Law") <- forAll { (x : Bool, y : Bool) in
 //: to construct default generators for each type and a testing mechanism that invokes the testing 
 //: block for the proper number of tests.  For some real magic, let's see what happens when we fail 
 //: a test:
-`reportProperty` is a variation of `property` that doesn't assert on failure.  It does, however, 
+perty` is a variation of `property` that doesn't assert on failure.  It does, however, 
 // still print all failures to the console.  We use it here because XCTest does not like it when you
 // assert outside of a test case.
 reportProperty("Obviously wrong") <- forAll({ (x : Int) in
@@ -437,7 +437,7 @@ reportProperty("Obviously wrong") <- forAll({ (x : Int) in
 }
 
 //
-///: If you open the console for the playground, you'll see output very similar to the following:
+//     publ//: If you open the console for the playground, you'll see output very similar to the following:
 //:
 //:     *** Failed! Proposition: Obviously wrong
 //:     Falsifiable (after 1 test):
@@ -450,7 +450,7 @@ reportProperty("Obviously wrong") <- forAll({ (x : Int) in
 //: the integer supposedly being random.  What's going on here?
 //:
 //: To find out, let's see the full definition of the `Arbitrary` protocol:
-/     public protocol Arbitrary {
+ic protocol Arbitrary {
 //         /// The generator for this particular type.
 //         ///
 //         /// This function should call out to any sources of randomness or state necessary to generate
@@ -469,21 +469,21 @@ reportProperty("Obviously wrong") <- forAll({ (x : Int) in
 //     }
 //
 
-Arr//: Here's where we one-up Fuzz Testing and show the real power of Property Testing.  A "shrink" is
+Array<Int>.sh//: Here's where we one-up Fuzz Testing and show the real power of Property Testing.  A "shrink" is
 //: a strategy for reducing randomly generated values.  To shrink a value, all you need to do is 
 //: return an array of "smaller values", whether in magnitude or value.  For example, the shrinker 
 //: for `Array` returns Arrays that have a size less than or equal to that of the input array.
-ay<Int>.shrink([1, 2, 3])
+rink([1, 2, 3])
 
 
 
-////: So herein lies the genius: Whenever SwiftCheck encounters a failing property, it simply invokes
+// SwiftChec//: So herein lies the genius: Whenever SwiftCheck encounters a failing property, it simply invokes
 //: the shrinker, tries the property again on the values of the array until it finds another failing
 //: case, then repeats the process until it runs out of cases to try.  In other words, it *shrinks*
 //: the value down to the least possible size then reports that to you as the failing test case 
 //: rather than the randomly generated value which could be unnecessarily large or complex.
- //: Before we move on, let's write a Modifier Type with a custom shrinker for the email generator we defined a little while ago:
-SwiftCheck defines default shrinkers for most of the types it gives Arbitrary instances.  There
+k//: Before we move on, let's write a Modifier Type with a custom shrinker for the email generator we defined a little while ago:
+ defines default shrinkers for most of the types it gives Arbitrary instances.  There
 // will often be times when those default shrinkers don't cut it, or you need more control over
 // what happens when you generate or shrink values.  Modifier Types to the rescue!
 struct ArbitraryEmail : Arbitrary {
@@ -503,10 +503,10 @@ property("email addresses don't come with a TLD") <- forAll { (email : Arbitrary
 
 
 
-// //: # All Together Now!
-T//: Let's put all of our newfound understanding of this framework to use by writing a property that
+// The Sieve //: # All Together Now!
+o//: Let's put all of our newfound understanding of this framework to use by writing a property that
 //: tests an implementation of the Sieve of Eratosthenes:
-he Sieve of Eratosthenes:
+f Eratosthenes:
 //
 // To find all the prime numbers less than or equal to a given integer n:
 //    - let l = [2...n]
@@ -560,9 +560,9 @@ func isPrime(n : Int) -> Bool {
 }
 
 
-repo//: We would like to test whether our sieve works properly, so we run it through SwiftCheck with the
+reportProperty//: We would like to test whether our sieve works properly, so we run it through SwiftCheck with the
 //: following property:
-rtProperty("All Prime") <- forAll { (n : Positive<Int>) in
+("All Prime") <- forAll { (n : Positive<Int>) in
 	let primes = sieve(n.getPositive)
 	return primes.count > 1 ==> {
 		let primeNumberGen = Gen<Int>.fromElementsOf(primes)
@@ -575,7 +575,7 @@ rtProperty("All Prime") <- forAll { (n : Positive<Int>) in
 
 
 //
-//: This test introduces several new concepts that we'll go through 1-by-1:
+// The Sie//: This test introduces several new concepts that we'll go through 1-by-1:
 //:
 //: * `Positive<Wrapped>`: This is a Modifier Type defined by SwiftCheck that only produces
 //:                        integers larger than zero - positive integers.  SwiftCheck also has
@@ -597,7 +597,7 @@ rtProperty("All Prime") <- forAll { (n : Positive<Int>) in
 //:                     `forAll` that takes a user-supplied generator.  For those times when you want
 //:                     absolute control over generated values, like we do here, use that particular
 //:                     series of overloads.
-///: If you check the console, you'll notice that this property doesn't hold!  
+v//: If you check the console, you'll notice that this property doesn't hold!  
 //:
 //:     *** Failed! Proposition: All Prime
 //:     Falsifiable (after 11 tests and 2 shrinks):
@@ -605,8 +605,8 @@ rtProperty("All Prime") <- forAll { (n : Positive<Int>) in
 //:     0
 //:
 //: What's wrong here?
-///: Let's go back to the spec we had for the sieve:
- The Sieve of Eratosthenes:
+e//: Let's go back to the spec we had for the sieve:
+ of Eratosthenes:
 //
 // To find all the prime numbers less than or equal to a given integer n:
 //    - let l = [2...n]
@@ -617,8 +617,8 @@ rtProperty("All Prime") <- forAll { (n : Positive<Int>) in
 //    - Remaining indices of unmarked numbers are primes
 //
 
-func//: Looks like we used `to:` when we meant `through:`.  Let's try again:
- sieveProperly(n : Int) -> [Int] {
+func sieveProp//: Looks like we used `to:` when we meant `through:`.  Let's try again:
+erly(n : Int) -> [Int] {
 	if n <= 1 {
 		return []
 	}
@@ -655,13 +655,13 @@ property("All Prime") <- forAll { (n : Positive<Int>) in
 
 
 
-pro//: And that's how you test with SwiftCheck.  When properties fail, it means some part of your algorithm
+property("All//: And that's how you test with SwiftCheck.  When properties fail, it means some part of your algorithm
 //: isn't handling the case presented.  So you search through some specification to find the mistake in
 //: logic and try again.  Along the way, SwiftCheck will do its best help you by presenting minimal
 //: cases at the least, and, with more advanced uses of the framework, the names of specific sub-parts of
 //: cases and even percentages of failing vs. passing tests.
-p//: Just for fun, let's try a simpler property that checks the same outcome:
-erty("All Prime") <- forAll { (n : Positive<Int>) in
+ //: Just for fun, let's try a simpler property that checks the same outcome:
+Prime") <- forAll { (n : Positive<Int>) in
 	// Sieving Properly then filtering for primes is the same as just Sieving, right?
 	return sieveProperly(n.getPositive).filter(isPrime) == sieveProperly(n.getPositive)
 }
@@ -673,18 +673,18 @@ erty("All Prime") <- forAll { (n : Positive<Int>) in
 
 
 
-//: When working with failing tests, it's often tough to be able to replicate the exact conditions
+reportProp//: When working with failing tests, it's often tough to be able to replicate the exact conditions
 //: that cause a failure or a bug.  With SwiftCheck, that is now a thing of the past.  The framework
 //: comes with a replay mechanism that allows the arguments that lead to a failing test to be generated
 //: in exactly the same order, with exactly the same values, as they did the first time.  When a test
 //: fails, SwiftCheck will present a helpful message that looks something like this in Xcode:
-r//: > failed - Falsifiable; Replay with 123456789 123456789
-e//: Or this message in your log:
-p//: > Pass the seed values 123456789 123456789 to replay the test.
-o//: These are called *seeds*, and they can be fed back into the property that generated them to 
+e//: > failed - Falsifiable; Replay with 123456789 123456789
+r//: Or this message in your log:
+t//: > Pass the seed values 123456789 123456789 to replay the test.
+y//: These are called *seeds*, and they can be fed back into the property that generated them to 
 //: activate the replay feature.  For example, here's an annoying test to debug because it only fails
 //: every so often on one particular value:
-rtProperty("Screw this value in particular") <- forAll { (n : UInt) in
+("Screw this value in particular") <- forAll { (n : UInt) in
 	if (n == 42) {
 		return false
 	}
@@ -693,9 +693,9 @@ rtProperty("Screw this value in particular") <- forAll { (n : UInt) in
 }
 
 
-/// //: But with a replay seed of (1391985334, 382376411) we can always reproduce the failure because
+/// By passing//: But with a replay seed of (1391985334, 382376411) we can always reproduce the failure because
 //: 42 will always be generated as the first value.  We've turned on verbose mode to demonstrate this.
-By passing this argument to the test, SwiftCheck will automatically use the given seed values and
+ this argument to the test, SwiftCheck will automatically use the given seed values and
 /// size to completely replicate a particular set of values that caused the first test to fail.
 let replayArgs = CheckerArguments(replay: (StdGen(1391985334, 382376411), 100))
 reportProperty("Replay", arguments: replayArgs) <- forAll { (n : UInt) in

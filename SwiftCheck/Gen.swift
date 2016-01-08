@@ -212,7 +212,7 @@ extension Gen {
 
 	/// Modifies a Generator such that it produces arrays with a length 
 	/// determined by the receiver's size parameter.
-	public func proliferate() -> Gen<[A]> {
+	public var proliferate : Gen<[A]> {
 		return Gen<[A]>.sized { n in
 			return Gen.choose((0, n)) >>- self.proliferateSized
 		}
@@ -220,7 +220,7 @@ extension Gen {
 
 	/// Modifies a Generator such that it produces non-empty arrays with a 
 	/// length determined by the receiver's size parameter.
-	public func proliferateNonEmpty() -> Gen<[A]> {
+	public var proliferateNonEmpty : Gen<[A]> {
 		return Gen<[A]>.sized { n in
 			return Gen.choose((1, max(1, n))) >>- self.proliferateSized
 		}
@@ -247,7 +247,7 @@ extension Gen /*: Functor*/ {
 ///
 /// This function is most useful for converting between generators of inter-
 /// related types.  For example, you might have a Generator of `Character` 
-/// values that you then `.proliferate()` into an `Array` of `Character`s.  You
+/// values that you then `.proliferate` into an `Array` of `Character`s.  You
 /// can then use `fmap` to convert that generator of `Array`s to a generator of 
 /// `String`s.
 public func <^> <A, B>(f : A -> B, g : Gen<A>) -> Gen<B> {

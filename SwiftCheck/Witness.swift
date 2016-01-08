@@ -9,14 +9,14 @@
 public protocol WitnessedArbitrary {
 	typealias Param
 
-	static func forAllWitnessed<A : Arbitrary>(wit : A -> Param)(pf : (Self -> Testable)) -> Property
+	static func forAllWitnessed<A : Arbitrary>(wit : A -> Param, pf : (Self -> Testable)) -> Property
 }
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for that type.
 @warn_unused_result(message="Did you forget to bind this quantifier to a property?")
 public func forAll<A : WitnessedArbitrary where A.Param : Arbitrary>(pf : (A -> Testable)) -> Property {
-	return A.forAllWitnessed(id)(pf: pf)
+	return A.forAllWitnessed(id, pf: pf)
 }
 
 /// Converts a function into a universally quantified property using the default

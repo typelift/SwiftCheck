@@ -208,7 +208,7 @@ extension Testable {
 	/// distribution map for the property that shows a percentage success rate 
 	/// for the property.
 	public func label(s : String) -> Property {
-		return self.classify(true)(s: s)
+		return self.classify(true, s: s)
 	}
 
 	/// Labels a property with a printable value.
@@ -217,8 +217,8 @@ extension Testable {
 	}
 
 	/// Conditionally labels a property with a value.
-	public func classify(b : Bool)(s : String) -> Property {
-		return self.cover(b)(n: 0)(s: s)
+	public func classify(b : Bool, s : String) -> Property {
+		return self.cover(b, n: 0, s: s)
 	}
 
 	/// Checks that at least the given proportion of successful test cases 
@@ -226,7 +226,7 @@ extension Testable {
 	///
 	/// Discarded tests (i.e. ones with a false precondition) do not affect 
 	/// coverage.
-	public func cover(b : Bool)(n : Int)(s : String) -> Property {
+	public func cover(b : Bool, n : Int, s : String) -> Property {
 		if b {
 			return self.mapResult { res in
 				return TestResult(ok:           res.ok
@@ -363,7 +363,7 @@ public struct TestResult {
 
 	/// Destructures a test case into a matcher that can be used in switch 
 	/// statement.
-	public func match() -> TestResultMatcher {
+	public var match : TestResultMatcher {
 		return .MatchResult(ok: ok, expect: expect, reason: reason, theException: theException, labels: labels, stamp: stamp, callbacks: callbacks, abort: abort, quantifier: quantifier)
 	}
 
@@ -438,10 +438,10 @@ private func protectResults(rs : Rose<TestResult>) -> Rose<TestResult> {
 }
 
 internal func protectRose(f : () throws -> Rose<TestResult>) -> (() -> Rose<TestResult>) {
-	return { protect(Rose.pure • exception("Exception"))(x: f) }
+	return { protect(Rose.pure • exception("Exception"), x: f) }
 }
 
-internal func protect<A>(f : ErrorType -> A)(x : () throws -> A) -> A {
+internal func protect<A>(f : ErrorType -> A, x : () throws -> A) -> A {
 	do {
 		return try x()
 	} catch let e {
@@ -450,7 +450,7 @@ internal func protect<A>(f : ErrorType -> A)(x : () throws -> A) -> A {
 }
 
 private func protectResult(r : () throws -> TestResult) -> (() -> TestResult) {
-	return { protect(exception("Exception"))(x: r) }
+	return { protect(exception("Exception"), x: r) }
 }
 
 internal func id<A>(x : A) -> A {

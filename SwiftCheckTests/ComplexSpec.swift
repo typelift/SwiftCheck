@@ -24,15 +24,15 @@ class ComplexSpec : XCTestCase {
 			lower,
 			numeric,
 			special,
-		]).proliferateNonEmpty().suchThat({ $0[$0.endIndex.predecessor()] != "." }).map(String.init)
+		]).proliferateNonEmpty.suchThat({ $0[$0.endIndex.predecessor()] != "." }).map(String.init)
 
 		let hostname = Gen<Character>.oneOf([
 			lower,
 			numeric,
 			Gen.pure("-"),
-		]).proliferateNonEmpty().map(String.init)
+		]).proliferateNonEmpty.map(String.init)
 
-		let tld = lower.proliferateNonEmpty().suchThat({ $0.count > 1 }).map(String.init)
+		let tld = lower.proliferateNonEmpty.suchThat({ $0.count > 1 }).map(String.init)
 
 		let emailGen = wrap3 <^> localEmail <*> Gen.pure("@") <*> hostname <*> Gen.pure(".") <*> tld
 
@@ -49,7 +49,7 @@ class ComplexSpec : XCTestCase {
 			hexDigits.proliferateSized(4).map{ String.init($0) + ":" },
 		])
 
-		let ipGen = { $0.initial() } <^> (wrap2 <^> ipHexDigits <*> ipHexDigits <*> ipHexDigits <*> ipHexDigits)
+		let ipGen = { $0.initial } <^> (wrap2 <^> ipHexDigits <*> ipHexDigits <*> ipHexDigits <*> ipHexDigits)
 
 		property("Generated IPs contain 3 sections") <- forAll(ipGen) { (e : String) in
 			return e.characters.filter({ $0 == ":" }).count == 3
@@ -72,7 +72,7 @@ private func wrap3(l : String) -> String -> String -> String -> String -> String
 }
 
 extension String {
-	func initial() -> String {
+	private var initial : String {
 		return self[self.startIndex..<self.endIndex.predecessor()]
 	}
 }

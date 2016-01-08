@@ -386,66 +386,24 @@ internal indirect enum Either<L, R> {
 }
 
 internal func quickCheckWithResult(args : CheckerArguments, _ p : Testable) -> Result {
-	func roundTo(n : Int)(m : Int) -> Int {
-		return (n / m) * m
-	}
-
-	func rnd() -> StdGen {
-		switch args.replay {
-		case Optional.None:
-			return newStdGen()
-		case Optional.Some(let (rnd, _)):
-			return rnd
-		}
-	}
-
-	func at0(f : Int -> Int -> Int)(s : Int)(n : Int)(d : Int) -> Int {
-		if n == 0 && d == 0 {
-			return s
-		} else {
-			return f(n)(d)
-		}
-	}
-
-	let computeSize : Int -> Int -> Int = { x in
-		let computeSize_ : Int -> Int -> Int  = { x in
-			return { y in
-				if	roundTo(x)(m: args.maxTestCaseSize) + args.maxTestCaseSize <= args.maxAllowableSuccessfulTests ||
-					x >= args.maxAllowableSuccessfulTests ||
-					args.maxAllowableSuccessfulTests % args.maxTestCaseSize == 0 {
-						return min(x % args.maxTestCaseSize + (y / 10), args.maxTestCaseSize)
-				} else {
-					return min((x % args.maxTestCaseSize) * args.maxTestCaseSize / (args.maxAllowableSuccessfulTests % args.maxTestCaseSize) + y / 10, args.maxTestCaseSize)
-				}
-			}
-		}
-
-		return { y in
-			if let (_, sz) = args.replay {
-				return at0(computeSize_)(s: sz)(n: x)(d: y)
-			}
-			return computeSize_(x)(y)
-		}
-	}
-
-
-	let istate = CheckerState(name: args.name
+	let istate = CheckerState(name:							args.name
 							, maxAllowableSuccessfulTests:	args.maxAllowableSuccessfulTests
 							, maxAllowableDiscardedTests:	args.maxAllowableDiscardedTests
-							, computeSize:					computeSize
+							, computeSize:					{ computeSize(args, vals: $0) }
 							, successfulTestCount:			0
 							, discardedTestCount:			0
 							, labels:						[:]
 							, collected:					[]
 							, hasFulfilledExpectedFailure:	false
-							, randomSeedGenerator:			rnd()
+							, randomSeedGenerator:			chooseReplayRNG(args)
 							, successfulShrinkCount:		0
 							, failedShrinkStepDistance:		0
 							, failedShrinkStepCount:		0
 							, shouldAbort:					false
-							, quantifier:					.Universal)
+							, quantifier:					.Universal
+							, arguments:					args)
 	let modP : Property = (p.exhaustive ? p.property.once : p.property)
-	return test(istate, f: modP.unProperty.unGen)
+	return test(istate, caseGen: modP.unProperty.unGen)
 }
 
 // Main Testing Loop:
@@ -461,10 +419,10 @@ internal func quickCheckWithResult(args : CheckerArguments, _ p : Testable) -> R
 // - giveUp: When the number of discarded tests exceeds the number given in the 
 //           arguments we just give up turning the run loop to prevent excessive
 //           generation.
-internal func test(st : CheckerState, f : (StdGen, Int) -> Prop) -> Result {
+internal func test(st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Result {
 	var state = st
 	while true {
-		switch runATest(state)(f: f) {
+		switch runATest(state, caseGen: caseGen) {
 		case let .Left(fail):
 			switch (fail.0, doneTesting(fail.1)) {
 			case (.Success(_, _, _), _):
@@ -502,17 +460,17 @@ internal func test(st : CheckerState, f : (StdGen, Int) -> Prop) -> Result {
 //
 // On success the next state is returned.  On failure the final result and state
 // are returned.
-internal func runATest(st : CheckerState)(f : (StdGen, Int) -> Prop) -> Either<(Result, CheckerState), CheckerState> {
-	let size = st.computeSize(st.successfulTestCount)(st.discardedTestCount)
+internal func runATest(st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Either<(Result, CheckerState), CheckerState> {
+	let size = st.computeSize(st.successfulTestCount, st.discardedTestCount)
 	let (rnd1, rnd2) = st.randomSeedGenerator.split
 
 	// Execute the Rose Tree for the test and reduce to .MkRose.
-	switch f(rnd1, size).unProp.reduce {
+	switch caseGen(rnd1, size).unProp.reduce {
 	case .MkRose(let resC, let ts):
 		let res = resC() // Force the result only once.
 		dispatchAfterTestCallbacks(st, res: res) // Then invoke the post-test callbacks
 
-		switch res.match() {
+		switch res.match {
 			// Success
 		case .MatchResult(.Some(true), let expect, _, _, let labels, let stamp, _, let abort, let quantifier):
 			let nstate = CheckerState(name:							st.name
@@ -529,7 +487,8 @@ internal func runATest(st : CheckerState)(f : (StdGen, Int) -> Prop) -> Either<(
 									, failedShrinkStepDistance:		st.failedShrinkStepDistance
 									, failedShrinkStepCount:		st.failedShrinkStepCount
 									, shouldAbort:					abort
-									, quantifier:					quantifier)
+									, quantifier:					quantifier
+									, arguments:					st.arguments)
 			return .Right(nstate)
 			// Discard
 		case .MatchResult(.None, let expect, _, _, let labels, _, _, let abort, let quantifier):
@@ -547,7 +506,8 @@ internal func runATest(st : CheckerState)(f : (StdGen, Int) -> Prop) -> Either<(
 									, failedShrinkStepDistance:		st.failedShrinkStepDistance
 									, failedShrinkStepCount:		st.failedShrinkStepCount
 									, shouldAbort:					abort
-									, quantifier:					quantifier)
+									, quantifier:					quantifier
+									, arguments:					st.arguments)
 			return .Right(nstate)
 			// Fail
 		case .MatchResult(.Some(false), let expect, _, _, _, _, _, let abort, let quantifier):
@@ -576,13 +536,14 @@ internal func runATest(st : CheckerState)(f : (StdGen, Int) -> Prop) -> Either<(
 										, failedShrinkStepDistance:		st.failedShrinkStepDistance
 										, failedShrinkStepCount:		st.failedShrinkStepCount
 										, shouldAbort:					abort
-										, quantifier:					quantifier)
+										, quantifier:					quantifier
+										, arguments:					st.arguments)
 
 				/// However, some existentials outlive their usefulness
 				if nstate.discardedTestCount >= nstate.maxAllowableDiscardedTests {
 					let resul = Result.ExistentialFailure(numTests: st.successfulTestCount.successor()
 						, usedSeed: st.randomSeedGenerator
-						, usedSize: st.computeSize(st.successfulTestCount)(st.discardedTestCount)
+						, usedSize: st.computeSize(st.successfulTestCount, st.discardedTestCount)
 						, reason: "Could not satisfy existential"
 						, labels: summary(st)
 						, output: "*** Failed! "
@@ -603,7 +564,7 @@ internal func runATest(st : CheckerState)(f : (StdGen, Int) -> Prop) -> Either<(
 			let stat = Result.Failure(numTests:		st.successfulTestCount.successor()
 									, numShrinks:	numShrinks
 									, usedSeed:		st.randomSeedGenerator
-									, usedSize:		st.computeSize(st.successfulTestCount)(st.discardedTestCount)
+									, usedSize:		st.computeSize(st.successfulTestCount, st.discardedTestCount)
 									, reason:		res.reason
 									, labels:		summary(st)
 									, output:		"*** Failed! ")
@@ -622,7 +583,8 @@ internal func runATest(st : CheckerState)(f : (StdGen, Int) -> Prop) -> Either<(
 									, failedShrinkStepDistance:		st.failedShrinkStepDistance
 									, failedShrinkStepCount:		st.failedShrinkStepCount
 									, shouldAbort:					abort
-									, quantifier:					quantifier)
+									, quantifier:					quantifier
+									, arguments:					st.arguments)
 			return .Left((stat, nstate))
 		}
 	default:
@@ -711,7 +673,7 @@ internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts
 		successfulShrinkCount++
 	}
 
-	let state = CheckerState(name:							st.name
+	let state = CheckerState( name:							st.name
 							, maxAllowableSuccessfulTests:	st.maxAllowableSuccessfulTests
 							, maxAllowableDiscardedTests:	st.maxAllowableDiscardedTests
 							, computeSize:					st.computeSize
@@ -725,7 +687,8 @@ internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts
 							, failedShrinkStepDistance:		failedShrinkStepDistance
 							, failedShrinkStepCount:		failedShrinkStepCount
 							, shouldAbort:					st.shouldAbort
-							, quantifier:					st.quantifier)
+							, quantifier:					st.quantifier
+							, arguments:					st.arguments)
 	return reportMinimumCaseFound(state, res: lastResult)
 }
 
@@ -846,7 +809,7 @@ private func pluralize(s : String, i : Int) -> String {
 }
 
 extension Array {
-	internal func groupBy(p : (Element , Element) -> Bool) -> [[Element]] {
+	private func groupBy(p : (Element , Element) -> Bool) -> [[Element]] {
 		func span(list : [Element], p : (Element -> Bool)) -> ([Element], [Element]) {
 			if list.isEmpty {
 				return ([], [])
@@ -869,4 +832,48 @@ extension Array {
 		}
 		fatalError("groupBy reached a non-empty list that could not produce a first element")
 	}
+}
+
+/// Testing loop stuff
+
+private func computeSize(args : CheckerArguments, vals : (successes : Int, discards : Int)) -> Int {
+	func computeSize_(successes : Int, _ discards : Int) -> Int {
+		if roundTo(successes, args.maxTestCaseSize) + args.maxTestCaseSize <= args.maxAllowableSuccessfulTests {
+			return min(successes % args.maxTestCaseSize + (discards / 10), args.maxTestCaseSize)
+		} else if successes >= args.maxAllowableSuccessfulTests {
+			return min(successes % args.maxTestCaseSize + (discards / 10), args.maxTestCaseSize)
+		} else if args.maxAllowableSuccessfulTests % args.maxTestCaseSize == 0 {
+			return min(successes % args.maxTestCaseSize + (discards / 10), args.maxTestCaseSize)
+		} else {
+			return min((successes % args.maxTestCaseSize) * args.maxTestCaseSize / (args.maxAllowableSuccessfulTests % args.maxTestCaseSize) + discards / 10, args.maxTestCaseSize)
+		}
+	}
+
+	if let (_, argSize) = args.replay {
+		return initialSizeForTest(	argSize
+					, successes:	vals.successes
+					, discards:		vals.discards
+					, computeSize:	computeSize_
+					)
+	}
+	return computeSize_(vals.successes, vals.discards)
+}
+
+private func roundTo(n : Int, _ m : Int) -> Int {
+	return (n / m) * m
+}
+
+private func initialSizeForTest(defaultSize : Int, successes : Int, discards : Int, computeSize : (Int, Int) -> Int) -> Int {
+	if successes == 0 && discards == 0 {
+		return defaultSize
+	} else {
+		return computeSize(successes, discards)
+	}
+}
+
+private func chooseReplayRNG(args : CheckerArguments) -> StdGen {
+	if let (rng, _) = args.replay {
+		return rng
+	}
+	return newStdGen()
 }
