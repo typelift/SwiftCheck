@@ -9,8 +9,8 @@
 @testable import SwiftCheck
 
 func ==(l : Property, r : Property) -> Bool {
-	let res1 = quickCheckWithResult(CheckerArguments(name: ""), l)
-	let res2 = quickCheckWithResult(CheckerArguments(name: ""), r)
+	let res1 = quickCheckWithResult(CheckerArguments(name: "", silence: true), l)
+	let res2 = quickCheckWithResult(CheckerArguments(name: "", silence: true), r)
 
 	switch (res1, res2) {
 	case (.Success(_, _, _), .Success(_, _, _)):
@@ -31,7 +31,7 @@ func ==(l : Property, r : Property) -> Bool {
 }
 
 func ==(l : Property, r : Bool) -> Bool {
-	let res1 = quickCheckWithResult(CheckerArguments(name: ""), l)
+	let res1 = quickCheckWithResult(CheckerArguments(name: "", silence: true), l)
 	switch res1 {
 	case .Success(_, _, _):
 		return r == true
@@ -82,16 +82,12 @@ class PropertySpec : XCTestCase {
 		}
 
 		property("Cover reports failures properly") <- forAll { (s : Set<Int>) in
-			return (s.count == [Int](s).count).cover(s.count >= 15, percentage: 60, label: "large")
+			return (s.count == [Int](s).count).cover(s.count >= 15, percentage: 70, label: "large")
 		}.expectFailure
 
 		property("Prop ==> true") <- forAllNoShrink(Bool.arbitrary, Gen.pure(true)) { (p1, p2) in
 			let p = p2 ==> p1
-			if case .Success(_, _, _) = quickCheckWithResult(CheckerArguments(name: ""), p) {
-				return (p1 ==== true) ^||^ (p ^&&^ p1 ^&&^ p2)
-			} else {
-				return (p1 ==== false) ^||^ (p ^&&^ p1 ^&&^ p2)
-			}
+			return (p == p1) ^||^ (p ^&&^ p1 ^&&^ p2)
 		}
 
 		property("==> Short Circuits") <- forAll { (n : Int) in
