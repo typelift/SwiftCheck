@@ -76,12 +76,8 @@ public struct Gen<A> {
 
 	/// Constructs a Generator that produces permutations of a given array.
 	public static func fromShufflingElementsOf<S>(xs : [S]) -> Gen<[S]> {
-		if xs.isEmpty {
-			return Gen<[S]>.pure([])
-		}
-
-		return Gen<(S, [S])>.fromElementsOf(selectOne(xs)).flatMap { (y, ys) in
-			return Gen.fromShufflingElementsOf(ys).map { [y] + $0 }
+		return choose((Int.min + 1, Int.max)).proliferateSized(xs.count).flatMap { ns in
+			return Gen<[S]>.pure(Swift.zip(ns, xs).sort({ l, r in l.0 < r.0 }).map { $0.1 })
 		}
 	}
 
