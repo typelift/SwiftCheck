@@ -6,31 +6,34 @@
 //  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
-/// The main interface for the SwiftCheck testing mechanism.  `property` notation is used to define
-/// a property that SwiftCheck can generate test cases for and a human-readable label for debugging
-/// output.  A simple property test might look like the following:
+/// The main interface for the SwiftCheck testing mechanism.  `property` 
+/// notation is used to define a property that SwiftCheck can generate test 
+/// cases for and a human-readable label for debugging output.  A simple 
+/// property test might look like the following:
 ///
 ///     property("reflexitivity") <- forAll { (i : Int8) in
 ///	        return i == i
 ///     }
 ///
-/// SwiftCheck will report all failures through the XCTest mechanism like a normal testing assert,
-/// but with the minimal failing case reported as well.
+/// SwiftCheck will report all failures through the XCTest mechanism like a 
+/// normal testing assert, but with the minimal failing case reported as well.
 ///
-/// If necessary, arguments can be provided to this function to change the behavior of the testing
-/// mechanism:
+/// If necessary, arguments can be provided to this function to change the 
+/// behavior of the testing mechanism:
 ///
-///     let args = CheckerArguments( replay: Optional.Some((newStdGen(), 10)) // Replays all tests with a new generator of size 10
-///                                , maxAllowableSuccessfulTests: 200 // Requires twice the normal amount of successes to pass.
-///                                , maxAllowableDiscardedTests: 0 // Discards are not allowed anymore.
-///                                , maxTestCaseSize: 1000 // Increase the size of tested values by 10x.
-///                                )
+///     let args = CheckerArguments
+///                  ( replay: Optional.Some((newStdGen(), 10)) // Replays all tests with a new generator of size 10
+///                  , maxAllowableSuccessfulTests: 200 // Requires twice the normal amount of successes to pass.
+///                  , maxAllowableDiscardedTests: 0 // Discards are not allowed anymore.
+///                  , maxTestCaseSize: 1000 // Increase the size of tested values by 10x.
+///                  )
 ///
 ///     property("reflexitivity", arguments: args) <- forAll { (i : Int8) in
 ///	        return i == i
 ///     }
 ///
 /// If no arguments are provided, or nil is given, SwiftCheck will select an internal default.
+@warn_unused_result(message="Did you forget to bind this property to a quantifier?")
 public func property(msg : String, arguments : CheckerArguments? = nil, file : String = __FILE__, line : UInt = __LINE__) -> AssertiveQuickCheck {
 	return AssertiveQuickCheck(msg: msg, file: file, line: line, args: arguments ?? CheckerArguments(name: msg))
 }
@@ -49,8 +52,9 @@ public struct AssertiveQuickCheck {
 	}
 }
 
-/// The interface for properties to be run through SwiftCheck without an XCTest assert.  The
-/// property will still generate console output during testing.
+/// The interface for properties to be run through SwiftCheck without an XCTest
+/// assert.  The property will still generate console output during testing.
+@warn_unused_result(message="Did you forget to bind this property to a quantifier?")
 public func reportProperty(msg : String, arguments : CheckerArguments? = nil, file : String = __FILE__, line : UInt = __LINE__) -> ReportiveQuickCheck {
 	return ReportiveQuickCheck(msg: msg, file: file, line: line, args: arguments ?? CheckerArguments(name: msg))
 }
@@ -69,12 +73,13 @@ public struct ReportiveQuickCheck {
 	}
 }
 
-/// Represents the arguments the test driver will use while performing testing, shrinking, and
-/// printing results.
+/// Represents the arguments the test driver will use while performing testing, 
+/// shrinking, and printing results.
 public struct CheckerArguments {
 	/// Provides a way of re-doing a test at the given size with a new generator.
 	let replay : Optional<(StdGen, Int)>
-	/// The maximum number of test cases that must pass before the property itself passes.
+	/// The maximum number of test cases that must pass before the property itself
+ /// passes.
 	///
 	/// The default value of this property is 100.  In general, some tests may require more than
 	/// this amount, but less is rare.  If you need a value less than or equal to 1, use `.once`

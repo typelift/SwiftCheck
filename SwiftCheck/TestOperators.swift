@@ -10,11 +10,13 @@ infix operator <- {}
 
 /// Binds a Testable value to a property.
 public func <-(checker : AssertiveQuickCheck, @autoclosure(escaping) test : () -> Testable) {
-	switch quickCheckWithResult(checker.args, p: test()) {
+	switch quickCheckWithResult(checker.args, test()) {
 	case let .Failure(_, sz, seed, _, reason, _, _):
 		XCTFail(reason + "; Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
 	case .NoExpectedFailure(_, _, _):
 		XCTFail("Expected property to fail but it didn't.", file: checker.file, line: checker.line)
+	case .InsufficientCoverage(_, _, _):
+		XCTFail("Property coverage insufficient.")
 	default:
 		return
 	}
@@ -22,11 +24,13 @@ public func <-(checker : AssertiveQuickCheck, @autoclosure(escaping) test : () -
 
 /// Binds a Testable value to a property.
 public func <-(checker : AssertiveQuickCheck, test : () -> Testable) {
-	switch quickCheckWithResult(checker.args, p: test()) {
+	switch quickCheckWithResult(checker.args, test()) {
 	case let .Failure(_, sz, seed, _, reason, _, _):
 		XCTFail(reason + "; Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
 	case .NoExpectedFailure(_, _, _):
 		XCTFail("Expected property to fail but it didn't.", file: checker.file, line: checker.line)
+	case .InsufficientCoverage(_, _, _):
+		XCTFail("Property coverage insufficient.")
 	default:
 		return
 	}
@@ -34,12 +38,12 @@ public func <-(checker : AssertiveQuickCheck, test : () -> Testable) {
 
 /// Binds a Testable value to a property.
 public func <-(checker : ReportiveQuickCheck, test : () -> Testable) {
-	quickCheckWithResult(checker.args, p: test())
+	quickCheckWithResult(checker.args, test())
 }
 
 /// Binds a Testable value to a property.
 public func <-(checker : ReportiveQuickCheck, @autoclosure(escaping) test : () -> Testable) {
-	quickCheckWithResult(checker.args, p: test())
+	quickCheckWithResult(checker.args, test())
 }
 
 infix operator ==> {
@@ -47,8 +51,9 @@ infix operator ==> {
 	precedence 100
 }
 
-/// Models implication for properties.  That is, the property holds if the first argument is false
-/// (in which case the test case is discarded), or if the given property holds.
+/// Models implication for properties.  That is, the property holds if the first
+/// argument is false (in which case the test case is discarded), or if the 
+/// given property holds.
 public func ==>(b : Bool, @autoclosure p : () -> Testable) -> Property {
 	if b {
 		return p().property
@@ -56,8 +61,9 @@ public func ==>(b : Bool, @autoclosure p : () -> Testable) -> Property {
 	return Discard().property
 }
 
-/// Models implication for properties.  That is, the property holds if the first argument is false
-/// (in which case the test case is discarded), or if the given property holds.
+/// Models implication for properties.  That is, the property holds if the first
+/// argument is false (in which case the test case is discarded), or if the 
+/// given property holds.
 public func ==>(b : Bool, p : () -> Testable) -> Property {
 	if b {
 		return p().property
@@ -82,10 +88,11 @@ infix operator <?> {
 
 /// Attaches a label to a property.
 ///
-/// Labelled properties aid in testing conjunctions and disjunctions, or any other cases where
-/// test cases need to be distinct from one another.  In addition to shrunken test cases, upon
-/// failure SwiftCheck will print a distribution map for the property that shows a percentage
-/// success rate for the property.
+/// Labelled properties aid in testing conjunctions and disjunctions, or any 
+/// other cases where test cases need to be distinct from one another.  In 
+/// addition to shrunken test cases, upon failure SwiftCheck will print a 
+/// distribution map for the property that shows a percentage success rate for 
+/// the property.
 public func <?>(p : Testable, s : String) -> Property {
 	return p.label(s)
 }
@@ -95,10 +102,11 @@ infix operator ^&&^ {
 	precedence 110
 }
 
-/// Takes the conjunction of two properties and treats them as a single large property.
+/// Takes the conjunction of two properties and treats them as a single large 
+/// property.
 ///
-/// Conjoined properties succeed only when both sub-properties succeed and fail when one or more
-/// sub-properties fail.
+/// Conjoined properties succeed only when both sub-properties succeed and fail 
+/// when one or more sub-properties fail.
 public func ^&&^(p1 : Testable, p2 : Testable) -> Property {
 	return conjoin(p1.property, p2.property)
 }
@@ -109,10 +117,11 @@ infix operator ^||^ {
 	precedence 110
 }
 
-/// Takes the disjunction of two properties and treats them as a single large property.
+/// Takes the disjunction of two properties and treats them as a single large 
+/// property.
 ///
-/// Disjoined properties succeed only when one or more sub-properties succeed and fail when both
-/// sub-properties fail.
+/// Disjoined properties succeed only when one or more sub-properties succeed 
+/// and fail when both sub-properties fail.
 public func ^||^(p1 : Testable, p2 : Testable) -> Property {
 	return disjoin(p1.property, p2.property)
 }

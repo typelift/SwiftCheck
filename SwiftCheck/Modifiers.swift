@@ -8,44 +8,49 @@
 
 // MARK: - Modifier Types
 
-/// A Modifier Type is a type that wraps another to provide special semantics or simply to generate
-/// values of an underlying type that would be unusually difficult to express given the limitations
-/// of Swift's type system.  
+/// A Modifier Type is a type that wraps another to provide special semantics or
+/// simply to generate values of an underlying type that would be unusually 
+/// difficult to express given the limitations of Swift's type system.
 ///
-/// For an example of the former, take the `Blind` modifier.  Because SwiftCheck's counterexamples 
-/// come from a description a particular object provides for itself, there are many cases where 
-/// console output can become unbearably long, or just simply isn't useful to your test suite.  By
-/// wrapping that type in `Blind` SwiftCheck ignores whatever description the property provides and
-/// just print "(*)".
+/// For an example of the former, take the `Blind` modifier.  Because 
+/// SwiftCheck's counterexamples come from a description a particular object 
+/// provides for itself, there are many cases where console output can become 
+/// unbearably long, or just simply isn't useful to your test suite.  By 
+/// wrapping that type in `Blind` SwiftCheck ignores whatever description the 
+/// property provides and just print "(*)".
 ///
 ///     property("All blind variables print '(*)'") <- forAll { (x : Blind<Int>) in
 ///         return x.description == "(*)"
 ///     }
 ///
-/// For an example of the latter see the `ArrowOf` modifier.  Because Swift's type system treats
-/// arrows (`->`) as an opaque entity that you can't interact with or extend, SwiftCheck provides
-/// `ArrowOf` to enable the generation of functions between 2 types.  That's right, we can generate
-/// arbitrary functions!
+/// For an example of the latter see the `ArrowOf` modifier.  Because Swift's 
+/// type system treats arrows (`->`) as an opaque entity that you can't interact
+/// with or extend, SwiftCheck provides `ArrowOf` to enable the generation of 
+/// functions between 2 types.  That's right, we can generate arbitrary 
+/// functions!
 ///
 ///     property("map accepts SwiftCheck arrows") <- forAll { (xs : [Int]) in
 ///         return forAll { (f : ArrowOf<Int, Int>) in
-///             /// Just to prove it really is a function (that is, every input always maps to the
-///             /// same output), and not just a trick, we map twice and should get equal arrays.
+///             /// Just to prove it really is a function (that is, every input 
+///             /// always maps to the same output), and not just a trick, we 
+///             /// map twice and should get equal arrays.
 ///	            return xs.map(f.getArrow) == xs.map(f.getArrow)
 ///         }
 ///     }
 ///
-/// Finally, modifiers nest to allow the generation of intricate structures that would not otherwise
-/// be possible due to the limitations above.  For example, to generate an Array of Arrays of 
-/// Dictionaries of Integers and Strings (a type that normally looks like 
-/// `Array<Array<Dictionary<String, Int>>>`), would look like this:
+/// Finally, modifiers nest to allow the generation of intricate structures that
+/// would not otherwise be possible due to the limitations above.  For example, 
+/// to generate an Array of Arrays of Dictionaries of Integers and Strings (a 
+/// type that normally looks like `Array<Array<Dictionary<String, Int>>>`), 
+/// would look like this:
 ///
 ///     property("Generating monstrous data types is possible") <- forAll { (xs : ArrayOf<ArrayOf<DictionaryOf<String, Int>>>) in
 ///         /// We're gonna need a bigger boat.
 ///     }
 
-/// For types that either do not have a `CustomStringConvertible` instance or that wish to have no
-/// description to print, Blind will create a default description for them.
+/// For types that either do not have a `CustomStringConvertible` instance or 
+/// that wish to have no description to print, Blind will create a default 
+/// description for them.
 public struct Blind<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 	public let getBlind : A
 
@@ -131,6 +136,31 @@ extension ArrayOf : CoArbitrary {
 	}
 }
 
+/// Generates a sorted array of arbitrary values of type A.
+public struct OrderedArrayOf<A : protocol<Arbitrary, Comparable>> : Arbitrary, CustomStringConvertible {
+	public let getOrderedArray : [A]
+	public var getContiguousArray : ContiguousArray<A> {
+		return ContiguousArray(self.getOrderedArray)
+	}
+
+	public init(_ array : [A]) {
+		self.getOrderedArray = array.sort()
+	}
+
+	public var description : String {
+		return "\(self.getOrderedArray)"
+	}
+
+	public static var arbitrary : Gen<OrderedArrayOf<A>> {
+		return OrderedArrayOf.init <^> Array<A>.arbitrary
+	}
+
+	public static func shrink(bl : OrderedArrayOf<A>) -> [OrderedArrayOf<A>] {
+		return Array<A>.shrink(bl.getOrderedArray).filter({ $0.sort() == $0 }).map(OrderedArrayOf.init)
+	}
+}
+
+
 /// Generates an dictionary of arbitrary keys and values.
 public struct DictionaryOf<K : protocol<Hashable, Arbitrary>, V : Arbitrary> : Arbitrary, CustomStringConvertible {
 	public let getDictionary : Dictionary<K, V>
@@ -202,7 +232,7 @@ public struct SetOf<A : protocol<Hashable, Arbitrary>> : Arbitrary, CustomString
 
 	public static var arbitrary : Gen<SetOf<A>> {
 		return Gen.sized { n in
-			return Gen<Int>.choose((0, n)).bind { k in
+			return Gen<Int>.choose((0, n)).flatMap { k in
 				if k == 0 {
 					return Gen.pure(SetOf(Set([])))
 				}
@@ -243,7 +273,7 @@ public struct PointerOf<T : Arbitrary> : Arbitrary, CustomStringConvertible {
 	}
 
 	public static var arbitrary : Gen<PointerOf<T>> {
-		return PointerOfImpl.arbitrary.fmap(PointerOf.init)
+		return PointerOfImpl.arbitrary.map(PointerOf.init)
 	}
 }
 
@@ -260,7 +290,7 @@ public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbi
 	}
 
 	public static var arbitrary : Gen<ArrowOf<T, U>> {
-		return ArrowOfImpl<T, U>.arbitrary.fmap(ArrowOf.init)
+		return ArrowOfImpl<T, U>.arbitrary.map(ArrowOf.init)
 	}
 }
 
@@ -290,7 +320,7 @@ public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol
 	}
 
 	public static var arbitrary : Gen<IsoOf<T, U>> {
-		return IsoOfImpl<T, U>.arbitrary.fmap(IsoOf.init)
+		return IsoOfImpl<T, U>.arbitrary.map(IsoOf.init)
 	}
 }
 
@@ -316,7 +346,7 @@ public struct Large<A : protocol<RandomType, LatticeType, IntegerType>> : Arbitr
 	}
 
 	public static var arbitrary : Gen<Large<A>> {
-		return Gen<A>.choose((A.min, A.max)).fmap(Large.init)
+		return Gen<A>.choose((A.min, A.max)).map(Large.init)
 	}
 
 	public static func shrink(bl : Large<A>) -> [Large<A>] {
@@ -337,7 +367,7 @@ public struct Positive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary, C
 	}
 
 	public static var arbitrary : Gen<Positive<A>> {
-		return A.arbitrary.fmap(Positive.init • abs).suchThat { $0.getPositive > 0 }
+		return A.arbitrary.map(Positive.init • abs).suchThat { $0.getPositive > 0 }
 	}
 
 	public static func shrink(bl : Positive<A>) -> [Positive<A>] {
@@ -501,7 +531,7 @@ private final class IsoOfImpl<T : protocol<Hashable, CoArbitrary, Arbitrary>, U 
 			return T.coarbitrary(a)(U.arbitrary)
 		}), promote({ a in
 			return U.coarbitrary(a)(T.arbitrary)
-		})).fmap { IsoOfImpl($0, $1) }
+		})).map { IsoOfImpl($0, $1) }
 	}
 
 	static func shrink(f : IsoOfImpl<T, U>) -> [IsoOfImpl<T, U>] {
@@ -550,7 +580,7 @@ private final class PointerOfImpl<T : Arbitrary> : Arbitrary {
 			}
 			let pt = UnsafeMutablePointer<T>.alloc(n)
 			let gt = pt.initializeFrom <^> sequence(Array((0..<n)).map { _ in T.arbitrary })
-			return gt.fmap { _ in PointerOfImpl(pt, n) }
+			return gt.map { _ in PointerOfImpl(pt, n) }
 		}
 	}
 }

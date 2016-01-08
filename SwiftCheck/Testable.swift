@@ -7,20 +7,23 @@
 //
 
 
-/// The type of things that can be tested.  Consequently, the type of things that can be returned
-/// from a `forAll` block.
+/// The type of things that can be tested.  Consequently, the type of things 
+/// that can be returned from a `forAll` block.
 ///
-/// `Testable` values must be able to produce a `Rose<TestResult>`, that is a rose tree of test
-/// cases that terminates in a passing or failing `TestResult`.  SwiftCheck provides instances for
-/// `Bool`, `Discard`, `Prop`, and `Property`.  The last of these enables `forAll`s to return
-/// further	`forAll`s that can depend on previously generated values.
+/// `Testable` values must be able to produce a `Rose<TestResult>`, that is a 
+/// rose tree of test cases that terminates in a passing or failing 
+/// `TestResult`.  SwiftCheck provides instances for `Bool`, `Discard`, `Prop`, 
+/// and `Property`.  The last of these enables `forAll`s to return further 
+/// `forAll`s that can depend on previously generated values.
 public protocol Testable {
-	/// Returns true iff a single test case is exhaustive i.e. adequately covers the search space.
+	/// Returns true iff a single test case is exhaustive i.e. adequately covers
+	/// the search space.
 	///
 	/// If true, the property will only be tested once.  Defaults to false.
 	var exhaustive : Bool { get }
 
-	/// Returns a `Property`, which SwiftCheck uses to perform test case generation.
+	/// Returns a `Property`, which SwiftCheck uses to perform test case 
+	/// generation.
 	var property : Property { get }
 }
 
@@ -30,7 +33,7 @@ extension Testable {
 	}
 }
 
-/// A property is anything that generates propositions.
+/// A property is anything that generates `Prop`s.
 public struct Property : Testable {
 	let unProperty : Gen<Prop>
 
@@ -43,7 +46,13 @@ public struct Property : Testable {
 	}
 }
 
-/// A proposition.
+/// A `Prop` describes a strategy for evaluating a test case to a final 
+/// `TestResult`.  It holds a Rose Tree of branches that evaluate the test and 
+/// any modifiers and mappings that may have been applied to a particular 
+/// testing tree.
+///
+/// As a testable value, it creates a Property that generates only its testing 
+/// tree.
 public struct Prop : Testable {
 	var unProp : Rose<TestResult>
 

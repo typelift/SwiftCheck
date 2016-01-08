@@ -6,96 +6,66 @@
 //  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
-/// Takes the conjunction of multiple properties and reports all successes and failures as one
-/// combined property.  That is, this property holds when all sub-properties hold and fails when one
-/// or more sub-properties fail.
+/// Takes the conjunction of multiple properties and reports all successes and 
+/// failures as one combined property.  That is, this property holds when all 
+/// sub-properties hold and fails when one or more sub-properties fail.
 ///
-/// Conjoined properties are each tested normally but are collected and labelled together.  This can
-/// mean multiple failures in distinct sub-properties are masked.  If fine-grained error reporting
-/// is needed, use a combination of `disjoin(_:)` and `verbose(_:)`.
+/// Conjoined properties are each tested normally but are collected and labelled
+/// together.  This can mean multiple failures in distinct sub-properties are 
+/// masked.  If fine-grained error reporting is needed, use a combination of 
+/// `disjoin(_:)` and `verbose(_:)`.
 ///
 /// When conjoining properties all calls to `expectFailure` will fail.
 public func conjoin(ps : Testable...) -> Property {
 	return Property(sequence(ps.map({ (p : Testable) in
-		return p.property.unProperty.fmap { $0.unProp }
-	})).bind({ roses in
+		return p.property.unProperty.map { $0.unProp }
+	})).flatMap({ roses in
 		return Gen.pure(Prop(unProp: conj(id, xs: roses)))
 	}))
 }
 
-/// Takes the disjunction of multiple properties and reports all successes and failures of each
-/// sub-property distinctly.  That is, this property holds when any one of its sub-properties holds
-/// and fails when all of its sub-properties fail simultaneously.
+/// Takes the disjunction of multiple properties and reports all successes and 
+/// failures of each sub-property distinctly.  That is, this property holds when
+/// any one of its sub-properties holds and fails when all of its sub-properties
+/// fail simultaneously.
 ///
-/// Disjoined properties, when used in conjunction with labelling, cause SwiftCheck to print a
-/// distribution map of the success rate of each sub-property.
+/// Disjoined properties, when used in conjunction with labelling, cause 
+/// SwiftCheck to print a distribution map of the success rate of each sub-
+/// property.
 ///
-/// When disjoining properties all calls to `expectFailure` will fail.
+/// When disjoining properties all calls to `expectFailure` will fail.  You can,
+/// however, `invert` the property.
 public func disjoin(ps : Testable...) -> Property {
 	return Property(sequence(ps.map({ (p : Testable) in
-		return p.property.unProperty.fmap { $0.unProp }
-	})).bind({ roses in
+		return p.property.unProperty.map { $0.unProp }
+	})).flatMap({ roses in
 		return Gen.pure(Prop(unProp: roses.reduce(.MkRose({ TestResult.failed() }, { [] }), combine: disj)))
 	}))
 }
 
-/// Takes the nondeterministic conjunction of multiple properties and treats them as a single large
-/// property.
+/// Takes the nondeterministic conjunction of multiple properties and treats 
+/// them as a single large property.
 ///
-/// The resulting property makes 100 random choices to test any of the given properties.  Thus,
-/// running multiple test cases will result in distinct arbitrary sequences of each property being
-/// tested.
+/// The resulting property makes 100 random choices to test any of the given 
+/// properties.  Thus, running multiple test cases will result in distinct 
+/// arbitrary sequences of each property being tested.
 public func conjamb(ps : () -> Testable...) -> Property {
 	let ls = ps.lazy.map { $0().property.unProperty }
 	return Property(Gen.oneOf(ls))
 }
 
 extension Testable {
-	/// Applies a function that modifies the property generator's inner `Prop`.
-	public func mapProp(f : Prop -> Prop) -> Property {
-		return Property(f <^> self.property.unProperty)
-	}
-
-	/// Applies a function that modifies the property generator's size.
-	public func mapSize(f : Int -> Int) -> Property {
-		return Property(Gen.sized { n in
-			return self.property.unProperty.resize(f(n))
-		})
-	}
-
-	/// Applies a function that modifies the result of a test case.
-	public func mapTotalResult(f : TestResult -> TestResult) -> Property {
-		return self.mapRoseResult { rs in
-			return protectResults(f <^> rs)
-		}
-	}
-
-	/// Applies a function that modifies the result of a test case.
-	public func mapResult(f : TestResult -> TestResult) -> Property {
-		return self.mapRoseResult { rs in
-			return f <^> rs
-		}
-	}
-
-	/// Applies a function that modifies the underlying Rose Tree that a test case has generated.
-	public func mapRoseResult(f : Rose<TestResult> -> Rose<TestResult>) -> Property {
-		return self.mapProp { t in
-			return Prop(unProp: f(t.unProp))
-		}
-	}
-
 	/// Modifies a property so it will not shrink when it fails.
 	public var noShrinking : Property {
-		return self.mapRoseResult({ rs in
-			return onRose({ res in
-				return { (_) in
-					return .MkRose({ res }, { [] })
-				}
-			})(rs: rs)
-		})
+		return self.mapRoseResult { rs in
+			return rs.onRose { res, _ in
+				return .MkRose({ res }, { [] })
+			}
+		}
 	}
 
-	/// Inverts the result of a test.  That is, test cases that would pass now fail and vice versa.
+	/// Inverts the result of a test.  That is, test cases that would pass now 
+	/// fail and vice versa.
 	///
 	/// Discarded tests remain discarded under inversion.
 	public var invert : Property {
@@ -158,8 +128,8 @@ extension Testable {
 
 	/// Executes an action after the every failure of the property.
 	///
-	/// Because the action is executed after every failing test it can be used to track the list of
-	/// failures generated by the shrinking mechanism.
+	/// Because the action is executed after every failing test it can be used 
+	/// to track the list of failures generated by the shrinking mechanism.
 	public func whenEachFail(m : () -> ()) -> Property {
 		return self.withCallback(Callback.AfterFinalFailure(kind: .NotCounterexample) { (st, res) in
 			if res.ok == .Some(false) {
@@ -168,11 +138,11 @@ extension Testable {
 		})
 	}
 
-	/// Modifies a property so it prints out every generated test case and the result of the property
-	/// every time it is tested.
+	/// Modifies a property so it prints out every generated test case and the 
+	/// result of the property every time it is tested.
 	///
-	/// This function maps AfterFinalFailure callbacks that have the .Counterexample kind to AfterTest
-	/// callbacks.
+	/// This function maps AfterFinalFailure callbacks that have the 
+	/// `.Counterexample` kind to `.AfterTest` callbacks.
 	public var verbose : Property {
 		func chattyCallbacks(cbs : [Callback]) -> [Callback] {
 			let c = Callback.AfterTest(kind: .Counterexample) { (st, res) in
@@ -217,7 +187,7 @@ extension Testable {
 	///
 	/// If the property does not fail, SwiftCheck will report an error.
 	public var expectFailure : Property {
-		return self.mapTotalResult({ res in
+		return self.mapTotalResult { res in
 			return TestResult(ok:           res.ok
 							, expect:       false
 							, reason:       res.reason
@@ -227,17 +197,18 @@ extension Testable {
 							, callbacks:    res.callbacks
 							, abort:        res.abort
 							, quantifier:	res.quantifier)
-		})
+		}
 	}
 
 	/// Attaches a label to a property.
 	///
-	/// Labelled properties aid in testing conjunctions and disjunctions, or any other cases where
-	/// test cases need to be distinct from one another.  In addition to shrunken test cases, upon
-	/// failure SwiftCheck will print a distribution map for the property that shows a percentage
-	/// success rate for the property.
+	/// Labelled properties aid in testing conjunctions and disjunctions, or any
+	/// other cases where test cases need to be distinct from one another.  In 
+	/// addition to shrunken test cases, upon failure SwiftCheck will print a 
+	/// distribution map for the property that shows a percentage success rate 
+	/// for the property.
 	public func label(s : String) -> Property {
-		return self.classify(true)(s: s)
+		return self.classify(true, label: s)
 	}
 
 	/// Labels a property with a printable value.
@@ -246,22 +217,24 @@ extension Testable {
 	}
 
 	/// Conditionally labels a property with a value.
-	public func classify(b : Bool)(s : String) -> Property {
-		return self.cover(b)(n: 0)(s: s)
+	public func classify(b : Bool, label : String) -> Property {
+		return self.cover(b, percentage: 0, label: label)
 	}
 
-	/// Checks that at least the given proportion of successful test cases belong to the given class.
+	/// Checks that at least the given proportion of successful test cases 
+	/// belong to the given class.
 	///
-	/// Discarded tests (i.e. ones with a false precondition) do not affect coverage.
-	public func cover(b : Bool)(n : Int)(s : String) -> Property {
+	/// Discarded tests (i.e. ones with a false precondition) do not affect 
+	/// coverage.
+	public func cover(b : Bool, percentage : Int, label : String) -> Property {
 		if b {
 			return self.mapResult { res in
 				return TestResult(ok:           res.ok
 								, expect:       res.expect
 								, reason:       res.reason
 								, theException: res.theException
-								, labels:       insertWith(max, k: s, v: n, m: res.labels)
-								, stamp:        res.stamp.union([s])
+								, labels:       insertWith(max, k: label, v: percentage, m: res.labels)
+								, stamp:        res.stamp.union([label])
 								, callbacks:    res.callbacks
 								, abort:        res.abort
 								, quantifier:	res.quantifier)
@@ -269,23 +242,63 @@ extension Testable {
 		}
 		return self.property
 	}
+
+	/// Applies a function that modifies the property generator's inner `Prop`.
+	///
+	/// This function can be used to completely change the evaluation schema of
+	/// generated test cases by replacing the test's rose tree with a custom
+	/// one.
+	public func mapProp(f : Prop -> Prop) -> Property {
+		return Property(f <^> self.property.unProperty)
+	}
+
+	/// Applies a function that modifies the test case generator's size.
+	public func mapSize(f : Int -> Int) -> Property {
+		return Property(Gen.sized { n in
+			return self.property.unProperty.resize(f(n))
+		})
+	}
+
+	/// Applies a function that modifies the result of a test case.
+	public func mapTotalResult(f : TestResult -> TestResult) -> Property {
+		return self.mapRoseResult { rs in
+			return protectResults(f <^> rs)
+		}
+	}
+
+	/// Applies a function that modifies the result of a test case.
+	public func mapResult(f : TestResult -> TestResult) -> Property {
+		return self.mapRoseResult { rs in
+			return f <^> rs
+		}
+	}
+
+	/// Applies a function that modifies the underlying Rose Tree that a test 
+	/// case has generated.
+	public func mapRoseResult(f : Rose<TestResult> -> Rose<TestResult>) -> Property {
+		return self.mapProp { t in
+			return Prop(unProp: f(t.unProp))
+		}
+	}
 }
 
-/// Using a shrinking function, shrinks a given argument to a property if it fails.
+/// Using a shrinking function, shrinks a given argument to a property if it 
+/// fails.
 ///
-/// Shrinking is handled automatically by SwiftCheck.  Invoking this function is only necessary
-/// when you must override the default behavior.
+/// Shrinking is handled automatically by SwiftCheck.  Invoking this function is
+/// only necessary when you must override the default behavior.
 public func shrinking<A>(shrinker : A -> [A], initial : A, prop : A -> Testable) -> Property {
-	return Property(promote(props(shrinker, original: initial, pf: prop)).fmap { rs in
-		return Prop(unProp: joinRose(rs.fmap { x in
+	return Property(promote(props(shrinker, original: initial, pf: prop)).map { rs in
+		return Prop(unProp: joinRose(rs.map { x in
 			return x.unProp
 		}))
 	})
 }
 
-/// A `Callback` is a block of code that can be run after a test case has finished.  They consist
-/// of a kind and the callback block itself, which is given the state SwiftCheck ran the test case
-/// with and the result of the test to do with as it sees fit.
+/// A `Callback` is a block of code that can be run after a test case has 
+/// finished.  They consist of a kind and the callback block itself, which is 
+/// given the state SwiftCheck ran the test case with and the result of the test
+/// to do with as it sees fit.
 public enum Callback {
 	/// A callback that is posted after a test case has completed.
 	case AfterTest(kind : CallbackKind, f : (CheckerState, TestResult) -> ())
@@ -328,8 +341,8 @@ public enum Quantification {
 
 /// A `TestResult` represents the result of performing a single test.
 public struct TestResult {
-	/// The result of executing the test case.  For Discarded test cases the value of this property
-	/// is .None.
+	/// The result of executing the test case.  For Discarded test cases the 
+	/// value of this property is `.None`.
 	let ok				: Optional<Bool>
 	/// Indicates what the expected result of the property is.
 	let expect			: Bool
@@ -348,8 +361,9 @@ public struct TestResult {
 
 	let quantifier		: Quantification
 
-	/// Destructures a test case into a matcher that can be used in switch statement.
-	public func match() -> TestResultMatcher {
+	/// Destructures a test case into a matcher that can be used in switch 
+	/// statement.
+	public var match : TestResultMatcher {
 		return .MatchResult(ok: ok, expect: expect, reason: reason, theException: theException, labels: labels, stamp: stamp, callbacks: callbacks, abort: abort, quantifier: quantifier)
 	}
 
@@ -380,8 +394,8 @@ public struct TestResult {
 		return result(Optional.None)
 	}
 
-	/// Lifts a `Bool`ean value to a TestResult by mapping true to `TestResult.suceeded` and false
-	/// to `TestResult.failed`.
+	/// Lifts a `Bool`ean value to a TestResult by mapping true to 
+	/// `TestResult.suceeded` and false to `TestResult.failed`.
 	public static func liftBool(b : Bool) -> TestResult {
 		if b {
 			return TestResult.succeeded
@@ -390,7 +404,7 @@ public struct TestResult {
 	}
 }
 
-/// MARK: - Implementation Details
+// MARK: - Implementation Details
 
 private func exception(msg : String) -> ErrorType -> TestResult {
 	return { e in TestResult.failed(String(e)) }
@@ -416,20 +430,18 @@ private func result(ok : Bool?, reason : String = "") -> TestResult {
 }
 
 private func protectResults(rs : Rose<TestResult>) -> Rose<TestResult> {
-	return onRose({ x in
-		return { rs in
-			return .IORose({
-				return .MkRose(protectResult({ x }), { rs.map(protectResults) })
-			})
-		}
-	})(rs: rs)
+	return rs.onRose { x, rs in
+		return .IORose({
+			return .MkRose(protectResult({ x }), { rs.map(protectResults) })
+		})
+	}
 }
 
 internal func protectRose(f : () throws -> Rose<TestResult>) -> (() -> Rose<TestResult>) {
-	return { protect(Rose.pure • exception("Exception"))(x: f) }
+	return { protect(Rose.pure • exception("Exception"), x: f) }
 }
 
-internal func protect<A>(f : ErrorType -> A)(x : () throws -> A) -> A {
+internal func protect<A>(f : ErrorType -> A, x : () throws -> A) -> A {
 	do {
 		return try x()
 	} catch let e {
@@ -438,7 +450,7 @@ internal func protect<A>(f : ErrorType -> A)(x : () throws -> A) -> A {
 }
 
 private func protectResult(r : () throws -> TestResult) -> (() -> TestResult) {
-	return { protect(exception("Exception"))(x: r) }
+	return { protect(exception("Exception"), x: r) }
 }
 
 internal func id<A>(x : A) -> A {
@@ -526,7 +538,7 @@ private func conj(k : TestResult -> TestResult, xs : [Rose<TestResult>]) -> Rose
 		return Rose.MkRose({ k(TestResult.succeeded) }, { [] })
 	} else if let p = xs.first {
 		return .IORose(/*protectRose*/({
-			let rose = reduce(p)
+			let rose = p.reduce
 			switch rose {
 			case .MkRose(let result, _):
 				if !result().expect {
@@ -539,7 +551,7 @@ private func conj(k : TestResult -> TestResult, xs : [Rose<TestResult>]) -> Rose
 				case .Some(false):
 					return rose
 				case .None:
-					let rose2 = reduce(conj(addCallbacks(result()) • k, xs: [Rose<TestResult>](xs[1..<xs.endIndex])))
+					let rose2 = conj(addCallbacks(result()) • k, xs: [Rose<TestResult>](xs[1..<xs.endIndex])).reduce
 					switch rose2 {
 					case .MkRose(let result2, _):
 						switch result2().ok {
@@ -563,7 +575,7 @@ private func conj(k : TestResult -> TestResult, xs : [Rose<TestResult>]) -> Rose
 }
 
 private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult> {
-	return p.bind { result1 in
+	return p.flatMap { result1 in
 		if !result1.expect {
 			return Rose<TestResult>.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 		}
@@ -571,7 +583,7 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 		case .Some(true):
 			return Rose<TestResult>.pure(result1)
 		case .Some(false):
-			return q.bind { (result2 : TestResult) in
+			return q.flatMap { (result2 : TestResult) in
 				if !result2.expect {
 					return Rose<TestResult>.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 				}
@@ -597,7 +609,7 @@ private func disj(p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult
 				}
 			}
 		case .None:
-			return q.bind { (result2 : TestResult) in
+			return q.flatMap { (result2 : TestResult) in
 				if !result2.expect {
 					return Rose<TestResult>.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 				}

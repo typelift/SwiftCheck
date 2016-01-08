@@ -9,14 +9,16 @@
 import func Darwin.time
 import func Darwin.clock
 
-/// Provides a standard interface to an underlying Random Value Generator of any type.  It is
-/// analogous to `GeneratorType`, but rather than consume a sequence it uses sources of randomness
-/// to generate values indefinitely.
+/// Provides a standard interface to an underlying Random Value Generator of any
+/// type.  It is analogous to `GeneratorType`, but rather than consume a 
+/// sequence it uses sources of randomness to generate values indefinitely.
 public protocol RandomGeneneratorType {
-	/// The next operation returns an Int that is uniformly distributed in the range returned by 
-	/// `genRange` (including both end points), and a new generator.
+	/// The next operation returns an Int that is uniformly distributed in the 
+	/// range returned by `genRange` (including both end points), and a new 
+	/// generator.
 	var next : (Int, Self) { get }
-	/// The genRange operation yields the range of values returned by the generator.
+	/// The genRange operation yields the range of values returned by the 
+	/// generator.
 	///
 	/// This property must return integers in ascending order.
 	var genRange : (Int, Int) { get }
@@ -24,15 +26,17 @@ public protocol RandomGeneneratorType {
 	var split : (Self, Self) { get }
 }
 
-/// `StdGen` represents a pseudo-random number generator. The library makes it possible to generate
-/// repeatable results, by starting with a specified initial random number generator, or to get 
-/// different results on each run by using the system-initialised generator or by supplying a seed 
-/// from some other source.
-public struct StdGen : RandomGeneneratorType, CustomStringConvertible {
+/// `StdGen` represents a pseudo-random number generator. The library makes it 
+/// possible to generate repeatable results, by starting with a specified 
+/// initial random number generator, or to get different results on each run by
+/// using the system-initialised generator or by supplying a seed from some 
+/// other source.
+public struct StdGen : RandomGeneneratorType {
 	let seed1 : Int
 	let seed2 : Int
 
-	/// Creates a `StdGen` initialized at the given seeds that is suitable for replaying of tests.
+	/// Creates a `StdGen` initialized at the given seeds that is suitable for 
+	/// replaying of tests.
 	public init(_ replaySeed1 : Int, _ replaySeed2 : Int) {
 		self.seed1 = replaySeed1
 		self.seed2 = replaySeed2
@@ -49,10 +53,8 @@ public struct StdGen : RandomGeneneratorType, CustomStringConvertible {
 		self = mkStdGen32(o)
 	}
 
-	public var description : String {
-		return "\(self.seed1) \(self.seed2)"
-	}
-
+	/// Returns an `Int` generated uniformly within the bounds of the generator
+	/// and a new distinct random number generator.
 	public var next : (Int, StdGen) {
 		let s1 = self.seed1
 		let s2 = self.seed2
@@ -70,6 +72,7 @@ public struct StdGen : RandomGeneneratorType, CustomStringConvertible {
 		return (z_, StdGen(s1__, s2__))
 	}
 
+	/// Splits the receiver and returns two distinct random number generators.
 	public var split : (StdGen, StdGen) {
 		let s1 = self.seed1
 		let s2 = self.seed2
@@ -80,6 +83,16 @@ public struct StdGen : RandomGeneneratorType, CustomStringConvertible {
 	public var genRange : (Int, Int) {
 		return (Int.min, Int.max)
 	}
+}
+
+extension StdGen : Equatable, CustomStringConvertible {
+	public var description : String {
+		return "\(self.seed1) \(self.seed2)"
+	}
+}
+
+public func == (l : StdGen, r : StdGen) -> Bool {
+	return l.seed1 == r.seed1 && l.seed2 == r.seed2
 }
 
 private var theStdGen : StdGen = mkStdRNG(0)
@@ -168,7 +181,7 @@ extension Int64 : RandomType {
 			let b = genhi - genlo + 1
 
 			let q : Int64 = 1000
-			let k = h - l + 1
+			let k = Int64.subtractWithOverflow(h, l).0 + 1
 			let magtgt = k * q
 
 			func entropize(mag : Int64, _ v : Int64, _ g : G) -> (Int64, G) {

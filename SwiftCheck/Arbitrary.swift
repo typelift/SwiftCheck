@@ -8,44 +8,49 @@
 
 /// A type that implements random generation and shrinking of values.
 ///
-/// While testing, SwiftCheck will invoke `arbitrary` a given amount of times (usually 100 if the
-/// default settings are used).  During that time, the receiver has an opportunity to call through
-/// to any data or sources of randomness it needs to return what it deems an "Arbitrary" value.
+/// While testing, SwiftCheck will invoke `arbitrary` a given amount of times 
+/// (usually 100 if the default settings are used).  During that time, the 
+/// receiver has an opportunity to call through to any data or sources of 
+/// randomness it needs to return what it deems an "Arbitrary" value.
 ///
-/// Shrinking is reduction in the complexity of a tested value to remove noise and present a minimal
-/// counterexample when a property fails.  A shrink necessitates returning a list of all possible 
-/// "smaller" values for SwiftCheck to run through.  As long as each individual value in the 
-/// returned list is less than or equal to the size of the input value, and is not a duplicate of 
-/// the input value, a minimal case should be reached fairly efficiently. Shrinking is an optional 
-/// extension of normal testing.  If no implementation of `shrink` is provided, SwiftCheck will 
-/// default to an empty one - that is, no shrinking will occur.
+/// Shrinking is reduction in the complexity of a tested value to remove noise 
+/// and present a minimal counterexample when a property fails.  A shrink 
+/// necessitates returning a list of all possible "smaller" values for 
+/// SwiftCheck to run through.  As long as each individual value in the returned
+/// list is less than or equal to the size of the input value, and is not a 
+/// duplicate of the input value, a minimal case should be reached fairly 
+/// efficiently. Shrinking is an optional extension of normal testing.  If no 
+/// implementation of `shrink` is provided, SwiftCheck will default to an empty 
+/// one - that is, no shrinking will occur.
 ///
 /// As an example, take the `ArrayOf` implementation of shrink:
 ///
 /// Arbitrary.shrink(ArrayOf([1, 2, 3]))
 ///	> [[], [2,3], [1,3], [1,2], [0,2,3], [1,0,3], [1,1,3], [1,2,0], [1,2,2]]
 ///
-/// SwiftCheck will search each case forward, one-by-one, and continue shrinking until it has 
-/// reached a case it deems minimal enough to present.
+/// SwiftCheck will search each case forward, one-by-one, and continue shrinking
+/// until it has reached a case it deems minimal enough to present.
 ///
-/// SwiftCheck implements a number of generators for common Swift Standard Library types for 
-/// convenience.  If more fine-grained testing is required see `Modifiers.swift` for an example of 
-/// how to define a "Modifier" type to implement it.
+/// SwiftCheck implements a number of generators for common Swift Standard 
+/// Library types for convenience.  If more fine-grained testing is required see
+/// `Modifiers.swift` for an example of how to define a "Modifier" type to 
+/// implement it.
 public protocol Arbitrary {
 	/// The generator for this particular type.
 	///
-	/// This function should call out to any sources of randomness or state necessary to generate
-	/// values.  It should not, however, be written as a deterministic function.  If such a
-	/// generator is needed, combinators are provided in `Gen.swift`.
+	/// This function should call out to any sources of randomness or state 
+	/// necessary to generate values.  It should not, however, be written as a 
+	/// deterministic function.  If such a generator is needed, combinators are 
+	/// provided in `Gen.swift`.
 	static var arbitrary : Gen<Self> { get }
 
-	/// An optional shrinking function.  If this function goes unimplemented, it is the same as
-	/// returning the empty list.
+	/// An optional shrinking function.  If this function goes unimplemented, it 
+	/// is the same as returning the empty list.
 	///
-	/// Shrunken values must be less than or equal to the "size" of the original type but never the
-	/// same as the value provided to this function (or a loop will form in the shrinker).  It is
-	/// recommended that they be presented smallest to largest to speed up the overall shrinking
-	/// process.
+	/// Shrunken values must be less than or equal to the "size" of the original 
+	/// type but never the same as the value provided to this function (or a loop 
+	/// will form in the shrinker).  It is recommended that they be presented 
+	/// smallest to largest to speed up the overall shrinking process.
 	static func shrink(_ : Self) -> [Self]
 }
 
@@ -254,7 +259,7 @@ extension Double : Arbitrary {
 
 extension UnicodeScalar : Arbitrary {
 	public static var arbitrary : Gen<UnicodeScalar> {
-		return UInt32.arbitrary.bind(Gen<UnicodeScalar>.pure • UnicodeScalar.init)
+		return UInt32.arbitrary.flatMap(Gen<UnicodeScalar>.pure • UnicodeScalar.init)
 	}
 
 	public static func shrink(x : UnicodeScalar) -> [UnicodeScalar] {
@@ -287,37 +292,37 @@ extension Character : Arbitrary {
 
 extension AnyForwardIndex : Arbitrary {
 	public static var arbitrary : Gen<AnyForwardIndex> {
-		return Gen<Int64>.choose((1, Int64.max)).bind(Gen<AnyForwardIndex>.pure • AnyForwardIndex.init)
+		return Gen<Int64>.choose((1, Int64.max)).flatMap(Gen<AnyForwardIndex>.pure • AnyForwardIndex.init)
 	}
 }
 
 extension AnyRandomAccessIndex : Arbitrary {
 	public static var arbitrary : Gen<AnyRandomAccessIndex> {
-		return Gen<Int64>.choose((1, Int64.max)).bind(Gen<AnyRandomAccessIndex>.pure • AnyRandomAccessIndex.init)
+		return Gen<Int64>.choose((1, Int64.max)).flatMap(Gen<AnyRandomAccessIndex>.pure • AnyRandomAccessIndex.init)
 	}
 }
 
 extension Mirror : Arbitrary {
 	public static var arbitrary : Gen<Mirror> {
 		let genAny : Gen<Any> = Gen<Any>.oneOf([
-			Bool.arbitrary.fmap(asAny),
-			Int.arbitrary.fmap(asAny),
-			UInt.arbitrary.fmap(asAny),
-			Float.arbitrary.fmap(asAny),
-			Double.arbitrary.fmap(asAny),
-			Character.arbitrary.fmap(asAny),
+			Bool.arbitrary.map(asAny),
+			Int.arbitrary.map(asAny),
+			UInt.arbitrary.map(asAny),
+			Float.arbitrary.map(asAny),
+			Double.arbitrary.map(asAny),
+			Character.arbitrary.map(asAny),
 		])
 
 		let genAnyWitnessed : Gen<Any> = Gen<Any>.oneOf([
-			Optional<Int>.arbitrary.fmap(asAny),
-			Array<Int>.arbitrary.fmap(asAny),
-			Set<Int>.arbitrary.fmap(asAny),
+			Optional<Int>.arbitrary.map(asAny),
+			Array<Int>.arbitrary.map(asAny),
+			Set<Int>.arbitrary.map(asAny),
 		])
 
 		return Gen<Any>.oneOf([
 			genAny,
 			genAnyWitnessed,
-		]).fmap(Mirror.init)
+		]).map(Mirror.init)
 	}
 }
 

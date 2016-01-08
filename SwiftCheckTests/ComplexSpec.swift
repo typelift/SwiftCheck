@@ -24,15 +24,15 @@ class ComplexSpec : XCTestCase {
 			lower,
 			numeric,
 			special,
-		]).proliferateNonEmpty().suchThat({ $0[$0.endIndex.predecessor()] != "." }).fmap(String.init)
+		]).proliferateNonEmpty.suchThat({ $0[$0.endIndex.predecessor()] != "." }).map(String.init)
 
 		let hostname = Gen<Character>.oneOf([
 			lower,
 			numeric,
 			Gen.pure("-"),
-		]).proliferateNonEmpty().fmap(String.init)
+		]).proliferateNonEmpty.map(String.init)
 
-		let tld = lower.proliferateNonEmpty().suchThat({ $0.count > 1 }).fmap(String.init)
+		let tld = lower.proliferateNonEmpty.suchThat({ $0.count > 1 }).map(String.init)
 
 		let emailGen = wrap3 <^> localEmail <*> Gen.pure("@") <*> hostname <*> Gen.pure(".") <*> tld
 
@@ -43,13 +43,13 @@ class ComplexSpec : XCTestCase {
 
 	func testIPv6Properties() {
 		let ipHexDigits = Gen<String>.oneOf([
-			hexDigits.proliferateSized(1).fmap{ String.init($0) + ":" },
-			hexDigits.proliferateSized(2).fmap{ String.init($0) + ":" },
-			hexDigits.proliferateSized(3).fmap{ String.init($0) + ":" },
-			hexDigits.proliferateSized(4).fmap{ String.init($0) + ":" },
+			hexDigits.proliferateSized(1).map{ String.init($0) + ":" },
+			hexDigits.proliferateSized(2).map{ String.init($0) + ":" },
+			hexDigits.proliferateSized(3).map{ String.init($0) + ":" },
+			hexDigits.proliferateSized(4).map{ String.init($0) + ":" },
 		])
 
-		let ipGen = { $0.initial() } <^> (wrap2 <^> ipHexDigits <*> ipHexDigits <*> ipHexDigits <*> ipHexDigits)
+		let ipGen = { $0.initial } <^> (wrap2 <^> ipHexDigits <*> ipHexDigits <*> ipHexDigits <*> ipHexDigits)
 
 		property("Generated IPs contain 3 sections") <- forAll(ipGen) { (e : String) in
 			return e.characters.filter({ $0 == ":" }).count == 3
@@ -57,7 +57,7 @@ class ComplexSpec : XCTestCase {
 	}
 }
 
-/// MARK: String Conveniences
+// MARK: String Conveniences
 
 private func wrap(l : String) -> String -> String -> String {
 	return { m in { r in l + m + r } }
@@ -72,7 +72,7 @@ private func wrap3(l : String) -> String -> String -> String -> String -> String
 }
 
 extension String {
-	func initial() -> String {
+	private var initial : String {
 		return self[self.startIndex..<self.endIndex.predecessor()]
 	}
 }

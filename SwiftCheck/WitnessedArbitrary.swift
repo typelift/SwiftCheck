@@ -9,7 +9,7 @@
 extension Array where Element : Arbitrary {
 	public static var arbitrary : Gen<Array<Element>> {
 		return Gen.sized { n in
-			return Gen<Int>.choose((0, n)).bind { k in
+			return Gen<Int>.choose((0, n)).flatMap { k in
 				if k == 0 {
 					return Gen.pure([])
 				}
@@ -28,7 +28,7 @@ extension Array where Element : Arbitrary {
 extension Array : WitnessedArbitrary {
 	public typealias Param = Element
 
-	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : ([Element] -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element, pf : ([Element] -> Testable)) -> Property {
 		return forAllShrink([A].arbitrary, shrinker: [A].shrink, f: { bl in
 			return pf(bl.map(wit))
 		})
@@ -48,7 +48,7 @@ extension AnyBidirectionalCollection where Element : Arbitrary {
 extension AnyBidirectionalCollection : WitnessedArbitrary {
 	public typealias Param = Element
 
-	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (AnyBidirectionalCollection<Element> -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element, pf : (AnyBidirectionalCollection<Element> -> Testable)) -> Property {
 		return forAllShrink(AnyBidirectionalCollection<A>.arbitrary, shrinker: AnyBidirectionalCollection<A>.shrink, f: { bl in
 			return pf(AnyBidirectionalCollection<Element>(bl.map(wit)))
 		})
@@ -68,7 +68,7 @@ extension AnySequence where Element : Arbitrary {
 extension AnySequence : WitnessedArbitrary {
 	public typealias Param = Element
 
-	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (AnySequence<Element> -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element, pf : (AnySequence<Element> -> Testable)) -> Property {
 		return forAllShrink(AnySequence<A>.arbitrary, shrinker: AnySequence<A>.shrink, f: { bl in
 			return pf(AnySequence<Element>(bl.map(wit)))
 		})
@@ -88,7 +88,7 @@ extension ArraySlice where Element : Arbitrary {
 extension ArraySlice : WitnessedArbitrary {
 	public typealias Param = Element
 
-	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (ArraySlice<Element> -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element, pf : (ArraySlice<Element> -> Testable)) -> Property {
 		return forAllShrink(ArraySlice<A>.arbitrary, shrinker: ArraySlice<A>.shrink, f: { bl in
 			return pf(ArraySlice<Element>(bl.map(wit)))
 		})
@@ -104,7 +104,7 @@ extension CollectionOfOne where Element : Arbitrary {
 extension CollectionOfOne : WitnessedArbitrary {
 	public typealias Param = Element
 
-	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (CollectionOfOne<Element> -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element, pf : (CollectionOfOne<Element> -> Testable)) -> Property {
 		return forAllShrink(CollectionOfOne<A>.arbitrary, shrinker: { _ in [] }, f: { (bl : CollectionOfOne<A>) -> Testable in
 			return pf(CollectionOfOne<Element>(wit(bl[.Zero])))
 		})
@@ -116,7 +116,7 @@ extension Optional where Wrapped : Arbitrary {
 	public static var arbitrary : Gen<Optional<Wrapped>> {
 		return Gen<Optional<Wrapped>>.frequency([
 			(1, Gen<Optional<Wrapped>>.pure(.None)),
-			(3, liftM(Optional<Wrapped>.Some)(m1: Wrapped.arbitrary)),
+			(3, liftM(Optional<Wrapped>.Some, Wrapped.arbitrary)),
 		])
 	}
 
@@ -132,7 +132,7 @@ extension Optional where Wrapped : Arbitrary {
 extension Optional : WitnessedArbitrary {
 	public typealias Param = Wrapped
 
-	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Wrapped)(pf : (Optional<Wrapped> -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Wrapped, pf : (Optional<Wrapped> -> Testable)) -> Property {
 		return forAllShrink(Optional<A>.arbitrary, shrinker: Optional<A>.shrink, f: { bl in
 			return pf(bl.map(wit))
 		})
@@ -152,7 +152,7 @@ extension ContiguousArray where Element : Arbitrary {
 extension ContiguousArray : WitnessedArbitrary {
 	public typealias Param = Element
 
-	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (ContiguousArray<Element> -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element, pf : (ContiguousArray<Element> -> Testable)) -> Property {
 		return forAllShrink(ContiguousArray<A>.arbitrary, shrinker: ContiguousArray<A>.shrink, f: { bl in
 			return pf(ContiguousArray<Element>(bl.map(wit)))
 		})
@@ -162,8 +162,8 @@ extension ContiguousArray : WitnessedArbitrary {
 /// Generates an dictionary of arbitrary keys and values.
 extension Dictionary where Key : Arbitrary, Value : Arbitrary {
 	public static var arbitrary : Gen<Dictionary<Key, Value>> {
-		return [Key].arbitrary.bind { k in
-			return [Value].arbitrary.bind { v in
+		return [Key].arbitrary.flatMap { k in
+			return [Value].arbitrary.flatMap { v in
 				return Gen.pure(Dictionary(Zip2Sequence(k, v)))
 			}
 		}
@@ -192,8 +192,8 @@ extension EmptyCollection : Arbitrary {
 
 extension HalfOpenInterval where Bound : protocol<Comparable, Arbitrary> {
 	public static var arbitrary : Gen<HalfOpenInterval<Bound>> {
-		return Bound.arbitrary.bind { l in
-			return Bound.arbitrary.bind { r in
+		return Bound.arbitrary.flatMap { l in
+			return Bound.arbitrary.flatMap { r in
 				return Gen.pure(HalfOpenInterval(min(l, r), max(l, r)))
 			}
 		}
@@ -217,7 +217,7 @@ extension ImplicitlyUnwrappedOptional where Wrapped : Arbitrary {
 extension ImplicitlyUnwrappedOptional : WitnessedArbitrary {
 	public typealias Param = Wrapped
 
-	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Wrapped)(pf : (ImplicitlyUnwrappedOptional<Wrapped> -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Wrapped, pf : (ImplicitlyUnwrappedOptional<Wrapped> -> Testable)) -> Property {
 		return forAllShrink(ImplicitlyUnwrappedOptional<A>.arbitrary, shrinker: ImplicitlyUnwrappedOptional<A>.shrink, f: { bl in
 			return pf(bl.map(wit))
 		})
@@ -238,8 +238,8 @@ extension LazySequence where Base : protocol<SequenceType, Arbitrary> {
 
 extension Range where Element : protocol<ForwardIndexType, Comparable, Arbitrary> {
 	public static var arbitrary : Gen<Range<Element>> {
-		return Element.arbitrary.bind { l in
-			return Element.arbitrary.bind { r in
+		return Element.arbitrary.flatMap { l in
+			return Element.arbitrary.flatMap { r in
 				return Gen.pure(Range(start: min(l, r), end: max(l, r)))
 			}
 		}
@@ -259,7 +259,7 @@ extension Repeat where Element : Arbitrary {
 extension Repeat : WitnessedArbitrary {
 	public typealias Param = Element
 
-	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (Repeat<Element> -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element, pf : (Repeat<Element> -> Testable)) -> Property {
 		return forAllShrink(Repeat<A>.arbitrary, shrinker: { _ in [] }, f: { bl in
 			let xs = bl.map(wit)
 			return pf(Repeat<Element>(count: xs.count, repeatedValue: xs.first!))
@@ -270,7 +270,7 @@ extension Repeat : WitnessedArbitrary {
 extension Set where Element : protocol<Arbitrary, Hashable> {
 	public static var arbitrary : Gen<Set<Element>> {
 		return Gen.sized { n in
-			return Gen<Int>.choose((0, n)).bind { k in
+			return Gen<Int>.choose((0, n)).flatMap { k in
 				if k == 0 {
 					return Gen.pure(Set([]))
 				}
@@ -288,7 +288,7 @@ extension Set where Element : protocol<Arbitrary, Hashable> {
 extension Set : WitnessedArbitrary {
 	public typealias Param = Element
 
-	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element)(pf : (Set<Element> -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element, pf : (Set<Element> -> Testable)) -> Property {
 		return forAll { (xs : [A]) in
 			return pf(Set<Element>(xs.map(wit)))
 		}
