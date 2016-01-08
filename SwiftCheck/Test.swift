@@ -320,12 +320,14 @@ public func forAllShrink<A>(gen : Gen<A>, shrinker : A -> [A], f : A throws -> T
 /// `SNF` involves turning every `exists` into a function returning the 
 /// existential value, taking any other parameters being quantified over as 
 /// needed.
+@warn_unused_result(message="Did you forget to bind this quantifier to a property?")
 public func exists<A : Arbitrary>(pf : A throws -> Testable) -> Property {
 	return exists(A.arbitrary, pf: pf)
 }
 
 /// Given an explicit generator, converts a function to an existentially 
 /// quantified property using the default shrinker for that type.
+@warn_unused_result(message="Did you forget to bind this quantifier to a property?")
 public func exists<A : Arbitrary>(gen : Gen<A>, pf : A throws -> Testable) -> Property {
 	return forAllNoShrink(A.arbitrary, pf: { try pf($0).invert }).invert.mapResult { res in
 		return TestResult(ok:			res.ok
