@@ -533,6 +533,19 @@ private func addLabels(result : TestResult) -> TestResult -> TestResult {
 	}
 }
 
+private func printLabels(st : TestResult) {
+	if st.labels.isEmpty {
+		print("(.)")
+	} else if st.labels.count == 1, let pt = st.labels.first {
+		print("(\(pt.0))")
+	} else {
+		let gAllLabels = st.labels.map({ (l, _) in
+			return l + ", "
+		}).reduce("", combine: +)
+		print("("  + gAllLabels[gAllLabels.startIndex..<gAllLabels.endIndex.advancedBy(-2)] + ")")
+	}
+}
+
 private func conj(k : TestResult -> TestResult, xs : [Rose<TestResult>]) -> Rose<TestResult> {
 	if xs.isEmpty {
 		return Rose.MkRose({ k(TestResult.succeeded) }, { [] })

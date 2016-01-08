@@ -99,13 +99,20 @@ public struct CheckerArguments {
 	/// it becomes too small the samples present in the test case will lose diversity.
 	let maxTestCaseSize : Int
 
+	internal let silence : Bool
+
 	public init(replay : Optional<(StdGen, Int)> = nil
 			, maxAllowableSuccessfulTests : Int = 100
 			, maxAllowableDiscardedTests : Int = 500
 			, maxTestCaseSize : Int = 100
 			)
 	{
-			self = CheckerArguments(replay: replay, maxAllowableSuccessfulTests: maxAllowableSuccessfulTests, maxAllowableDiscardedTests: maxAllowableDiscardedTests, maxTestCaseSize: maxTestCaseSize, name: "")
+			self = CheckerArguments(  replay: replay
+									, maxAllowableSuccessfulTests: maxAllowableSuccessfulTests
+									, maxAllowableDiscardedTests: maxAllowableDiscardedTests
+									, maxTestCaseSize: maxTestCaseSize
+									, name: ""
+									)
 	}
 
 	internal init(replay : Optional<(StdGen, Int)> = nil
@@ -113,6 +120,7 @@ public struct CheckerArguments {
 				, maxAllowableDiscardedTests : Int = 500
 				, maxTestCaseSize : Int = 100
 				, name : String
+				, silence : Bool = false
 				)
 	{
 
@@ -121,6 +129,7 @@ public struct CheckerArguments {
 			self.maxAllowableDiscardedTests = maxAllowableDiscardedTests
 			self.maxTestCaseSize = maxTestCaseSize
 			self.name = name
+			self.silence = silence
 	}
 
 	internal var name : String

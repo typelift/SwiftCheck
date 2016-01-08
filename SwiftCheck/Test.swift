@@ -405,7 +405,8 @@ internal func quickCheckWithResult(args : CheckerArguments, _ p : Testable) -> R
 							, failedShrinkStepCount:		0
 							, shouldAbort:					false
 							, quantifier:					.Universal
-							, arguments:					args)
+							, arguments:					args
+							, silence:						args.silence)
 	let modP : Property = (p.exhaustive ? p.property.once : p.property)
 	return test(istate, caseGen: modP.unProperty.unGen)
 }
@@ -492,7 +493,8 @@ internal func runATest(st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Ei
 									, failedShrinkStepCount:		st.failedShrinkStepCount
 									, shouldAbort:					abort
 									, quantifier:					quantifier
-									, arguments:					st.arguments)
+									, arguments:					st.arguments
+									, silence:						st.silence)
 			return .Right(nstate)
 			// Discard
 		case .MatchResult(.None, let expect, _, _, let labels, _, _, let abort, let quantifier):
@@ -511,16 +513,17 @@ internal func runATest(st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Ei
 									, failedShrinkStepCount:		st.failedShrinkStepCount
 									, shouldAbort:					abort
 									, quantifier:					quantifier
-									, arguments:					st.arguments)
+									, arguments:					st.arguments
+									, silence:						st.silence)
 			return .Right(nstate)
 			// Fail
 		case .MatchResult(.Some(false), let expect, _, _, _, _, _, let abort, let quantifier):
 			if quantifier == .Existential {
 //				print("")
 			} else if !expect {
-				print("+++ OK, failed as expected. ", terminator: "")
+				printCond(st.silence, "+++ OK, failed as expected. ", terminator: "")
 			} else {
-				print("*** Failed! ", terminator: "")
+				printCond(st.silence, "*** Failed! ", terminator: "")
 			}
 
 			// Failure of an existential is not necessarily failure of the whole
@@ -541,7 +544,8 @@ internal func runATest(st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Ei
 										, failedShrinkStepCount:		st.failedShrinkStepCount
 										, shouldAbort:					abort
 										, quantifier:					quantifier
-										, arguments:					st.arguments)
+										, arguments:					st.arguments
+										, silence:						st.silence)
 
 				/// However, some existentials outlive their usefulness
 				if nstate.discardedTestCount >= nstate.maxAllowableDiscardedTests {
@@ -588,7 +592,8 @@ internal func runATest(st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Ei
 									, failedShrinkStepCount:		st.failedShrinkStepCount
 									, shouldAbort:					abort
 									, quantifier:					quantifier
-									, arguments:					st.arguments)
+									, arguments:					st.arguments
+									, silence:						st.silence)
 			return .Left((stat, nstate))
 		}
 	default:
@@ -600,8 +605,8 @@ internal func runATest(st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Ei
 internal func doneTesting(st : CheckerState) -> Result {
 	if !st.hasFulfilledExpectedFailure {
 		if insufficientCoverage(st) {
-			print("+++ OK, failed as expected. ")
-			print("*** Insufficient coverage after " + "\(st.successfulTestCount)" + pluralize(" test", i: st.successfulTestCount))
+			printCond(st.silence, "+++ OK, failed as expected. ")
+			printCond(st.silence, "*** Insufficient coverage after " + "\(st.successfulTestCount)" + pluralize(" test", i: st.successfulTestCount))
 			printDistributionGraph(st)
 			return .Success(numTests: st.successfulTestCount, labels: summary(st), output: "")
 		}
@@ -609,11 +614,11 @@ internal func doneTesting(st : CheckerState) -> Result {
 		printDistributionGraph(st)
 		return .NoExpectedFailure(numTests: st.successfulTestCount, labels: summary(st), output: "")
 	} else if insufficientCoverage(st) {
-		print("*** Insufficient coverage after " + "\(st.successfulTestCount)" + pluralize(" test", i: st.successfulTestCount))
+		printCond(st.silence, "*** Insufficient coverage after " + "\(st.successfulTestCount)" + pluralize(" test", i: st.successfulTestCount))
 		printDistributionGraph(st)
 		return .InsufficientCoverage(numTests: st.successfulTestCount, labels: summary(st), output: "")
 	} else {
-		print("*** Passed " + "\(st.successfulTestCount)" + pluralize(" test", i: st.successfulTestCount))
+		printCond(st.silence, "*** Passed " + "\(st.successfulTestCount)" + pluralize(" test", i: st.successfulTestCount))
 		printDistributionGraph(st)
 		return .Success(numTests: st.successfulTestCount, labels: summary(st), output: "")
 	}
@@ -703,7 +708,8 @@ internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts
 							, failedShrinkStepCount:		failedShrinkStepCount
 							, shouldAbort:					st.shouldAbort
 							, quantifier:					st.quantifier
-							, arguments:					st.arguments)
+							, arguments:					st.arguments
+							, silence:						st.silence)
 	return reportMinimumCaseFound(state, res: lastResult)
 }
 
@@ -711,8 +717,8 @@ internal func reportMinimumCaseFound(st : CheckerState, res : TestResult) -> (In
 	let testMsg = " (after \(st.successfulTestCount.successor()) test"
 	let shrinkMsg = st.successfulShrinkCount > 1 ? (" and \(st.successfulShrinkCount) shrink") : ""
 
-	print("Proposition: " + st.name)
-	print(res.reason + pluralize(testMsg, i: st.successfulTestCount.successor()) + (st.successfulShrinkCount > 1 ? pluralize(shrinkMsg, i: st.successfulShrinkCount) : "") + "):")
+	printCond(st.silence, "Proposition: " + st.name)
+	printCond(st.silence, res.reason + pluralize(testMsg, i: st.successfulTestCount.successor()) + (st.successfulShrinkCount > 1 ? pluralize(shrinkMsg, i: st.successfulShrinkCount) : "") + "):")
 	dispatchAfterFinalFailureCallbacks(st, res: res)
 	return (st.successfulShrinkCount, st.failedShrinkStepCount - st.failedShrinkStepDistance, st.failedShrinkStepDistance)
 }
@@ -722,9 +728,9 @@ internal func reportExistentialFailure(st : CheckerState, res : Result) -> Resul
 	case let .ExistentialFailure(_, _, _, reason, _, _, lastTest):
 		let testMsg = " (after \(st.discardedTestCount) test"
 
-		print("*** Failed! ", terminator: "")
-		print("Proposition: " + st.name)
-		print(reason + pluralize(testMsg, i: st.discardedTestCount) + "):")
+		printCond(st.silence, "*** Failed! ", terminator: "")
+		printCond(st.silence, "Proposition: " + st.name)
+		printCond(st.silence, reason + pluralize(testMsg, i: st.discardedTestCount) + "):")
 		dispatchAfterFinalFailureCallbacks(st, res: lastTest)
 		return res
 	default:
@@ -733,6 +739,10 @@ internal func reportExistentialFailure(st : CheckerState, res : Result) -> Resul
 }
 
 internal func dispatchAfterTestCallbacks(st : CheckerState, res : TestResult) {
+	guard !st.silence else {
+		return
+	}
+	
 	res.callbacks.forEach { c in
 		switch c {
 		case let .AfterTest(_, f):
@@ -744,6 +754,10 @@ internal func dispatchAfterTestCallbacks(st : CheckerState, res : TestResult) {
 }
 
 internal func dispatchAfterFinalFailureCallbacks(st : CheckerState, res : TestResult) {
+	guard !st.silence else {
+		return
+	}
+
 	res.callbacks.forEach { c in
 		switch c {
 		case let .AfterFinalFailure(_, f):
@@ -763,19 +777,6 @@ private func summary(s : CheckerState) -> [(String, Int)] {
 private func labelPercentage(l : String, st : CheckerState) -> Int {
 	let occur = st.collected.flatMap(Array.init).filter { $0 == l }
 	return (100 * occur.count) / st.maxAllowableSuccessfulTests
-}
-
-internal func printLabels(st : TestResult) {
-	if st.labels.isEmpty {
-		print("(.)")
-	} else if st.labels.count == 1, let pt = st.labels.first {
-		print("(\(pt.0))")
-	} else {
-		let gAllLabels = st.labels.map({ (l, _) in
-			return l + ", "
-		}).reduce("", combine: +)
-		print("("  + gAllLabels[gAllLabels.startIndex..<gAllLabels.endIndex.advancedBy(-2)] + ")")
-	}
 }
 
 private func showP(n : Int) -> String {
@@ -800,13 +801,13 @@ private func printDistributionGraph(st : CheckerState) {
 
 	let all = covers + allLabels
 	if all.isEmpty {
-		print(".")
+		printCond(st.silence, ".")
 	} else if all.count == 1, let pt = all.first {
-		print("(\(pt))")
+		printCond(st.silence, "(\(pt))")
 	} else {
-		print(":")
+		printCond(st.silence, ":")
 		all.forEach { pt in
-			print(pt)
+			printCond(st.silence, pt)
 		}
 	}
 }
@@ -827,6 +828,12 @@ private func insufficientCoverage(st : CheckerState) -> Bool {
 	return st.labels
 			.map({ (l, reqP) in labelPercentage(l, st: st) < reqP })
 			.reduce(false, combine: { $0 || $1 })
+}
+
+private func printCond(cond : Bool, _ str : String, terminator : String = "\n") {
+	if !cond {
+		print(str, terminator: terminator)
+	}
 }
 
 extension Array {

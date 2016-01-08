@@ -51,6 +51,9 @@ public struct CheckerState {
 	let quantifier					: Quantification
 
 	let arguments					: CheckerArguments
+
+	let silence						: Bool
+
 	public init(  name							: String
 				, maxAllowableSuccessfulTests	: Int
 				, maxAllowableDiscardedTests	: Int
@@ -66,7 +69,8 @@ public struct CheckerState {
 				, failedShrinkStepCount			: Int
 				, shouldAbort					: Bool
 				, quantifier					: Quantification
-				, arguments						: CheckerArguments)
+				, arguments						: CheckerArguments
+				, silence						: Bool)
 	{
 		self.name = name
 		self.maxAllowableSuccessfulTests = maxAllowableSuccessfulTests
@@ -84,5 +88,6 @@ public struct CheckerState {
 		self.shouldAbort = shouldAbort
 		self.quantifier = quantifier
 		self.arguments = arguments
+		self.silence = silence
 	}
 }
