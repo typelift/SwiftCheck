@@ -237,7 +237,7 @@ extension Gen {
 extension Gen /*: Functor*/ {
 	/// Returns a new generator that applies a given function to any outputs the
 	/// receiver creates.
-	public func map<B>(f : (A -> B)) -> Gen<B> {
+	public func map<B>(f : A -> B) -> Gen<B> {
 		return f <^> self
 	}
 }

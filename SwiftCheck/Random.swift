@@ -31,7 +31,7 @@ public protocol RandomGeneneratorType {
 /// initial random number generator, or to get different results on each run by
 /// using the system-initialised generator or by supplying a seed from some 
 /// other source.
-public struct StdGen : Equatable, RandomGeneneratorType, CustomStringConvertible {
+public struct StdGen : RandomGeneneratorType {
 	let seed1 : Int
 	let seed2 : Int
 
@@ -53,10 +53,8 @@ public struct StdGen : Equatable, RandomGeneneratorType, CustomStringConvertible
 		self = mkStdGen32(o)
 	}
 
-	public var description : String {
-		return "\(self.seed1) \(self.seed2)"
-	}
-
+	/// Returns an `Int` generated uniformly within the bounds of the generator
+	/// and a new distinct random number generator.
 	public var next : (Int, StdGen) {
 		let s1 = self.seed1
 		let s2 = self.seed2
@@ -74,6 +72,7 @@ public struct StdGen : Equatable, RandomGeneneratorType, CustomStringConvertible
 		return (z_, StdGen(s1__, s2__))
 	}
 
+	/// Splits the receiver and returns two distinct random number generators.
 	public var split : (StdGen, StdGen) {
 		let s1 = self.seed1
 		let s2 = self.seed2
@@ -83,6 +82,12 @@ public struct StdGen : Equatable, RandomGeneneratorType, CustomStringConvertible
 
 	public var genRange : (Int, Int) {
 		return (Int.min, Int.max)
+	}
+}
+
+extension StdGen : Equatable, CustomStringConvertible {
+	public var description : String {
+		return "\(self.seed1) \(self.seed2)"
 	}
 }
 

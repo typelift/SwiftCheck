@@ -46,7 +46,7 @@ extension Rose /*: Functor*/ {
 	/// For `.MkRose` branches the computation is applied to the node's value 
 	/// then application recurses into the sub-trees.  For `.IORose` branches 
 	/// the map is suspended.
-	public func map<B>(f : (A -> B)) -> Rose<B> {
+	public func map<B>(f : A -> B) -> Rose<B> {
 		return f <^> self
 	}
 }

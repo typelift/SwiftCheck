@@ -244,15 +244,19 @@ extension Testable {
 	}
 
 	/// Applies a function that modifies the property generator's inner `Prop`.
+	///
+	/// This function can be used to completely change the evaluation schema of
+	/// generated test cases by replacing the test's rose tree with a custom
+	/// one.
 	public func mapProp(f : Prop -> Prop) -> Property {
 		return Property(f <^> self.property.unProperty)
 	}
 
-	/// Applies a function that modifies the property generator's size.
+	/// Applies a function that modifies the test case generator's size.
 	public func mapSize(f : Int -> Int) -> Property {
 		return Property(Gen.sized { n in
 			return self.property.unProperty.resize(f(n))
-			})
+		})
 	}
 
 	/// Applies a function that modifies the result of a test case.
