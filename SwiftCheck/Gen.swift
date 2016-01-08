@@ -298,7 +298,7 @@ extension Gen /*: Monad*/ {
 	/// Applies the function to any generated values to yield a new generator.  
 	/// This generator is then given a new random seed and returned.
 	///
-	/// `bind` allows for the creation of Generators that depend on other 
+	/// `flatMap` allows for the creation of Generators that depend on other
 	/// generators.  One might, for example, use a Generator of integers to 
 	/// control the length of a Generator of strings, or use it to choose a 
 	/// random index into a Generator of arrays.
@@ -310,7 +310,7 @@ extension Gen /*: Monad*/ {
 /// Applies the function to any generated values to yield a new generator.  This
 /// generator is then given a new random seed and returned.
 ///
-/// `bind` allows for the creation of Generators that depend on other 
+/// `flatMap` allows for the creation of Generators that depend on other 
 /// generators.  One might, for example, use a Generator of integers to control 
 /// the length of a Generator of strings, or use it to choose a random index 
 /// into a Generator of arrays.
