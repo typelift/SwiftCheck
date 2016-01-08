@@ -6,15 +6,16 @@
 //  Copyright © 2015 Robert Widmann. All rights reserved.
 //
 
-/// `CoArbitrary is the dual to the `Arbitrary` protocol.  Where `Arbitrary` allows generating
-/// random values, `CoArbitrary` allows observance of random values passing through as input to 
-/// random functions.  A `CoArbitrary` type is thus able to influence the flow of values in the
-/// function.
+/// `CoArbitrary is the dual to the `Arbitrary` protocol.  Where `Arbitrary` 
+/// allows generating random values, `CoArbitrary` allows observance of random 
+/// values passing through as input to random functions.  A `CoArbitrary` type 
+/// is thus able to influence the flow of values in the function.
 ///
-/// `CoArbitrary` types must take an arbitrary value of their type and yield a function that
-/// transforms a given generator by returning a new generator that depends on the input value.  Put
-/// simply, the function should perturb the given generator (more than likely using `Gen.variant()`)
-/// based on the value it observes.
+/// `CoArbitrary` types must take an arbitrary value of their type and yield a 
+/// function that transforms a given generator by returning a new generator that
+/// depends on the input value.  Put simply, the function should perturb the 
+/// given generator (more than likely using `Gen.variant()`) based on the value 
+/// it observes.
 public protocol CoArbitrary {
 	/// Uses an instance of the receiver to return a function that perturbs a generator.
 	static func coarbitrary<C>(x : Self) -> (Gen<C> -> Gen<C>)
@@ -27,8 +28,9 @@ extension IntegerType {
 	}
 }
 
-/// A coarbitrary implementation for any Printable type.  Avoid using this function if you can, it
-/// can be quite an expensive operation given a detailed enough description.
+/// A coarbitrary implementation for any Printable type.  Avoid using this 
+/// function if you can, it can be quite an expensive operation given a detailed
+/// enough description.
 public func coarbitraryPrintable<A, B>(x : A) -> Gen<B> -> Gen<B> {
 	return String.coarbitrary(String(x))
 }

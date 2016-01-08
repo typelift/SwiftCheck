@@ -9,10 +9,11 @@
 
 import Darwin
 
-/// Lattice types are types that have definable upper and lower limits.  For types like the Int and
-/// Float, their limits are the minimum and maximum possible values representable in their bit-
-/// width.  While the definition of a "limit" is flexible, generally custom types that wish to
-/// conform to LatticeType must come with some kind of supremum or infimum.
+/// Lattice types are types that have definable upper and lower limits.  For 
+/// types like the `Int` and `Float`, their limits are the minimum and maximum 
+/// possible values representable in their bit- width.  While the definition of 
+/// a "limit" is flexible, generally custom types that wish to conform to 
+/// `LatticeType` must come with some kind of supremum or infimum.
 public protocol LatticeType {
 	static var min : Self { get }
 	static var max : Self { get }

@@ -57,7 +57,7 @@ class ComplexSpec : XCTestCase {
 	}
 }
 
-/// MARK: String Conveniences
+// MARK: String Conveniences
 
 private func wrap(l : String) -> String -> String -> String {
 	return { m in { r in l + m + r } }

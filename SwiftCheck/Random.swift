@@ -9,14 +9,16 @@
 import func Darwin.time
 import func Darwin.clock
 
-/// Provides a standard interface to an underlying Random Value Generator of any type.  It is
-/// analogous to `GeneratorType`, but rather than consume a sequence it uses sources of randomness
-/// to generate values indefinitely.
+/// Provides a standard interface to an underlying Random Value Generator of any
+/// type.  It is analogous to `GeneratorType`, but rather than consume a 
+/// sequence it uses sources of randomness to generate values indefinitely.
 public protocol RandomGeneneratorType {
-	/// The next operation returns an Int that is uniformly distributed in the range returned by 
-	/// `genRange` (including both end points), and a new generator.
+	/// The next operation returns an Int that is uniformly distributed in the 
+	/// range returned by `genRange` (including both end points), and a new 
+	/// generator.
 	var next : (Int, Self) { get }
-	/// The genRange operation yields the range of values returned by the generator.
+	/// The genRange operation yields the range of values returned by the 
+	/// generator.
 	///
 	/// This property must return integers in ascending order.
 	var genRange : (Int, Int) { get }
@@ -24,15 +26,17 @@ public protocol RandomGeneneratorType {
 	var split : (Self, Self) { get }
 }
 
-/// `StdGen` represents a pseudo-random number generator. The library makes it possible to generate
-/// repeatable results, by starting with a specified initial random number generator, or to get 
-/// different results on each run by using the system-initialised generator or by supplying a seed 
-/// from some other source.
+/// `StdGen` represents a pseudo-random number generator. The library makes it 
+/// possible to generate repeatable results, by starting with a specified 
+/// initial random number generator, or to get different results on each run by
+/// using the system-initialised generator or by supplying a seed from some 
+/// other source.
 public struct StdGen : Equatable, RandomGeneneratorType, CustomStringConvertible {
 	let seed1 : Int
 	let seed2 : Int
 
-	/// Creates a `StdGen` initialized at the given seeds that is suitable for replaying of tests.
+	/// Creates a `StdGen` initialized at the given seeds that is suitable for 
+	/// replaying of tests.
 	public init(_ replaySeed1 : Int, _ replaySeed2 : Int) {
 		self.seed1 = replaySeed1
 		self.seed2 = replaySeed2
