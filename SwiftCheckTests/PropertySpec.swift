@@ -8,35 +8,65 @@
 
 @testable import SwiftCheck
 
-func ==(l : Property, r : Property) -> Bool {
-	let res1 = quickCheckWithResult(CheckerArguments(name: ""), l)
-	let res2 = quickCheckWithResult(CheckerArguments(name: ""), r)
+// From http://stackoverflow.com/a/4832902/945847
+func shutup<T>(f : () -> T) -> T {
+	var bak : Int32 = 0
+	var bake : Int32 = 0
+	var new : Int32 = 0
+	var newe : Int32 = 0
+	fflush(stdout)
+	fflush(stderr)
+	bak = dup(1)
+	bake = dup(2)
+	new = open("/dev/null", O_WRONLY)
+	newe = open("/dev/null", O_WRONLY)
+	dup2(new, 1)
+	dup2(newe, 2)
+	close(new)
+	close(newe)
+	let res = f()
+	fflush(stdout)
+	fflush(stderr)
+	dup2(bak, 1)
+	dup2(bake, 2)
+	close(bak)
+	close(bake)
+	return res
+}
 
-	switch (res1, res2) {
-	case (.Success(_, _, _), .Success(_, _, _)):
-		return true
-	case (.GaveUp(_, _, _), .GaveUp(_, _, _)):
-		return true
-	case (.Failure(_, _, _, _, _, _, _), .Failure(_, _, _, _, _, _, _)):
-		return true
-	case (.ExistentialFailure(_, _, _, _, _, _, _), .ExistentialFailure(_, _, _, _, _, _, _)):
-		return true
-	case (.NoExpectedFailure(_, _, _), .NoExpectedFailure(_, _, _)):
-		return true
-	case (.InsufficientCoverage(_, _, _), .InsufficientCoverage(_, _, _)):
-		return true
-	default:
-		return false
+func ==(l : Property, r : Property) -> Bool {
+	return shutup {
+		let res1 = quickCheckWithResult(CheckerArguments(name: ""), l)
+		let res2 = quickCheckWithResult(CheckerArguments(name: ""), r)
+
+		switch (res1, res2) {
+		case (.Success(_, _, _), .Success(_, _, _)):
+			return true
+		case (.GaveUp(_, _, _), .GaveUp(_, _, _)):
+			return true
+		case (.Failure(_, _, _, _, _, _, _), .Failure(_, _, _, _, _, _, _)):
+			return true
+		case (.ExistentialFailure(_, _, _, _, _, _, _), .ExistentialFailure(_, _, _, _, _, _, _)):
+			return true
+		case (.NoExpectedFailure(_, _, _), .NoExpectedFailure(_, _, _)):
+			return true
+		case (.InsufficientCoverage(_, _, _), .InsufficientCoverage(_, _, _)):
+			return true
+		default:
+			return false
+		}
 	}
 }
 
 func ==(l : Property, r : Bool) -> Bool {
-	let res1 = quickCheckWithResult(CheckerArguments(name: ""), l)
-	switch res1 {
-	case .Success(_, _, _):
-		return r == true
-	default:
-		return r == false
+	return shutup {
+		let res1 = quickCheckWithResult(CheckerArguments(name: ""), l)
+		switch res1 {
+		case .Success(_, _, _):
+			return r == true
+		default:
+			return r == false
+		}
 	}
 }
 
@@ -82,16 +112,12 @@ class PropertySpec : XCTestCase {
 		}
 
 		property("Cover reports failures properly") <- forAll { (s : Set<Int>) in
-			return (s.count == [Int](s).count).cover(s.count >= 15, percentage: 60, label: "large")
+			return (s.count == [Int](s).count).cover(s.count >= 15, percentage: 70, label: "large")
 		}.expectFailure
 
 		property("Prop ==> true") <- forAllNoShrink(Bool.arbitrary, Gen.pure(true)) { (p1, p2) in
 			let p = p2 ==> p1
-			if case .Success(_, _, _) = quickCheckWithResult(CheckerArguments(name: ""), p) {
-				return (p1 ==== true) ^||^ (p ^&&^ p1 ^&&^ p2)
-			} else {
-				return (p1 ==== false) ^||^ (p ^&&^ p1 ^&&^ p2)
-			}
+			return (p == p1) ^||^ (p ^&&^ p1 ^&&^ p2)
 		}
 
 		property("==> Short Circuits") <- forAll { (n : Int) in
