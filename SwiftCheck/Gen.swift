@@ -359,7 +359,7 @@ public func promote<A>(x : Rose<Gen<A>>) -> Gen<Rose<A>> {
 /// Promotes a function returning generators to a generator of functions.
 public func promote<A, B>(m : A -> Gen<B>) -> Gen<A -> B> {
 	return delay().flatMap { (let eval : Gen<B> -> B) in
-		return Gen<A -> B>.pure({ x in eval(m(x)) })
+		return Gen<A -> B>.pure(eval • m)
 	}
 }
 

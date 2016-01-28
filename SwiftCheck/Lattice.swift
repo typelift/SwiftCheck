@@ -90,7 +90,6 @@ extension AnyRandomAccessIndex : LatticeType {
 	}
 }
 
-
 /// float.h does not export Float80's limits, nor does the Swift Standard Library.
 // rdar://18404510
 //extension Swift.Float80 : LatticeType {

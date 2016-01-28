@@ -7,6 +7,7 @@
 //
 
 import SwiftCheck
+import XCTest
 
 class GenSpec : XCTestCase {
 	func testAll() {

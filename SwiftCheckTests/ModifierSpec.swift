@@ -7,6 +7,7 @@
 //
 
 import SwiftCheck
+import XCTest
 
 class ModifierSpec : XCTestCase {
 	func testModifiers() {

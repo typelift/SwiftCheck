@@ -7,6 +7,7 @@
 //
 
 import SwiftCheck
+import XCTest
 
 extension Dictionary {
 	init<S : SequenceType where S.Generator.Element == Element>(_ pairs : S) {

@@ -449,10 +449,6 @@ internal func protect<A>(f : ErrorType -> A, x : () throws -> A) -> A {
 	}
 }
 
-private func protectResult(r : () throws -> TestResult) -> (() -> TestResult) {
-	return { protect(exception("Exception"), x: r) }
-}
-
 internal func id<A>(x : A) -> A {
 	return x
 }
@@ -461,25 +457,29 @@ internal func • <A, B, C>(f : B -> C, g : A -> B) -> A -> C {
 	return { f(g($0)) }
 }
 
-internal func insertWith<K : Hashable, V>(f : (V, V) -> V, k : K, v : V, var m : Dictionary<K, V>) -> Dictionary<K, V> {
-	let oldV = m[k]
-	if let existV = oldV {
-		m[k] = f(existV, v)
-	} else {
-		m[k] = v
-	}
-	return m
+private func protectResult(r : () throws -> TestResult) -> (() -> TestResult) {
+	return { protect(exception("Exception"), x: r) }
 }
 
 internal func unionWith<K : Hashable, V>(f : (V, V) -> V, l : Dictionary<K, V>, r : Dictionary<K, V>) -> Dictionary<K, V> {
 	var map = l
-	l.forEach { (k, v) in
-		map.updateValue(v, forKey: k)
-	}
 	r.forEach { (k, v) in
-		map.updateValue(v, forKey: k)
+		if let val = map.updateValue(v, forKey: k) {
+			map.updateValue(f(val, v), forKey: k)
+		}
 	}
 	return map
+}
+
+private func insertWith<K : Hashable, V>(f : (V, V) -> V, k : K, v : V, m : Dictionary<K, V>) -> Dictionary<K, V> {
+	var res = m
+	let oldV = res[k]
+	if let existV = oldV {
+		res[k] = f(existV, v)
+	} else {
+		res[k] = v
+	}
+	return res
 }
 
 private func sep(l : String, r : String) -> String {

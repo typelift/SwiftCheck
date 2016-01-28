@@ -106,49 +106,49 @@ public func forAll<A : Arbitrary>(pf : (A throws -> Testable)) -> Property {
 /// shrinker and generator for 2 types.
 @warn_unused_result(message="Did you forget to bind this quantifier to a property?")
 public func forAll<A : Arbitrary, B : Arbitrary>(pf : (A, B) throws -> Testable) -> Property {
-	return forAll({ t in forAll({ b in try pf(t, b) }) })
+	return forAll { t in forAll { b in try pf(t, b) } }
 }
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 3 types.
 @warn_unused_result(message="Did you forget to bind this quantifier to a property?")
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary>(pf : (A, B, C) throws -> Testable) -> Property {
-	return forAll({ t in forAll({ b, c in try pf(t, b, c) }) })
+	return forAll { t in forAll { b, c in try pf(t, b, c) } }
 }
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 4 types.
 @warn_unused_result(message="Did you forget to bind this quantifier to a property?")
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary>(pf : (A, B, C, D) throws -> Testable) -> Property {
-	return forAll({ t in forAll({ b, c, d in try pf(t, b, c, d) }) })
+	return forAll { t in forAll { b, c, d in try pf(t, b, c, d) } }
 }
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 5 types.
 @warn_unused_result(message="Did you forget to bind this quantifier to a property?")
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary>(pf : (A, B, C, D, E) throws -> Testable) -> Property {
-	return forAll({ t in forAll({ b, c, d, e in try pf(t, b, c, d, e) }) })
+	return forAll { t in forAll { b, c, d, e in try pf(t, b, c, d, e) } }
 }
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 6 types.
 @warn_unused_result(message="Did you forget to bind this quantifier to a property?")
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary>(pf : (A, B, C, D, E, F) throws -> Testable) -> Property {
-	return forAll({ t in forAll({ b, c, d, e, f in try pf(t, b, c, d, e, f) }) })
+	return forAll { t in forAll { b, c, d, e, f in try pf(t, b, c, d, e, f) } }
 }
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 7 types.
 @warn_unused_result(message="Did you forget to bind this quantifier to a property?")
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary>(pf : (A, B, C, D, E, F, G) throws -> Testable) -> Property {
-	return forAll({ t in forAll({ b, c, d, e, f, g in try pf(t, b, c, d, e, f, g) }) })
+	return forAll { t in forAll { b, c, d, e, f, g in try pf(t, b, c, d, e, f, g) } }
 }
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 8 types.
 @warn_unused_result(message="Did you forget to bind this quantifier to a property?")
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary, H : Arbitrary>(pf : (A, B, C, D, E, F, G, H) throws -> Testable) -> Property {
-	return forAll({ t in forAll({ b, c, d, e, f, g, h in try pf(t, b, c, d, e, f, g, h) }) })
+	return forAll { t in forAll { b, c, d, e, f, g, h in try pf(t, b, c, d, e, f, g, h) } }
 }
 
 /// Given an explicit generator, converts a function to a universally quantified
@@ -683,14 +683,14 @@ internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts
 
 				// Otherwise increment the tried shrink counter and the failed 
 				// shrink counter.
-				failedShrinkStepDistance++
-				failedShrinkStepCount++
+				failedShrinkStepDistance = failedShrinkStepDistance.successor()
+				failedShrinkStepCount = failedShrinkStepCount.successor()
 			default:
 				fatalError("Rose should not have reduced to IO")
 			}
 		}
 
-		successfulShrinkCount++
+		successfulShrinkCount = successfulShrinkCount.successor()
 	}
 
 	let state = CheckerState( name:							st.name
@@ -812,9 +812,10 @@ private func printDistributionGraph(st : CheckerState) {
 	}
 }
 
-internal func cons<T>(lhs : T, var _ rhs : [T]) -> [T] {
-	rhs.insert(lhs, atIndex: 0)
-	return rhs
+internal func cons<T>(lhs : T, _ rhs : [T]) -> [T] {
+	var res = rhs
+	res.insert(lhs, atIndex: 0)
+	return res
 }
 
 private func pluralize(s : String, i : Int) -> String {

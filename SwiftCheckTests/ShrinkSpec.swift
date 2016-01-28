@@ -7,6 +7,7 @@
 //
 
 import SwiftCheck
+import XCTest
 
 class ShrinkSpec : XCTestCase {
 	func shrinkArbitrary<A : Arbitrary>(x : A) -> [A] {

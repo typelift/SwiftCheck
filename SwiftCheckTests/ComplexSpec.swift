@@ -7,6 +7,7 @@
 //
 
 import SwiftCheck
+import XCTest
 
 let upper : Gen<Character>= Gen<Character>.fromElementsIn("A"..."Z")
 let lower : Gen<Character> = Gen<Character>.fromElementsIn("a"..."z")
@@ -36,9 +37,11 @@ class ComplexSpec : XCTestCase {
 
 		let emailGen = glue([localEmail, Gen.pure("@"), hostname, Gen.pure("."), tld])
 
-		property("Generated email addresses contain 1 @") <- forAll(emailGen) { (e : String) in
+		let args = CheckerArguments(maxTestCaseSize: 10)
+		
+		property("Generated email addresses contain 1 @", arguments: args) <- forAll(emailGen) { (e : String) in
 			return e.characters.filter({ $0 == "@" }).count == 1
-		}
+		}.once
 	}
 
 	func testIPv6Properties() {

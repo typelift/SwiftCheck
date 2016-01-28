@@ -7,6 +7,7 @@
 //
 
 import SwiftCheck
+import XCTest
 
 public struct ArbitraryFoo {
 	let x : Int

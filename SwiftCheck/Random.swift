@@ -6,8 +6,7 @@
 //  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
-import func Darwin.time
-import func Darwin.clock
+import Darwin
 
 /// Provides a standard interface to an underlying Random Value Generator of any
 /// type.  It is analogous to `GeneratorType`, but rather than consume a 
@@ -181,7 +180,7 @@ extension Int64 : RandomType {
 			let b = genhi - genlo + 1
 
 			let q : Int64 = 1000
-			let k = Int64.subtractWithOverflow(h, l).0 + 1
+			let k = Int64.subtractWithOverflow(h, Int64.addWithOverflow(l, 1).0).0
 			let magtgt = k * q
 
 			func entropize(mag : Int64, _ v : Int64, _ g : G) -> (Int64, G) {
@@ -195,7 +194,7 @@ extension Int64 : RandomType {
 			}
 
 			let (v, rng_) = entropize(1, 0, gen)
-			return (l + (v % k), rng_)
+			return (l + (v % (k == 0 ? Int64.min : k)), rng_)
 		}
 	}
 }

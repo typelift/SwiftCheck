@@ -7,6 +7,7 @@
 //
 
 import SwiftCheck
+import XCTest
 
 extension Rose {
 	var root : A {

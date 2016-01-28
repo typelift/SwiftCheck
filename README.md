@@ -72,7 +72,7 @@ property("Shrunken lists of integers always contain [] or [0]") <- forAll { (l :
     return (!l.getArray.isEmpty && l.getArray != [0]) ==> {
         let ls = self.shrinkArbitrary(l).map { $0.getArray }
         return (ls.filter({ $0 == [] || $0 == [0] }).count >= 1)
-    }()
+    }
 }
 ```
 
@@ -236,7 +236,7 @@ with custom generators as simple as possible:
 ```swift
 let onlyEven = Int.arbitrary.suchThat { $0 % 2 == 0 }
 
-let vowels = Gen.fromElementsOf(["A", "E", "I", "O", "U" ])
+let vowels = Gen.fromElementsOf([ "A", "E", "I", "O", "U" ])
 
 let randomHexValue = Gen<UInt>.choose((0, 15))
 
