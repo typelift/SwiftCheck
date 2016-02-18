@@ -202,7 +202,7 @@ extension Int64 : RandomType {
 extension UInt : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt, UInt), gen : G) -> (UInt, G) {
 		let (minl, maxl) = range
-		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
+		let (bb, gg) = Int64.randomInRange((Int64(Int(bitPattern: minl)), Int64(Int(bitPattern: maxl))), gen: gen)
 		return (UInt(truncatingBitPattern: bb), gg)
 	}
 }

@@ -70,7 +70,7 @@ extension IntegerType {
 			}
 			let n = i / 2
 			return .Some((n, n))
-		}, initial: self < 0 ? (self * -1) : self)
+		}, initial: self < 0 ? (Self.multiplyWithOverflow(self, -1).0) : self)
 	}
 }
 

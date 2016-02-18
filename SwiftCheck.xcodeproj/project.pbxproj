@@ -47,6 +47,9 @@
 		82575B231C55524A00F0CD54 /* RoseSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82575B221C55524A00F0CD54 /* RoseSpec.swift */; };
 		82575B241C55524A00F0CD54 /* RoseSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82575B221C55524A00F0CD54 /* RoseSpec.swift */; };
 		82575B251C55524A00F0CD54 /* RoseSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82575B221C55524A00F0CD54 /* RoseSpec.swift */; };
+		825794A71C6BDAD100BA20EA /* PathSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 825794A61C6BDAD100BA20EA /* PathSpec.swift */; };
+		825794A81C6BDAD100BA20EA /* PathSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 825794A61C6BDAD100BA20EA /* PathSpec.swift */; };
+		825794A91C6BDAD100BA20EA /* PathSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 825794A61C6BDAD100BA20EA /* PathSpec.swift */; };
 		827749F81B65ABCC00A7965F /* Witness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827749F71B65ABCC00A7965F /* Witness.swift */; };
 		827749F91B65ABCC00A7965F /* Witness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827749F71B65ABCC00A7965F /* Witness.swift */; };
 		82A6679F1BFD299500EBCDFA /* ReplaySpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82A6679E1BFD299500EBCDFA /* ReplaySpec.swift */; };
@@ -158,6 +161,7 @@
 		8240CCBA1C3A123700EF4D29 /* SwiftCheck-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SwiftCheck-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8248E0BB1C3E2FF200EADEA9 /* LambdaSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LambdaSpec.swift; sourceTree = "<group>"; };
 		82575B221C55524A00F0CD54 /* RoseSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoseSpec.swift; sourceTree = "<group>"; };
+		825794A61C6BDAD100BA20EA /* PathSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PathSpec.swift; sourceTree = "<group>"; };
 		827749F71B65ABCC00A7965F /* Witness.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Witness.swift; sourceTree = "<group>"; usesTabs = 1; };
 		82A6679E1BFD299500EBCDFA /* ReplaySpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReplaySpec.swift; sourceTree = "<group>"; };
 		82DD8EEB1B4CC88C00B66551 /* Operators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Operators.swift; path = Carthage/Checkouts/Operadics/Operators.swift; sourceTree = SOURCE_ROOT; usesTabs = 1; };
@@ -305,8 +309,9 @@
 				821B76CC1BC4449300AF97D6 /* FailureSpec.swift */,
 				8445C4A91B16D37800280089 /* GenSpec.swift */,
 				8248E0BB1C3E2FF200EADEA9 /* LambdaSpec.swift */,
-				84EA2C381B2287200001FB3F /* PropertySpec.swift */,
 				8480AB2C1A7B0A9700C6162D /* ModifierSpec.swift */,
+				825794A61C6BDAD100BA20EA /* PathSpec.swift */,
+				84EA2C381B2287200001FB3F /* PropertySpec.swift */,
 				82A6679E1BFD299500EBCDFA /* ReplaySpec.swift */,
 				82575B221C55524A00F0CD54 /* RoseSpec.swift */,
 				8445C4AC1B17E48300280089 /* ShrinkSpec.swift */,
@@ -604,6 +609,7 @@
 				8240CCE41C3A12AB00EF4D29 /* ShrinkSpec.swift in Sources */,
 				8240CCE51C3A12AB00EF4D29 /* SimpleSpec.swift in Sources */,
 				8240CCE61C3A12AB00EF4D29 /* TestSpec.swift in Sources */,
+				825794A91C6BDAD100BA20EA /* PathSpec.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -647,6 +653,7 @@
 				8445C4A51B16897200280089 /* BooleanIdentitySpec.swift in Sources */,
 				82A6679F1BFD299500EBCDFA /* ReplaySpec.swift in Sources */,
 				844FCCC9198EFF9B00EB242A /* SimpleSpec.swift in Sources */,
+				825794A71C6BDAD100BA20EA /* PathSpec.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -690,6 +697,7 @@
 				84DF76201B0BD58900C912B0 /* ModifierSpec.swift in Sources */,
 				82A667A01BFD299500EBCDFA /* ReplaySpec.swift in Sources */,
 				84DF76211B0BD58900C912B0 /* BooleanIdentitySpec.swift in Sources */,
+				825794A81C6BDAD100BA20EA /* PathSpec.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

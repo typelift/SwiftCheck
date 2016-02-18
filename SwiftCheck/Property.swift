@@ -437,9 +437,9 @@ private func protectResults(rs : Rose<TestResult>) -> Rose<TestResult> {
 	}
 }
 
-internal func protectRose(f : () throws -> Rose<TestResult>) -> (() -> Rose<TestResult>) {
-	return { protect(Rose.pure • exception("Exception"), x: f) }
-}
+//internal func protectRose(f : () throws -> Rose<TestResult>) -> (() -> Rose<TestResult>) {
+//	return { protect(Rose.pure • exception("Exception"), x: f) }
+//}
 
 internal func protect<A>(f : ErrorType -> A, x : () throws -> A) -> A {
 	do {
