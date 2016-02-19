@@ -28,37 +28,6 @@
 /// any assertions you could make in `XCTest` will work immediately with the 
 /// framework.
 
-// MARK: - Quantifiers
-
-/// Below is the method all SwiftCheck properties are based on, `forAll`.  It 
-/// acts as a "Quantifier", i.e. a contract that serves as a guarantee that a 
-/// property holds when the given testing block returns `true` or truthy values,
-/// and fails when the testing block returns `false` or falsy values.  The 
-/// testing block is usually used with Swift's abbreviated block syntax and
-/// requires type annotations for all value positions being requested.  For 
-/// example:
-///
-///     + This is "Property Notation".  It allows you to give your properties a 
-///     | name and instructs SwiftCheck to test it.
-///     |
-///     |      This backwards arrow binds a property name and a property +
-///     |      to each other.                                            |
-///     |                                                                |
-///     v                                                                v
-///     property("The reverse of the reverse of an array is that array") <- forAll { (xs : [Int]) in
-///	        return
-///	            (xs.reverse().reverse() == xs) <?> "Reverse on the left"
-/// 	        ^&&^
-///	 	        (xs == xs.reverse().reverse()) <?> "Reverse on the right"
-///     }
-///
-/// Why require types?  For one, Swift cannot infer the types of local variables 
-/// because SwiftCheck uses highly polymorphic testing primitives.  But, more 
-/// importantly, types are required because SwiftCheck uses them to select the 
-/// appropriate `Gen`erators and shrinkers for each data type automagically by 
-/// default.  Those `Gen`erators and shrinkers are then used to create 100 
-/// random test cases that are evaluated lazily to produce a final result.
-
 // MARK: - Going Further
 
 /// As mentioned before, SwiftCheck types do not exist in a bubble.  They are highly compositional
@@ -94,6 +63,37 @@
 /// check out our test suite and the files `Gen.swift`, `Property.swift`, 
 /// `Modifiers.swift`, and the top half of this very file to learn more about 
 /// the various parts of the SwiftCheck testing mechanism.
+
+// MARK: - Quantifiers
+
+/// Below is the method all SwiftCheck properties are based on, `forAll`.  It 
+/// acts as a "Quantifier", i.e. a contract that serves as a guarantee that a 
+/// property holds when the given testing block returns `true` or truthy values,
+/// and fails when the testing block returns `false` or falsy values.  The 
+/// testing block is usually used with Swift's abbreviated block syntax and
+/// requires type annotations for all value positions being requested.  For 
+/// example:
+///
+///     + This is "Property Notation".  It allows you to give your properties a 
+///     | name and instructs SwiftCheck to test it.
+///     |
+///     |      This backwards arrow binds a property name and a property +
+///     |      to each other.                                            |
+///     |                                                                |
+///     v                                                                v
+///     property("The reverse of the reverse of an array is that array") <- forAll { (xs : [Int]) in
+///	        return
+///	            (xs.reverse().reverse() == xs) <?> "Reverse on the left"
+/// 	        ^&&^
+///	 	        (xs == xs.reverse().reverse()) <?> "Reverse on the right"
+///     }
+///
+/// Why require types?  For one, Swift cannot infer the types of local variables 
+/// because SwiftCheck uses highly polymorphic testing primitives.  But, more 
+/// importantly, types are required because SwiftCheck uses them to select the 
+/// appropriate `Gen`erators and shrinkers for each data type automagically by 
+/// default.  Those `Gen`erators and shrinkers are then used to create 100 
+/// random test cases that are evaluated lazily to produce a final result.
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for that type.
@@ -424,7 +424,7 @@ internal func quickCheckWithResult(args : CheckerArguments, _ p : Testable) -> R
 // - giveUp: When the number of discarded tests exceeds the number given in the 
 //           arguments we just give up turning the run loop to prevent excessive
 //           generation.
-internal func test(st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Result {
+private func test(st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Result {
 	var state = st
 	while true {
 		switch runATest(state, caseGen: caseGen) {
@@ -465,7 +465,7 @@ internal func test(st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Result
 //
 // On success the next state is returned.  On failure the final result and state
 // are returned.
-internal func runATest(st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Either<(Result, CheckerState), CheckerState> {
+private func runATest(st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Either<(Result, CheckerState), CheckerState> {
 	let size = st.computeSize(st.successfulTestCount, st.discardedTestCount)
 	let (rnd1, rnd2) = st.randomSeedGenerator.split
 
@@ -602,7 +602,7 @@ internal func runATest(st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Ei
 	}
 }
 
-internal func doneTesting(st : CheckerState) -> Result {
+private func doneTesting(st : CheckerState) -> Result {
 	if !st.hasFulfilledExpectedFailure {
 		if insufficientCoverage(st) {
 			printCond(st.silence, "+++ OK, failed as expected. ")
@@ -624,7 +624,7 @@ internal func doneTesting(st : CheckerState) -> Result {
 	}
 }
 
-internal func giveUp(st: CheckerState) -> Result {
+private func giveUp(st: CheckerState) -> Result {
 	printDistributionGraph(st)
 	return .GaveUp(numTests: st.successfulTestCount, labels: summary(st), output: "")
 }
@@ -640,7 +640,7 @@ internal func giveUp(st: CheckerState) -> Result {
 // slow as hell. This way we stay in one stack frame no matter what and give ARC
 // a chance to cleanup after us. Plus we get to stay within a reasonable ~50-100
 // megabytes for truly horrendous tests that used to eat 8 gigs.
-internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
+private func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts : [Rose<TestResult>]) -> (Int, Int, Int) {
 	if let e = res.theException {
 		fatalError("Test failed due to exception: \(e)")
 	}
@@ -713,7 +713,7 @@ internal func findMinimalFailingTestCase(st : CheckerState, res : TestResult, ts
 	return reportMinimumCaseFound(state, res: lastResult)
 }
 
-internal func reportMinimumCaseFound(st : CheckerState, res : TestResult) -> (Int, Int, Int) {
+private func reportMinimumCaseFound(st : CheckerState, res : TestResult) -> (Int, Int, Int) {
 	let testMsg = " (after \(st.successfulTestCount.successor()) test"
 	let shrinkMsg = st.successfulShrinkCount > 1 ? (" and \(st.successfulShrinkCount) shrink") : ""
 
@@ -723,7 +723,7 @@ internal func reportMinimumCaseFound(st : CheckerState, res : TestResult) -> (In
 	return (st.successfulShrinkCount, st.failedShrinkStepCount - st.failedShrinkStepDistance, st.failedShrinkStepDistance)
 }
 
-internal func reportExistentialFailure(st : CheckerState, res : Result) -> Result {
+private func reportExistentialFailure(st : CheckerState, res : Result) -> Result {
 	switch res {
 	case let .ExistentialFailure(_, _, _, reason, _, _, lastTest):
 		let testMsg = " (after \(st.discardedTestCount) test"
@@ -738,7 +738,7 @@ internal func reportExistentialFailure(st : CheckerState, res : Result) -> Resul
 	}
 }
 
-internal func dispatchAfterTestCallbacks(st : CheckerState, res : TestResult) {
+private func dispatchAfterTestCallbacks(st : CheckerState, res : TestResult) {
 	guard !st.silence else {
 		return
 	}
@@ -753,7 +753,7 @@ internal func dispatchAfterTestCallbacks(st : CheckerState, res : TestResult) {
 	}
 }
 
-internal func dispatchAfterFinalFailureCallbacks(st : CheckerState, res : TestResult) {
+private func dispatchAfterFinalFailureCallbacks(st : CheckerState, res : TestResult) {
 	guard !st.silence else {
 		return
 	}
@@ -812,7 +812,7 @@ private func printDistributionGraph(st : CheckerState) {
 	}
 }
 
-internal func cons<T>(lhs : T, _ rhs : [T]) -> [T] {
+private func cons<T>(lhs : T, _ rhs : [T]) -> [T] {
 	var res = rhs
 	res.insert(lhs, atIndex: 0)
 	return res
