@@ -15,7 +15,9 @@ import Darwin
 /// a "limit" is flexible, generally custom types that wish to conform to 
 /// `LatticeType` must come with some kind of supremum or infimum.
 public protocol LatticeType {
+	/// The lower limit of the type.
 	static var min : Self { get }
+	/// The upper limit of the type.
 	static var max : Self { get }
 }
 

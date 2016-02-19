@@ -132,7 +132,7 @@ public func joinRose<A>(rs : Rose<Rose<A>>) -> Rose<A> {
 
 /// Sequences an array of Rose Trees into a Rose Tree of an array.
 public func sequence<A>(ms : [Rose<A>]) -> Rose<[A]> {
-	return ms.reduce(Rose<[A]>.pure([]), combine: { n, m in
+	return ms.reverse().reduce(Rose<[A]>.pure([]), combine: { n, m in
 		return m.flatMap { x in
 			return n.flatMap { xs in
 				return Rose<[A]>.pure([x] + xs)

@@ -325,7 +325,7 @@ public func >>- <A, B>(m : Gen<A>, fn : A -> Gen<B>) -> Gen<B> {
 /// in the order they were given to the function exactly once.  Thus all arrays 
 /// generated are of the same rank as the array that was given.
 public func sequence<A>(ms : [Gen<A>]) -> Gen<[A]> {
-	return ms.reduce(Gen<[A]>.pure([]), combine: { y, x in
+	return ms.reverse().reduce(Gen<[A]>.pure([]), combine: { y, x in
 		return x.flatMap { x1 in
 			return y.flatMap { xs in
 				return Gen<[A]>.pure([x1] + xs)
@@ -363,17 +363,17 @@ public func promote<A, B>(m : A -> Gen<B>) -> Gen<A -> B> {
 	}
 }
 
-internal func delay<A>() -> Gen<Gen<A> -> A> {
+// MARK: - Implementation Details
+
+import func Darwin.log
+
+private func delay<A>() -> Gen<Gen<A> -> A> {
 	return Gen(unGen: { r, n in
 		return { g in
 			return g.unGen(r, n)
 		}
 	})
 }
-
-// MARK: - Implementation Details
-
-import func Darwin.log
 
 private func vary<S : IntegerType>(k : S, _ rng : StdGen) -> StdGen {
 	let s = rng.split

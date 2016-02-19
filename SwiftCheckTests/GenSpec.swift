@@ -142,6 +142,12 @@ class GenSpec : XCTestCase {
 				return str.rangeOfString(",") == nil
 			}
 		}
+		
+		property("Gen.sequence occurs in order") <- forAll { (xs : [String]) in
+			return forAllNoShrink(sequence(xs.map(Gen.pure))) { ss in
+				return ss == xs
+			}
+		}
 	}
 
 	func testLaws() {
