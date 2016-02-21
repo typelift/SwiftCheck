@@ -351,21 +351,19 @@ public func liftM<A, R>(f : A -> R, _ m1 : Gen<A>) -> Gen<R> {
 
 /// Promotes a rose of generators to a generator of rose values.
 public func promote<A>(x : Rose<Gen<A>>) -> Gen<Rose<A>> {
-	return delay().flatMap { (let eval : Gen<A> -> A) in
+	return delay().flatMap { eval in
 		return Gen<Rose<A>>.pure(liftM(eval, x))
 	}
 }
 
 /// Promotes a function returning generators to a generator of functions.
 public func promote<A, B>(m : A -> Gen<B>) -> Gen<A -> B> {
-	return delay().flatMap { (let eval : Gen<B> -> B) in
+	return delay().flatMap { eval in
 		return Gen<A -> B>.pure(eval • m)
 	}
 }
 
 // MARK: - Implementation Details
-
-import func Darwin.log
 
 private func delay<A>() -> Gen<Gen<A> -> A> {
 	return Gen(unGen: { r, n in
@@ -385,7 +383,7 @@ private func attemptBoundedTry<A>(gen: Gen<A>, _ k : Int, _ bound : Int, _ pred 
 	if bound == 0 {
 		return Gen.pure(.None)
 	}
-	return gen.resize(2 * k + bound).flatMap { (let x : A) -> Gen<Optional<A>> in
+	return gen.resize(2 * k + bound).flatMap { x in
 		if pred(x) {
 			return Gen.pure(.Some(x))
 		}
@@ -416,3 +414,10 @@ private func pick<A>(n : Int, _ lst : [(Int, Gen<A>)]) -> Gen<A> {
 	}
 	return pick(n - k, tl)
 }
+
+#if os(Linux)
+	import Glibc
+#else
+	import Darwin
+#endif
+
