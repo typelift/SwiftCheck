@@ -104,6 +104,13 @@ extension AnyRandomAccessIndex : LatticeType {
 
 #if os(Linux)
 	import Glibc
+	
+	/// Matches http://www.opensource.apple.com/source/gcc/gcc-934.3/float.h
+	public var FLT_MAX: Float = 3.40282347e+38
+	public var FLT_MIN: Float = 1.17549435e-38
+
+	public var DBL_MAX: Double = 1.7976931348623157e+308
+	public var DBL_MIN: Double = 2.2250738585072014e-308
 #else
 	import Darwin
 #endif
