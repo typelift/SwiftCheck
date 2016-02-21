@@ -6,8 +6,6 @@
 //  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
-import Darwin
-
 /// Provides a standard interface to an underlying Random Value Generator of any
 /// type.  It is analogous to `GeneratorType`, but rather than consume a 
 /// sequence it uses sources of randomness to generate values indefinitely.
@@ -332,3 +330,9 @@ private func clock_gettime(_ : Int, _ t : UnsafeMutablePointer<timespec>) -> Int
 
 	return 0
 }
+
+#if os(Linux)
+	import Glibc
+#else
+	import Darwin
+#endif

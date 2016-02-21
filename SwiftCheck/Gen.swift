@@ -325,10 +325,10 @@ public func >>- <A, B>(m : Gen<A>, fn : A -> Gen<B>) -> Gen<B> {
 /// in the order they were given to the function exactly once.  Thus all arrays 
 /// generated are of the same rank as the array that was given.
 public func sequence<A>(ms : [Gen<A>]) -> Gen<[A]> {
-	return ms.reverse().reduce(Gen<[A]>.pure([]), combine: { y, x in
-		return x.flatMap { x1 in
-			return y.flatMap { xs in
-				return Gen<[A]>.pure([x1] + xs)
+	return ms.reduce(Gen<[A]>.pure([]), combine: { n, m in
+		return m.flatMap { x in
+			return n.flatMap { xs in
+				return Gen<[A]>.pure(xs + [x])
 			}
 		}
 	})

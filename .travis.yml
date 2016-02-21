@@ -1,16 +1,30 @@
-language: objective-c
-osx_image: xcode7.3
 env:
-    - TEST_CONFIG="RELEASE"
-    - TEST_CONFIG="PODS"
-    - TEST_CONFIG="CARTHAGE"
-
-install: true
+  global:
+    - LC_CTYPE=en_US.UTF-8
+matrix:
+  include:
+    - os: osx
+      language: objective-c
+      osx_image: xcode7.3
+    - os: linux
+      language: generic
+      sudo: required
+      dist: trusty
+      before_install:
+        - curl -sL https://gist.github.com/kylef/5c0475ff02b7c7671d2a/raw/621ef9b29bbb852fdfd2e10ed147b321d792c1e4/swiftenv-install.sh | bash
+      script:
+        - . ~/.swiftenv/init
+        - swift build
+git:
+  submodules: false
+before_install:
+  - git submodule update --init --recursive
 script:
-    - if [[ "$TEST_CONFIG" == "RELEASE" ]]; then script/cibuild SwiftCheck SwiftCheck-iOS ; fi
-    - if [[ "$TEST_CONFIG" == "RELEASE" ]]; then xcodebuild -verbose test -scheme SwiftCheck-tvOS -destination 'platform=tvOS Simulator,name=Apple TV 1080p' ; fi
-    - if [[ "$TEST_CONFIG" == "CARTHAGE" ]]; then carthage build --no-skip-current; fi
-    - if [[ "$TEST_CONFIG" == "PODS" ]]; then pod lib lint; fi
+  - pod lib lint
+  - set -o pipefail
+  - script/cibuild SwiftCheck SwiftCheck-iOS
+  - xcodebuild test -scheme SwiftCheck-tvOS -destination 'platform=tvOS Simulator,name=Apple TV 1080p'
+  - carthage build --no-skip-current
 notifications:
   webhooks:
     urls:

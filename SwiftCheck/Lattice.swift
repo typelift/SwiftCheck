@@ -7,8 +7,6 @@
 //  Released under the MIT license.
 //
 
-import Darwin
-
 /// Lattice types are types that have definable upper and lower limits.  For 
 /// types like the `Int` and `Float`, their limits are the minimum and maximum 
 /// possible values representable in their bit- width.  While the definition of 
@@ -103,3 +101,9 @@ extension AnyRandomAccessIndex : LatticeType {
 //		return LDBL_MAX
 //	}
 //}
+
+#if os(Linux)
+	import Glibc
+#else
+	import Darwin
+#endif
