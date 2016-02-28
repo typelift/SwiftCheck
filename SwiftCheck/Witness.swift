@@ -7,7 +7,7 @@
 //
 
 public protocol WitnessedArbitrary {
-	typealias Param
+	associatedtype Param
 
 	static func forAllWitnessed<A : Arbitrary>(wit : A -> Param, pf : (Self -> Testable)) -> Property
 }

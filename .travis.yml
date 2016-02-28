@@ -23,9 +23,9 @@ before_install:
 script:
   - pod lib lint
   - set -o pipefail
-  - script/cibuild SwiftCheck SwiftCheck-iOS
-  - xcodebuild test -scheme SwiftCheck-tvOS -destination 'platform=tvOS Simulator,name=Apple TV 1080p'
   - carthage build --no-skip-current
+  - xcodebuild test -scheme SwiftCheck-tvOS -destination 'platform=tvOS Simulator,name=Apple TV 1080p'
+  - script/cibuild SwiftCheck SwiftCheck-iOS
 notifications:
   webhooks:
     urls:
