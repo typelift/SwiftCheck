@@ -37,7 +37,7 @@ public struct Gen<A> {
 	/// practice, you should never use this property because it hinders the 
 	/// replay functionality and the robustness of tests in general.
 	public var sample : [A] {
-		return sequence((2...20).map { self.resize($0) }).generate
+		return sequence((2...20).map(self.resize)).generate
 	}
 
 	/// Constructs a Generator that selects a random value from the given 

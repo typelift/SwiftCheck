@@ -151,7 +151,7 @@ public struct OrderedArrayOf<A : protocol<Arbitrary, Comparable>> : Arbitrary, C
 	/// Retrieves the underlying sorted array of values.
 	public let getOrderedArray : [A]
 	
-	/// Retrieves the underlying sorted array of value values as a contiguous 
+	/// Retrieves the underlying sorted array of values as a contiguous 
 	/// array.
 	public var getContiguousArray : ContiguousArray<A> {
 		return ContiguousArray(self.getOrderedArray)
@@ -571,7 +571,7 @@ private final class IsoOfImpl<T : protocol<Hashable, CoArbitrary, Arbitrary>, U 
 			return T.coarbitrary(a)(U.arbitrary)
 		}), promote({ a in
 			return U.coarbitrary(a)(T.arbitrary)
-		})).map { IsoOfImpl($0, $1) }
+		})).map(IsoOfImpl.init)
 	}
 
 	static func shrink(f : IsoOfImpl<T, U>) -> [IsoOfImpl<T, U>] {

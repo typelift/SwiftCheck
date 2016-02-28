@@ -79,7 +79,7 @@ public struct CheckerArguments {
 	/// Provides a way of re-doing a test at the given size with a new generator.
 	let replay : Optional<(StdGen, Int)>
 	/// The maximum number of test cases that must pass before the property itself
- /// passes.
+	/// passes.
 	///
 	/// The default value of this property is 100.  In general, some tests may require more than
 	/// this amount, but less is rare.  If you need a value less than or equal to 1, use `.once`

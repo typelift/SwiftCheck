@@ -291,7 +291,7 @@ extension UnicodeScalar : Arbitrary {
 
 	/// The default shrinking function for `UnicodeScalar` values.
 	public static func shrink(x : UnicodeScalar) -> [UnicodeScalar] {
-		let s : UnicodeScalar = UnicodeScalar(UInt32(towlower(Int32(x.value))))
+		let s : UnicodeScalar = UnicodeScalar(UInt32(tolower(Int32(x.value))))
 		return [ "a", "b", "c", s, "A", "B", "C", "1", "2", "3", "\n", " " ].nub.filter { $0 < x }
 	}
 }
@@ -300,12 +300,12 @@ extension String : Arbitrary {
 	/// Returns a generator of `String` values.
 	public static var arbitrary : Gen<String> {
 		let chars = Gen.sized(Character.arbitrary.proliferateSized)
-		return chars >>- (Gen<String>.pure • String.init)
+		return chars >>- { Gen<String>.pure(String($0)) }
 	}
 
 	/// The default shrinking function for `String` values.
 	public static func shrink(s : String) -> [String] {
-		return [Character].shrink([Character](s.characters)).map(String.init)
+		return [Character].shrink([Character](s.characters)).map { String($0) }
 	}
 }
 

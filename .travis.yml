@@ -6,26 +6,37 @@ matrix:
     - os: osx
       language: objective-c
       osx_image: xcode7.3
+      before_install:
+        - git submodule update --init --recursive
+      script:
+        - pod lib lint
+        - carthage build --no-skip-current
+    - os: osx
+      language: objective-c
+      osx_image: xcode7.3
+      before_install:
+        - git submodule update --init --recursive
+      script:
+        - set -o pipefail
+        - xcodebuild test -scheme SwiftCheck
+        - xcodebuild test -scheme SwiftCheck-iOS -destination 'platform=iOS Simulator,name=iPad Pro'
+        - xcodebuild test -scheme SwiftCheck-tvOS -destination 'platform=tvOS Simulator,name=Apple TV 1080p'
     - os: linux
       language: generic
       sudo: required
       dist: trusty
       before_install:
         - git submodule update --init --recursive
-        - curl -sL https://gist.github.com/kylef/5c0475ff02b7c7671d2a/raw/621ef9b29bbb852fdfd2e10ed147b321d792c1e4/swiftenv-install.sh | bash
+        - wget -q -O - https://swift.org/keys/all-keys.asc | gpg --import -
+        - wget https://swift.org/builds/development/ubuntu1404/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04.tar.gz
+        - tar xzf swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04.tar.gz
+        - export PATH=${PWD}/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04/usr/bin:"${PATH}"
+        - wget -q -O - https://swift.org/keys/all-keys.asc | gpg --import -
+        - wget https://swift.org/builds/development/ubuntu1404/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04.tar.gz
+        - tar xzf swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04.tar.gz
+        - export PATH=${PWD}/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04/usr/bin:"${PATH}"
       script:
-        - . ~/.swiftenv/init
         - swift build
-git:
-  submodules: false
-before_install:
-  - git submodule update --init --recursive
-script:
-  - pod lib lint
-  - set -o pipefail
-  - carthage build --no-skip-current
-  - xcodebuild test -scheme SwiftCheck-tvOS -destination 'platform=tvOS Simulator,name=Apple TV 1080p'
-  - script/cibuild SwiftCheck SwiftCheck-iOS
 notifications:
   webhooks:
     urls:
