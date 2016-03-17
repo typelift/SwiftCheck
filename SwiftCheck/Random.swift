@@ -178,24 +178,23 @@ extension Int64 : RandomType {
 			return Int64.randomInRange((h, l), gen: gen)
 		} else {
 			let (genlo, genhi) : (Int64, Int64) = (1, 2147483562)
-			let b = genhi - genlo + 1
-
-			let q : Int64 = 1000
-			let k = Int64.subtractWithOverflow(h, l).0 + 1
+			let b = Double(genhi - genlo + 1)
+			let q : Double = 1000
+			let k = Double(h) - Double(l) +  1
 			let magtgt = k * q
-
-			func entropize(mag : Int64, _ v : Int64, _ g : G) -> (Int64, G) {
+			
+			func entropize(mag : Double, _ v : Double, _ g : G) -> (Double, G) {
 				if mag >= magtgt {
 					return (v, g)
 				} else {
 					let (x, g_) = g.next
-					let v_ = (v * b + (Int64(x) - genlo))
+					let v_ = (v * b + (Double(x) - Double(genlo)))
 					return entropize(mag * b, v_, g_)
 				}
 			}
-
+			
 			let (v, rng_) = entropize(1, 0, gen)
-			return (l + (v % k), rng_)
+			return (Int64(Double(l) + (v % k)), rng_)
 		}
 	}
 }
