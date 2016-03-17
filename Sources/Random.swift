@@ -194,7 +194,7 @@ extension Int64 : RandomType {
 			let q : Double = 1000
 			let k = Double(h) - Double(l) +  1
 			let magtgt = k * q
-
+			
 			func entropize(mag : Double, _ v : Double, _ g : G) -> (Double, G) {
 				if mag >= magtgt {
 					return (v, g)
@@ -204,7 +204,7 @@ extension Int64 : RandomType {
 					return entropize(mag * b, v_, g_)
 				}
 			}
-
+			
 			let (v, rng_) = entropize(1, 0, gen)
 			return (Int64(Double(l) + (v % k)), rng_)
 		}
