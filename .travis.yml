@@ -5,9 +5,6 @@ env:
     - TEST_CONFIG="PODS"
     - TEST_CONFIG="CARTHAGE"
 
-before_install:
-- brew update
-- brew install carthage
 install: true
 script:
     - if [[ "$TEST_CONFIG" == "RELEASE" ]]; then script/cibuild SwiftCheck SwiftCheck-iOS ; fi
