@@ -7,15 +7,15 @@
 //  Released under the MIT license.
 //
 
-import Darwin
-
 /// Lattice types are types that have definable upper and lower limits.  For 
 /// types like the `Int` and `Float`, their limits are the minimum and maximum 
 /// possible values representable in their bit- width.  While the definition of 
 /// a "limit" is flexible, generally custom types that wish to conform to 
 /// `LatticeType` must come with some kind of supremum or infimum.
 public protocol LatticeType {
+	/// The lower limit of the type.
 	static var min : Self { get }
+	/// The upper limit of the type.
 	static var max : Self { get }
 }
 
@@ -90,7 +90,6 @@ extension AnyRandomAccessIndex : LatticeType {
 	}
 }
 
-
 /// float.h does not export Float80's limits, nor does the Swift Standard Library.
 // rdar://18404510
 //extension Swift.Float80 : LatticeType {
@@ -102,3 +101,16 @@ extension AnyRandomAccessIndex : LatticeType {
 //		return LDBL_MAX
 //	}
 //}
+
+#if os(Linux)
+	import Glibc
+	
+	/// Matches http://www.opensource.apple.com/source/gcc/gcc-934.3/float.h
+	public var FLT_MAX: Float = 3.40282347e+38
+	public var FLT_MIN: Float = 1.17549435e-38
+
+	public var DBL_MAX: Double = 1.7976931348623157e+308
+	public var DBL_MIN: Double = 2.2250738585072014e-308
+#else
+	import Darwin
+#endif

@@ -7,6 +7,7 @@
 //
 
 import SwiftCheck
+import XCTest
 
 class GenSpec : XCTestCase {
 	func testAll() {
@@ -139,6 +140,12 @@ class GenSpec : XCTestCase {
 			let g = String.arbitrary.suchThat({ !$0.isEmpty }).suchThat({ $0.rangeOfString(",") == nil })
 			return forAll(g) { str in
 				return str.rangeOfString(",") == nil
+			}
+		}
+		
+		property("Gen.sequence occurs in order") <- forAll { (xs : [String]) in
+			return forAllNoShrink(sequence(xs.map(Gen.pure))) { ss in
+				return ss == xs
 			}
 		}
 	}

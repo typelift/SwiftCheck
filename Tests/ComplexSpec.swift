@@ -7,6 +7,7 @@
 //
 
 import SwiftCheck
+import XCTest
 
 let upper : Gen<Character>= Gen<Character>.fromElementsIn("A"..."Z")
 let lower : Gen<Character> = Gen<Character>.fromElementsIn("a"..."z")
@@ -34,11 +35,13 @@ class ComplexSpec : XCTestCase {
 
 		let tld = lower.proliferateNonEmpty.suchThat({ $0.count > 1 }).map(String.init)
 
-		let emailGen = wrap3 <^> localEmail <*> Gen.pure("@") <*> hostname <*> Gen.pure(".") <*> tld
+		let emailGen = glue([localEmail, Gen.pure("@"), hostname, Gen.pure("."), tld])
 
-		property("Generated email addresses contain 1 @") <- forAll(emailGen) { (e : String) in
+		let args = CheckerArguments(maxTestCaseSize: 10)
+		
+		property("Generated email addresses contain 1 @", arguments: args) <- forAll(emailGen) { (e : String) in
 			return e.characters.filter({ $0 == "@" }).count == 1
-		}
+		}.once
 	}
 
 	func testIPv6Properties() {
@@ -49,7 +52,7 @@ class ComplexSpec : XCTestCase {
 			hexDigits.proliferateSized(4).map{ String.init($0) + ":" },
 		])
 
-		let ipGen = { $0.initial } <^> (wrap2 <^> ipHexDigits <*> ipHexDigits <*> ipHexDigits <*> ipHexDigits)
+		let ipGen = { $0.initial } <^> glue([ipHexDigits, ipHexDigits, ipHexDigits, ipHexDigits])
 
 		property("Generated IPs contain 3 sections") <- forAll(ipGen) { (e : String) in
 			return e.characters.filter({ $0 == ":" }).count == 3
@@ -59,16 +62,8 @@ class ComplexSpec : XCTestCase {
 
 // MARK: String Conveniences
 
-private func wrap(l : String) -> String -> String -> String {
-	return { m in { r in l + m + r } }
-}
-
-private func wrap2(l : String) -> String -> String -> String -> String {
-	return { m in { m2 in { r in l + m + m2 + r } } }
-}
-
-private func wrap3(l : String) -> String -> String -> String -> String -> String {
-	return { m in { m2 in { m3 in { r in l + m + m2 + m3 + r } } } }
+func glue(parts : [Gen<String>]) -> Gen<String> {
+	return sequence(parts).map { $0.reduce("", combine: +) }
 }
 
 extension String {

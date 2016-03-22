@@ -7,6 +7,7 @@
 //
 
 import SwiftCheck
+import XCTest
 
 struct Name : Arbitrary, Equatable, Hashable, CustomStringConvertible {
 	let unName : String

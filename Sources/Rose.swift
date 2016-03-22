@@ -15,7 +15,10 @@
 /// In practice SwiftCheck will minimize the side-effects performed in a given 
 /// `IORose` to printing values to the console and executing callbacks.
 public enum Rose<A> {
+	/// A normal branch in the Rose Tree.
 	case MkRose(() -> A, () -> [Rose<A>])
+	/// An IO branch in the Rose Tree.  That is, a branch that must execute
+	/// side effects before revealing further structure.
 	case IORose(() -> Rose<A>)
 
 	/// Case analysis for a Rose Tree.
@@ -132,7 +135,7 @@ public func sequence<A>(ms : [Rose<A>]) -> Rose<[A]> {
 	return ms.reduce(Rose<[A]>.pure([]), combine: { n, m in
 		return m.flatMap { x in
 			return n.flatMap { xs in
-				return Rose<[A]>.pure([x] + xs)
+				return Rose<[A]>.pure(xs + [x])
 			}
 		}
 	})

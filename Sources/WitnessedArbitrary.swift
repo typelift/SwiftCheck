@@ -204,26 +204,6 @@ extension HalfOpenInterval where Bound : protocol<Comparable, Arbitrary> {
 	}
 }
 
-extension ImplicitlyUnwrappedOptional where Wrapped : Arbitrary {
-	public static var arbitrary : Gen<ImplicitlyUnwrappedOptional<Wrapped>> {
-		return ImplicitlyUnwrappedOptional.init <^> Optional<Wrapped>.arbitrary
-	}
-
-	public static func shrink(bl : ImplicitlyUnwrappedOptional<Wrapped>) -> [ImplicitlyUnwrappedOptional<Wrapped>] {
-		return Optional<Wrapped>.shrink(bl).map(ImplicitlyUnwrappedOptional.init)
-	}
-}
-
-extension ImplicitlyUnwrappedOptional : WitnessedArbitrary {
-	public typealias Param = Wrapped
-
-	public static func forAllWitnessed<A : Arbitrary>(wit : A -> Wrapped, pf : (ImplicitlyUnwrappedOptional<Wrapped> -> Testable)) -> Property {
-		return forAllShrink(ImplicitlyUnwrappedOptional<A>.arbitrary, shrinker: ImplicitlyUnwrappedOptional<A>.shrink, f: { bl in
-			return pf(bl.map(wit))
-		})
-	}
-}
-
 extension LazyCollection where Base : protocol<CollectionType, Arbitrary>, Base.Index : ForwardIndexType {
 	public static var arbitrary : Gen<LazyCollection<Base>> {
 		return LazyCollection<Base>.arbitrary
@@ -240,13 +220,13 @@ extension Range where Element : protocol<ForwardIndexType, Comparable, Arbitrary
 	public static var arbitrary : Gen<Range<Element>> {
 		return Element.arbitrary.flatMap { l in
 			return Element.arbitrary.flatMap { r in
-				return Gen.pure(Range(start: min(l, r), end: max(l, r)))
+				return Gen.pure(min(l, r)..<max(l, r))
 			}
 		}
 	}
 
 	public static func shrink(bl : Range<Element>) -> [Range<Element>] {
-		return Zip2Sequence(Element.shrink(bl.startIndex), Element.shrink(bl.endIndex)).map(Range.init)
+		return Zip2Sequence(Element.shrink(bl.startIndex), Element.shrink(bl.endIndex)).map(..<)
 	}
 }
 

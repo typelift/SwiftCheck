@@ -34,17 +34,17 @@
 ///
 /// If no arguments are provided, or nil is given, SwiftCheck will select an internal default.
 @warn_unused_result(message="Did you forget to bind this property to a quantifier?")
-public func property(msg : String, arguments : CheckerArguments? = nil, file : String = __FILE__, line : UInt = __LINE__) -> AssertiveQuickCheck {
+public func property(msg : String, arguments : CheckerArguments? = nil, file : StaticString = #file, line : UInt = #line) -> AssertiveQuickCheck {
 	return AssertiveQuickCheck(msg: msg, file: file, line: line, args: arguments ?? CheckerArguments(name: msg))
 }
 
 public struct AssertiveQuickCheck {
 	let msg : String
-	let file : String
+	let file : StaticString
 	let line : UInt
 	let args : CheckerArguments
 
-	private init(msg : String, file : String, line : UInt, args : CheckerArguments) {
+	private init(msg : String, file : StaticString, line : UInt, args : CheckerArguments) {
 		self.msg = msg
 		self.file = file
 		self.line = line
@@ -55,17 +55,17 @@ public struct AssertiveQuickCheck {
 /// The interface for properties to be run through SwiftCheck without an XCTest
 /// assert.  The property will still generate console output during testing.
 @warn_unused_result(message="Did you forget to bind this property to a quantifier?")
-public func reportProperty(msg : String, arguments : CheckerArguments? = nil, file : String = __FILE__, line : UInt = __LINE__) -> ReportiveQuickCheck {
+public func reportProperty(msg : String, arguments : CheckerArguments? = nil, file : StaticString = #file, line : UInt = #line) -> ReportiveQuickCheck {
 	return ReportiveQuickCheck(msg: msg, file: file, line: line, args: arguments ?? CheckerArguments(name: msg))
 }
 
 public struct ReportiveQuickCheck {
 	let msg : String
-	let file : String
+	let file : StaticString
 	let line : UInt
 	let args : CheckerArguments
 
-	private init(msg : String, file : String, line : UInt, args : CheckerArguments) {
+	private init(msg : String, file : StaticString, line : UInt, args : CheckerArguments) {
 		self.msg = msg
 		self.file = file
 		self.line = line
@@ -79,7 +79,7 @@ public struct CheckerArguments {
 	/// Provides a way of re-doing a test at the given size with a new generator.
 	let replay : Optional<(StdGen, Int)>
 	/// The maximum number of test cases that must pass before the property itself
- /// passes.
+	/// passes.
 	///
 	/// The default value of this property is 100.  In general, some tests may require more than
 	/// this amount, but less is rare.  If you need a value less than or equal to 1, use `.once`

@@ -7,6 +7,7 @@
 //
 
 import SwiftCheck
+import XCTest
 
 enum SwiftCheckError : ErrorType {
 	case Bogus
@@ -52,7 +53,7 @@ class FailureSpec : XCTestCase {
 			assert(false, "Assertion should never throw.")
 		} else {
 //			super.recordFailureWithDescription(message, inFile: file, atLine: line, expected: expected)
-			failCount++
+			failCount = failCount.successor()
 		}
 	}
 

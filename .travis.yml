@@ -1,16 +1,42 @@
-language: objective-c
-osx_image: xcode7.2
 env:
-    - TEST_CONFIG="RELEASE"
-    - TEST_CONFIG="PODS"
-    - TEST_CONFIG="CARTHAGE"
-
-install: true
-script:
-    - if [[ "$TEST_CONFIG" == "RELEASE" ]]; then script/cibuild SwiftCheck SwiftCheck-iOS ; fi
-    - if [[ "$TEST_CONFIG" == "RELEASE" ]]; then xcodebuild test -scheme SwiftCheck-tvOS -destination 'platform=tvOS Simulator,name=Apple TV 1080p' ; fi
-    - if [[ "$TEST_CONFIG" == "CARTHAGE" ]]; then carthage build --no-skip-current; fi
-    - if [[ "$TEST_CONFIG" == "PODS" ]]; then pod lib lint; fi
+  global:
+    - LC_CTYPE=en_US.UTF-8
+matrix:
+  include:
+    - os: osx
+      language: objective-c
+      osx_image: xcode7.3
+      before_install:
+        - git submodule update --init --recursive
+      script:
+        - pod lib lint
+        - carthage build --no-skip-current
+    - os: osx
+      language: objective-c
+      osx_image: xcode7.3
+      before_install:
+        - git submodule update --init --recursive
+      script:
+        - set -o pipefail
+        - xcodebuild test -scheme SwiftCheck
+        - xcodebuild test -scheme SwiftCheck-iOS -destination 'platform=iOS Simulator,name=iPad Pro'
+        - xcodebuild test -scheme SwiftCheck-tvOS -destination 'platform=tvOS Simulator,name=Apple TV 1080p'
+    - os: linux
+      language: generic
+      sudo: required
+      dist: trusty
+      before_install:
+        - git submodule update --init --recursive
+        - wget -q -O - https://swift.org/keys/all-keys.asc | gpg --import -
+        - wget https://swift.org/builds/development/ubuntu1404/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04.tar.gz
+        - tar xzf swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04.tar.gz
+        - export PATH=${PWD}/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04/usr/bin:"${PATH}"
+        - wget -q -O - https://swift.org/keys/all-keys.asc | gpg --import -
+        - wget https://swift.org/builds/development/ubuntu1404/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04.tar.gz
+        - tar xzf swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04.tar.gz
+        - export PATH=${PWD}/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04/usr/bin:"${PATH}"
+      script:
+        - swift build
 notifications:
   webhooks:
     urls:

@@ -52,12 +52,16 @@
 /// that wish to have no description to print, Blind will create a default 
 /// description for them.
 public struct Blind<A : Arbitrary> : Arbitrary, CustomStringConvertible {
+	/// Retrieves the underlying value.
 	public let getBlind : A
 
 	public init(_ blind : A) {
 		self.getBlind = blind
 	}
 
+	/// A default short description for the blind value.
+	///
+	/// By default, the value of this property is `(*)`.
 	public var description : String {
 		return "(*)"
 	}
@@ -80,12 +84,14 @@ extension Blind : CoArbitrary {
 
 /// Guarantees test cases for its underlying type will not be shrunk.
 public struct Static<A : Arbitrary> : Arbitrary, CustomStringConvertible {
+	/// Retrieves the underlying value.
 	public let getStatic : A
 
 	public init(_ fixed : A) {
 		self.getStatic = fixed
 	}
 
+	/// A textual representation of `self`.
 	public var description : String {
 		return "Static( \(self.getStatic) )"
 	}
@@ -104,7 +110,10 @@ extension Static : CoArbitrary {
 
 /// Generates an array of arbitrary values of type A.
 public struct ArrayOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
+	/// Retrieves the underlying array of values.
 	public let getArray : [A]
+	
+	/// Retrieves the underlying array of values as a contiguous array.
 	public var getContiguousArray : ContiguousArray<A> {
 		return ContiguousArray(self.getArray)
 	}
@@ -113,6 +122,7 @@ public struct ArrayOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 		self.getArray = array
 	}
 
+	/// A textual representation of `self`.
 	public var description : String {
 		return "\(self.getArray)"
 	}
@@ -138,7 +148,11 @@ extension ArrayOf : CoArbitrary {
 
 /// Generates a sorted array of arbitrary values of type A.
 public struct OrderedArrayOf<A : protocol<Arbitrary, Comparable>> : Arbitrary, CustomStringConvertible {
+	/// Retrieves the underlying sorted array of values.
 	public let getOrderedArray : [A]
+	
+	/// Retrieves the underlying sorted array of values as a contiguous 
+	/// array.
 	public var getContiguousArray : ContiguousArray<A> {
 		return ContiguousArray(self.getOrderedArray)
 	}
@@ -147,6 +161,7 @@ public struct OrderedArrayOf<A : protocol<Arbitrary, Comparable>> : Arbitrary, C
 		self.getOrderedArray = array.sort()
 	}
 
+	/// A textual representation of `self`.
 	public var description : String {
 		return "\(self.getOrderedArray)"
 	}
@@ -163,12 +178,14 @@ public struct OrderedArrayOf<A : protocol<Arbitrary, Comparable>> : Arbitrary, C
 
 /// Generates an dictionary of arbitrary keys and values.
 public struct DictionaryOf<K : protocol<Hashable, Arbitrary>, V : Arbitrary> : Arbitrary, CustomStringConvertible {
+	/// Retrieves the underlying dictionary of values.
 	public let getDictionary : Dictionary<K, V>
 
 	public init(_ dict : Dictionary<K, V>) {
 		self.getDictionary = dict
 	}
 
+	/// A textual representation of `self`.
 	public var description : String {
 		return "\(self.getDictionary)"
 	}
@@ -190,12 +207,14 @@ extension DictionaryOf : CoArbitrary {
 
 /// Generates an Optional of arbitrary values of type A.
 public struct OptionalOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
+	/// Retrieves the underlying optional value.
 	public let getOptional : A?
 
 	public init(_ opt : A?) {
 		self.getOptional = opt
 	}
 
+	/// A textual representation of `self`.
 	public var description : String {
 		return "\(self.getOptional)"
 	}
@@ -220,12 +239,14 @@ extension OptionalOf : CoArbitrary {
 
 /// Generates a set of arbitrary values of type A.
 public struct SetOf<A : protocol<Hashable, Arbitrary>> : Arbitrary, CustomStringConvertible {
+	/// Retrieves the underlying set of values.
 	public let getSet : Set<A>
 
 	public init(_ set : Set<A>) {
 		self.getSet = set
 	}
 
+	/// A textual representation of `self`.
 	public var description : String {
 		return "\(self.getSet)"
 	}
@@ -260,6 +281,7 @@ extension SetOf : CoArbitrary {
 public struct PointerOf<T : Arbitrary> : Arbitrary, CustomStringConvertible {
 	private let _impl : PointerOfImpl<T>
 
+	/// Retrieves the underlying pointer value.
 	public var getPointer : UnsafePointer<T> {
 		return UnsafePointer(self._impl.ptr)
 	}
@@ -268,6 +290,7 @@ public struct PointerOf<T : Arbitrary> : Arbitrary, CustomStringConvertible {
 		return self._impl.size
 	}
 
+	/// A textual representation of `self`.
 	public var description : String {
 		return self._impl.description
 	}
@@ -281,10 +304,12 @@ public struct PointerOf<T : Arbitrary> : Arbitrary, CustomStringConvertible {
 public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbitrary, CustomStringConvertible {
 	private let _impl : ArrowOfImpl<T, U>
 
+	/// Retrieves the underlying function value, `T -> U`.
 	public var getArrow : T -> U {
 		return self._impl.arr
 	}
-
+	
+	/// A textual representation of `self`.
 	public var description : String {
 		return self._impl.description
 	}
@@ -303,18 +328,21 @@ extension ArrowOf : CustomReflectable {
 	}
 }
 
-/// Generates two isomorphic Swift function from T to U and back again.
+/// Generates two isomorphic Swift functions from `T` to `U` and back again.
 public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol<Equatable, CoArbitrary, Arbitrary>> : Arbitrary, CustomStringConvertible {
 	private let _impl : IsoOfImpl<T, U>
 
+	/// Retrieves the underlying embedding function, `T -> U`.
 	public var getTo : T -> U {
 		return self._impl.embed
 	}
 
+	/// Retrieves the underlying projecting function, `U -> T`.
 	public var getFrom : U -> T {
 		return self._impl.project
 	}
 
+	/// A textual representation of `self`.
 	public var description : String {
 		return self._impl.description
 	}
@@ -337,12 +365,14 @@ extension IsoOf : CustomReflectable {
 /// By default, SwiftCheck generates values drawn from a small range. `Large` 
 /// gives you values drawn from the entire range instead.
 public struct Large<A : protocol<RandomType, LatticeType, IntegerType>> : Arbitrary {
+	/// Retrieves the underlying large value.
 	public let getLarge : A
 
 	public init(_ lrg : A) {
 		self.getLarge = lrg
 	}
 
+	/// A textual representation of `self`.
 	public var description : String {
 		return "Large( \(self.getLarge) )"
 	}
@@ -358,12 +388,14 @@ public struct Large<A : protocol<RandomType, LatticeType, IntegerType>> : Arbitr
 
 /// Guarantees that every generated integer is greater than 0.
 public struct Positive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary, CustomStringConvertible {
+	/// Retrieves the underlying positive value.
 	public let getPositive : A
 
 	public init(_ pos : A) {
 		self.getPositive = pos
 	}
 
+	/// A textual representation of `self`.
 	public var description : String {
 		return "Positive( \(self.getPositive) )"
 	}
@@ -386,12 +418,14 @@ extension Positive : CoArbitrary {
 
 /// Guarantees that every generated integer is never 0.
 public struct NonZero<A : protocol<Arbitrary, IntegerType>> : Arbitrary, CustomStringConvertible {
+	/// Retrieves the underlying non-zero value.
 	public let getNonZero : A
 
 	public init(_ non : A) {
 		self.getNonZero = non
 	}
 
+	/// A textual representation of `self`.
 	public var description : String {
 		return "NonZero( \(self.getNonZero) )"
 	}
@@ -413,12 +447,14 @@ extension NonZero : CoArbitrary {
 
 /// Guarantees that every generated integer is greater than or equal to 0.
 public struct NonNegative<A : protocol<Arbitrary, IntegerType>> : Arbitrary, CustomStringConvertible {
+	/// Retrieves the underlying non-negative value.
 	public let getNonNegative : A
 
 	public init(_ non : A) {
 		self.getNonNegative = non
 	}
 
+	/// A textual representation of `self`.
 	public var description : String {
 		return "NonNegative( \(self.getNonNegative) )"
 	}
@@ -438,7 +474,9 @@ extension NonNegative : CoArbitrary {
 	}
 }
 
-/// Implementation Details
+
+// MARK: - Implementation Details Follow
+
 
 private func undefined<A>() -> A {
 	fatalError("")
@@ -533,7 +571,7 @@ private final class IsoOfImpl<T : protocol<Hashable, CoArbitrary, Arbitrary>, U 
 			return T.coarbitrary(a)(U.arbitrary)
 		}), promote({ a in
 			return U.coarbitrary(a)(T.arbitrary)
-		})).map { IsoOfImpl($0, $1) }
+		})).map(IsoOfImpl.init)
 	}
 
 	static func shrink(f : IsoOfImpl<T, U>) -> [IsoOfImpl<T, U>] {

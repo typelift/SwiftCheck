@@ -6,9 +6,6 @@
 //  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
-import func Darwin.time
-import func Darwin.clock
-
 /// Provides a standard interface to an underlying Random Value Generator of any
 /// type.  It is analogous to `GeneratorType`, but rather than consume a 
 /// sequence it uses sources of randomness to generate values indefinitely.
@@ -106,6 +103,13 @@ public func newStdGen() -> StdGen {
 
 /// Types that can generate random versions of themselves.
 public protocol RandomType {
+	/// Takes a range `(lo, hi)` and a random number generator `G`, and returns
+	/// a random value uniformly distributed in the closed interval `[lo,hi]`, 
+	/// together with a new generator. It is unspecified what happens if lo>hi. 
+	///
+	/// For continuous types there is no requirement that the values `lo` and 
+	/// `hi` are ever produced, but they may be, depending on the implementation
+	/// and the interval.
 	static func randomInRange<G : RandomGeneneratorType>(range : (Self, Self), gen : G) -> (Self, G)
 }
 
@@ -115,13 +119,15 @@ public func randomBound<A : protocol<LatticeType, RandomType>, G : RandomGenener
 }
 
 extension Bool : RandomType {
-	public static func randomInRange<G : RandomGeneneratorType>(range: (Bool, Bool), gen: G) -> (Bool, G) {
+	/// Returns a random `Bool`ean value using the given range and generator.
+	public static func randomInRange<G : RandomGeneneratorType>(range : (Bool, Bool), gen: G) -> (Bool, G) {
 		let (x, gg) = Int.randomInRange((range.0 ? 1 : 0, range.1 ? 1 : 0), gen: gen)
 		return (x == 1, gg)
 	}
 }
 
 extension Character : RandomType {
+	/// Returns a random `Character` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Character, Character), gen : G) -> (Character, G) {
 		let (min, max) = range
 		let minc = String(min).unicodeScalars.first!
@@ -133,6 +139,7 @@ extension Character : RandomType {
 }
 
 extension UnicodeScalar : RandomType {
+	/// Returns a random `UnicodeScalar` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UnicodeScalar, UnicodeScalar), gen : G) -> (UnicodeScalar, G) {
 		let (val, gg) = UInt32.randomInRange((range.0.value, range.1.value), gen: gen)
 		return (UnicodeScalar(val), gg)
@@ -140,6 +147,7 @@ extension UnicodeScalar : RandomType {
 }
 
 extension Int : RandomType {
+	/// Returns a random `Int` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int, Int), gen : G) -> (Int, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
@@ -148,6 +156,7 @@ extension Int : RandomType {
 }
 
 extension Int8 : RandomType {
+	/// Returns a random `Int8` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int8, Int8), gen : G) -> (Int8, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
@@ -156,6 +165,7 @@ extension Int8 : RandomType {
 }
 
 extension Int16 : RandomType {
+	/// Returns a random `Int16` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int16, Int16), gen : G) -> (Int16, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
@@ -164,6 +174,7 @@ extension Int16 : RandomType {
 }
 
 extension Int32 : RandomType {
+	/// Returns a random `Int32` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int32, Int32), gen : G) -> (Int32, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
@@ -172,6 +183,7 @@ extension Int32 : RandomType {
 }
 
 extension Int64 : RandomType {
+	/// Returns a random `Int64` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Int64, Int64), gen : G) -> (Int64, G) {
 		let (l, h) = range
 		if l > h {
@@ -200,14 +212,16 @@ extension Int64 : RandomType {
 }
 
 extension UInt : RandomType {
+	/// Returns a random `UInt` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt, UInt), gen : G) -> (UInt, G) {
 		let (minl, maxl) = range
-		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
+		let (bb, gg) = Int64.randomInRange((Int64(Int(bitPattern: minl)), Int64(Int(bitPattern: maxl))), gen: gen)
 		return (UInt(truncatingBitPattern: bb), gg)
 	}
 }
 
 extension UInt8 : RandomType {
+	/// Returns a random `UInt8` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt8, UInt8), gen : G) -> (UInt8, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
@@ -216,6 +230,7 @@ extension UInt8 : RandomType {
 }
 
 extension UInt16 : RandomType {
+	/// Returns a random `UInt16` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt16, UInt16), gen : G) -> (UInt16, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
@@ -224,6 +239,7 @@ extension UInt16 : RandomType {
 }
 
 extension UInt32 : RandomType {
+	/// Returns a random `UInt32` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt32, UInt32), gen : G) -> (UInt32, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
@@ -232,6 +248,7 @@ extension UInt32 : RandomType {
 }
 
 extension UInt64 : RandomType {
+	/// Returns a random `UInt64` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(range : (UInt64, UInt64), gen : G) -> (UInt64, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
@@ -240,6 +257,7 @@ extension UInt64 : RandomType {
 }
 
 extension Float : RandomType {
+	/// Produces a random `Float` value in the range `[Float.min, Float.max]`.
 	public static func random<G : RandomGeneneratorType>(rng : G) -> (Float, G) {
 		let (x, rng_) : (Int32, G) = randomBound(rng)
 		let twoto24 = Int32(2) ^ Int32(24)
@@ -248,6 +266,7 @@ extension Float : RandomType {
 		return (Float(mask24 & (x)) / Float(twoto24), rng_)
 	}
 
+	/// Returns a random `Float` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Float, Float), gen : G) -> (Float, G) {
 		let (l, h) = range
 		if l > h {
@@ -260,6 +279,7 @@ extension Float : RandomType {
 }
 
 extension Double : RandomType {
+	/// Produces a random `Float` value in the range `[Double.min, Double.max]`.
 	public static func random<G : RandomGeneneratorType>(rng : G) -> (Double, G) {
 		let (x, rng_) : (Int64, G) = randomBound(rng)
 		let twoto53 = Int64(2) ^ Int64(53)
@@ -268,6 +288,7 @@ extension Double : RandomType {
 		return (Double(mask53 & (x)) / Double(twoto53), rng_)
 	}
 
+	/// Returns a random `Double` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(range : (Double, Double), gen : G) -> (Double, G) {
 		let (l, h) = range
 		if l > h {
@@ -308,3 +329,9 @@ private func clock_gettime(_ : Int, _ t : UnsafeMutablePointer<timespec>) -> Int
 
 	return 0
 }
+
+#if os(Linux)
+	import Glibc
+#else
+	import Darwin
+#endif

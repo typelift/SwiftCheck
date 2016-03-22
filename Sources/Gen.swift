@@ -37,7 +37,7 @@ public struct Gen<A> {
 	/// practice, you should never use this property because it hinders the 
 	/// replay functionality and the robustness of tests in general.
 	public var sample : [A] {
-		return sequence((2...20).map { self.resize($0) }).generate
+		return sequence((2...20).map(self.resize)).generate
 	}
 
 	/// Constructs a Generator that selects a random value from the given 
@@ -325,10 +325,10 @@ public func >>- <A, B>(m : Gen<A>, fn : A -> Gen<B>) -> Gen<B> {
 /// in the order they were given to the function exactly once.  Thus all arrays 
 /// generated are of the same rank as the array that was given.
 public func sequence<A>(ms : [Gen<A>]) -> Gen<[A]> {
-	return ms.reduce(Gen<[A]>.pure([]), combine: { y, x in
-		return x.flatMap { x1 in
-			return y.flatMap { xs in
-				return Gen<[A]>.pure([x1] + xs)
+	return ms.reduce(Gen<[A]>.pure([]), combine: { n, m in
+		return m.flatMap { x in
+			return n.flatMap { xs in
+				return Gen<[A]>.pure(xs + [x])
 			}
 		}
 	})
@@ -351,29 +351,27 @@ public func liftM<A, R>(f : A -> R, _ m1 : Gen<A>) -> Gen<R> {
 
 /// Promotes a rose of generators to a generator of rose values.
 public func promote<A>(x : Rose<Gen<A>>) -> Gen<Rose<A>> {
-	return delay().flatMap { (let eval : Gen<A> -> A) in
+	return delay().flatMap { eval in
 		return Gen<Rose<A>>.pure(liftM(eval, x))
 	}
 }
 
 /// Promotes a function returning generators to a generator of functions.
 public func promote<A, B>(m : A -> Gen<B>) -> Gen<A -> B> {
-	return delay().flatMap { (let eval : Gen<B> -> B) in
-		return Gen<A -> B>.pure({ x in eval(m(x)) })
+	return delay().flatMap { eval in
+		return Gen<A -> B>.pure(eval • m)
 	}
 }
 
-internal func delay<A>() -> Gen<Gen<A> -> A> {
+// MARK: - Implementation Details
+
+private func delay<A>() -> Gen<Gen<A> -> A> {
 	return Gen(unGen: { r, n in
 		return { g in
 			return g.unGen(r, n)
 		}
 	})
 }
-
-// MARK: - Implementation Details
-
-import func Darwin.log
 
 private func vary<S : IntegerType>(k : S, _ rng : StdGen) -> StdGen {
 	let s = rng.split
@@ -385,7 +383,7 @@ private func attemptBoundedTry<A>(gen: Gen<A>, _ k : Int, _ bound : Int, _ pred 
 	if bound == 0 {
 		return Gen.pure(.None)
 	}
-	return gen.resize(2 * k + bound).flatMap { (let x : A) -> Gen<Optional<A>> in
+	return gen.resize(2 * k + bound).flatMap { x in
 		if pred(x) {
 			return Gen.pure(.Some(x))
 		}
@@ -416,3 +414,10 @@ private func pick<A>(n : Int, _ lst : [(Int, Gen<A>)]) -> Gen<A> {
 	}
 	return pick(n - k, tl)
 }
+
+#if os(Linux)
+	import Glibc
+#else
+	import Darwin
+#endif
+

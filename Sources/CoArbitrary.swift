@@ -37,6 +37,7 @@ public func coarbitraryPrintable<A, B>(x : A) -> Gen<B> -> Gen<B> {
 }
 
 extension Bool : CoArbitrary {
+	/// The default coarbitrary implementation for `Bool` values. 
 	public static func coarbitrary<C>(x : Bool) -> Gen<C> -> Gen<C> {
 		return { g in
 			if x {
@@ -48,12 +49,14 @@ extension Bool : CoArbitrary {
 }
 
 extension UnicodeScalar : CoArbitrary {
+	/// The default coarbitrary implementation for `UnicodeScalar` values. 
 	public static func coarbitrary<C>(x : UnicodeScalar) -> Gen<C> -> Gen<C> {
 		return UInt32.coarbitrary(x.value)
 	}
 }
 
 extension Character : CoArbitrary {
+	/// The default coarbitrary implementation for `Character` values. 
 	public static func coarbitrary<C>(x : Character) -> (Gen<C> -> Gen<C>) {
 		let ss = String(x).unicodeScalars
 		return UnicodeScalar.coarbitrary(ss[ss.startIndex])
@@ -61,6 +64,7 @@ extension Character : CoArbitrary {
 }
 
 extension String : CoArbitrary {
+	/// The default coarbitrary implementation for `String` values. 
 	public static func coarbitrary<C>(x : String) -> (Gen<C> -> Gen<C>) {
 		if x.isEmpty {
 			return { $0.variant(0) }
@@ -70,60 +74,70 @@ extension String : CoArbitrary {
 }
 
 extension Int : CoArbitrary {
+	/// The default coarbitrary implementation for `Int` values. 
 	public static func coarbitrary<C>(x : Int) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension Int8 : CoArbitrary {
+	/// The default coarbitrary implementation for `Int8` values. 
 	public static func coarbitrary<C>(x : Int8) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension Int16 : CoArbitrary {
+	/// The default coarbitrary implementation for `Int16` values. 
 	public static func coarbitrary<C>(x : Int16) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension Int32 : CoArbitrary {
+	/// The default coarbitrary implementation for `Int32` values. 
 	public static func coarbitrary<C>(x : Int32) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension Int64 : CoArbitrary {
+	/// The default coarbitrary implementation for `Int64` values. 
 	public static func coarbitrary<C>(x : Int64) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension UInt : CoArbitrary {
+	/// The default coarbitrary implementation for `UInt` values. 
 	public static func coarbitrary<C>(x : UInt) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension UInt8 : CoArbitrary {
+	/// The default coarbitrary implementation for `UInt8` values. 
 	public static func coarbitrary<C>(x : UInt8) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension UInt16 : CoArbitrary {
+	/// The default coarbitrary implementation for `UInt16` values. 
 	public static func coarbitrary<C>(x : UInt16) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension UInt32 : CoArbitrary {
+	/// The default coarbitrary implementation for `UInt32` values. 
 	public static func coarbitrary<C>(x : UInt32) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
 }
 
 extension UInt64 : CoArbitrary {
+	/// The default coarbitrary implementation for `UInt64` values. 
 	public static func coarbitrary<C>(x : UInt64) -> Gen<C> -> Gen<C> {
 		return x.coarbitraryIntegral()
 	}
@@ -131,18 +145,21 @@ extension UInt64 : CoArbitrary {
 
 // In future, implement these with Ratios like QuickCheck.
 extension Float : CoArbitrary {
+	/// The default coarbitrary implementation for `Float` values. 
 	public static func coarbitrary<C>(x : Float) -> (Gen<C> -> Gen<C>) {
 		return Int64(x).coarbitraryIntegral()
 	}
 }
 
 extension Double : CoArbitrary {
+	/// The default coarbitrary implementation for `Double` values. 
 	public static func coarbitrary<C>(x : Double) -> (Gen<C> -> Gen<C>) {
 		return Int64(x).coarbitraryIntegral()
 	}
 }
 
 extension Array : CoArbitrary {
+	/// The default coarbitrary implementation for an `Array` of values. 
 	public static func coarbitrary<C>(a : [Element]) -> (Gen<C> -> Gen<C>) {
 		if a.isEmpty {
 			return { $0.variant(0) }
@@ -152,6 +169,7 @@ extension Array : CoArbitrary {
 }
 
 extension Dictionary : CoArbitrary {
+	/// The default coarbitrary implementation for a `Dictionary` of values. 
 	public static func coarbitrary<C>(x : Dictionary<Key, Value>) -> (Gen<C> -> Gen<C>) {
 		if x.isEmpty {
 			return { $0.variant(0) }
@@ -161,6 +179,7 @@ extension Dictionary : CoArbitrary {
 }
 
 extension Optional : CoArbitrary {
+	/// The default coarbitrary implementation for `Optional` values. 
 	public static func coarbitrary<C>(x : Optional<Wrapped>) -> (Gen<C> -> Gen<C>) {
 		if let _ = x {
 			return { $0.variant(0) }
@@ -170,6 +189,7 @@ extension Optional : CoArbitrary {
 }
 
 extension Set : CoArbitrary {
+	/// The default coarbitrary implementation for `Set`s of values. 
 	public static func coarbitrary<C>(x : Set<Element>) -> (Gen<C> -> Gen<C>) {
 		if x.isEmpty {
 			return { $0.variant(0) }

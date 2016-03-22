@@ -7,6 +7,7 @@
 //
 
 import SwiftCheck
+import XCTest
 
 public struct ArbitraryFoo {
 	let x : Int
@@ -51,6 +52,25 @@ class SimpleSpec : XCTestCase {
 
 		property("ArbitraryFoo Properties are Reflexive") <- forAll { (i : ArbitraryFoo) in
 			return i.x == i.x && i.y == i.y
+		}
+		
+		property("All generated Charaters are valid Unicode") <- forAll { (c : Character) in
+			return 
+				(c >= ("\u{0000}" as Character) && c <= ("\u{D7FF}" as Character))
+				||
+				(c >= ("\u{E000}" as Character) && c <= ("\u{10FFFF}" as Character))
+		}
+		
+		let inverses = Gen<((UInt8, UInt8) -> Bool, (UInt8, UInt8) -> Bool)>.fromElementsOf([
+			((>), (<=)),
+			((<), (>=)),
+			((==), (!=)),
+		])
+		
+		property("Inverses work") <- forAllNoShrink(inverses) { (op, iop) in
+			return forAll { (x : UInt8, y : UInt8) in
+				return op(x, y) ==== !iop(x, y)
+			}
 		}
 	}
 }

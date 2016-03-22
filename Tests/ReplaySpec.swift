@@ -7,6 +7,7 @@
 //
 
 import SwiftCheck
+import XCTest
 
 class ReplaySpec : XCTestCase {
 	func testProperties() {
