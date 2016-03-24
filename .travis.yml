@@ -18,9 +18,9 @@ matrix:
         - git submodule update --init --recursive
       script:
         - set -o pipefail
-        - xcodebuild test -scheme SwiftCheck
-        - xcodebuild test -scheme SwiftCheck-iOS -destination 'platform=iOS Simulator,name=iPad Pro'
-        - xcodebuild test -scheme SwiftCheck-tvOS -destination 'platform=tvOS Simulator,name=Apple TV 1080p'
+        - xcodebuild test -scheme SwiftCheck | xcpretty -c
+        - xcodebuild test -scheme SwiftCheck-iOS -destination 'platform=iOS Simulator,name=iPad Pro' | xcpretty -c
+        - xcodebuild test -scheme SwiftCheck-tvOS -destination 'platform=tvOS Simulator,name=Apple TV 1080p' | xcpretty -c
     - os: linux
       language: generic
       sudo: required
