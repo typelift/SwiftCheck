@@ -88,6 +88,9 @@ extension StdGen : Equatable, CustomStringConvertible {
 	}
 }
 
+/// Equality over random number generators.
+///
+/// Two `StdGen`s are equal iff their seeds match.
 public func == (l : StdGen, r : StdGen) -> Bool {
 	return l.seed1 == r.seed1 && l.seed2 == r.seed2
 }

@@ -303,8 +303,8 @@ extension Gen /*: Monad*/ {
 	}
 }
 
-/// Applies the function to any generated values to yield a new generator.  This
-/// generator is then given a new random seed and returned.
+/// Flat Map | Applies the function to any generated values to yield a new 
+/// generator.  This generator is then given a new random seed and returned.
 ///
 /// `flatMap` allows for the creation of Generators that depend on other 
 /// generators.  One might, for example, use a Generator of integers to control 

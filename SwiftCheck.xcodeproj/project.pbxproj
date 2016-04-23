@@ -12,9 +12,6 @@
 		826D81581C953D070022266C /* Arbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81461C953D070022266C /* Arbitrary.swift */; };
 		826D81591C953D070022266C /* Arbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81461C953D070022266C /* Arbitrary.swift */; };
 		826D815A1C953D070022266C /* Arbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81461C953D070022266C /* Arbitrary.swift */; };
-		826D815B1C953D070022266C /* Check.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81471C953D070022266C /* Check.swift */; };
-		826D815C1C953D070022266C /* Check.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81471C953D070022266C /* Check.swift */; };
-		826D815D1C953D070022266C /* Check.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81471C953D070022266C /* Check.swift */; };
 		826D815E1C953D070022266C /* CoArbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81481C953D070022266C /* CoArbitrary.swift */; };
 		826D815F1C953D070022266C /* CoArbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81481C953D070022266C /* CoArbitrary.swift */; };
 		826D81601C953D070022266C /* CoArbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81481C953D070022266C /* CoArbitrary.swift */; };
@@ -158,7 +155,6 @@
 		8240CCB11C3A123600EF4D29 /* SwiftCheck.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCheck.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8240CCBA1C3A123700EF4D29 /* SwiftCheck-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SwiftCheck-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		826D81461C953D070022266C /* Arbitrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Arbitrary.swift; path = Sources/Arbitrary.swift; sourceTree = SOURCE_ROOT; };
-		826D81471C953D070022266C /* Check.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Check.swift; path = Sources/Check.swift; sourceTree = SOURCE_ROOT; };
 		826D81481C953D070022266C /* CoArbitrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CoArbitrary.swift; path = Sources/CoArbitrary.swift; sourceTree = SOURCE_ROOT; };
 		826D81491C953D070022266C /* Gen.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Gen.swift; path = Sources/Gen.swift; sourceTree = SOURCE_ROOT; };
 		826D814A1C953D070022266C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Sources/Info.plist; sourceTree = SOURCE_ROOT; };
@@ -272,7 +268,6 @@
 			isa = PBXGroup;
 			children = (
 				826D81461C953D070022266C /* Arbitrary.swift */,
-				826D81471C953D070022266C /* Check.swift */,
 				826D81481C953D070022266C /* CoArbitrary.swift */,
 				826D81491C953D070022266C /* Gen.swift */,
 				826D814B1C953D070022266C /* Lattice.swift */,
@@ -585,7 +580,6 @@
 				826D81871C953D070022266C /* TestOperators.swift in Sources */,
 				826D81781C953D070022266C /* Rose.swift in Sources */,
 				826D81601C953D070022266C /* CoArbitrary.swift in Sources */,
-				826D815D1C953D070022266C /* Check.swift in Sources */,
 				826D81631C953D070022266C /* Gen.swift in Sources */,
 				826D818D1C953D070022266C /* WitnessedArbitrary.swift in Sources */,
 				826D817B1C953D070022266C /* State.swift in Sources */,
@@ -629,7 +623,6 @@
 				826D81851C953D070022266C /* TestOperators.swift in Sources */,
 				826D81761C953D070022266C /* Rose.swift in Sources */,
 				826D815E1C953D070022266C /* CoArbitrary.swift in Sources */,
-				826D815B1C953D070022266C /* Check.swift in Sources */,
 				826D81611C953D070022266C /* Gen.swift in Sources */,
 				826D818B1C953D070022266C /* WitnessedArbitrary.swift in Sources */,
 				826D81791C953D070022266C /* State.swift in Sources */,
@@ -673,7 +666,6 @@
 				826D81861C953D070022266C /* TestOperators.swift in Sources */,
 				826D81771C953D070022266C /* Rose.swift in Sources */,
 				826D815F1C953D070022266C /* CoArbitrary.swift in Sources */,
-				826D815C1C953D070022266C /* Check.swift in Sources */,
 				826D81621C953D070022266C /* Gen.swift in Sources */,
 				826D818C1C953D070022266C /* WitnessedArbitrary.swift in Sources */,
 				826D817A1C953D070022266C /* State.swift in Sources */,

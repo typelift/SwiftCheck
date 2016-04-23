@@ -28,6 +28,7 @@ public protocol Testable {
 }
 
 extension Testable {
+	/// By default, all `Testable` types are non-exhaustive.
 	public var exhaustive : Bool {
 		return false
 	}
@@ -41,6 +42,7 @@ public struct Property : Testable {
 		self.unProperty = val
 	}
 
+	/// Yields self.
 	public var property : Property {
 		return self
 	}
@@ -56,8 +58,11 @@ public struct Property : Testable {
 public struct Prop : Testable {
 	var unProp : Rose<TestResult>
 
+	/// `Prop` tests are exhaustive because they unwrap to reveal non-exhaustive
+	/// property tests.
 	public var exhaustive : Bool { return true }
 
+	/// Returns a property that tests the receiver. 
 	public var property : Property {
 //		return Property(Gen.pure(Prop(unProp: .IORose(protectRose({ self.unProp })))))
 		return Property(Gen.pure(Prop(unProp: .IORose({ self.unProp }))))
@@ -66,26 +71,34 @@ public struct Prop : Testable {
 
 /// When returned from a test case, that particular case is discarded.
 public struct Discard : Testable {
+	/// `Discard`s are trivially exhaustive.
 	public var exhaustive : Bool { return true }
 
+	/// Create a `Discard` suitable for 
 	public init() { }
 
+	/// Returns a property that always rejects whatever result occurs.
 	public var property : Property {
 		return TestResult.rejected.property
 	}
 }
 
 extension TestResult : Testable {
+	/// `TestResult`s are trivially exhaustive.
 	public var exhaustive : Bool { return true }
 
+	/// Returns a property that tests the receiver.
 	public var property : Property {
 		return Property(Gen.pure(Prop(unProp: Rose.pure(self))))
 	}
 }
 
 extension Bool : Testable {
+	/// `Bool`ean values are trivially exhaustive.
 	public var exhaustive : Bool { return true }
 
+	/// Returns a property that evaluates to a test success if the receiver is
+	/// `true`, else returns a property that evaluates to a test failure.
 	public var property : Property {
 		return TestResult.liftBool(self).property
 	}

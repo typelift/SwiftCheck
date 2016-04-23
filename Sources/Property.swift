@@ -314,19 +314,6 @@ public enum CallbackKind {
 	case NotCounterexample
 }
 
-public enum TestResultMatcher {
-	case MatchResult( ok			: Optional<Bool>
-					, expect		: Bool
-					, reason		: String
-					, theException	: Optional<String>
-					, labels		: Dictionary<String, Int>
-					, stamp			: Set<String>
-					, callbacks		: Array<Callback>
-					, abort			: Bool
-					, quantifier	: Quantification
-					)
-}
-
 /// The types of quantification SwiftCheck can perform.
 public enum Quantification {
 	/// Universal Quantification ("for all").
@@ -358,16 +345,43 @@ public struct TestResult {
 	let callbacks		: [Callback]
 	/// Indicates that any further testing of the property should cease.
 	let abort			: Bool
-
+	/// The quantifier being applied to this test case.
 	let quantifier		: Quantification
 
+	/// Provides a pattern-match-friendly view of the current state of a test 
+	/// result.
+	public enum TestResultMatcher {
+		/// A case-able view of the current state of a test result.  
+		case MatchResult( ok	: Optional<Bool>
+			, expect			: Bool
+			, reason			: String
+			, theException		: Optional<String>
+			, labels			: Dictionary<String, Int>
+			, stamp				: Set<String>
+			, callbacks			: Array<Callback>
+			, abort				: Bool
+			, quantifier		: Quantification
+		)
+	}
+	
 	/// Destructures a test case into a matcher that can be used in switch 
 	/// statement.
 	public var match : TestResultMatcher {
 		return .MatchResult(ok: ok, expect: expect, reason: reason, theException: theException, labels: labels, stamp: stamp, callbacks: callbacks, abort: abort, quantifier: quantifier)
 	}
 
-	public init(ok : Optional<Bool>, expect : Bool, reason : String, theException : Optional<String>, labels : Dictionary<String, Int>, stamp : Set<String>, callbacks : [Callback], abort : Bool, quantifier : Quantification) {
+	/// Creates and returns a new test result initialized with the given
+	/// parameters.
+	public init(  ok : Optional<Bool>
+				, expect : Bool
+				, reason : String
+				, theException : Optional<String>
+				, labels : Dictionary<String, Int>
+				, stamp : Set<String>
+				, callbacks : [Callback]
+				, abort : Bool
+				, quantifier : Quantification) 
+	{
 		self.ok = ok
 		self.expect = expect
 		self.reason = reason

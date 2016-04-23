@@ -47,9 +47,9 @@ public struct CheckerState {
 	let failedShrinkStepCount		: Int
 	/// Returns whether the testing system should cease testing altogether.
 	let shouldAbort					: Bool
-
+	/// The quantifier being applied to this test case.
 	let quantifier					: Quantification
-
+	/// The arguments currently being applied to the testing driver.
 	let arguments					: CheckerArguments
 
 	let silence						: Bool

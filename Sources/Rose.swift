@@ -54,6 +54,7 @@ extension Rose /*: Functor*/ {
 	}
 }
 
+/// Fmap | Maps a function over all the nodes of a Rose Tree.
 public func <^> <A, B>(f : A -> B, g : Rose<A>) -> Rose<B> {
 	switch g {
 		case .MkRose(let root, let children):
@@ -81,6 +82,8 @@ extension Rose /*: Applicative*/ {
 	}
 }
 
+/// Ap | Applies a Rose Tree of functions to the receiver to yield a new Rose 
+/// Tree of values.
 public func <*> <A, B>(fn : Rose<A -> B>, g : Rose<A>) -> Rose<B> {
 	switch fn {
 		case .MkRose(let f, _):
@@ -98,6 +101,8 @@ extension Rose /*: Monad*/ {
 	}
 }
 
+/// Flat Map | Maps the values in the receiver to Rose Trees and joins them all 
+/// together.
 public func >>- <A, B>(m : Rose<A>, fn : A -> Rose<B>) -> Rose<B> {
 	return joinRose(m.map(fn))
 }

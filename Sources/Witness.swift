@@ -6,9 +6,61 @@
 //  Copyright © 2015 TypeLift. All rights reserved.
 //
 
+/// Provides a way for higher-order types to implement the `Arbitrary` protocol.
+///
+/// The `WitnessedArbitrary` protocol is a *HACK*, but a very necessary one.
+/// Because Swift does not have Higher Kinded Types, but we need to know that,
+/// say, the `Element`s underlying an `Array<Element>` are all `Arbitrary`, we
+/// instead ask the conformee to hand over information about the type parameter
+/// it wishes to guarantee is `Arbitrary` then SwiftCheck will synthesize a
+/// function to act as a Witness that the parameter is in fact `Arbitrary`.  
+/// SwiftCheck presents a stronger but less general version of `forAll` that 
+/// must be implemented by the conformee to guarantee a type-safe interface with
+/// the rest of the framework.
+///
+/// Implementating the `WitnessedArbitrary` protocol functions much like 
+/// implementing the `Arbitrary` protocol, but with a little extra baggage.  For
+/// example, to implement the protocol for `Array`, we declare the usual 
+/// `arbitrary` and `shrink`:
+///
+///    extension Array where Element : Arbitrary {
+///        public static var arbitrary : Gen<Array<Element>> {
+///            return Gen.sized { n in
+///                return Gen<Int>.choose((0, n)).flatMap { k in
+///                    if k == 0 {
+///                        return Gen.pure([])
+///                    }
+///                    
+///                    return sequence((0...k).map { _ in Element.arbitrary })
+///                }
+///            }
+///        }
+///        
+///        public static func shrink(bl : Array<Element>) -> [[Element]] {
+///            let rec : [[Element]] = shrinkOne(bl)
+///            return Int.shrink(bl.count).reverse().flatMap({ k in removes(k.successor(), n: bl.count, xs: bl) }) + rec
+///        }
+///    }
+///
+/// In addition, we declare a witnessed version of `forAll` that simply invokes
+/// `forAllShrink` and `map`s the witness function to make sure all generated
+/// `Array`s are made of `Arbitrary ` elements:
+///
+///    extension Array : WitnessedArbitrary {
+///        public typealias Param = Element
+///        
+///        public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element, pf : ([Element] -> Testable)) -> Property {
+///            return forAllShrink([A].arbitrary, shrinker: [A].shrink, f: { bl in
+///                return pf(bl.map(wit))
+///            })
+///        }
+///    }
 public protocol WitnessedArbitrary {
+	/// The witnessing type parameter.
 	associatedtype Param
 
+	/// A property test that relies on a witness that the given type parameter 
+	/// is actually `Arbitrary`.
 	static func forAllWitnessed<A : Arbitrary>(wit : A -> Param, pf : (Self -> Testable)) -> Property
 }
 
