@@ -399,7 +399,7 @@ internal func quickCheckWithResult(args : CheckerArguments, _ p : Testable) -> R
 							, labels:						[:]
 							, collected:					[]
 							, hasFulfilledExpectedFailure:	false
-							, randomSeedGenerator:			chooseReplayRNG(args)
+                            , randomSeedGenerator:			args.replay.map({ $0.0 }) ?? newStdGen()
 							, successfulShrinkCount:		0
 							, failedShrinkStepDistance:		0
 							, failedShrinkStepCount:		0
@@ -812,12 +812,6 @@ private func printDistributionGraph(st : CheckerState) {
 	}
 }
 
-private func cons<T>(lhs : T, _ rhs : [T]) -> [T] {
-	var res = rhs
-	res.insert(lhs, atIndex: 0)
-	return res
-}
-
 private func pluralize(s : String, i : Int) -> String {
 	if i == 1 {
 		return s
@@ -839,27 +833,24 @@ private func printCond(cond : Bool, _ str : String, terminator : String = "\n") 
 
 extension Array {
 	private func groupBy(p : (Element , Element) -> Bool) -> [[Element]] {
-		func span(list : [Element], p : (Element -> Bool)) -> ([Element], [Element]) {
-			if list.isEmpty {
-				return ([], [])
-			} else if let x = list.first {
-				if p (x) {
-					let (ys, zs) = span([Element](list[1..<list.endIndex]), p: p)
-					return (cons(x, ys), zs)
-				}
-				return ([], list)
-			}
-			fatalError("span reached a non-empty list that could not produce a first element")
-		}
-
-		if self.isEmpty {
-			return []
-		} else if let x = self.first {
-			let (ys, zs) = span([Element](self[1..<self.endIndex]), p: { p(x, $0) })
-			let l = cons(x, ys)
-			return cons(l, zs.groupBy(p))
-		}
-		fatalError("groupBy reached a non-empty list that could not produce a first element")
+        var result = [[Element]]()
+        var accumulator = [Element]()
+        self.forEach { current in
+            if let prev = accumulator.last {
+                if p(prev, current) {
+                    accumulator.append(current)
+                } else {
+                    result.append(accumulator)
+                    accumulator = [ current ]
+                }
+            } else {
+                return accumulator.append(current)
+            }
+        }
+        if !accumulator.isEmpty {
+            result.append(accumulator);
+        }
+        return result
 	}
 }
 
@@ -867,6 +858,10 @@ extension Array {
 
 private func computeSize(args : CheckerArguments, vals : (successes : Int, discards : Int)) -> Int {
 	func computeSize_(successes : Int, _ discards : Int) -> Int {
+        func roundTo(n : Int, _ m : Int) -> Int {
+            return (n / m) * m
+        }
+        
 		if roundTo(successes, args.maxTestCaseSize) + args.maxTestCaseSize <= args.maxAllowableSuccessfulTests {
 			return min(successes % args.maxTestCaseSize + (discards / 10), args.maxTestCaseSize)
 		} else if successes >= args.maxAllowableSuccessfulTests {
@@ -878,6 +873,15 @@ private func computeSize(args : CheckerArguments, vals : (successes : Int, disca
 		}
 	}
 
+    func initialSizeForTest(defaultSize : Int, successes : Int, discards : Int, computeSize : (Int, Int) -> Int) -> Int {
+        if successes == 0 && discards == 0 {
+            return defaultSize
+        } else {
+            return computeSize(successes, discards)
+        }
+    }
+
+    
 	if let (_, argSize) = args.replay {
 		return initialSizeForTest(	argSize
 					, successes:	vals.successes
@@ -888,21 +892,3 @@ private func computeSize(args : CheckerArguments, vals : (successes : Int, disca
 	return computeSize_(vals.successes, vals.discards)
 }
 
-private func roundTo(n : Int, _ m : Int) -> Int {
-	return (n / m) * m
-}
-
-private func initialSizeForTest(defaultSize : Int, successes : Int, discards : Int, computeSize : (Int, Int) -> Int) -> Int {
-	if successes == 0 && discards == 0 {
-		return defaultSize
-	} else {
-		return computeSize(successes, discards)
-	}
-}
-
-private func chooseReplayRNG(args : CheckerArguments) -> StdGen {
-	if let (rng, _) = args.replay {
-		return rng
-	}
-	return newStdGen()
-}
