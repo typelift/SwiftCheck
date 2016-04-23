@@ -370,7 +370,8 @@ public struct TestResult {
 		return .MatchResult(ok: ok, expect: expect, reason: reason, theException: theException, labels: labels, stamp: stamp, callbacks: callbacks, abort: abort, quantifier: quantifier)
 	}
 
-	/// 
+	/// Creates and returns a new test result initialized with the given
+	/// parameters.
 	public init(  ok : Optional<Bool>
 				, expect : Bool
 				, reason : String

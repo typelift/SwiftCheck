@@ -197,12 +197,12 @@ public struct DictionaryOf<K : protocol<Hashable, Arbitrary>, V : Arbitrary> : A
 		return "\(self.getDictionary)"
 	}
 
-    /// Returns a generator for a `DictionaryOf` values.
+	/// Returns a generator for a `DictionaryOf` values.
 	public static var arbitrary : Gen<DictionaryOf<K, V>> {
 		return DictionaryOf.init <^> Dictionary<K, V>.arbitrary
 	}
 
-    /// The default shrinking function for a `DictionaryOf` values.
+	/// The default shrinking function for a `DictionaryOf` values.
 	public static func shrink(d : DictionaryOf<K, V>) -> [DictionaryOf<K, V>] {
 		return Dictionary.shrink(d.getDictionary).map(DictionaryOf.init)
 	}
@@ -275,7 +275,7 @@ public struct SetOf<A : protocol<Hashable, Arbitrary>> : Arbitrary, CustomString
 		}
 	}
 
-    /// The default shrinking function for a `SetOf` values.
+	/// The default shrinking function for a `SetOf` values.
 	public static func shrink(s : SetOf<A>) -> [SetOf<A>] {
 		return ArrayOf.shrink(ArrayOf([A](s.getSet))).map({ SetOf(Set($0.getArray)) })
 	}
@@ -328,7 +328,7 @@ public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbi
 		return self._impl.description
 	}
 
-    /// Returns a generator for an `ArrowOf` function values.
+	/// Returns a generator for an `ArrowOf` function values.
 	public static var arbitrary : Gen<ArrowOf<T, U>> {
 		return ArrowOfImpl<T, U>.arbitrary.map(ArrowOf.init)
 	}
@@ -362,7 +362,7 @@ public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol
 		return self._impl.description
 	}
 
-    /// Returns a generator for an `IsoOf` function values.
+	/// Returns a generator for an `IsoOf` function values.
 	public static var arbitrary : Gen<IsoOf<T, U>> {
 		return IsoOfImpl<T, U>.arbitrary.map(IsoOf.init)
 	}

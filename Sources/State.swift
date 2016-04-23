@@ -49,7 +49,7 @@ public struct CheckerState {
 	let shouldAbort					: Bool
 	/// The quantifier being applied to this test case.
 	let quantifier					: Quantification
-    /// The arguments currently being applied to the testing driver.
+	/// The arguments currently being applied to the testing driver.
 	let arguments					: CheckerArguments
 
 	let silence						: Bool
