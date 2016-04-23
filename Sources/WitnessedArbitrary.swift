@@ -355,7 +355,7 @@ private func shrinkOne<A : Arbitrary>(xs : [A]) -> [[A]] {
 }
 
 extension Dictionary {
-    init<S : SequenceType where S.Generator.Element == Element>(_ pairs : S) {
+    private init<S : SequenceType where S.Generator.Element == Element>(_ pairs : S) {
         self.init()
         var g = pairs.generate()
         while let (k, v): (Key, Value) = g.next() {

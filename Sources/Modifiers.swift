@@ -66,10 +66,12 @@ public struct Blind<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 		return "(*)"
 	}
 
+	/// Returns a generator of `Blind` values.
 	public static var arbitrary : Gen<Blind<A>> {
 		return Blind.init <^> A.arbitrary
 	}
 
+	/// The default shrinking function for `Blind` values.
 	public static func shrink(bl : Blind<A>) -> [Blind<A>] {
 		return A.shrink(bl.getBlind).map(Blind.init)
 	}
@@ -96,6 +98,7 @@ public struct Static<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 		return "Static( \(self.getStatic) )"
 	}
 
+	/// Returns a generator of `Static` values.
 	public static var arbitrary : Gen<Static<A>> {
 		return Static.init <^> A.arbitrary
 	}
@@ -127,10 +130,12 @@ public struct ArrayOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 		return "\(self.getArray)"
 	}
 
+	/// Returns a generator of `ArrayOf` values.
 	public static var arbitrary : Gen<ArrayOf<A>> {
 		return ArrayOf.init <^> Array<A>.arbitrary
 	}
 
+	/// The default shrinking function for an `ArrayOf` values.
 	public static func shrink(bl : ArrayOf<A>) -> [ArrayOf<A>] {
 		return Array<A>.shrink(bl.getArray).map(ArrayOf.init)
 	}
@@ -166,10 +171,12 @@ public struct OrderedArrayOf<A : protocol<Arbitrary, Comparable>> : Arbitrary, C
 		return "\(self.getOrderedArray)"
 	}
 
+	/// Returns a generator for an `OrderedArrayOf` values.
 	public static var arbitrary : Gen<OrderedArrayOf<A>> {
 		return OrderedArrayOf.init <^> Array<A>.arbitrary
 	}
 
+	/// The default shrinking function for an `OrderedArrayOf` values.
 	public static func shrink(bl : OrderedArrayOf<A>) -> [OrderedArrayOf<A>] {
 		return Array<A>.shrink(bl.getOrderedArray).filter({ $0.sort() == $0 }).map(OrderedArrayOf.init)
 	}
@@ -190,10 +197,12 @@ public struct DictionaryOf<K : protocol<Hashable, Arbitrary>, V : Arbitrary> : A
 		return "\(self.getDictionary)"
 	}
 
+    /// Returns a generator for a `DictionaryOf` values.
 	public static var arbitrary : Gen<DictionaryOf<K, V>> {
 		return DictionaryOf.init <^> Dictionary<K, V>.arbitrary
 	}
 
+    /// The default shrinking function for a `DictionaryOf` values.
 	public static func shrink(d : DictionaryOf<K, V>) -> [DictionaryOf<K, V>] {
 		return Dictionary.shrink(d.getDictionary).map(DictionaryOf.init)
 	}
@@ -219,10 +228,12 @@ public struct OptionalOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 		return "\(self.getOptional)"
 	}
 
+	/// Returns a generator for `OptionalOf` values.
 	public static var arbitrary : Gen<OptionalOf<A>> {
 		return OptionalOf.init <^> Optional<A>.arbitrary
 	}
 
+	/// The default shrinking function for `OptionalOf` values.
 	public static func shrink(bl : OptionalOf<A>) -> [OptionalOf<A>] {
 		return Optional<A>.shrink(bl.getOptional).map(OptionalOf.init)
 	}
@@ -251,6 +262,7 @@ public struct SetOf<A : protocol<Hashable, Arbitrary>> : Arbitrary, CustomString
 		return "\(self.getSet)"
 	}
 
+	/// Returns a generator for a `SetOf` values.
 	public static var arbitrary : Gen<SetOf<A>> {
 		return Gen.sized { n in
 			return Gen<Int>.choose((0, n)).flatMap { k in
@@ -263,6 +275,7 @@ public struct SetOf<A : protocol<Hashable, Arbitrary>> : Arbitrary, CustomString
 		}
 	}
 
+    /// The default shrinking function for a `SetOf` values.
 	public static func shrink(s : SetOf<A>) -> [SetOf<A>] {
 		return ArrayOf.shrink(ArrayOf([A](s.getSet))).map({ SetOf(Set($0.getArray)) })
 	}
@@ -295,6 +308,7 @@ public struct PointerOf<T : Arbitrary> : Arbitrary, CustomStringConvertible {
 		return self._impl.description
 	}
 
+	/// Returns a generator for a `PointerOf` values.
 	public static var arbitrary : Gen<PointerOf<T>> {
 		return PointerOfImpl.arbitrary.map(PointerOf.init)
 	}
@@ -314,6 +328,7 @@ public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbi
 		return self._impl.description
 	}
 
+    /// Returns a generator for an `ArrowOf` function values.
 	public static var arbitrary : Gen<ArrowOf<T, U>> {
 		return ArrowOfImpl<T, U>.arbitrary.map(ArrowOf.init)
 	}
@@ -347,6 +362,7 @@ public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol
 		return self._impl.description
 	}
 
+    /// Returns a generator for an `IsoOf` function values.
 	public static var arbitrary : Gen<IsoOf<T, U>> {
 		return IsoOfImpl<T, U>.arbitrary.map(IsoOf.init)
 	}
@@ -377,10 +393,12 @@ public struct Large<A : protocol<RandomType, LatticeType, IntegerType>> : Arbitr
 		return "Large( \(self.getLarge) )"
 	}
 
+	/// Returns a generator of `Large` values.
 	public static var arbitrary : Gen<Large<A>> {
 		return Gen<A>.choose((A.min, A.max)).map(Large.init)
 	}
 
+	/// The default shrinking function for `Large` values.
 	public static func shrink(bl : Large<A>) -> [Large<A>] {
 		return bl.getLarge.shrinkIntegral.map(Large.init)
 	}
@@ -400,10 +418,12 @@ public struct Positive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary, C
 		return "Positive( \(self.getPositive) )"
 	}
 
+	/// Returns a generator of `Positive` values.
 	public static var arbitrary : Gen<Positive<A>> {
 		return A.arbitrary.map(Positive.init • abs).suchThat { $0.getPositive > 0 }
 	}
 
+	/// The default shrinking function for `Positive` values.
 	public static func shrink(bl : Positive<A>) -> [Positive<A>] {
 		return A.shrink(bl.getPositive).filter({ $0 > 0 }).map(Positive.init)
 	}
@@ -430,10 +450,12 @@ public struct NonZero<A : protocol<Arbitrary, IntegerType>> : Arbitrary, CustomS
 		return "NonZero( \(self.getNonZero) )"
 	}
 
+	/// Returns a generator of `NonZero` values.
 	public static var arbitrary : Gen<NonZero<A>> {
 		return NonZero.init <^> A.arbitrary.suchThat { $0 != 0 }
 	}
 
+	/// The default shrinking function for `NonZero` values.
 	public static func shrink(bl : NonZero<A>) -> [NonZero<A>] {
 		return A.shrink(bl.getNonZero).filter({ $0 != 0 }).map(NonZero.init)
 	}
@@ -459,10 +481,12 @@ public struct NonNegative<A : protocol<Arbitrary, IntegerType>> : Arbitrary, Cus
 		return "NonNegative( \(self.getNonNegative) )"
 	}
 
+	/// Returns a generator of `NonNegative` values.
 	public static var arbitrary : Gen<NonNegative<A>> {
 		return NonNegative.init <^> A.arbitrary.suchThat { $0 >= 0 }
 	}
 
+	/// The default shrinking function for `NonNegative` values.
 	public static func shrink(bl : NonNegative<A>) -> [NonNegative<A>] {
 		return A.shrink(bl.getNonNegative).filter({ $0 >= 0 }).map(NonNegative.init)
 	}
