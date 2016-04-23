@@ -20,20 +20,24 @@ public protocol LatticeType {
 }
 
 extension Bool : LatticeType {
+	/// The lower limit of the `Bool` type.
 	public static var min : Bool {
 		return false
 	}
 
+	/// The upper limit of the `Bool` type.
 	public static var max : Bool {
 		return true
 	}
 }
 
 extension Character : LatticeType {
+	/// The lower limit of the `Character` type.
 	public static var min : Character {
 		return "\0"
 	}
 
+	/// The upper limit of the `Character` type.
 	public static var max : Character {
 		return "\u{FFFFF}"
 	}
@@ -51,40 +55,48 @@ extension Int32 : LatticeType {}
 extension Int64 : LatticeType {}
 
 extension Float : LatticeType {
+	/// The lower limit of the `Float` type.
 	public static var min : Float {
 		return FLT_MIN
 	}
 
+	/// The upper limit of the `Float` type.
 	public static var max : Float {
 		return FLT_MAX
 	}
 }
 
 extension Double : LatticeType {
+	/// The lower limit of the `Double` type.
 	public static var min : Double {
 		return DBL_MIN
 	}
 
+	/// The upper limit of the `Double` type.
 	public static var max : Double {
 		return DBL_MAX
 	}
 }
 
 extension AnyForwardIndex : LatticeType {
+	/// The lower limit of the `AnyForwardIndex` type.
 	public static var min : AnyForwardIndex {
 		return AnyForwardIndex(Int64.min)
 	}
 
+	/// The upper limit of the `AnyForwardIndex` type.
 	public static var max : AnyForwardIndex {
 		return AnyForwardIndex(Int64.max)
 	}
 }
 
 extension AnyRandomAccessIndex : LatticeType {
+	/// The lower limit of the `AnyRandomAccessIndex` type.
 	public static var min : AnyRandomAccessIndex {
 		return AnyRandomAccessIndex(Int64.min)
 	}
 
+	/// The upper limit of the `AnyRandomAccessIndex` type.
 	public static var max : AnyRandomAccessIndex {
 		return AnyRandomAccessIndex(Int64.max)
 	}

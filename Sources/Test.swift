@@ -779,11 +779,11 @@ private func labelPercentage(l : String, st : CheckerState) -> Int {
 	return (100 * occur.count) / st.maxAllowableSuccessfulTests
 }
 
-private func showP(n : Int) -> String {
-	return (n < 10 ? " " : "") + "\(n)" + "%"
-}
-
 private func printDistributionGraph(st : CheckerState) {
+	func showP(n : Int) -> String {
+		return (n < 10 ? " " : "") + "\(n)" + "%"
+	}
+	
 	let gAllLabels : [String] = st.collected.map({ (s : Set<String>) in
 		return Array(s).filter({ t in st.labels[t] == .Some(0) }).reduce("", combine: { (l : String, r : String) in l + ", " + r })
 	})
