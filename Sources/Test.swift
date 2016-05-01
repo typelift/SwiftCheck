@@ -384,7 +384,7 @@ internal enum Result {
 	)
 }
 
-internal indirect enum Either<L, R> {
+private indirect enum Either<L, R> {
 	case Left(L)
 	case Right(R)
 }

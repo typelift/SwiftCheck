@@ -253,7 +253,7 @@ let weightedOptionals = Gen<Int?>.frequency([
 ```
  
 For instances of many complex or "real world" generators, see 
-[`ComplexSpec.swift`](SwiftCheckTests/ComplexSpec.swift).
+[`ComplexSpec.swift`](Tests/ComplexSpec.swift).
 
 System Requirements
 ===================
