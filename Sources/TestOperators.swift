@@ -142,7 +142,7 @@ public struct CheckerArguments {
 infix operator <- {}
 
 /// Binds a Testable value to a property.
-public func <-(checker : AssertiveQuickCheck, @autoclosure(escaping) test : () -> Testable) {
+public func <- (checker : AssertiveQuickCheck, @autoclosure(escaping) test : () -> Testable) {
 	switch quickCheckWithResult(checker.args, test()) {
 	case let .Failure(_, sz, seed, _, reason, _, _):
 		XCTFail(reason + "; Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
@@ -156,7 +156,7 @@ public func <-(checker : AssertiveQuickCheck, @autoclosure(escaping) test : () -
 }
 
 /// Binds a Testable value to a property.
-public func <-(checker : AssertiveQuickCheck, test : () -> Testable) {
+public func <- (checker : AssertiveQuickCheck, test : () -> Testable) {
 	switch quickCheckWithResult(checker.args, test()) {
 	case let .Failure(_, sz, seed, _, reason, _, _):
 		XCTFail(reason + "; Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
@@ -170,12 +170,12 @@ public func <-(checker : AssertiveQuickCheck, test : () -> Testable) {
 }
 
 /// Binds a Testable value to a property.
-public func <-(checker : ReportiveQuickCheck, test : () -> Testable) {
+public func <- (checker : ReportiveQuickCheck, test : () -> Testable) {
 	quickCheckWithResult(checker.args, test())
 }
 
 /// Binds a Testable value to a property.
-public func <-(checker : ReportiveQuickCheck, @autoclosure(escaping) test : () -> Testable) {
+public func <- (checker : ReportiveQuickCheck, @autoclosure(escaping) test : () -> Testable) {
 	quickCheckWithResult(checker.args, test())
 }
 
@@ -187,7 +187,7 @@ infix operator ==> {
 /// Models implication for properties.  That is, the property holds if the first
 /// argument is false (in which case the test case is discarded), or if the 
 /// given property holds.
-public func ==>(b : Bool, @autoclosure p : () -> Testable) -> Property {
+public func ==> (b : Bool, @autoclosure p : () -> Testable) -> Property {
 	if b {
 		return p().property
 	}
@@ -197,7 +197,7 @@ public func ==>(b : Bool, @autoclosure p : () -> Testable) -> Property {
 /// Models implication for properties.  That is, the property holds if the first
 /// argument is false (in which case the test case is discarded), or if the 
 /// given property holds.
-public func ==>(b : Bool, p : () -> Testable) -> Property {
+public func ==> (b : Bool, p : () -> Testable) -> Property {
 	if b {
 		return p().property
 	}
@@ -209,8 +209,8 @@ infix operator ==== {
 }
 
 /// Like equality but prints a verbose description when it fails.
-public func ====<A where A : Equatable>(x : A, y : A) -> Property {
-	return (x == y).counterexample(String(x) + "/=" + String(y))
+public func ==== <A where A : Equatable>(x : A, y : A) -> Property {
+	return (x == y).counterexample(String(x) + " /= " + String(y))
 }
 
 
@@ -226,7 +226,7 @@ infix operator <?> {
 /// addition to shrunken test cases, upon failure SwiftCheck will print a 
 /// distribution map for the property that shows a percentage success rate for 
 /// the property.
-public func <?>(p : Testable, s : String) -> Property {
+public func <?> (p : Testable, s : String) -> Property {
 	return p.label(s)
 }
 
@@ -240,7 +240,7 @@ infix operator ^&&^ {
 ///
 /// Conjoined properties succeed only when both sub-properties succeed and fail 
 /// when one or more sub-properties fail.
-public func ^&&^(p1 : Testable, p2 : Testable) -> Property {
+public func ^&&^ (p1 : Testable, p2 : Testable) -> Property {
 	return conjoin(p1.property, p2.property)
 }
 
@@ -255,7 +255,7 @@ infix operator ^||^ {
 ///
 /// Disjoined properties succeed only when one or more sub-properties succeed 
 /// and fail when both sub-properties fail.
-public func ^||^(p1 : Testable, p2 : Testable) -> Property {
+public func ^||^ (p1 : Testable, p2 : Testable) -> Property {
 	return disjoin(p1.property, p2.property)
 }
 

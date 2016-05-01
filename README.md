@@ -253,7 +253,7 @@ let weightedOptionals = Gen<Int?>.frequency([
 ```
  
 For instances of many complex or "real world" generators, see 
-[`ComplexSpec.swift`](SwiftCheckTests/ComplexSpec.swift).
+[`ComplexSpec.swift`](Tests/ComplexSpec.swift).
 
 System Requirements
 ===================
@@ -264,7 +264,15 @@ Setup
 =====
 
 SwiftCheck can be included one of two ways:
+ 
+**Using The Swift Package Manager**
 
+- Add SwiftCheck to your `Package.swift` file's dependencies section:
+
+```swift
+.Package(url: "https://github.com/typelift/SwiftCheck.git", versions: Version(0,6,0)..<Version(1,0,0))
+```
+ 
 **Using Carthage**
 
 - Add SwiftCheck to your Cartfile
@@ -276,6 +284,11 @@ SwiftCheck can be included one of two ways:
 - Set the directory to `Frameworks`
 - Click the + and add SwiftCheck
 
+**Using CocoaPods**
+
+- Add [our Pod](https://cocoapods.org/pods/SwiftCheck) to your podfile.
+- Run `$ pod install` in your project directory.
+ 
 **Framework**
 
 - Drag SwiftCheck.xcodeproj into your project tree
