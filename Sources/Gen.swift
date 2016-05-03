@@ -142,11 +142,10 @@ public struct Gen<A> {
 
 	/// Zips together 2 generators of type `A` and `B` into a generator of pairs.
 	public static func zip<A, B>(gen1 : Gen<A>, _ gen2 : Gen<B>) -> Gen<(A, B)> {
-		return gen1.flatMap { l in
-			return gen2.flatMap { r in
-				return Gen<(A, B)>.pure((l, r))
-			}
-		}
+		return Gen<(A, B)>(unGen: { r, n in
+			let (r1, r2) = r.split
+			return (gen1.unGen(r1, n), gen2.unGen(r2, n))
+		})
 	}
 }
 
@@ -283,11 +282,10 @@ extension Gen /*: Applicative*/ {
 /// Promotes function application to a Generator of functions applied to a 
 /// Generator of values.
 public func <*> <A, B>(fn : Gen<A -> B>, g : Gen<A>) -> Gen<B> {
-	return fn >>- { x1 in
-		return g >>- { x2 in
-			return Gen.pure(x1(x2))
-		}
-	}
+	return Gen(unGen: { r, n in
+		let (r1, r2) = r.split
+		return fn.unGen(r1, n)(g.unGen(r2, n))
+	})
 }
 
 extension Gen /*: Monad*/ {
