@@ -25,7 +25,7 @@ class GenSpec : XCTestCase {
 		property("Gen.frequency with N arguments behaves") <- forAll(Gen<Int>.choose((1, 1000))) { n in
 			return forAll(Gen.frequency(Array(count: n, repeatedValue: (1, Gen.pure(0))))) { $0 == 0 }
 		}
-
+		
 		property("Gen.weighted behaves") <- {
 			let g = Gen.weighted([
 				(10, 0),
@@ -146,6 +146,13 @@ class GenSpec : XCTestCase {
 		property("Gen.sequence occurs in order") <- forAll { (xs : [String]) in
 			return forAllNoShrink(sequence(xs.map(Gen.pure))) { ss in
 				return ss == xs
+			}
+		}
+		
+		property("Gen.zip behaves") <- forAll { (x : Int, y : Int) in
+			let g = Gen<(Int, Int)>.zip(Gen.pure(x), Gen.pure(y))
+			return forAllNoShrink(g) { (x1, y1) in
+				return (x1, y1) == (x, y)
 			}
 		}
 	}
