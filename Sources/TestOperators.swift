@@ -144,12 +144,12 @@ infix operator <- {}
 /// Binds a Testable value to a property.
 public func <- (checker : AssertiveQuickCheck, @autoclosure(escaping) test : () -> Testable) {
 	switch quickCheckWithResult(checker.args, test()) {
-	case let .Failure(_, sz, seed, _, reason, _, _):
+	case let .Failure(_, _, seed, sz, reason, _, _):
 		XCTFail(reason + "; Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
-	case .NoExpectedFailure(_, _, _):
-		XCTFail("Expected property to fail but it didn't.", file: checker.file, line: checker.line)
-	case .InsufficientCoverage(_, _, _):
-		XCTFail("Property coverage insufficient.", file: checker.file, line: checker.line)
+	case let .NoExpectedFailure(_, seed, sz, _, _):
+		XCTFail("Expected property to fail but it didn't.  Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
+	case let .InsufficientCoverage(_, seed, sz, _, _):
+		XCTFail("Property coverage insufficient.  Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
 	default:
 		return
 	}
@@ -158,12 +158,12 @@ public func <- (checker : AssertiveQuickCheck, @autoclosure(escaping) test : () 
 /// Binds a Testable value to a property.
 public func <- (checker : AssertiveQuickCheck, test : () -> Testable) {
 	switch quickCheckWithResult(checker.args, test()) {
-	case let .Failure(_, sz, seed, _, reason, _, _):
+	case let .Failure(_, _, seed, sz, reason, _, _):
 		XCTFail(reason + "; Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
-	case .NoExpectedFailure(_, _, _):
-		XCTFail("Expected property to fail but it didn't.", file: checker.file, line: checker.line)
-	case .InsufficientCoverage(_, _, _):
-		XCTFail("Property coverage insufficient.", file: checker.file, line: checker.line)
+	case let .NoExpectedFailure(_, seed, sz, _, _):
+		XCTFail("Expected property to fail but it didn't.  Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
+	case let .InsufficientCoverage(_, seed, sz, _, _):
+		XCTFail("Property coverage insufficient.  Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
 	default:
 		return
 	}
