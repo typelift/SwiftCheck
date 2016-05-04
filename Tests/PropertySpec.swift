@@ -22,9 +22,9 @@ func ==(l : Property, r : Property) -> Bool {
 		return true
 	case (.ExistentialFailure(_, _, _, _, _, _, _), .ExistentialFailure(_, _, _, _, _, _, _)):
 		return true
-	case (.NoExpectedFailure(_, _, _), .NoExpectedFailure(_, _, _)):
+	case (.NoExpectedFailure(_, _, _, _, _), .NoExpectedFailure(_, _, _, _, _)):
 		return true
-	case (.InsufficientCoverage(_, _, _), .InsufficientCoverage(_, _, _)):
+	case (.InsufficientCoverage(_, _, _, _, _), .InsufficientCoverage(_, _, _, _, _)):
 		return true
 	default:
 		return false

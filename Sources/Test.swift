@@ -375,10 +375,14 @@ internal enum Result {
 		, lastResult : TestResult
 	)
 	case NoExpectedFailure(numTests : Int
+		, usedSeed : StdGen
+		, usedSize : Int
 		, labels : [(String,Int)]
 		, output : String
 	)
 	case InsufficientCoverage(numTests : Int
+		, usedSeed : StdGen
+		, usedSize : Int
 		, labels : [(String,Int)]
 		, output : String
 	)
@@ -432,8 +436,8 @@ private func test(st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Result 
 			switch (fail.0, doneTesting(fail.1)) {
 			case (.Success(_, _, _), _):
 				return fail.0
-			case let (_, .NoExpectedFailure(numTests, labels, output)):
-				return .NoExpectedFailure(numTests: numTests, labels: labels, output: output)
+			case let (_, .NoExpectedFailure(numTests, seed, sz, labels, output)):
+				return .NoExpectedFailure(numTests: numTests, usedSeed: seed, usedSize: sz, labels: labels, output: output)
 			// Existential Failures need explicit propagation.  Existentials increment the
 			// discard count so we check if it has been surpassed.  If it has with any kind
 			// of success we're done.  If no successes are found we've failed checking the
@@ -612,11 +616,19 @@ private func doneTesting(st : CheckerState) -> Result {
 		}
 		
 		printDistributionGraph(st)
-		return .NoExpectedFailure(numTests: st.successfulTestCount, labels: summary(st), output: "")
+		return .NoExpectedFailure(numTests: st.successfulTestCount
+								, usedSeed:	st.randomSeedGenerator
+								, usedSize:	st.computeSize(st.successfulTestCount, st.discardedTestCount)
+								, labels:	summary(st)
+								, output:	"")
 	} else if insufficientCoverage(st) {
 		printCond(st.silence, "*** Insufficient coverage after " + "\(st.successfulTestCount)" + pluralize(" test", i: st.successfulTestCount))
 		printDistributionGraph(st)
-		return .InsufficientCoverage(numTests: st.successfulTestCount, labels: summary(st), output: "")
+		return .InsufficientCoverage( numTests: st.successfulTestCount
+									, usedSeed:	st.randomSeedGenerator
+									, usedSize:	st.computeSize(st.successfulTestCount, st.discardedTestCount)
+									, labels:	summary(st)
+									, output:	"")
 	} else {
 		printCond(st.silence, "*** Passed " + "\(st.successfulTestCount)" + pluralize(" test", i: st.successfulTestCount))
 		printDistributionGraph(st)
