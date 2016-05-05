@@ -21,4 +21,5 @@ DerivedData
 *.xcscmblueprint
 Carthage/Build
 Carthage/Checkouts
+build/
 
