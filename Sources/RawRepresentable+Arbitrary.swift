@@ -6,8 +6,6 @@
 //  Copyright © 2016 Typelift. All rights reserved.
 //
 
-import Foundation
-
 extension RawRepresentable where RawValue: Arbitrary {
     // Default implementation, maps arbitrary values of its RawValue type until a valid representation is obtained.
     public static var arbitrary: Gen<Self> {
