@@ -3,7 +3,7 @@
 //  SwiftCheck
 //
 //  Created by Brian Gerstle on 5/4/16.
-//  Copyright © 2016 Robert Widmann. All rights reserved.
+//  Copyright © 2016 Typelift. All rights reserved.
 //
 
 import Foundation

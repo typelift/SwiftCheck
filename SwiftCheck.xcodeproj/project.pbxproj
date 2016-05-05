@@ -491,7 +491,7 @@
 			attributes = {
 				LastSwiftUpdateCheck = 0730;
 				LastUpgradeCheck = 0700;
-				ORGANIZATIONNAME = "Robert Widmann";
+				ORGANIZATIONNAME = Typelift;
 				TargetAttributes = {
 					8240CCB01C3A123600EF4D29 = {
 						CreatedOnToolsVersion = 7.2;
