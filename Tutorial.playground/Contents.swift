@@ -46,7 +46,7 @@ import SwiftCheck
 
 //: In Swift, when one thinks of a Generator, they usually think of the `GeneratorType` protocol or
 //: the many many individual structures the Swift Standard Library exposes to allow loops to work 
-//: with data structures like `[T]` and `Set<T>`.  In Swift, we also have Generators, but we spell 
+//: with data structures like `[T]` and `Set<T>`.  In *SwiftCheck*, we also have Generators, but we spell 
 //: them `Gen`erators, as in the universal Generator type `Gen`.
 //:
 //: `Gen` is a struct defined generically over any kind of type that looks like this:
