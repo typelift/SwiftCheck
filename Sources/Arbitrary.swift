@@ -74,6 +74,15 @@ extension IntegerType {
 	}
 }
 
+extension RawRepresentable where RawValue: Arbitrary {
+	/// Default implementation, maps arbitrary values of its `RawValue` type 
+	/// until a valid representation is obtained.  Naturally, you should strive
+	/// to override this with a more efficient version.
+	public static var arbitrary: Gen<Self> {
+		return RawValue.arbitrary.map(Self.init).suchThat { $0 != nil }.map { $0! }
+	}
+}
+
 extension Bool : Arbitrary {
 	/// Returns a generator of `Bool`ean values.
 	public static var arbitrary : Gen<Bool> {
