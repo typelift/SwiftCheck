@@ -149,10 +149,74 @@ class GenSpec : XCTestCase {
 			}
 		}
 		
-		property("Gen.zip behaves") <- forAll { (x : Int, y : Int) in
+		property("Gen.zip2 behaves") <- forAll { (x : Int, y : Int) in
 			let g = Gen<(Int, Int)>.zip(Gen.pure(x), Gen.pure(y))
 			return forAllNoShrink(g) { (x1, y1) in
 				return (x1, y1) == (x, y)
+			}
+		}
+		
+		property("Gen.zip3 behaves") <- forAll { (x : Int, y : Int, z : Int) in
+			let g = Gen<(Int, Int, Int)>.zip(Gen.pure(x), Gen.pure(y), Gen.pure(z))
+			return forAllNoShrink(g) { (x1, y1, z1) in
+				return (x1, y1, z1) == (x, y, z)
+			}
+		}
+		
+		property("Gen.zip4 behaves") <- forAll { (x : Int, y : Int, z : Int, w : Int) in
+			let g = Gen<(Int, Int, Int, Int)>.zip(Gen.pure(x), Gen.pure(y), Gen.pure(z), Gen.pure(w))
+			return forAllNoShrink(g) { (x1, y1, z1, w1) in
+				return (x1, y1, z1, w1) == (x, y, z, w)
+			}
+		}
+		
+		property("Gen.zip5 behaves") <- forAll { (x : Int, y : Int, z : Int, w : Int, a : Int) in
+			let g = Gen<(Int, Int, Int, Int, Int)>.zip(Gen.pure(x), Gen.pure(y), Gen.pure(z), Gen.pure(w), Gen.pure(a))
+			return forAllNoShrink(g) { (x1, y1, z1, w1, a1) in
+				return (x1, y1, z1, w1, a1) == (x, y, z, w, a)
+			}
+		}
+		
+		property("Gen.zip6 behaves") <- forAll { (x : Int, y : Int, z : Int, w : Int, a : Int, b : Int) in
+			let g = Gen<(Int, Int, Int, Int, Int, Int)>.zip(Gen.pure(x), Gen.pure(y), Gen.pure(z), Gen.pure(w), Gen.pure(a), Gen.pure(b))
+			return forAllNoShrink(g) { (x1, y1, z1, w1, a1, b1) in
+				return (x1, y1, z1, w1, a1, b1) == (x, y, z, w, a, b)
+			}
+		}
+		
+		property("Gen.zip7 behaves") <- forAll { (x : Int, y : Int, z : Int, w : Int, a : Int, b : Int, c : Int) in
+			let g = Gen<(Int, Int, Int, Int, Int, Int, Int)>.zip(Gen.pure(x), Gen.pure(y), Gen.pure(z), Gen.pure(w), Gen.pure(a), Gen.pure(b), Gen.pure(c))
+			return forAllNoShrink(g) { (x1, y1, z1, w1, a1, b1, c1) in
+				return (x1, y1, z1, w1, a1, b1) == (x, y, z, w, a, b)
+					&& c1 == c
+			}
+		}
+		
+		property("Gen.zip8 behaves") <- forAll { (x : Int, y : Int, z : Int, w : Int, a : Int, b : Int, c : Int, d : Int) in
+			let g = Gen<(Int, Int, Int, Int, Int, Int)>.zip(Gen.pure(x), Gen.pure(y), Gen.pure(z), Gen.pure(w), Gen.pure(a), Gen.pure(b), Gen.pure(c), Gen.pure(d))
+			return forAllNoShrink(g) { (x1, y1, z1, w1, a1, b1, c1, d1) in
+				return (x1, y1, z1, w1, a1, b1) == (x, y, z, w, a, b)
+					&& (c1, d1) == (c, d)
+			}
+		}
+		
+		property("Gen.zip9 behaves") <- forAll { (x : Int, y : Int, z : Int, w : Int, a : Int, b : Int, c : Int, d : Int) in
+			return forAll { (e : Int) in
+				let g = Gen<(Int, Int, Int, Int, Int, Int, Int, Int, Int)>.zip(Gen.pure(x), Gen.pure(y), Gen.pure(z), Gen.pure(w), Gen.pure(a), Gen.pure(b), Gen.pure(c), Gen.pure(d), Gen.pure(e))
+				return forAllNoShrink(g) { (x1, y1, z1, w1, a1, b1, c1, d1, e1) in
+					return (x1, y1, z1, w1, a1, b1) == (x, y, z, w, a, b)
+						&& (c1, d1, e1) == (c, d, e)
+				}	
+			}
+		}
+
+		property("Gen.zip10 behaves") <- forAll { (x : Int, y : Int, z : Int, w : Int, a : Int, b : Int, c : Int, d : Int) in
+			return forAll { (e : Int, f : Int) in
+				let g = Gen<(Int, Int, Int, Int, Int, Int, Int, Int, Int, Int)>.zip(Gen.pure(x), Gen.pure(y), Gen.pure(z), Gen.pure(w), Gen.pure(a), Gen.pure(b), Gen.pure(c), Gen.pure(d), Gen.pure(e), Gen.pure(f))
+				return forAllNoShrink(g) { (x1, y1, z1, w1, a1, b1, c1, d1, e1, f1) in
+					return (x1, y1, z1, w1, a1, b1) == (x, y, z, w, a, b)
+						&& (c1, d1, e1, f1) == (c, d, e, f)
+				}	
 			}
 		}
 	}
