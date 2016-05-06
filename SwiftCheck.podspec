@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name        = "SwiftCheck"
-    s.version     = "0.6.0"
+    s.version     = "0.6.1"
     s.summary     = "QuickCheck for Swift."
     s.homepage    = "https://github.com/typelift/SwiftCheck"
     s.license     = { :type => "MIT", :text => <<-LICENSE
