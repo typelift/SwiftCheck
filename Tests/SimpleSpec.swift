@@ -93,6 +93,23 @@ class SimpleSpec : XCTestCase {
 			return i.x == i.x && i.y == i.y
 		}
 		
+		property("ArbitraryLargeFoo Properties are Reflexive") <- forAll { (i : ArbitraryLargeFoo) in
+			return i.a == i.a
+				&& i.b == i.b
+				&& i.c == i.c
+				&& i.d == i.d
+				&& i.e == i.e
+				&& i.f == i.f
+				&& i.g == i.g
+				&& i.h == i.h
+				&& i.i == i.i
+				&& i.j == i.j
+				&& i.k == i.k
+				&& i.l == i.l
+				&& i.m == i.m
+				&& i.n == i.n
+		}
+		
 		property("All generated Charaters are valid Unicode") <- forAll { (c : Character) in
 			return 
 				(c >= ("\u{0000}" as Character) && c <= ("\u{D7FF}" as Character))
