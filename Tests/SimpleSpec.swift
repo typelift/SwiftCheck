@@ -13,10 +13,6 @@ public struct ArbitraryFoo {
 	let x : Int
 	let y : Int
 
-	public static func create(x : Int) -> Int -> ArbitraryFoo {
-		return { y in ArbitraryFoo(x: x, y: y) }
-	}
-
 	public var description : String {
 		return "Arbitrary Foo!"
 	}
@@ -24,7 +20,7 @@ public struct ArbitraryFoo {
 
 extension ArbitraryFoo : Arbitrary {
 	public static var arbitrary : Gen<ArbitraryFoo> {
-		return ArbitraryFoo.create <^> Int.arbitrary <*> Int.arbitrary
+		return Gen<(Int, Int)>.zip(Int.arbitrary, Int.arbitrary).map(ArbitraryFoo.init)
 	}
 }
 
