@@ -257,6 +257,60 @@ extension Gen /*: Cartesian*/ {
 			return (gen1.unGen(r1, n), gen2.unGen(r2, n), gen3.unGen(r3, n), gen4.unGen(r4, n), gen5.unGen(r5, n), gen6.unGen(r6, n), gen7.unGen(r7, n), gen8.unGen(r8, n), gen9.unGen(r9, n), gen10.unGen(r10, n))
 		})
 	}
+
+	/// Returns a new generator that applies a given function to any outputs the
+	/// two receivers create.
+	public static func map<A1, A2, R>(ga1 : Gen<A1>, _ ga2 : Gen<A2>, transform: (A1, A2) -> R) -> Gen<R> {
+		return zip(ga1, ga2).map(transform)
+	}
+
+	/// Returns a new generator that applies a given function to any outputs the
+	/// three receivers create.
+	public static func map<A1, A2, A3, R>(ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, transform: (A1, A2, A3) -> R) -> Gen<R> {
+		return zip(ga1, ga2, ga3).map(transform)
+	}
+
+	/// Returns a new generator that applies a given function to any outputs the
+	/// four receivers create.
+	public static func map<A1, A2, A3, A4, R>(ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4 : Gen<A4>, transform: (A1, A2, A3, A4) -> R) -> Gen<R> {
+		return zip(ga1, ga2, ga3, ga4).map(transform)
+	}
+
+	/// Returns a new generator that applies a given function to any outputs the
+	/// five receivers create.
+	public static func map<A1, A2, A3, A4, A5, R>(ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, transform: (A1, A2, A3, A4, A5) -> R) -> Gen<R> {
+		return zip(ga1, ga2, ga3, ga4, ga5).map(transform)
+	}
+
+	/// Returns a new generator that applies a given function to any outputs the
+	/// six receivers create.
+	public static func map<A1, A2, A3, A4, A5, A6, R>(ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, _ ga6 : Gen<A6>, transform: (A1, A2, A3, A4, A5, A6) -> R) -> Gen<R> {
+		return zip(ga1, ga2, ga3, ga4, ga5, ga6).map(transform)
+	}
+
+	/// Returns a new generator that applies a given function to any outputs the
+	/// seven receivers create.
+	public static func map<A1, A2, A3, A4, A5, A6, A7, R>(ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, _ ga6 : Gen<A6>,  _ ga7 : Gen<A7>, transform: (A1, A2, A3, A4, A5, A6, A7) -> R) -> Gen<R> {
+		return zip(ga1, ga2, ga3, ga4, ga5, ga6, ga7).map(transform)
+	}
+
+	/// Returns a new generator that applies a given function to any outputs the
+	/// eight receivers create.
+	public static func map<A1, A2, A3, A4, A5, A6, A7, A8, R>(ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, _ ga6 : Gen<A6>,  _ ga7 : Gen<A7>, _ ga8 : Gen<A8>, transform: (A1, A2, A3, A4, A5, A6, A7, A8) -> R) -> Gen<R> {
+		return zip(ga1, ga2, ga3, ga4, ga5, ga6, ga7, ga8).map(transform)
+	}
+
+	/// Returns a new generator that applies a given function to any outputs the
+	/// nine receivers create.
+	public static func map<A1, A2, A3, A4, A5, A6, A7, A8, A9, R>(ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, _ ga6 : Gen<A6>,  _ ga7 : Gen<A7>, _ ga8 : Gen<A8>, _ ga9 : Gen<A9>, transform: (A1, A2, A3, A4, A5, A6, A7, A8, A9) -> R) -> Gen<R> {
+		return zip(ga1, ga2, ga3, ga4, ga5, ga6, ga7, ga8, ga9).map(transform)
+	}
+
+	/// Returns a new generator that applies a given function to any outputs the
+	/// ten receivers create.
+	public static func map<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, R>(ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, _ ga6 : Gen<A6>,  _ ga7 : Gen<A7>, _ ga8 : Gen<A8>, _ ga9 : Gen<A9>, _ ga10 : Gen<A10>, transform: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) -> R) -> Gen<R> {
+		return zip(ga1, ga2, ga3, ga4, ga5, ga6, ga7, ga8, ga9, ga10).map(transform)
+	}
 }
 
 // MARK: Generator Modifiers
@@ -376,7 +430,7 @@ extension Gen /*: Applicative*/ {
 	}
 }
 
-/// Ap | Returns a Generator that uses the first given Generator to produce 
+/// Ap | Returns a Generator that uses the first given Generator to produce
 /// functions and the second given Generator to produce values that it applies 
 /// to those functions.  It can be used in conjunction with <^> to simplify the 
 /// application of "combining" functions to a large amount of sub-generators.  
