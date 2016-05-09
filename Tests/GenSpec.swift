@@ -311,7 +311,7 @@ private func ==(l : Gen<Int>, r : Gen<Int>) -> Bool {
 ///
 /// - Returns: True *iff* `(a1, a2, a3) == (b1, b2, b3)`
 ///            where `lhs = Gen((a1, (a2, a3)))` and `rhs = Gen(((b1, b2), b3))`.
-private func ~= (lhs: Gen<(Int, (Int, Int))>, rhs: Gen<((Int, Int), Int)>) -> Bool {
+private func ~= (lhs : Gen<(Int, (Int, Int))>, rhs : Gen<((Int, Int), Int)>) -> Bool {
 	let normalizedL = lhs.map { ($0, $1.0, $1.1) }
 	let normalizedR = rhs.map { ($0.0, $0.1, $1) }
 

@@ -51,13 +51,14 @@ extension ArbitraryLargeFoo : Arbitrary {
 				, Int.arbitrary, UInt.arbitrary)
 			.flatMap { t in
 				return Gen<(Bool, (Bool, Bool), (Bool, Bool, Bool), (Bool, Bool, Bool, Bool))>
-					.zip( Bool.arbitrary
-						, Gen<(Bool, Bool)>.zip(Bool.arbitrary, Bool.arbitrary)
-						, Gen<(Bool, Bool, Bool)>.zip(Bool.arbitrary, Bool.arbitrary, Bool.arbitrary)
-						, Gen<(Bool, Bool, Bool, Bool)>.zip(Bool.arbitrary, Bool.arbitrary, Bool.arbitrary, Bool.arbitrary))
-					.map({ t2 in
-						return (t.0, t.1, t.2, t.3, t.4, t.5, t.6, t.7, t.8, t.9, t2.0, t2.1, t2.2, t2.3)
-					}).map(ArbitraryLargeFoo.init)
+					.map(
+						Bool.arbitrary,
+						Gen<(Bool, Bool)>.zip(Bool.arbitrary, Bool.arbitrary),
+						Gen<(Bool, Bool, Bool)>.zip(Bool.arbitrary, Bool.arbitrary, Bool.arbitrary),
+						Gen<(Bool, Bool, Bool, Bool)>.zip(Bool.arbitrary, Bool.arbitrary, Bool.arbitrary, Bool.arbitrary)
+					) { t2 in
+						(t.0, t.1, t.2, t.3, t.4, t.5, t.6, t.7, t.8, t.9, t2.0, t2.1, t2.2, t2.3)
+					}.map(ArbitraryLargeFoo.init)
 		}
 	}
 }
