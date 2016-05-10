@@ -155,7 +155,27 @@ class GenSpec : XCTestCase {
 				return (x1, y1) == (x, y)
 			}
 		}
-		
+
+		property("Gen.zip2 obeys the Cartesian associativity law") <- forAll { (x : Int, y : Int, z : Int) in
+			let rightBiasedZip: Gen<(Int, (Int, Int))> = .zip(.pure(x), .zip(.pure(y), .pure(z)))
+			let leftBiasedZip: Gen<((Int, Int), Int)> = .zip(.zip(.pure(x), .pure(y)), .pure(z))
+			return rightBiasedZip ~= leftBiasedZip
+		}
+
+		property("Gen.ap is consistent with Gen.zip2") <- forAll { (x : Int, f : ArrowOf<Int, Int>) in
+			let fx = Gen<Int>.pure(x)
+			let ff = Gen<ArrowOf<Int, Int>>.pure(f).map { $0.getArrow }
+			return fx.ap(ff) == Gen<(Int -> Int, Int)>.zip(ff, fx).map { f, x in f(x) }
+		}
+
+		property("Gen.zip2 obeys the Monoidal Functor left identity law") <- forAll { (x : Int) in
+			Gen<(Void, Int)>.zip(.pure(()), .pure(x)).map { $0.1 } == .pure(x)
+		}
+
+		property("Gen.zip2 obeys the Monoidal Functor right identity law") <- forAll { (x : Int) in
+			Gen<(Int, Void)>.zip(.pure(x), .pure(())).map { $0.0 } == .pure(x)
+		}
+
 		property("Gen.zip3 behaves") <- forAll { (x : Int, y : Int, z : Int) in
 			let g = Gen<(Int, Int, Int)>.zip(Gen.pure(x), Gen.pure(y), Gen.pure(z))
 			return forAllNoShrink(g) { (x1, y1, z1) in
@@ -285,4 +305,23 @@ internal func • <A, B, C>(f : B -> C, g : A -> B) -> A -> C {
 
 private func ==(l : Gen<Int>, r : Gen<Int>) -> Bool {
 	return l.proliferateSized(10).generate == r.proliferateSized(10).generate
+}
+
+/// `Gen` product is associative and has a natural isomorphism.
+///
+/// - Returns: True *iff* `(a1, a2, a3) == (b1, b2, b3)`
+///            where `lhs = Gen((a1, (a2, a3)))` and `rhs = Gen(((b1, b2), b3))`.
+private func ~= (lhs : Gen<(Int, (Int, Int))>, rhs : Gen<((Int, Int), Int)>) -> Bool {
+	let normalizedL = lhs.map { ($0, $1.0, $1.1) }
+	let normalizedR = rhs.map { ($0.0, $0.1, $1) }
+
+	let sampleSize = 10
+	let sampleL = normalizedL.proliferateSized(sampleSize).generate
+	let sampleR = normalizedR.proliferateSized(sampleSize).generate
+
+	for (tupleL, tupleR) in zip(sampleL, sampleR) {
+		guard tupleL == tupleR else { return false }
+	}
+
+	return true
 }
