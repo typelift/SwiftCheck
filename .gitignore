@@ -23,3 +23,9 @@ Carthage/Build
 Carthage/Checkouts
 build/
 
+# Python bytecode
+*.pyc
+
+# Generated Files
+Sources/Generated\ Files/
+
