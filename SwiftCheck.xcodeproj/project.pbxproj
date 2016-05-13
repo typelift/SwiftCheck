@@ -105,6 +105,8 @@
 		841408BB1B1A85A900BA2B6C /* SwiftCheck.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		844FCC99198B320500EB242A /* SwiftCheck.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 844FCC8D198B320500EB242A /* SwiftCheck.framework */; };
 		84DF76031B0BD54600C912B0 /* SwiftCheck.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */; };
+		FA3AD5371CE53BB30098B92B /* Monoidal.swift.gyb in Resources */ = {isa = PBXBuildFile; fileRef = FA3AD5361CE53BB30098B92B /* Monoidal.swift.gyb */; };
+		FA7865841CE581810077CD7C /* Monoidal.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7865831CE581810077CD7C /* Monoidal.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -194,6 +196,8 @@
 		844FCC98198B320500EB242A /* SwiftCheckTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftCheckTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCheck.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		84DF76021B0BD54600C912B0 /* SwiftCheck-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SwiftCheck-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FA3AD5361CE53BB30098B92B /* Monoidal.swift.gyb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Monoidal.swift.gyb; path = Sources/Monoidal.swift.gyb; sourceTree = SOURCE_ROOT; };
+		FA7865831CE581810077CD7C /* Monoidal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Monoidal.swift; path = "Sources/Generated Files/Monoidal.swift"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -271,6 +275,8 @@
 		844FCC8F198B320500EB242A /* SwiftCheck */ = {
 			isa = PBXGroup;
 			children = (
+				FA7865821CE580960077CD7C /* Generated Files */,
+				FA3AD5361CE53BB30098B92B /* Monoidal.swift.gyb */,
 				826D81461C953D070022266C /* Arbitrary.swift */,
 				826D81481C953D070022266C /* CoArbitrary.swift */,
 				826D81491C953D070022266C /* Gen.swift */,
@@ -328,6 +334,15 @@
 				826D81C61C953D350022266C /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		FA7865821CE580960077CD7C /* Generated Files */ = {
+			isa = PBXGroup;
+			children = (
+				FA7865831CE581810077CD7C /* Monoidal.swift */,
+			);
+			name = "Generated Files";
+			path = "Sources/Generated Files";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -401,6 +416,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 844FCCA3198B320500EB242A /* Build configuration list for PBXNativeTarget "SwiftCheck" */;
 			buildPhases = (
+				FA7865811CE57F430077CD7C /* ShellScript */,
 				844FCC88198B320500EB242A /* Sources */,
 				844FCC89198B320500EB242A /* Frameworks */,
 				844FCC8A198B320500EB242A /* Headers */,
@@ -542,6 +558,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FA3AD5371CE53BB30098B92B /* Monoidal.swift.gyb in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -567,6 +584,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		FA7865811CE57F430077CD7C /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "./Utils/gyb -o ./Sources/Generated\\ Files/Monoidal.swift Sources/Monoidal.swift.gyb\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		8240CCAC1C3A123600EF4D29 /* Sources */ = {
@@ -629,6 +662,7 @@
 				826D81851C953D070022266C /* TestOperators.swift in Sources */,
 				826D81761C953D070022266C /* Rose.swift in Sources */,
 				826D815E1C953D070022266C /* CoArbitrary.swift in Sources */,
+				FA7865841CE581810077CD7C /* Monoidal.swift in Sources */,
 				826D81611C953D070022266C /* Gen.swift in Sources */,
 				826D818B1C953D070022266C /* WitnessedArbitrary.swift in Sources */,
 				826D81791C953D070022266C /* State.swift in Sources */,
