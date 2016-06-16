@@ -112,11 +112,14 @@ class SimpleSpec : XCTestCase {
 				||
 				(c >= ("\u{E000}" as Character) && c <= ("\u{10FFFF}" as Character))
 		}
-		
+
+        let greaterThan_lessThanEqualTo: ((UInt8, UInt8) -> Bool, (UInt8, UInt8) -> Bool) = ((>), (<=))
+        let lessThan_greaterThanEqualTo: ((UInt8, UInt8) -> Bool, (UInt8, UInt8) -> Bool) = ((<), (>=))
+        let equalTo_notEqualTo: ((UInt8, UInt8) -> Bool, (UInt8, UInt8) -> Bool) = ((==), (!=))
 		let inverses = Gen<((UInt8, UInt8) -> Bool, (UInt8, UInt8) -> Bool)>.fromElementsOf([
-			((>), (<=)),
-			((<), (>=)),
-			((==), (!=)),
+			greaterThan_lessThanEqualTo,
+			lessThan_greaterThanEqualTo,
+			equalTo_notEqualTo,
 		])
 		
 		property("Inverses work") <- forAllNoShrink(inverses) { (op, iop) in

@@ -10,15 +10,15 @@ import SwiftCheck
 import XCTest
 
 class RoseSpec : XCTestCase {
-	private static func intRoseTree(v : Int) -> Rose<Int> {
-		return .MkRose({ v }, { Int.shrink(v).map(intRoseTree) })
+	private static func intRoseTree(_ v : Int) -> Rose<Int> {
+		return .mkRose({ v }, { Int.shrink(v).map(intRoseTree) })
 	}
 	
-	private static func depthOneChildren<A>(rose : Rose<A>) -> [A] {
+	private static func depthOneChildren<A>(_ rose : Rose<A>) -> [A] {
 		return rose.children.map { $0.root }
 	}
 	
-	private static func depthOneAndTwoChildren<A>(rose : Rose<A>) -> [A] {
+	private static func depthOneAndTwoChildren<A>(_ rose : Rose<A>) -> [A] {
 		let topChildren = rose.children
 		let vs = topChildren.map { $0.root }
 		let cs = topChildren.flatMap({ $0.children }).map({ $0.root })
@@ -93,23 +93,23 @@ struct RoseTreeOf<A : Arbitrary> : Arbitrary {
 	}
 }
 
-private func arbTree<A>(n : Int) -> Gen<RoseTreeOf<A>> {
+private func arbTree<A>(_ n : Int) -> Gen<RoseTreeOf<A>> {
 	if n == 0 {
 		return A.arbitrary >>- { Gen.pure(RoseTreeOf(Rose.pure($0))) }
 	}
 	return Positive<Int>.arbitrary.flatMap { m in
 		let n2 = n / (m.getPositive + 1)
 		return Gen<(A, [A])>.zip(A.arbitrary, arbTree(n2).proliferateSized(m.getPositive)).flatMap { (a, f) in
-			return Gen.pure(RoseTreeOf(.MkRose({ a }, { f.map { $0.getRose } })))
+			return Gen.pure(RoseTreeOf(.mkRose({ a }, { f.map { $0.getRose } })))
 		}
 	}
 }
 
 private func == <T : Equatable>(l : Rose<T>, r : Rose<T>) -> Bool {
 	switch (l, r) {
-	case let (.MkRose(l1, r1), .MkRose(l2, r2)):
+	case let (.mkRose(l1, r1), .mkRose(l2, r2)):
 		return l1() == l2() && zip(r1(), r2()).reduce(true) { (a, t) in a && (t.0 == t.1) }
-	case (.IORose(_), .IORose(_)):
+	case (.ioRose(_), .ioRose(_)):
 		return true
 	default:
 		return false
@@ -119,7 +119,7 @@ private func == <T : Equatable>(l : Rose<T>, r : Rose<T>) -> Bool {
 extension Rose {
 	var root : A {
 		switch self.reduce {
-		case let .MkRose(root, _):
+		case let .mkRose(root, _):
 			return root()
 		default:
 			fatalError("Rose should not have reduced to .IORose")
@@ -128,7 +128,7 @@ extension Rose {
 	
 	var children : [Rose<A>] {
 		switch self.reduce {
-		case let .MkRose(_, children):
+		case let .mkRose(_, children):
 			return children()
 		default:
 			fatalError("Rose should not have reduced to .IORose")
@@ -141,6 +141,6 @@ extension Rose {
 		let vs = children.map { $0.collapse }
 		let cs = children.flatMap({ $0.children }).map { $0.collapse }
 		
-		return .MkRose({ self.root }, { vs + cs })
+		return .mkRose({ self.root }, { vs + cs })
 	}
 }

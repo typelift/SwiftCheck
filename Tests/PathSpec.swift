@@ -12,7 +12,7 @@ import XCTest
 struct Path<A : Arbitrary> : Arbitrary {
 	let unPath : [A]
 	
-	private static func pathFrom(x : A) -> Gen<[A]> {
+	private static func pathFrom(_ x : A) -> Gen<[A]> {
 		return Gen.sized { n in
 			return Gen<[A]>.oneOf(
 				[Gen.pure([])] + A.shrink(x).map { pathFrom($0).resize(n - 1) }
@@ -27,11 +27,11 @@ struct Path<A : Arbitrary> : Arbitrary {
 	}
 }
 
-func path<A>(p : A -> Bool, _ pth : Path<A>) -> Bool {
+func path<A>(_ p : (A) -> Bool, _ pth : Path<A>) -> Bool {
 	return pth.unPath.reduce(true, combine: { $0 && p($1) })
 }
 
-func somePath<A>(p : A -> Bool, _ pth : Path<A>) -> Property {
+func somePath<A>(_ p : (A) -> Bool, _ pth : Path<A>) -> Property {
 	return path({ !p($0) }, pth).expectFailure
 }
 
@@ -46,19 +46,19 @@ struct Extremal<A : protocol<Arbitrary, LatticeType>> : Arbitrary {
 		]).map(Extremal.init)
 	}
 	
-	static func shrink(x : Extremal<A>) -> [Extremal<A>] {
+	static func shrink(_ x : Extremal<A>) -> [Extremal<A>] {
 		return A.shrink(x.getExtremal).map(Extremal.init)
 	}
 }
 
 class PathSpec : XCTestCase {
-	private static func smallProp<A : protocol<IntegerType, Arbitrary>>(pth : Path<A>) -> Bool {
+	private static func smallProp<A : protocol<Integer, Arbitrary>>(_ pth : Path<A>) -> Bool {
 		return path({ x in 
 			return (x >= -100 || -100 >= 0) && x <= 100
 		}, pth)
 	}
 	
-	private static func largeProp<A : protocol<IntegerType, Arbitrary>>(pth : Path<A>) -> Property {
+	private static func largeProp<A : protocol<Integer, Arbitrary>>(_ pth : Path<A>) -> Property {
 		return somePath({ x in 
 			return (x < -1000000 || x > 1000000)
 		}, pth)

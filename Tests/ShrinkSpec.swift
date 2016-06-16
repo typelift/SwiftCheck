@@ -10,7 +10,7 @@ import SwiftCheck
 import XCTest
 
 class ShrinkSpec : XCTestCase {
-	func shrinkArbitrary<A : Arbitrary>(x : A) -> [A] {
+	func shrinkArbitrary<A : Arbitrary>(_ x : A) -> [A] {
 		let xs = A.shrink(x)
 		if let x = xs.first {
 			return xs + [x].flatMap(self.shrinkArbitrary)

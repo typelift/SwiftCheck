@@ -10,9 +10,9 @@ import SwiftCheck
 import XCTest
 
 extension Dictionary {
-	init<S : SequenceType where S.Generator.Element == Element>(_ pairs : S) {
+	init<S : Sequence where S.Iterator.Element == Element>(_ pairs : S) {
 		self.init()
-		var g = pairs.generate()
+		var g = pairs.makeIterator()
 		while let (k, v) : (Key, Value) = g.next() {
 			self[k] = v
 		}
@@ -22,7 +22,7 @@ extension Dictionary {
 
 class TestSpec : XCTestCase {
 	func testAll() {
-		let dictionaryGen = Gen<(String, Int)>.zip(String.arbitrary, Int.arbitrary).proliferate.map(Dictionary.init)
+        let dictionaryGen: Gen<Dictionary<String, Int>> = Gen<(String, Int)>.zip(String.arbitrary, Int.arbitrary).proliferate.map { _ -> Dictionary<String, Int> in [:] }
 
 		property("Dictionaries behave") <- forAllNoShrink(dictionaryGen) { (xs : Dictionary<String, Int>) in
 			return true
@@ -38,16 +38,16 @@ class TestSpec : XCTestCase {
 
 		property("The reverse of the reverse of an array is that array") <- forAll { (xs : Array<Int>) in
 			return
-				(xs.reverse().reverse() == xs) <?> "Left identity"
+				(xs.reversed().reversed() == xs) <?> "Left identity"
 				^&&^
-				(xs == xs.reverse().reverse()) <?> "Right identity"
+				(xs == xs.reversed().reversed()) <?> "Right identity"
 		}
 
 		property("Failing conjunctions print labelled properties") <- forAll { (xs : Array<Int>) in
 			return
-				(xs.sort().sort() == xs.sort()).verbose <?> "Sort Left"
+				(xs.sorted().sorted() == xs.sorted()).verbose <?> "Sort Left"
 				^&&^
-				((xs.sort() != xs.sort().sort()).verbose <?> "Bad Sort Right")
+				((xs.sorted() != xs.sorted().sorted()).verbose <?> "Bad Sort Right")
 		}.expectFailure
 
 		property("map behaves") <- forAll { (xs : Array<Int>) in

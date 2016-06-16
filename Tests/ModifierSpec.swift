@@ -20,7 +20,7 @@ class ModifierSpec : XCTestCase {
 		}
 
 		property("Pointers behave") <- forAll { (x : PointerOf<Int>) in
-			return x.getPointer == nil || x.size != 0
+			return x.size != 0
 		}
 
 		property("Positive propositions only generate positive numbers") <- forAll { (x : Positive<Int>) in
@@ -41,9 +41,9 @@ class ModifierSpec : XCTestCase {
 
 		property("The reverse of the reverse of an array is that array") <- forAll { (xs : ArrayOf<Int>) in
 			return
-				(xs.getArray.reverse().reverse() == xs.getArray) <?> "Left identity"
+				(xs.getArray.reversed().reversed() == xs.getArray) <?> "Left identity"
 				^&&^
-				(xs.getArray == xs.getArray.reverse().reverse()) <?> "Right identity"
+				(xs.getArray == xs.getArray.reversed().reversed()) <?> "Right identity"
 		}
 
 		property("map behaves") <- forAll { (xs : ArrayOf<Int>, f : ArrowOf<Int, Int>) in

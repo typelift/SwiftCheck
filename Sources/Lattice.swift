@@ -78,27 +78,15 @@ extension Double : LatticeType {
 	}
 }
 
-extension AnyForwardIndex : LatticeType {
+extension AnyIndex : LatticeType {
 	/// The lower limit of the `AnyForwardIndex` type.
-	public static var min : AnyForwardIndex {
-		return AnyForwardIndex(Int64.min)
+	public static var min : AnyIndex {
+		return AnyIndex(Int64.min)
 	}
 
 	/// The upper limit of the `AnyForwardIndex` type.
-	public static var max : AnyForwardIndex {
-		return AnyForwardIndex(Int64.max)
-	}
-}
-
-extension AnyRandomAccessIndex : LatticeType {
-	/// The lower limit of the `AnyRandomAccessIndex` type.
-	public static var min : AnyRandomAccessIndex {
-		return AnyRandomAccessIndex(Int64.min)
-	}
-
-	/// The upper limit of the `AnyRandomAccessIndex` type.
-	public static var max : AnyRandomAccessIndex {
-		return AnyRandomAccessIndex(Int64.max)
+	public static var max : AnyIndex {
+		return AnyIndex(Int64.max)
 	}
 }
 

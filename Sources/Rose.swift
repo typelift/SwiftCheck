@@ -16,18 +16,18 @@
 /// `IORose` to printing values to the console and executing callbacks.
 public enum Rose<A> {
 	/// A normal branch in the Rose Tree.
-	case MkRose(() -> A, () -> [Rose<A>])
+	case mkRose(() -> A, () -> [Rose<A>])
 	/// An IO branch in the Rose Tree.  That is, a branch that must execute
 	/// side effects before revealing further structure.
-	case IORose(() -> Rose<A>)
+	case ioRose(() -> Rose<A>)
 
 	/// Case analysis for a Rose Tree.
-	public func onRose(f : (A, [Rose<A>]) -> Rose<A>) -> Rose<A> {
+	public func onRose(_ f : (A, [Rose<A>]) -> Rose<A>) -> Rose<A> {
 		switch self {
-		case .MkRose(let x, let rs):
+		case .mkRose(let x, let rs):
 			return f(x(), rs())
-		case .IORose(let m):
-			return .IORose({ m().onRose(f) })
+		case .ioRose(let m):
+			return .ioRose({ m().onRose(f) })
 		}
 	}
 
@@ -35,9 +35,9 @@ public enum Rose<A> {
 	/// `.MkRose` branch is encountered.  That branch is then returned.
 	public var reduce : Rose<A> {
 		switch self {
-		case .MkRose(_, _):
+		case .mkRose(_, _):
 			return self
-		case .IORose(let m):
+		case .ioRose(let m):
 			return m().reduce
 		}
 	}
@@ -49,25 +49,25 @@ extension Rose /*: Functor*/ {
 	/// For `.MkRose` branches the computation is applied to the node's value 
 	/// then application recurses into the sub-trees.  For `.IORose` branches 
 	/// the map is suspended.
-	public func map<B>(f : A -> B) -> Rose<B> {
+	public func map<B>(_ f : (A) -> B) -> Rose<B> {
 		return f <^> self
 	}
 }
 
 /// Fmap | Maps a function over all the nodes of a Rose Tree.
-public func <^> <A, B>(f : A -> B, g : Rose<A>) -> Rose<B> {
+public func <^> <A, B>(f : (A) -> B, g : Rose<A>) -> Rose<B> {
 	switch g {
-		case .MkRose(let root, let children):
-			return .MkRose({ f(root()) }, { children().map() { $0.map(f) } })
-		case .IORose(let rs):
-			return .IORose({ rs().map(f) })
+		case .mkRose(let root, let children):
+			return .mkRose({ f(root()) }, { children().map() { $0.map(f) } })
+		case .ioRose(let rs):
+			return .ioRose({ rs().map(f) })
 	}
 }
 
 extension Rose /*: Applicative*/ {
 	/// Lifts a value into a Rose Tree.
-	public static func pure(a : A) -> Rose<A> {
-		return .MkRose({ a }, { [] })
+	public static func pure(_ a : A) -> Rose<A> {
+		return .mkRose({ a }, { [] })
 	}
 
 	/// Applies a Rose Tree of functions to the receiver to yield a new Rose 
@@ -77,18 +77,18 @@ extension Rose /*: Applicative*/ {
 	/// then application recurses into the sub-trees.  For `.IORose` the branch 
 	/// is reduced to a `.MkRose` and applied, executing all side-effects along 
 	/// the way.
-	public func ap<B>(fn : Rose<A -> B>) -> Rose<B> {
+	public func ap<B>(_ fn : Rose<(A) -> B>) -> Rose<B> {
 		return fn <*> self
 	}
 }
 
 /// Ap | Applies a Rose Tree of functions to the receiver to yield a new Rose 
 /// Tree of values.
-public func <*> <A, B>(fn : Rose<A -> B>, g : Rose<A>) -> Rose<B> {
+public func <*> <A, B>(fn : Rose<(A) -> B>, g : Rose<A>) -> Rose<B> {
 	switch fn {
-		case .MkRose(let f, _):
+		case .mkRose(let f, _):
 			return g.map(f())
-		case .IORose(let rs):
+		case .ioRose(let rs):
 			return g.ap(rs()) ///EEWW, EW, EW, EW, EW, EW
 	}
 }
@@ -96,19 +96,19 @@ public func <*> <A, B>(fn : Rose<A -> B>, g : Rose<A>) -> Rose<B> {
 extension Rose /*: Monad*/ {
 	/// Maps the values in the receiver to Rose Trees and joins them all 
 	/// together.
-	public func flatMap<B>(fn : A -> Rose<B>) -> Rose<B> {
+	public func flatMap<B>(_ fn : (A) -> Rose<B>) -> Rose<B> {
 		return self >>- fn
 	}
 }
 
 /// Flat Map | Maps the values in the receiver to Rose Trees and joins them all 
 /// together.
-public func >>- <A, B>(m : Rose<A>, fn : A -> Rose<B>) -> Rose<B> {
+public func >>- <A, B>(m : Rose<A>, fn : (A) -> Rose<B>) -> Rose<B> {
 	return joinRose(m.map(fn))
 }
 
 /// Lifts functions to functions over Rose Trees.
-public func liftM<A, R>(f : A -> R, _ m1 : Rose<A>) -> Rose<R> {
+public func liftM<A, R>(_ f : (A) -> R, _ m1 : Rose<A>) -> Rose<R> {
 	return m1.flatMap { x1 in
 		return Rose.pure(f(x1))
 	}
@@ -121,22 +121,22 @@ public func liftM<A, R>(f : A -> R, _ m1 : Rose<A>) -> Rose<R> {
 /// `.IORose` sub-trees The join is suspended.  For `.MkRose` the result is the 
 /// value at the sub-tree node and a recursive call to join the branch's tree to
 /// its sub-trees.
-public func joinRose<A>(rs : Rose<Rose<A>>) -> Rose<A> {
+public func joinRose<A>(_ rs : Rose<Rose<A>>) -> Rose<A> {
 	switch rs {
-		case .IORose(let rs):
-			return .IORose({ joinRose(rs()) })
-		case .MkRose(let bx , let rs):
+		case .ioRose(let rs):
+			return .ioRose({ joinRose(rs()) })
+		case .mkRose(let bx , let rs):
 			switch bx() {
-				case .IORose(let rm):
-					return .IORose({ joinRose(.MkRose(rm, rs)) })
-				case .MkRose(let x, let ts):
-					return .MkRose(x, { rs().map(joinRose) + ts() })
+				case .ioRose(let rm):
+					return .ioRose({ joinRose(.mkRose(rm, rs)) })
+				case .mkRose(let x, let ts):
+					return .mkRose(x, { rs().map(joinRose) + ts() })
 			}
 	}
 }
 
 /// Sequences an array of Rose Trees into a Rose Tree of an array.
-public func sequence<A>(ms : [Rose<A>]) -> Rose<[A]> {
+public func sequence<A>(_ ms : [Rose<A>]) -> Rose<[A]> {
 	return ms.reduce(Rose<[A]>.pure([]), combine: { n, m in
 		return m.flatMap { x in
 			return n.flatMap { xs in
@@ -148,6 +148,6 @@ public func sequence<A>(ms : [Rose<A>]) -> Rose<[A]> {
 
 /// Sequences the result of mapping values to Rose trees into a single rose tree
 /// of an array of values.
-public func mapM<A, B>(f : A -> Rose<B>, xs : [A]) -> Rose<[B]> {
+public func mapM<A, B>(_ f : (A) -> Rose<B>, xs : [A]) -> Rose<[B]> {
 	return sequence(xs.map(f))
 }

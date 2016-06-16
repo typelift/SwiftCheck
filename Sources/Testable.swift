@@ -65,7 +65,7 @@ public struct Prop : Testable {
 	/// Returns a property that tests the receiver. 
 	public var property : Property {
 //		return Property(Gen.pure(Prop(unProp: .IORose(protectRose({ self.unProp })))))
-		return Property(Gen.pure(Prop(unProp: .IORose({ self.unProp }))))
+		return Property(Gen.pure(Prop(unProp: .ioRose({ self.unProp }))))
 	}
 }
 

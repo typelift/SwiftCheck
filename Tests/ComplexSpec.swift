@@ -25,15 +25,15 @@ class ComplexSpec : XCTestCase {
 			lower,
 			numeric,
 			special,
-		]).proliferateNonEmpty.suchThat({ $0[$0.endIndex.predecessor()] != "." }).map(String.init)
+			]).proliferateNonEmpty.suchThat({ $0[($0.endIndex - 1)] != "." }).map(String.init(stringInterpolationSegment:))
 
 		let hostname = Gen<Character>.oneOf([
 			lower,
 			numeric,
 			Gen.pure("-"),
-		]).proliferateNonEmpty.map(String.init)
+		]).proliferateNonEmpty.map(String.init(stringInterpolationSegment:))
 
-		let tld = lower.proliferateNonEmpty.suchThat({ $0.count > 1 }).map(String.init)
+		let tld = lower.proliferateNonEmpty.suchThat({ $0.count > 1 }).map(String.init(stringInterpolationSegment:))
 
 		let emailGen = glue([localEmail, Gen.pure("@"), hostname, Gen.pure("."), tld])
 
@@ -45,11 +45,17 @@ class ComplexSpec : XCTestCase {
 	}
 
 	func testIPv6Properties() {
+
+        let gen1: Gen<String> = hexDigits.proliferateSized(1).map{ String.init($0) + ":" }
+        let gen2: Gen<String> = hexDigits.proliferateSized(2).map{ String.init($0) + ":" }
+        let gen3: Gen<String> = hexDigits.proliferateSized(3).map{ String.init($0) + ":" }
+        let gen4: Gen<String> = hexDigits.proliferateSized(4).map{ String.init($0) + ":" }
+
 		let ipHexDigits = Gen<String>.oneOf([
-			hexDigits.proliferateSized(1).map{ String.init($0) + ":" },
-			hexDigits.proliferateSized(2).map{ String.init($0) + ":" },
-			hexDigits.proliferateSized(3).map{ String.init($0) + ":" },
-			hexDigits.proliferateSized(4).map{ String.init($0) + ":" },
+			gen1,
+			gen2,
+			gen3,
+			gen4
 		])
 
 		let ipGen = { $0.initial } <^> glue([ipHexDigits, ipHexDigits, ipHexDigits, ipHexDigits])
@@ -62,12 +68,12 @@ class ComplexSpec : XCTestCase {
 
 // MARK: String Conveniences
 
-func glue(parts : [Gen<String>]) -> Gen<String> {
+func glue(_ parts : [Gen<String>]) -> Gen<String> {
 	return sequence(parts).map { $0.reduce("", combine: +) }
 }
 
 extension String {
 	private var initial : String {
-		return self[self.startIndex..<self.endIndex.predecessor()]
+		return self[self.startIndex..<self.characters.index(before: self.endIndex)]
 	}
 }

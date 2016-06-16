@@ -14,7 +14,7 @@ class DiscardSpec : XCTestCase {
 		property("P != NP") <- Discard()
 		property("P = NP") <- Discard().expectFailure
 
-		let args = CheckerArguments(  replay: Optional.Some((newStdGen(), 10))
+		let args = CheckerArguments(  replay: Optional.some((newStdGen(), 10))
 									, maxAllowableSuccessfulTests: 200
 									, maxAllowableDiscardedTests: 0
 									, maxTestCaseSize: 1000

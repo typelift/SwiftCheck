@@ -33,8 +33,8 @@
 ///     }
 ///
 /// If no arguments are provided, or nil is given, SwiftCheck will select an internal default.
-@warn_unused_result(message="Did you forget to bind this property to a quantifier?")
-public func property(msg : String, arguments : CheckerArguments? = nil, file : StaticString = #file, line : UInt = #line) -> AssertiveQuickCheck {
+@warn_unused_result(message:"Did you forget to bind this property to a quantifier?")
+public func property(_ msg : String, arguments : CheckerArguments? = nil, file : StaticString = #file, line : UInt = #line) -> AssertiveQuickCheck {
 	return AssertiveQuickCheck(msg: msg, file: file, line: line, args: arguments ?? CheckerArguments(name: msg))
 }
 
@@ -56,8 +56,8 @@ public struct AssertiveQuickCheck {
 
 /// The interface for properties to be run through SwiftCheck without an XCTest
 /// assert.  The property will still generate console output during testing.
-@warn_unused_result(message="Did you forget to bind this property to a quantifier?")
-public func reportProperty(msg : String, arguments : CheckerArguments? = nil, file : StaticString = #file, line : UInt = #line) -> ReportiveQuickCheck {
+@warn_unused_result(message:"Did you forget to bind this property to a quantifier?")
+public func reportProperty(_ msg : String, arguments : CheckerArguments? = nil, file : StaticString = #file, line : UInt = #line) -> ReportiveQuickCheck {
 	return ReportiveQuickCheck(msg: msg, file: file, line: line, args: arguments ?? CheckerArguments(name: msg))
 }
 
@@ -144,11 +144,11 @@ infix operator <- {}
 /// Binds a Testable value to a property.
 public func <- (checker : AssertiveQuickCheck, @autoclosure(escaping) test : () -> Testable) {
 	switch quickCheckWithResult(checker.args, test()) {
-	case let .Failure(_, _, seed, sz, reason, _, _):
+	case let .failure(_, _, seed, sz, reason, _, _):
 		XCTFail(reason + "; Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
-	case let .NoExpectedFailure(_, seed, sz, _, _):
+	case let .noExpectedFailure(_, seed, sz, _, _):
 		XCTFail("Expected property to fail but it didn't.  Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
-	case let .InsufficientCoverage(_, seed, sz, _, _):
+	case let .insufficientCoverage(_, seed, sz, _, _):
 		XCTFail("Property coverage insufficient.  Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
 	default:
 		return
@@ -158,11 +158,11 @@ public func <- (checker : AssertiveQuickCheck, @autoclosure(escaping) test : () 
 /// Binds a Testable value to a property.
 public func <- (checker : AssertiveQuickCheck, test : () -> Testable) {
 	switch quickCheckWithResult(checker.args, test()) {
-	case let .Failure(_, _, seed, sz, reason, _, _):
+	case let .failure(_, _, seed, sz, reason, _, _):
 		XCTFail(reason + "; Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
-	case let .NoExpectedFailure(_, seed, sz, _, _):
+	case let .noExpectedFailure(_, seed, sz, _, _):
 		XCTFail("Expected property to fail but it didn't.  Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
-	case let .InsufficientCoverage(_, seed, sz, _, _):
+	case let .insufficientCoverage(_, seed, sz, _, _):
 		XCTFail("Property coverage insufficient.  Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
 	default:
 		return
