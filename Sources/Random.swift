@@ -304,6 +304,10 @@ extension Double : RandomType {
 }
 
 /// Implementation Details Follow
+private enum ClockTimeResult {
+    case success
+    case failure(Int)
+}
 
 private func mkStdRNG(_ o : Int) -> StdGen {
 	func mkStdGen32(_ sMaybeNegative : Int) -> StdGen {
@@ -315,22 +319,28 @@ private func mkStdRNG(_ o : Int) -> StdGen {
 
 	let ct = Int(clock())
 	var tt = timespec()
-	clock_gettime(0, &tt)
+    switch clock_gettime(0, &tt) {
+    case .success:
+        break
+    case let .failure(error):
+        fatalError("call to `clock_gettime` failed. error: \(error)")
+    }
+
 	let (sec, psec) = (tt.tv_sec, tt.tv_nsec)
 	let (ll, _) = Int.multiplyWithOverflow(Int(sec), 12345)
 	return mkStdGen32(Int.addWithOverflow(ll, Int.addWithOverflow(psec, Int.addWithOverflow(ct, o).0).0).0)
 }
 
-private func clock_gettime(_ : Int, _ t : UnsafeMutablePointer<timespec>) -> Int {
+private func clock_gettime(_ : Int, _ t : UnsafeMutablePointer<timespec>) -> ClockTimeResult {
 	var now : timeval = timeval()
 	let rv = gettimeofday(&now, nil)
 	if rv != 0 {
-		return Int(rv)
+		return .failure(Int(rv))
 	}
 	t.pointee.tv_sec  = now.tv_sec
 	t.pointee.tv_nsec = Int(now.tv_usec) * 1000
 
-	return 0
+	return .success
 }
 
 #if os(Linux)

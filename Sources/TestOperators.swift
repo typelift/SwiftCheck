@@ -142,7 +142,7 @@ public struct CheckerArguments {
 infix operator <- {}
 
 /// Binds a Testable value to a property.
-public func <- (checker : AssertiveQuickCheck, @autoclosure(escaping) test : () -> Testable) {
+public func <- (checker : AssertiveQuickCheck, test : @autoclosure(escaping)() -> Testable) {
 	switch quickCheckWithResult(checker.args, test()) {
 	case let .failure(_, _, seed, sz, reason, _, _):
 		XCTFail(reason + "; Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
@@ -171,12 +171,12 @@ public func <- (checker : AssertiveQuickCheck, test : () -> Testable) {
 
 /// Binds a Testable value to a property.
 public func <- (checker : ReportiveQuickCheck, test : () -> Testable) {
-	quickCheckWithResult(checker.args, test())
+	_ = quickCheckWithResult(checker.args, test())
 }
 
 /// Binds a Testable value to a property.
-public func <- (checker : ReportiveQuickCheck, @autoclosure(escaping) test : () -> Testable) {
-	quickCheckWithResult(checker.args, test())
+public func <- (checker : ReportiveQuickCheck, test : @autoclosure(escaping)() -> Testable) {
+	_ = quickCheckWithResult(checker.args, test())
 }
 
 infix operator ==> {
@@ -187,7 +187,7 @@ infix operator ==> {
 /// Models implication for properties.  That is, the property holds if the first
 /// argument is false (in which case the test case is discarded), or if the 
 /// given property holds.
-public func ==> (b : Bool, @autoclosure p : () -> Testable) -> Property {
+public func ==> (b : Bool, p : @autoclosure() -> Testable) -> Property {
 	if b {
 		return p().property
 	}

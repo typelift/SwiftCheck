@@ -344,7 +344,7 @@ public func exists<A : Arbitrary>(_ gen : Gen<A>, pf : (A) throws -> Testable) -
 
 /// Tests a property and prints the results to stdout.
 public func quickCheck(_ prop : Testable, name : String = "") {
-	quickCheckWithResult(CheckerArguments(name: name), prop)
+	_ = quickCheckWithResult(CheckerArguments(name: name), prop)
 }
 
 // MARK: - Implementation Details
