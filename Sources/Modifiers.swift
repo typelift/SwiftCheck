@@ -652,7 +652,7 @@ private final class PointerOfImpl<T : Arbitrary> : Arbitrary {
 /// Class used to generate values from mulitple `Gen` instances.
 /// 
 /// Given a StdGen and size, generate values from other generators, splitting the StdGen
-/// after each call to `generate`, ensuring suffiicent entropy across generators.
+/// after each call to `generate`, ensuring sufficient entropy across generators.
 /// 
 /// - seealso: Gen.compose
 public final class GenComposer {
@@ -676,12 +676,11 @@ public final class GenComposer {
     /// - parameter gen: The generator used to create a random value.
     /// 
     /// - returns: A random `T` using the receiver's stdgen and size.
-    ///
     public func generate<T>(gen: Gen<T>) -> T {
         return gen.unGen(split(), size)
     }
     
-    ///  Generate a new `T` with it's default `arbitrary` generator.
+    ///  Generate a new `T` with its default `arbitrary` generator.
     ///
     ///  - returns: A random `T`.
     ///
