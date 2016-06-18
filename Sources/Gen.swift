@@ -559,10 +559,8 @@ private func size<S : Integer>(_ k : S, _ m : Int) -> Int {
 }
 
 private func selectOne<A>(_ xs : [A]) -> [(A, [A])] {
-	if xs.isEmpty {
-		return []
-	}
-	let y = xs.first!
+    guard let y = xs.first else { return [] }
+
 	let ys = Array(xs[1..<xs.endIndex])
 	let rec : [(A, Array<A>)] = selectOne(ys).map({ t in (t.0, [y] + t.1) })
 	return [(y, ys)] + rec
