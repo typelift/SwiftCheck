@@ -41,6 +41,26 @@ public struct ArbitraryLargeFoo {
 	let n : (Bool, Bool, Bool, Bool)
 }
 
+extension ArbitraryLargeFoo: Equatable {}
+
+public func ==(i: ArbitraryLargeFoo, j: ArbitraryLargeFoo) -> Bool {
+    return
+        i.a == j.a
+        && i.b == j.b
+        && i.c == j.c
+        && i.d == j.d
+        && i.e == j.e
+        && i.f == j.f
+        && i.g == j.g
+        && i.h == j.h
+        && i.i == j.i
+        && i.j == j.j
+        && i.k == j.k
+        && i.l == j.l
+        && i.m == j.m
+        && i.n == j.n
+}
+
 extension ArbitraryLargeFoo : Arbitrary {
 	public static var arbitrary : Gen<ArbitraryLargeFoo> {
 		return Gen<(Int8, Int16, Int32, Int64
@@ -124,6 +144,30 @@ class SimpleSpec : XCTestCase {
 				return op(x, y) ==== !iop(x, y)
 			}
 		}
+        
+        let composedArbitraryLargeFoo = Gen<ArbitraryLargeFoo>.compose { c in
+            return ArbitraryLargeFoo(
+                a: c.generate(),
+                b: c.generate(),
+                c: c.generate(),
+                d: c.generate(),
+                e: c.generate(),
+                f: c.generate(),
+                g: c.generate(),
+                h: c.generate(),
+                i: c.generate(),
+                j: c.generate(),
+                k: c.generate(),
+                l: (c.generate(), c.generate()),
+                m: (c.generate(), c.generate(), c.generate()),
+                n: (c.generate(), c.generate(), c.generate(), c.generate())
+            )   
+        }
+        
+        property("composition generates high-entropy, arbitrary values")
+        <- forAll(composedArbitraryLargeFoo, composedArbitraryLargeFoo) { a, b in
+            return a != b
+        }
 	}
 }
 
