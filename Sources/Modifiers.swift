@@ -658,8 +658,8 @@ private final class PointerOfImpl<T : Arbitrary> : Arbitrary {
  - seealso: Gen.compose
 */
 public final class GenComposer {
-    var stdgen: StdGen
-    var size: Int
+    private var stdgen: StdGen
+    private var size: Int
     
     init(stdgen: StdGen, size: Int) {
         self.stdgen = stdgen
