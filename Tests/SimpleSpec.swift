@@ -24,6 +24,31 @@ extension ArbitraryFoo : Arbitrary {
 	}
 }
 
+public struct ArbitraryMutableFoo : Arbitrary {
+    var a: Int8
+    var b: Int16
+    
+    public init() {
+        a = 0
+        b = 0
+    }
+    
+    public static var arbitrary: Gen<ArbitraryMutableFoo> {
+        return Gen.compose { c in
+            var foo = ArbitraryMutableFoo()
+            foo.a = c.generate()
+            foo.b = c.generate()
+            return foo
+        }
+    }
+}
+
+extension ArbitraryMutableFoo: Equatable {}
+
+public func == (lhs: ArbitraryMutableFoo, rhs: ArbitraryMutableFoo) -> Bool {
+    return lhs.a == rhs.a && lhs.b == rhs.b
+}
+
 public struct ArbitraryLargeFoo {
 	let a : Int8
 	let b : Int16
@@ -39,6 +64,26 @@ public struct ArbitraryLargeFoo {
 	let l : (Bool, Bool)
 	let m : (Bool, Bool, Bool)
 	let n : (Bool, Bool, Bool, Bool)
+}
+
+extension ArbitraryLargeFoo: Equatable {}
+
+public func ==(i: ArbitraryLargeFoo, j: ArbitraryLargeFoo) -> Bool {
+    return
+        i.a == j.a
+        && i.b == j.b
+        && i.c == j.c
+        && i.d == j.d
+        && i.e == j.e
+        && i.f == j.f
+        && i.g == j.g
+        && i.h == j.h
+        && i.i == j.i
+        && i.j == j.j
+        && i.k == j.k
+        && i.l == j.l
+        && i.m == j.m
+        && i.n == j.n
 }
 
 extension ArbitraryLargeFoo : Arbitrary {
@@ -61,6 +106,26 @@ extension ArbitraryLargeFoo : Arbitrary {
 					}.map(ArbitraryLargeFoo.init)
 		}
 	}
+}
+
+let composedArbitraryLargeFoo = Gen<ArbitraryLargeFoo>.compose { c in
+    let evenInt16 = Int16.arbitrary.suchThat { $0 % 2 == 0 }
+    return ArbitraryLargeFoo(
+        a: c.generate(),
+        b: c.generate(evenInt16),
+        c: c.generate(),
+        d: c.generate(),
+        e: c.generate(),
+        f: c.generate(),
+        g: c.generate(),
+        h: c.generate(),
+        i: c.generate(),
+        j: c.generate(),
+        k: c.generate(),
+        l: (c.generate(), c.generate()),
+        m: (c.generate(), c.generate(), c.generate()),
+        n: (c.generate(), c.generate(), c.generate(), c.generate())
+    )
 }
 
 class SimpleSpec : XCTestCase {
@@ -124,6 +189,19 @@ class SimpleSpec : XCTestCase {
 				return op(x, y) ==== !iop(x, y)
 			}
 		}
+        
+        property("composition generates high-entropy, arbitrary values")
+        <- forAll(composedArbitraryLargeFoo, composedArbitraryLargeFoo) { a, b in
+            return a != b
+        }
 	}
+    
+    func testComposeWithMutableType() {
+        property("composition allows setting values on mutable types")
+        <- (forAll { (a: ArbitraryMutableFoo, b: ArbitraryMutableFoo) in
+            return a != b
+        // !!!: for some reason this always gets a size of 0, so using mapSize as a hack to increase size
+        }.mapSize { $0 + 100 })
+    }
 }
 

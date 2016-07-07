@@ -19,7 +19,19 @@ matrix:
       script:
         - set -o pipefail
         - xcodebuild test -scheme SwiftCheck | xcpretty -c
-        - xcodebuild test -scheme SwiftCheck-iOS -destination 'platform=iOS Simulator,name=iPad Pro' | xcpretty -c
+        # -- Start iOS --
+        # !!!: Make sure desired device name & OS version are suitable for the Xcode version installed on osx_image
+        - iOS_DEVICE_NAME="iPad Pro"
+        - iOS_RUNTIME_VERSION="9.3"
+        # Get simulator identifier for desired device/runtime pair
+        - SIMULATOR_ID=$(xcrun instruments -s | grep -o "${iOS_DEVICE_NAME} (${iOS_RUNTIME_VERSION}) \[.*\]" | grep -o "\[.*\]" | sed "s/^\[\(.*\)\]$/\1/")
+        - echo $SIMULATOR_ID
+        - echo $iOS_DEVICE_NAME
+        - echo $iOS_RUNTIME_VERSION
+        # !!!: Start simulator w/ desired device—helps avoid issues w/ Xcode timing out when waiting for simulator to become ready
+        - open -b com.apple.iphonesimulator --args -CurrentDeviceUDID $SIMULATOR_ID
+        - xcodebuild test -scheme SwiftCheck-iOS -destination "platform=iOS Simulator,name=${iOS_DEVICE_NAME},OS=${iOS_RUNTIME_VERSION}" | xcpretty -c
+        # -- End iOS --
         - xcodebuild test -scheme SwiftCheck-tvOS -destination 'platform=tvOS Simulator,name=Apple TV 1080p' | xcpretty -c
     - os: linux
       language: generic
