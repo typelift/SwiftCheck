@@ -677,7 +677,7 @@ public final class GenComposer {
     /// - parameter gen: The generator used to create a random value.
     /// 
     /// - returns: A random `T` using the receiver's stdgen and size.
-    public func generate<T>(gen: Gen<T>) -> T {
+    public func generate<T>(using gen: Gen<T>) -> T {
         return gen.unGen(split(), size)
     }
     
@@ -687,7 +687,7 @@ public final class GenComposer {
     ///
     ///  - seealso: generate\<T\>(gen:)
     public func generate<T where T: Arbitrary>() -> T {
-        return generate(T.arbitrary)
+        return generate(using: T.arbitrary)
     }
 }
 
@@ -715,7 +715,7 @@ extension Gen {
     /// - parameter build: Function which is passed a GenComposer which can be used
     /// 
     /// - returns: A generator which uses the `build` function to create arbitrary instances of `A`.
-    public static func compose(build: GenComposer -> A) -> Gen<A> {
+    public static func compose(build: (GenComposer) -> A) -> Gen<A> {
         return Gen(unGen: { (stdgen, size) -> A in
             let composer = GenComposer(stdgen: stdgen, size: size)
             return build(composer)

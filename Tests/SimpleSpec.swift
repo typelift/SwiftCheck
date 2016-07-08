@@ -112,7 +112,7 @@ let composedArbitraryLargeFoo = Gen<ArbitraryLargeFoo>.compose { c in
     let evenInt16 = Int16.arbitrary.suchThat { $0 % 2 == 0 }
     return ArbitraryLargeFoo(
         a: c.generate(),
-        b: c.generate(evenInt16),
+        b: c.generate(using: evenInt16),
         c: c.generate(),
         d: c.generate(),
         e: c.generate(),
