@@ -1,6 +1,7 @@
 //: Playground - noun: a place where people can play
 
 import SwiftCheck
+import Foundation.NSDate
 
 //: # Prerequisites
 
@@ -129,7 +130,7 @@ pairsOfNumbers.generate
 // This generator ideally generates nil 1/4 (1 / (1 + 3)) of the time and `.Some(5)` 3/4 of the time.
 let weightedGen = Gen<Int?>.weighted([
 	(1, nil),
-	(3, .Some(5)),
+	(3, .some(5)),
 ])
 
 weightedGen.generate
@@ -245,8 +246,8 @@ let allowedLocalCharacters : Gen<Character> = Gen<Character>.oneOf([
 
 let localEmail = allowedLocalCharacters
 					.proliferateNonEmpty // Make a non-empty array of characters
-					.suchThat({ $0[$0.endIndex.predecessor()] != "." }) // Such that the last character isn't a dot.
-					.map(String.init) // Then make a string.
+                    .suchThat({ $0[$0.index(before: $0.endIndex)] != "." }) // Such that the last character isn't a dot.
+                    .map { String($0) } // Then make a string.
 
 //: The RFC says that the host name can only consist of lowercase letters, numbers, and dashes.  We'll skip some
 //: steps here and combine them all into one big generator.
@@ -255,20 +256,20 @@ let hostname = Gen<Character>.oneOf([
 	lowerCaseLetters,
 	numeric,
 	Gen.pure("-"),
-]).proliferateNonEmpty.map(String.init)
+]).proliferateNonEmpty.map { String($0) }
 
 //: Finally, the RFC says the TLD for the address can only consist of lowercase letters with a length larger than 1.
 
 let tld = lowerCaseLetters
 			.proliferateNonEmpty
 			.suchThat({ $0.count > 1 })
-			.map(String.init)
+			.map { String($0) }
 
 //: So now that we've got all the pieces, so how do we put them together to make the final generator?  Well, how
 //: about some glue?
 
 // Concatenates an array of `String` `Gen`erators together in order.
-func glue(parts : [Gen<String>]) -> Gen<String> {
+func glue(_ parts : [Gen<String>]) -> Gen<String> {
 	return sequence(parts).map { $0.reduce("", combine: +) }
 }
 
@@ -280,7 +281,6 @@ let emailGen = glue([localEmail, Gen.pure("@"), hostname, Gen.pure("."), tld])
 emailGen.generate
 emailGen.generate
 emailGen.generate
-
 
 //: Complex cases like the above are rare in practice.  Most of the time you won't even need to use
 //: generators at all!  This brings us to one of the most important parts of SwiftCheck:
@@ -309,56 +309,12 @@ emailGen.generate
 //: types in the Swift Standard Library in the ways you might expect e.g. The `Arbitrary` instance
 //: for `Int` calls `arc4random_uniform`.
 //:
-//: We'll take this opportunity here to show you how to use Arbitrary for any types you might happen
-//: to write yourself.  But before that, let's try to write an `Arbitrary` instance for `NSDate`.
-
-import class Foundation.NSDate
-import typealias Foundation.NSTimeInterval
-
-//: Here's the obvious way to do it
-//
-// extension NSDate : Arbitrary {
-//     public static var arbitrary : Gen<NSDate> {
-//         return Gen.oneOf([
-//             Gen.pure(NSDate()),
-//             Gen.pure(NSDate.distantFuture()),
-//             Gen.pure(NSDate.distantPast()),
-//             NSDate.init <^> NSTimeInterval.arbitrary,
-//         ])
-//     }
-// }
-//
-//: But this doesn't work!  Swift won't let us extend `NSDate` directly because we use `Gen<Self>`
-//: in the wrong position.  What to do?
-//:
-//: Let's write a wrapper!
-
-struct ArbitraryDate : Arbitrary {
-	let getDate : NSDate
-
-	init(date : NSDate) { self.getDate = date }
-
-	static var arbitrary : Gen<ArbitraryDate> {
-		return Gen.oneOf([
-			Gen.pure(NSDate()),
-			Gen.pure(NSDate.distantFuture()),
-			Gen.pure(NSDate.distantPast()),
-			NSDate.init <^> NSTimeInterval.arbitrary,
-		]).map(ArbitraryDate.init)
-	}
-}
-
-ArbitraryDate.arbitrary.generate.getDate
-ArbitraryDate.arbitrary.generate.getDate
-
-//: What we've just written is called a `Modifier Type`; a wrapper around one type that we can't
-//: generate with another that we can.
-//:
-//: SwiftCheck uses this strategy for a few of the more "difficult" types in the Swift STL, but
+//: SwiftCheck uses a strategy called a `Modifier Type`–a wrapper around one type that we can't
+//: generate with another that we can–for a few of the more "difficult" types in the Swift STL, but
 //: we also use them in more benign ways too.  For example, we can write a modifier type that only
 //: generates positive numbers:
 
-public struct ArbitraryPositive<A : protocol<Arbitrary, SignedNumberType>> : Arbitrary {
+public struct ArbitraryPositive<A : protocol<Arbitrary, SignedNumber>> : Arbitrary {
 	public let getPositive : A
 
 	public init(_ pos : A) { self.getPositive = pos }
@@ -395,7 +351,7 @@ ArbitraryPositive<Int>.arbitrary.generate.getPositive
 //     |                                                          |
 //     v                                                          v
 property("The reverse of the reverse of an array is that array") <- forAll { (xs : [Int]) in
-	return xs.reverse().reverse() == xs
+	return xs.reversed().reversed() == xs
 }
 
 // From now on, all of our examples will take the form above.
@@ -499,7 +455,7 @@ struct ArbitraryEmail : Arbitrary {
 
 // Let's be wrong for the sake of example
 property("email addresses don't come with a TLD") <- forAll { (email : ArbitraryEmail) in
-	return !email.getEmail.containsString(".")
+	return !email.getEmail.contains(".")
 }.expectFailure // It turns out true things aren't the only thing we can test.  We can `expectFailure`
 				// to make SwiftCheck, well, expect failure.  Beware, however, that if you don't fail
 				// and live up to your expectations, SwiftCheck treats that as a failure of the test case.
@@ -531,7 +487,7 @@ func sieve(n : Int) -> [Int] {
 	marked[1] = true
 
 	for p in 2..<n {
-		for i in (2 * p).stride(to: n, by: p) {
+        for i in stride(from: 2 * p, to: n, by: p) {
 			marked[i] = true
 		}
 	}
@@ -549,7 +505,7 @@ func sieve(n : Int) -> [Int] {
 //
 // Short and sweet check if a number is prime by enumerating from 2...⌈√(x)⌉ and checking
 // for a nonzero modulus.
-func isPrime(n : Int) -> Bool {
+func isPrime(_ n : Int) -> Bool {
 	if n == 0 || n == 1 {
 		return false
 	} else if n == 2 {
@@ -569,7 +525,7 @@ func isPrime(n : Int) -> Bool {
 //: following property:
 
 reportProperty("All Prime") <- forAll { (n : Positive<Int>) in
-	let primes = sieve(n.getPositive)
+	let primes = sieve(n: n.getPositive)
 	return primes.count > 1 ==> {
 		let primeNumberGen = Gen<Int>.fromElementsOf(primes)
 		return forAll(primeNumberGen) { (p : Int) in
@@ -624,7 +580,7 @@ reportProperty("All Prime") <- forAll { (n : Positive<Int>) in
 //
 //: Looks like we used `to:` when we meant `through:`.  Let's try again:
 
-func sieveProperly(n : Int) -> [Int] {
+func sieveProperly(_ n : Int) -> [Int] {
 	if n <= 1 {
 		return []
 	}
@@ -634,7 +590,8 @@ func sieveProperly(n : Int) -> [Int] {
 	marked[1] = true
 
 	for p in 2..<n {
-		for i in (2 * p).stride(through: n, by: p) {
+
+        for i in stride(from: 2 * p, through: n, by: p) {
 			marked[i] = true
 		}
 	}

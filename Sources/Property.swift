@@ -508,7 +508,7 @@ private func sep(_ l : String, r : String) -> String {
 }
 
 private func mplus(_ l : Optional<String>, r : Optional<String>) -> Optional<String> {
-	if let ls = l, rs = r {
+	if let ls = l, let rs = r {
 		return .some(ls + rs)
 	}
 

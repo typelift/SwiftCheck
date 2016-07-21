@@ -577,7 +577,7 @@ private final class IsoOfImpl<T : protocol<Hashable, CoArbitrary, Arbitrary>, U 
 
 		self.project = { [unowned self] u in
 			let ts = self.table.filter { $1 == u }.map { $0.0 }
-			if let k = ts.first, _ = self.table[k] {
+			if let k = ts.first, let _ = self.table[k] {
 				return k
 			}
 			let y = project(u)
