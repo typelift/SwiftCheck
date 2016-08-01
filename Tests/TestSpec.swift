@@ -59,7 +59,7 @@ class TestSpec : XCTestCase {
 		property("filter behaves") <- forAll { (xs : Array<Int>) in
 			return forAll { (pred : ArrowOf<Int, Bool>) in
 				let f = pred.getArrow
-				return (xs.filter(f).reduce(true, combine: { $0.0 && f($0.1) }) as Bool)
+				return (xs.filter(f).reduce(true, { $0.0 && f($0.1) }) as Bool)
 			}
 		}
 	}

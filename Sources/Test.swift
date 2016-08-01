@@ -770,7 +770,7 @@ private func printDistributionGraph(_ st : CheckerState) {
 	}
 	
 	let gAllLabels : [String] = st.collected.map({ (s : Set<String>) in
-		return Array(s).filter({ t in st.labels[t] == .some(0) }).reduce("", combine: { (l : String, r : String) in l + ", " + r })
+		return Array(s).filter({ t in st.labels[t] == .some(0) }).reduce("", { (l : String, r : String) in l + ", " + r })
 	})
 	let gAll : [[String]] = gAllLabels.filter({ !$0.isEmpty }).sorted().groupBy(==)
 	let gPrint : [String] = gAll.map({ ss in showP((ss.count * 100) / st.successfulTestCount) + ss.first! })
@@ -807,7 +807,7 @@ private func pluralize(_ s : String, i : Int) -> String {
 private func insufficientCoverage(_ st : CheckerState) -> Bool {
 	return st.labels
 			.map({ (l, reqP) in labelPercentage(l, st: st) < reqP })
-			.reduce(false, combine: { $0 || $1 })
+			.reduce(false, { $0 || $1 })
 }
 
 private func printCond(_ cond : Bool, _ str : String, terminator : String = "\n") {

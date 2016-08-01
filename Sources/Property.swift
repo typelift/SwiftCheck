@@ -39,7 +39,7 @@ public func disjoin(_ ps : Testable...) -> Property {
 	return Property(sequence(ps.map({ (p : Testable) in
 		return p.property.unProperty.map { $0.unProp }
 	})).flatMap({ roses in
-		return Gen.pure(Prop(unProp: roses.reduce(.mkRose({ TestResult.failed() }, { [] }), combine: disj)))
+		return Gen.pure(Prop(unProp: roses.reduce(.mkRose({ TestResult.failed() }, { [] }), disj)))
 	}))
 }
 
@@ -420,7 +420,7 @@ public struct TestResult {
 
 // MARK: - Implementation Details
 
-private func exception(_ msg : String) -> (ErrorProtocol) -> TestResult {
+private func exception(_ msg : String) -> (Error) -> TestResult {
 	return { e in TestResult.failed(String(e)) }
 }
 
@@ -455,7 +455,7 @@ private func protectResults(_ rs : Rose<TestResult>) -> Rose<TestResult> {
 //	return { protect(Rose.pure • exception("Exception"), x: f) }
 //}
 
-internal func protect<A>(_ f : (ErrorProtocol) -> A, x : () throws -> A) -> A {
+internal func protect<A>(_ f : (Error) -> A, x : () throws -> A) -> A {
 	do {
 		return try x()
 	} catch let e {
@@ -555,7 +555,7 @@ private func printLabels(_ st : TestResult) {
 	} else {
 		let gAllLabels = st.labels.map({ (l, _) in
 			return l + ", "
-		}).reduce("", combine: +)
+		}).reduce("", +)
 		print("("  + gAllLabels[gAllLabels.startIndex..<gAllLabels.characters.index(gAllLabels.endIndex, offsetBy: -2)] + ")")
 	}
 }

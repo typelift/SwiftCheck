@@ -9,7 +9,7 @@
 import SwiftCheck
 import XCTest
 
-enum SwiftCheckError : ErrorProtocol {
+enum SwiftCheckError : Error {
 	case bogus
 }
 

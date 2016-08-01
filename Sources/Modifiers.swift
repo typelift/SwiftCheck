@@ -152,7 +152,7 @@ extension ArrayOf : CoArbitrary {
 }
 
 /// Generates a sorted array of arbitrary values of type A.
-public struct OrderedArrayOf<A : protocol<Arbitrary, Comparable>> : Arbitrary, CustomStringConvertible {
+public struct OrderedArrayOf<A : Arbitrary & Comparable> : Arbitrary, CustomStringConvertible {
 	/// Retrieves the underlying sorted array of values.
 	public let getOrderedArray : [A]
 	
@@ -184,7 +184,7 @@ public struct OrderedArrayOf<A : protocol<Arbitrary, Comparable>> : Arbitrary, C
 
 
 /// Generates an dictionary of arbitrary keys and values.
-public struct DictionaryOf<K : protocol<Hashable, Arbitrary>, V : Arbitrary> : Arbitrary, CustomStringConvertible {
+public struct DictionaryOf<K : Hashable & Arbitrary, V : Arbitrary> : Arbitrary, CustomStringConvertible {
 	/// Retrieves the underlying dictionary of values.
 	public let getDictionary : Dictionary<K, V>
 
@@ -249,7 +249,7 @@ extension OptionalOf : CoArbitrary {
 }
 
 /// Generates a set of arbitrary values of type A.
-public struct SetOf<A : protocol<Hashable, Arbitrary>> : Arbitrary, CustomStringConvertible {
+public struct SetOf<A : Hashable & Arbitrary> : Arbitrary, CustomStringConvertible {
 	/// Retrieves the underlying set of values.
 	public let getSet : Set<A>
 
@@ -315,7 +315,7 @@ public struct PointerOf<T : Arbitrary> : Arbitrary, CustomStringConvertible {
 }
 
 /// Generates a Swift function from T to U.
-public struct ArrowOf<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbitrary, CustomStringConvertible {
+public struct ArrowOf<T : Hashable & CoArbitrary, U : Arbitrary> : Arbitrary, CustomStringConvertible {
 	private let _impl : ArrowOfImpl<T, U>
 
 	/// Retrieves the underlying function value, `T -> U`.
@@ -344,7 +344,7 @@ extension ArrowOf : CustomReflectable {
 }
 
 /// Generates two isomorphic Swift functions from `T` to `U` and back again.
-public struct IsoOf<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol<Equatable, CoArbitrary, Arbitrary>> : Arbitrary, CustomStringConvertible {
+public struct IsoOf<T : Hashable & CoArbitrary & Arbitrary, U : Equatable & CoArbitrary & Arbitrary> : Arbitrary, CustomStringConvertible {
 	private let _impl : IsoOfImpl<T, U>
 
 	/// Retrieves the underlying embedding function, `T -> U`.
@@ -380,7 +380,7 @@ extension IsoOf : CustomReflectable {
 
 /// By default, SwiftCheck generates values drawn from a small range. `Large` 
 /// gives you values drawn from the entire range instead.
-public struct Large<A : protocol<RandomType, LatticeType, Integer>> : Arbitrary {
+public struct Large<A : RandomType & LatticeType & Integer> : Arbitrary {
 	/// Retrieves the underlying large value.
 	public let getLarge : A
 
@@ -405,7 +405,7 @@ public struct Large<A : protocol<RandomType, LatticeType, Integer>> : Arbitrary 
 }
 
 /// Guarantees that every generated integer is greater than 0.
-public struct Positive<A : protocol<Arbitrary, SignedNumber>> : Arbitrary, CustomStringConvertible {
+public struct Positive<A : Arbitrary & SignedNumber> : Arbitrary, CustomStringConvertible {
 	/// Retrieves the underlying positive value.
 	public let getPositive : A
 
@@ -437,7 +437,7 @@ extension Positive : CoArbitrary {
 }
 
 /// Guarantees that every generated integer is never 0.
-public struct NonZero<A : protocol<Arbitrary, Integer>> : Arbitrary, CustomStringConvertible {
+public struct NonZero<A : Arbitrary & Integer> : Arbitrary, CustomStringConvertible {
 	/// Retrieves the underlying non-zero value.
 	public let getNonZero : A
 
@@ -468,7 +468,7 @@ extension NonZero : CoArbitrary {
 }
 
 /// Guarantees that every generated integer is greater than or equal to 0.
-public struct NonNegative<A : protocol<Arbitrary, Integer>> : Arbitrary, CustomStringConvertible {
+public struct NonNegative<A : Arbitrary & Integer> : Arbitrary, CustomStringConvertible {
 	/// Retrieves the underlying non-negative value.
 	public let getNonNegative : A
 
@@ -506,7 +506,7 @@ private func undefined<A>() -> A {
 	fatalError("")
 }
 
-private final class ArrowOfImpl<T : protocol<Hashable, CoArbitrary>, U : Arbitrary> : Arbitrary, CustomStringConvertible {
+private final class ArrowOfImpl<T : Hashable & CoArbitrary, U : Arbitrary> : Arbitrary, CustomStringConvertible {
 	private var table : Dictionary<T, U>
 	private var arr : (T) -> U
 
@@ -552,7 +552,7 @@ private final class ArrowOfImpl<T : protocol<Hashable, CoArbitrary>, U : Arbitra
 	}
 }
 
-private final class IsoOfImpl<T : protocol<Hashable, CoArbitrary, Arbitrary>, U : protocol<Equatable, CoArbitrary, Arbitrary>> : Arbitrary, CustomStringConvertible {
+private final class IsoOfImpl<T : Hashable & CoArbitrary & Arbitrary, U : Equatable & CoArbitrary & Arbitrary> : Arbitrary, CustomStringConvertible {
 	var table : Dictionary<T, U>
 	var embed : (T) -> U
 	var project : (U) -> T
@@ -632,7 +632,7 @@ private final class PointerOfImpl<T : Arbitrary> : Arbitrary {
 
 	deinit {
 		if self.size > 0 && self.ptr != nil {
-			self.ptr?.deallocateCapacity(self.size)
+			self.ptr?.deallocate(capacity: self.size)
 			self.ptr = nil
 		}
 	}
@@ -641,10 +641,10 @@ private final class PointerOfImpl<T : Arbitrary> : Arbitrary {
 		return Gen.sized { n in
 			if n <= 0 {
                 let size = 1
-				return Gen.pure(PointerOfImpl(UnsafeMutablePointer(allocatingCapacity: size), size))
+				return Gen.pure(PointerOfImpl(UnsafeMutablePointer<T>.allocate(capacity: size), size))
 			}
-			let pt = UnsafeMutablePointer<T>(allocatingCapacity: n)
-			let gt = pt.initializeFrom <^> sequence(Array((0..<n)).map { _ in T.arbitrary })
+			let pt = UnsafeMutablePointer<T>.allocate(capacity: n)
+			let gt = pt.initialize <^> sequence(Array((0..<n)).map { _ in T.arbitrary })
 			return gt.map { _ in PointerOfImpl(pt, n) }
 		}
 	}

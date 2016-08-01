@@ -215,7 +215,7 @@ extension EmptyCollection : Arbitrary {
 	}
 }
 
-extension Range where Bound : protocol<Comparable, Arbitrary> {
+extension Range where Bound : Comparable & Arbitrary {
 	/// Returns a generator of `HalfOpenInterval`s of arbitrary `Bound`s.
 	public static var arbitrary : Gen<Range<Bound>> {
 		return Bound.arbitrary.flatMap { l in
@@ -231,14 +231,14 @@ extension Range where Bound : protocol<Comparable, Arbitrary> {
 	}
 }
 
-extension LazyCollection where Base : protocol<Collection, Arbitrary>, Base.Index : Comparable {
+extension LazyCollection where Base : Collection & Arbitrary, Base.Index : Comparable {
 	/// Returns a generator of `LazyCollection`s of arbitrary `Base`s.
 	public static var arbitrary : Gen<LazyCollection<Base>> {
 		return LazyCollection<Base>.arbitrary
 	}
 }
 
-extension LazySequence where Base : protocol<Sequence, Arbitrary> {
+extension LazySequence where Base : Sequence & Arbitrary {
 	/// Returns a generator of `LazySequence`s of arbitrary `Base`s.
 	public static var arbitrary : Gen<LazySequence<Base>> {
 		return LazySequence<Base>.arbitrary
@@ -269,7 +269,7 @@ extension Repeated : WitnessedArbitrary {
 	}
 }
 
-extension Set where Element : protocol<Arbitrary, Hashable> {
+extension Set where Element : Arbitrary & Hashable {
 	/// Returns a generator of `Set`s of arbitrary `Element`s.
 	public static var arbitrary : Gen<Set<Element>> {
 		return Gen.sized { n in

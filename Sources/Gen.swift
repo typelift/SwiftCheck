@@ -44,7 +44,7 @@ public struct Gen<A> {
 	/// collection and produces only that value.
 	///
 	/// The input collection is required to be non-empty.
-	public static func fromElementsOf<S : Indexable where S.Index : protocol<Comparable, RandomType>>(_ xs : S) -> Gen<S._Element> {
+	public static func fromElementsOf<S : Indexable where S.Index : Comparable & RandomType>(_ xs : S) -> Gen<S._Element> {
 		return Gen.fromElementsIn(xs.startIndex...xs.index(xs.endIndex, offsetBy: -1)).map { i in
 			return xs[i]
 		}
@@ -77,7 +77,7 @@ public struct Gen<A> {
 	/// Constructs a Generator that produces permutations of a given array.
 	public static func fromShufflingElementsOf<S>(_ xs : [S]) -> Gen<[S]> {
 		return choose((Int.min + 1, Int.max)).proliferateSized(xs.count).flatMap { ns in
-			return Gen<[S]>.pure(Swift.zip(ns, xs).sorted(isOrderedBefore: { l, r in l.0 < r.0 }).map { $0.1 })
+			return Gen<[S]>.pure(Swift.zip(ns, xs).sorted(by: { l, r in l.0 < r.0 }).map { $0.1 })
 		}
 	}
 
@@ -105,7 +105,7 @@ public struct Gen<A> {
 	///
 	/// If control over the distribution of generators is needed, see 
 	/// `Gen.frequency` or `Gen.weighted`.
-    public static func oneOf<S : BidirectionalCollection where S.Iterator.Element == Gen<A>, S.Index : protocol<RandomType, Comparable>, S.Index : RandomType>(_ gs : S) -> Gen<A> {
+    public static func oneOf<S : BidirectionalCollection where S.Iterator.Element == Gen<A>, S.Index : RandomType & Comparable, S.Index : RandomType>(_ gs : S) -> Gen<A> {
 		assert(gs.count != 0, "oneOf used with empty list")
 
 		return choose((gs.startIndex, gs.index(before: gs.endIndex))) >>- { x in
@@ -123,7 +123,7 @@ public struct Gen<A> {
 		let xs: [(Int, Gen<A>)] = Array(xs)
 		assert(xs.count != 0, "frequency used with empty list")
 
-		return choose((1, xs.map({ $0.0 }).reduce(0, combine: +))).flatMap { l in
+		return choose((1, xs.map({ $0.0 }).reduce(0, +))).flatMap { l in
 			return pick(l, xs)
 		}
 	}
@@ -487,7 +487,7 @@ public func >>- <A, B>(m : Gen<A>, fn : (A) -> Gen<B>) -> Gen<B> {
 /// in the order they were given to the function exactly once.  Thus all arrays 
 /// generated are of the same rank as the array that was given.
 public func sequence<A>(_ ms : [Gen<A>]) -> Gen<[A]> {
-	return ms.reduce(Gen<[A]>.pure([]), combine: { n, m in
+	return ms.reduce(Gen<[A]>.pure([]), { n, m in
 		return m.flatMap { x in
 			return n.flatMap { xs in
 				return Gen<[A]>.pure(xs + [x])

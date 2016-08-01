@@ -117,7 +117,7 @@ public protocol RandomType {
 }
 
 /// Generates a random value from a LatticeType random type.
-public func randomBound<A : protocol<LatticeType, RandomType>, G : RandomGeneneratorType>(_ gen : G) -> (A, G) {
+public func randomBound<A : LatticeType & RandomType, G : RandomGeneneratorType>(_ gen : G) -> (A, G) {
 	return A.randomInRange((A.min, A.max), gen: gen)
 }
 

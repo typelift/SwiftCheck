@@ -69,7 +69,7 @@ class ComplexSpec : XCTestCase {
 // MARK: String Conveniences
 
 func glue(_ parts : [Gen<String>]) -> Gen<String> {
-	return sequence(parts).map { $0.reduce("", combine: +) }
+	return sequence(parts).map { $0.reduce("", +) }
 }
 
 extension String {

@@ -28,14 +28,14 @@ struct Path<A : Arbitrary> : Arbitrary {
 }
 
 func path<A>(_ p : (A) -> Bool, _ pth : Path<A>) -> Bool {
-	return pth.unPath.reduce(true, combine: { $0 && p($1) })
+	return pth.unPath.reduce(true, { $0 && p($1) })
 }
 
 func somePath<A>(_ p : (A) -> Bool, _ pth : Path<A>) -> Property {
 	return path({ !p($0) }, pth).expectFailure
 }
 
-struct Extremal<A : protocol<Arbitrary, LatticeType>> : Arbitrary {
+struct Extremal<A : Arbitrary & LatticeType> : Arbitrary {
 	let getExtremal : A
 	
 	static var arbitrary : Gen<Extremal<A>> {
@@ -52,13 +52,13 @@ struct Extremal<A : protocol<Arbitrary, LatticeType>> : Arbitrary {
 }
 
 class PathSpec : XCTestCase {
-	private static func smallProp<A : protocol<Integer, Arbitrary>>(_ pth : Path<A>) -> Bool {
+	private static func smallProp<A : Integer & Arbitrary>(_ pth : Path<A>) -> Bool {
 		return path({ x in 
 			return (x >= -100 || -100 >= 0) && x <= 100
 		}, pth)
 	}
 	
-	private static func largeProp<A : protocol<Integer, Arbitrary>>(_ pth : Path<A>) -> Property {
+	private static func largeProp<A : Integer & Arbitrary>(_ pth : Path<A>) -> Property {
 		return somePath({ x in 
 			return (x < -1000000 || x > 1000000)
 		}, pth)
