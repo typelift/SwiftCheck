@@ -270,7 +270,7 @@ let tld = lowerCaseLetters
 
 // Concatenates an array of `String` `Gen`erators together in order.
 func glue(_ parts : [Gen<String>]) -> Gen<String> {
-	return sequence(parts).map { $0.reduce("", combine: +) }
+	return sequence(parts).map { $0.reduce("", +) }
 }
 
 let emailGen = glue([localEmail, Gen.pure("@"), hostname, Gen.pure("."), tld])
@@ -314,7 +314,7 @@ emailGen.generate
 //: we also use them in more benign ways too.  For example, we can write a modifier type that only
 //: generates positive numbers:
 
-public struct ArbitraryPositive<A : protocol<Arbitrary, SignedNumber>> : Arbitrary {
+public struct ArbitraryPositive<A : Arbitrary & SignedNumber> : Arbitrary {
 	public let getPositive : A
 
 	public init(_ pos : A) { self.getPositive = pos }
@@ -364,7 +364,7 @@ property("The reverse of the reverse of an array is that array") <- forAll { (xs
 //                                           v                    v
 property("filter behaves") <- forAll { (xs : ArrayOf<Int>, pred : ArrowOf<Int, Bool>) in
 	let f = pred.getArrow
-	return xs.getArray.filter(f).reduce(true, combine: { $0.0 && f($0.1) })
+	return xs.getArray.filter(f).reduce(true, { $0.0 && f($0.1) })
 	// ^ This property says that if we filter an array then apply the predicate
 	//   to all its elements, then they should all respond with `true`.
 }
