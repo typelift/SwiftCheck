@@ -6,28 +6,28 @@
 //  Copyright (c) 2015 TypeLift. All rights reserved.
 //  Released under the MIT License.
 //
-// Precedence marks for certain symbols aligned with Runes 
+// Precedence marks for certain symbols aligned with Runes
 // ~( https://github.com/thoughtbot/Runes/blob/master/Source/Runes.swift ) until Swift gets a proper
 // resolver.
 
 // MARK: Combinators
 
 precedencegroup CompositionPrecedence {
-  associativity: right
-  higherThan: BitwiseShiftPrecedence
+    associativity: right
+    higherThan: BitwiseShiftPrecedence
 }
 
 /// Compose | Applies one function to the result of another function to produce a third function.
 infix operator • : CompositionPrecedence
 
 precedencegroup RightAssociativeCombinatorPrecedence {
-  associativity: right
-  lowerThan: DefaultPrecedence
+    associativity: right
+    lowerThan: DefaultPrecedence
 }
 
 precedencegroup LeftAssociativeCombinatorPrecedence {
-  associativity: left
-  lowerThan: DefaultPrecedence
+    associativity: left
+    lowerThan: DefaultPrecedence
 }
 
 /// Apply | Applies an argument to a function.
@@ -47,23 +47,23 @@ infix operator |*| : LeftAssociativeCombinatorPrecedence
 // MARK: Control.*
 
 precedencegroup FunctorPrecedence {
-  associativity: left
-  higherThan: DefaultPrecedence
+    associativity: left
+    higherThan: DefaultPrecedence
 }
 
 precedencegroup FunctorSequencePrecedence {
-  associativity: left
-  higherThan: FunctorPrecedence
+    associativity: left
+    higherThan: FunctorPrecedence
 }
 
 precedencegroup MonadPrecedenceLeft {
-  associativity: left
-  higherThan: FunctorSequencePrecedence
+    associativity: left
+    higherThan: FunctorSequencePrecedence
 }
 
 precedencegroup MonadPrecedenceRight {
-  associativity: right
-  higherThan: FunctorSequencePrecedence
+    associativity: right
+    higherThan: FunctorSequencePrecedence
 }
 
 /// Fmap | Maps a function over the value encapsulated by a functor.
@@ -82,13 +82,13 @@ infix operator <*> : FunctorPrecedence
 /// Sequence Right | Disregards the Functor on the Left.
 ///
 /// Default definition:
-///		`const(id) <^> a <*> b`
+///        `const(id) <^> a <*> b`
 infix operator *> : FunctorSequencePrecedence
 
 /// Sequence Left | Disregards the Functor on the Right.
 ///
 /// Default definition:
-///		`const <^> a <*> b`
+///        `const <^> a <*> b`
 infix operator <* : FunctorSequencePrecedence
 
 /// Bind | Sequences and composes two monadic actions by passing the value inside the monad on the
@@ -110,8 +110,8 @@ infix operator <<-<< : MonadPrecedenceRight
 infix operator ->> : MonadPrecedenceLeft
 
 precedencegroup FunctorExtrasPrecedence {
-  associativity: left
-  higherThan: FunctorSequencePrecedence
+    associativity: left
+    higherThan: FunctorSequencePrecedence
 }
 
 /// Imap | Maps covariantly over the index of a right-leaning bifunctor.
@@ -123,8 +123,8 @@ infix operator <!> : FunctorExtrasPrecedence
 // MARK: Data.Result
 
 precedencegroup ResultPrecedence {
-  associativity: none
-  higherThan: FunctorPrecedence
+    associativity: none
+    higherThan: FunctorPrecedence
 }
 
 /// From | Creates a Result given a function that can possibly fail with an error.
@@ -138,8 +138,8 @@ infix operator <> : AdditionPrecedence
 // MARK: Control.Category
 
 precedencegroup CategoryPrecedence {
-  associativity: right
-  higherThan: MonadPrecedenceRight
+    associativity: right
+    higherThan: MonadPrecedenceRight
 }
 
 /// Right-to-Left Composition | Composes two categories to form a new category with the source of
@@ -157,8 +157,8 @@ infix operator >>> : CategoryPrecedence
 // MARK: Control.Arrow
 
 precedencegroup ArrowPrecedence {
-  associativity: right
-  higherThan: CategoryPrecedence
+    associativity: right
+    higherThan: CategoryPrecedence
 }
 
 /// Split | Splits two computations and combines the result into one Arrow yielding a tuple of
@@ -173,8 +173,8 @@ infix operator &&& : ArrowPrecedence
 // MARK: Control.Arrow.Choice
 
 precedencegroup ArrowChoicePrecedence {
-  associativity: right
-  higherThan: ArrowPrecedence
+    associativity: right
+    higherThan: ArrowPrecedence
 }
 
 /// Splat | Splits two computations and combines the results into Eithers on the left and right.
@@ -187,8 +187,8 @@ infix operator ||| : ArrowChoicePrecedence
 // MARK: Control.Arrow.Plus
 
 precedencegroup ArrowPlusPrecedence {
-  associativity: right
-  higherThan: ArrowChoicePrecedence
+    associativity: right
+    higherThan: ArrowChoicePrecedence
 }
 
 /// Op | Combines two ArrowZero monoids.
@@ -197,8 +197,8 @@ infix operator <+> : ArrowPlusPrecedence
 // MARK: Data.JSON
 
 precedencegroup JSONPrecedence {
-  associativity: right
-  higherThan: ArrowPlusPrecedence
+    associativity: right
+    higherThan: ArrowPlusPrecedence
 }
 
 /// Retrieve | Retrieves a value from a dictionary of JSON values using a given keypath.
