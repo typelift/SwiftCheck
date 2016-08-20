@@ -42,10 +42,10 @@
 ///     property("Shrunken sets of integers don't always contain [] or [0]") <- forAll { (s : SetOf<Int>) in
 ///
 ///         /// This part of the property uses `==>`, or the "implication" 
-///         /// combinator.  Implication only executes the following block if 
-///         /// the preceding expression returns true.  It can be used to 
+///         /// combinator.  Implication only executes the following block if
+///         /// the preceding expression returns true.  It can be used to
 ///         /// discard test cases that contain data you don't want to test with.
-///         return (!s.getSet.isEmpty && s.getSet != Set([0])) ==> {
+///         return (!s.getSet.isEmpty && s.getSet != [0]) ==> {
 ///
 ///             /// N.B. `shrinkArbitrary` is a internal method call that invokes the shrinker.
 ///             let ls = self.shrinkArbitrary(s).map { $0.getSet }
@@ -103,43 +103,43 @@ public func forAll<A : Arbitrary>(_ pf : ((A) throws -> Testable)) -> Property {
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 2 types.
-public func forAll<A : Arbitrary, B : Arbitrary>(_ pf : (A, B) throws -> Testable) -> Property {
+public func forAll<A : Arbitrary, B : Arbitrary>(_ pf : @escaping (A, B) throws -> Testable) -> Property {
 	return forAll { t in forAll { b in try pf(t, b) } }
 }
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 3 types.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary>(_ pf : (A, B, C) throws -> Testable) -> Property {
+public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary>(_ pf : @escaping (A, B, C) throws -> Testable) -> Property {
 	return forAll { t in forAll { b, c in try pf(t, b, c) } }
 }
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 4 types.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary>(_ pf : (A, B, C, D) throws -> Testable) -> Property {
+public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary>(_ pf : @escaping (A, B, C, D) throws -> Testable) -> Property {
 	return forAll { t in forAll { b, c, d in try pf(t, b, c, d) } }
 }
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 5 types.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary>(_ pf : (A, B, C, D, E) throws -> Testable) -> Property {
+public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary>(_ pf : @escaping (A, B, C, D, E) throws -> Testable) -> Property {
 	return forAll { t in forAll { b, c, d, e in try pf(t, b, c, d, e) } }
 }
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 6 types.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary>(_ pf : (A, B, C, D, E, F) throws -> Testable) -> Property {
+public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary>(_ pf : @escaping (A, B, C, D, E, F) throws -> Testable) -> Property {
 	return forAll { t in forAll { b, c, d, e, f in try pf(t, b, c, d, e, f) } }
 }
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 7 types.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary>(_ pf : (A, B, C, D, E, F, G) throws -> Testable) -> Property {
+public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary>(_ pf : @escaping (A, B, C, D, E, F, G) throws -> Testable) -> Property {
 	return forAll { t in forAll { b, c, d, e, f, g in try pf(t, b, c, d, e, f, g) } }
 }
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 8 types.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary, H : Arbitrary>(_ pf : (A, B, C, D, E, F, G, H) throws -> Testable) -> Property {
+public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary, H : Arbitrary>(_ pf : @escaping (A, B, C, D, E, F, G, H) throws -> Testable) -> Property {
 	return forAll { t in forAll { b, c, d, e, f, g, h in try pf(t, b, c, d, e, f, g, h) } }
 }
 
@@ -151,43 +151,43 @@ public func forAll<A : Arbitrary>(_ gen : Gen<A>, pf : ((A) throws -> Testable))
 
 /// Given 2 explicit generators, converts a function to a universally quantified
 /// property using the default shrinkers for those 2 types.
-public func forAll<A : Arbitrary, B : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, pf : (A, B) throws -> Testable) -> Property {
+public func forAll<A : Arbitrary, B : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, pf : @escaping (A, B) throws -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB, pf: { b in try pf(t, b) }) })
 }
 
 /// Given 3 explicit generators, converts a function to a universally quantified
 /// property using the default shrinkers for those 3 types.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, pf : (A, B, C) throws -> Testable) -> Property {
+public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, pf : @escaping (A, B, C) throws -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB, genC, pf: { b, c in try pf(t, b, c) }) })
 }
 
 /// Given 4 explicit generators, converts a function to a universally quantified
 /// property using the default shrinkers for those 4 types.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, pf : (A, B, C, D) throws -> Testable) -> Property {
+public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, pf : @escaping (A, B, C, D) throws -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB, genC, genD, pf: { b, c, d in try pf(t, b, c, d) }) })
 }
 
 /// Given 5 explicit generators, converts a function to a universally quantified
 /// property using the default shrinkers for those 5 types.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, pf : (A, B, C, D, E) throws -> Testable) -> Property {
+public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, pf : @escaping (A, B, C, D, E) throws -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB, genC, genD, genE, pf: { b, c, d, e in try pf(t, b, c, d, e) }) })
 }
 
 /// Given 6 explicit generators, converts a function to a universally quantified
 /// property using the default shrinkers for those 6 types.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, pf : (A, B, C, D, E, F) throws -> Testable) -> Property {
+public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, pf : @escaping (A, B, C, D, E, F) throws -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB, genC, genD, genE, genF, pf: { b, c, d, e, f in try pf(t, b, c, d, e, f) }) })
 }
 
 /// Given 7 explicit generators, converts a function to a universally quantified
 /// property using the default shrinkers for those 7 types.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, _ genG : Gen<G>, pf : (A, B, C, D, E, F, G) throws -> Testable) -> Property {
+public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, _ genG : Gen<G>, pf : @escaping (A, B, C, D, E, F, G) throws -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB, genC, genD, genE, genF, genG, pf: { b, c, d, e, f, g in try pf(t, b, c, d, e, f, g) }) })
 }
 
 /// Given 8 explicit generators, converts a function to a universally quantified
 /// property using the default shrinkers for those 8 types.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary, H : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, _ genG : Gen<G>, _ genH : Gen<H>, pf : (A, B, C, D, E, F, G, H) throws -> Testable) -> Property {
+public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary, H : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, _ genG : Gen<G>, _ genH : Gen<H>, pf : @escaping (A, B, C, D, E, F, G, H) throws -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB, genC, genD, genE, genF, genG, genH, pf: { b, c, d, e, f, g, h in try pf(t, b, c, d, e, f, g, h) }) })
 }
 
@@ -203,75 +203,75 @@ public func forAllNoShrink<A>(_ gen : Gen<A>, pf : ((A) throws -> Testable)) -> 
 /// Given 2 explicit generators, converts a function to a universally quantified
 /// property for those 2 types.
 ///
-/// This variant of `forAll` does not shrink its argument but allows generators 
+/// This variant of `forAll` does not shrink its argument but allows generators
 /// of any type, not just those that conform to `Arbitrary`.
-public func forAllNoShrink<A, B>(_ genA : Gen<A>, _ genB : Gen<B>, pf : (A, B) throws -> Testable) -> Property {
+public func forAllNoShrink<A, B>(_ genA : Gen<A>, _ genB : Gen<B>, pf : @escaping (A, B) throws -> Testable) -> Property {
 	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, pf: { b in try pf(t, b) }) })
 }
 
 /// Given 3 explicit generators, converts a function to a universally quantified
 /// property for those 3 types.
 ///
-/// This variant of `forAll` does not shrink its argument but allows generators 
+/// This variant of `forAll` does not shrink its argument but allows generators
 /// of any type, not just those that conform to `Arbitrary`.
-public func forAllNoShrink<A, B, C>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, pf : (A, B, C) throws -> Testable) -> Property {
+public func forAllNoShrink<A, B, C>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, pf : @escaping (A, B, C) throws -> Testable) -> Property {
 	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, genC, pf: { b, c in try pf(t, b, c) }) })
 }
 
 /// Given 4 explicit generators, converts a function to a universally quantified
 /// property for those 4 types.
 ///
-/// This variant of `forAll` does not shrink its argument but allows generators 
+/// This variant of `forAll` does not shrink its argument but allows generators
 /// of any type, not just those that conform to `Arbitrary`.
-public func forAllNoShrink<A, B, C, D>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, pf : (A, B, C, D) throws -> Testable) -> Property {
+public func forAllNoShrink<A, B, C, D>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, pf : @escaping (A, B, C, D) throws -> Testable) -> Property {
 	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, genC, genD, pf: { b, c, d in try pf(t, b, c, d) }) })
 }
 
 /// Given 5 explicit generators, converts a function to a universally quantified
 /// property for those 5 types.
 ///
-/// This variant of `forAll` does not shrink its argument but allows generators 
+/// This variant of `forAll` does not shrink its argument but allows generators
 /// of any type, not just those that conform to `Arbitrary`.
-public func forAllNoShrink<A, B, C, D, E>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, pf : (A, B, C, D, E) throws -> Testable) -> Property {
+public func forAllNoShrink<A, B, C, D, E>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, pf : @escaping (A, B, C, D, E) throws -> Testable) -> Property {
 	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, genC, genD, genE, pf: { b, c, d, e in try pf(t, b, c, d, e) }) })
 }
 
 /// Given 6 explicit generators, converts a function to a universally quantified
 /// property for those 6 types.
 ///
-/// This variant of `forAll` does not shrink its argument but allows generators 
+/// This variant of `forAll` does not shrink its argument but allows generators
 /// of any type, not just those that conform to `Arbitrary`.
-public func forAllNoShrink<A, B, C, D, E, F>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, pf : (A, B, C, D, E, F) throws -> Testable) -> Property {
+public func forAllNoShrink<A, B, C, D, E, F>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, pf : @escaping (A, B, C, D, E, F) throws -> Testable) -> Property {
 	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, genC, genD, genE, genF, pf: { b, c, d, e, f in try pf(t, b, c, d, e, f) }) })
 }
 
 /// Given 7 explicit generators, converts a function to a universally quantified
 /// property for those 7 types.
 ///
-/// This variant of `forAll` does not shrink its argument but allows generators 
+/// This variant of `forAll` does not shrink its argument but allows generators
 /// of any type, not just those that conform to `Arbitrary`.
-public func forAllNoShrink<A, B, C, D, E, F, G>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, _ genG : Gen<G>, pf : (A, B, C, D, E, F, G) throws -> Testable) -> Property {
+public func forAllNoShrink<A, B, C, D, E, F, G>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, _ genG : Gen<G>, pf : @escaping (A, B, C, D, E, F, G) throws -> Testable) -> Property {
 	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, genC, genD, genE, genF, genG, pf: { b, c, d, e, f, g in try pf(t, b, c, d, e, f, g) }) })
 }
 
 /// Given 8 explicit generators, converts a function to a universally quantified
 /// property for those 8 types.
 ///
-/// This variant of `forAll` does not shrink its argument but allows generators 
+/// This variant of `forAll` does not shrink its argument but allows generators
 /// of any type, not just those that conform to `Arbitrary`.
-public func forAllNoShrink<A, B, C, D, E, F, G, H>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, _ genG : Gen<G>, _ genH : Gen<H>, pf : (A, B, C, D, E, F, G, H) throws -> Testable) -> Property {
+public func forAllNoShrink<A, B, C, D, E, F, G, H>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, _ genG : Gen<G>, _ genH : Gen<H>, pf : @escaping (A, B, C, D, E, F, G, H) throws -> Testable) -> Property {
 	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, genC, genD, genE, genF, genG, genH, pf: { b, c, d, e, f, g, h in try pf(t, b, c, d, e, f, g, h) }) })
 }
 
-/// Given an explicit generator and shrinker, converts a function to a 
+/// Given an explicit generator and shrinker, converts a function to a
 /// universally quantified property.
-public func forAllShrink<A>(_ gen : Gen<A>, shrinker : (A) -> [A], f : (A) throws -> Testable) -> Property {
+public func forAllShrink<A>(_ gen : Gen<A>, shrinker : @escaping (A) -> [A], f : @escaping (A) throws -> Testable) -> Property {
 	return Property(gen.flatMap { x in
 		return shrinking(shrinker, initial: x, prop: { xs  in
 			do {
-				return (try f(xs)).counterexample(String(xs))
+        return (try f(xs)).counterexample(String(describing: xs))
 			} catch let e {
-				return TestResult.failed("Test case threw an exception: \"\(e)\"").counterexample(String(xs))
+        return TestResult.failed("Test case threw an exception: \"\(e)\"").counterexample(String(describing: xs))
 			}
 		}).unProperty
 	})
@@ -292,16 +292,16 @@ public func forAllShrink<A>(_ gen : Gen<A>, shrinker : (A) -> [A], f : (A) throw
 /// used for *negative* statements "there does not exist `foo` such that `bar`".
 /// It is recommended that you avoid `exists` and instead reduce your property 
 /// to [Skolem Normal Form](https://en.wikipedia.org/wiki/Skolem_normal_form).  
-/// `SNF` involves turning every `exists` into a function returning the 
-/// existential value, taking any other parameters being quantified over as 
+/// `SNF` involves turning every `exists` into a function returning the
+/// existential value, taking any other parameters being quantified over as
 /// needed.
-public func exists<A : Arbitrary>(_ pf : (A) throws -> Testable) -> Property {
+public func exists<A : Arbitrary>(_ pf : @escaping (A) throws -> Testable) -> Property {
 	return exists(A.arbitrary, pf: pf)
 }
 
-/// Given an explicit generator, converts a function to an existentially 
+/// Given an explicit generator, converts a function to an existentially
 /// quantified property using the default shrinker for that type.
-public func exists<A : Arbitrary>(_ gen : Gen<A>, pf : (A) throws -> Testable) -> Property {
+public func exists<A : Arbitrary>(_ gen : Gen<A>, pf : @escaping (A) throws -> Testable) -> Property {
 	return forAllNoShrink(A.arbitrary, pf: { try pf($0).invert }).invert.mapResult { res in
 		return TestResult(ok:			res.ok
 						, expect:		res.expect
@@ -817,7 +817,7 @@ private func printCond(_ cond : Bool, _ str : String, terminator : String = "\n"
 }
 
 extension Array {
-	private func groupBy(_ p : (Element , Element) -> Bool) -> [[Element]] {
+	fileprivate func groupBy(_ p : (Element , Element) -> Bool) -> [[Element]] {
 		var result = [[Element]]()
 		var accumulator = [Element]()
 		self.forEach { current in

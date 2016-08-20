@@ -22,7 +22,7 @@ public enum Rose<A> {
 	case ioRose(() -> Rose<A>)
 
 	/// Case analysis for a Rose Tree.
-	public func onRose(_ f : (A, [Rose<A>]) -> Rose<A>) -> Rose<A> {
+	public func onRose(_ f : @escaping (A, [Rose<A>]) -> Rose<A>) -> Rose<A> {
 		switch self {
 		case .mkRose(let x, let rs):
 			return f(x(), rs())
@@ -46,16 +46,16 @@ public enum Rose<A> {
 extension Rose /*: Functor*/ {
 	/// Maps a function over all the nodes of a Rose Tree.
 	///
-	/// For `.MkRose` branches the computation is applied to the node's value 
-	/// then application recurses into the sub-trees.  For `.IORose` branches 
+	/// For `.MkRose` branches the computation is applied to the node's value
+	/// then application recurses into the sub-trees.  For `.IORose` branches
 	/// the map is suspended.
-	public func map<B>(_ f : (A) -> B) -> Rose<B> {
+	public func map<B>(_ f : @escaping (A) -> B) -> Rose<B> {
 		return f <^> self
 	}
 }
 
 /// Fmap | Maps a function over all the nodes of a Rose Tree.
-public func <^> <A, B>(f : (A) -> B, g : Rose<A>) -> Rose<B> {
+public func <^> <A, B>(f : @escaping (A) -> B, g : Rose<A>) -> Rose<B> {
 	switch g {
 		case .mkRose(let root, let children):
 			return .mkRose({ f(root()) }, { children().map() { $0.map(f) } })
@@ -94,21 +94,21 @@ public func <*> <A, B>(fn : Rose<(A) -> B>, g : Rose<A>) -> Rose<B> {
 }
 
 extension Rose /*: Monad*/ {
-	/// Maps the values in the receiver to Rose Trees and joins them all 
+	/// Maps the values in the receiver to Rose Trees and joins them all
 	/// together.
-	public func flatMap<B>(_ fn : (A) -> Rose<B>) -> Rose<B> {
+	public func flatMap<B>(_ fn : @escaping (A) -> Rose<B>) -> Rose<B> {
 		return self >>- fn
 	}
 }
 
-/// Flat Map | Maps the values in the receiver to Rose Trees and joins them all 
+/// Flat Map | Maps the values in the receiver to Rose Trees and joins them all
 /// together.
-public func >>- <A, B>(m : Rose<A>, fn : (A) -> Rose<B>) -> Rose<B> {
+public func >>- <A, B>(m : Rose<A>, fn : @escaping (A) -> Rose<B>) -> Rose<B> {
 	return joinRose(m.map(fn))
 }
 
 /// Lifts functions to functions over Rose Trees.
-public func liftM<A, R>(_ f : (A) -> R, _ m1 : Rose<A>) -> Rose<R> {
+public func liftM<A, R>(_ f : @escaping (A) -> R, _ m1 : Rose<A>) -> Rose<R> {
 	return m1.flatMap { x1 in
 		return Rose.pure(f(x1))
 	}

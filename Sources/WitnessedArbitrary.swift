@@ -32,7 +32,7 @@ extension Array : WitnessedArbitrary {
 
 	/// Given a witness and a function to test, converts them into a universally
 	/// quantified property over `Array`s.
-	public static func forAllWitnessed<A : Arbitrary>(_ wit : (A) -> Element, pf : (([Element]) -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Element, pf : (([Element]) -> Testable)) -> Property {
 		return forAllShrink([A].arbitrary, shrinker: [A].shrink, f: { bl in
 			return pf(bl.map(wit))
 		})
@@ -56,7 +56,7 @@ extension AnyBidirectionalCollection : WitnessedArbitrary {
 
 	/// Given a witness and a function to test, converts them into a universally
 	/// quantified property over `AnyBidirectionalCollection`s.
-	public static func forAllWitnessed<A : Arbitrary>(_ wit : (A) -> Element, pf : ((AnyBidirectionalCollection<Element>) -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Element, pf : ((AnyBidirectionalCollection<Element>) -> Testable)) -> Property {
 		return forAllShrink(AnyBidirectionalCollection<A>.arbitrary, shrinker: AnyBidirectionalCollection<A>.shrink, f: { bl in
 			return pf(AnyBidirectionalCollection<Element>(bl.map(wit)))
 		})
@@ -80,7 +80,7 @@ extension AnySequence : WitnessedArbitrary {
 
 	/// Given a witness and a function to test, converts them into a universally
 	/// quantified property over `AnySequence`s.
-	public static func forAllWitnessed<A : Arbitrary>(_ wit : (A) -> Element, pf : ((AnySequence<Element>) -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Element, pf : ((AnySequence<Element>) -> Testable)) -> Property {
 		return forAllShrink(AnySequence<A>.arbitrary, shrinker: AnySequence<A>.shrink, f: { bl in
 			return pf(AnySequence<Element>(bl.map(wit)))
 		})
@@ -104,7 +104,7 @@ extension ArraySlice : WitnessedArbitrary {
 
 	/// Given a witness and a function to test, converts them into a universally
 	/// quantified property over `ArraySlice`s.
-	public static func forAllWitnessed<A : Arbitrary>(_ wit : (A) -> Element, pf : ((ArraySlice<Element>) -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Element, pf : ((ArraySlice<Element>) -> Testable)) -> Property {
 		return forAllShrink(ArraySlice<A>.arbitrary, shrinker: ArraySlice<A>.shrink, f: { bl in
 			return pf(ArraySlice<Element>(bl.map(wit)))
 		})
@@ -123,7 +123,7 @@ extension CollectionOfOne : WitnessedArbitrary {
 
 	/// Given a witness and a function to test, converts them into a universally
 	/// quantified property over `CollectionOfOne`s.
-	public static func forAllWitnessed<A : Arbitrary>(_ wit : (A) -> Element, pf : ((CollectionOfOne<Element>) -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Element, pf : ((CollectionOfOne<Element>) -> Testable)) -> Property {
         return forAllShrink(CollectionOfOne<A>.arbitrary, shrinker: { _ in [] }, f: { (bl : CollectionOfOne<A>) -> Testable in
             return pf(CollectionOfOne<Element>(wit(bl[bl.startIndex])))
         })
@@ -155,7 +155,7 @@ extension Optional : WitnessedArbitrary {
 
 	/// Given a witness and a function to test, converts them into a universally
 	/// quantified property over `Optional`s.
-	public static func forAllWitnessed<A : Arbitrary>(_ wit : (A) -> Wrapped, pf : ((Optional<Wrapped>) -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Wrapped, pf : ((Optional<Wrapped>) -> Testable)) -> Property {
 		return forAllShrink(Optional<A>.arbitrary, shrinker: Optional<A>.shrink, f: { bl in
 			return pf(bl.map(wit))
 		})
@@ -179,7 +179,7 @@ extension ContiguousArray : WitnessedArbitrary {
 
 	/// Given a witness and a function to test, converts them into a universally
 	/// quantified property over `ContiguousArray`s.
-	public static func forAllWitnessed<A : Arbitrary>(_ wit : (A) -> Element, pf : ((ContiguousArray<Element>) -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Element, pf : ((ContiguousArray<Element>) -> Testable)) -> Property {
 		return forAllShrink(ContiguousArray<A>.arbitrary, shrinker: ContiguousArray<A>.shrink, f: { bl in
 			return pf(ContiguousArray<Element>(bl.map(wit)))
 		})
@@ -190,11 +190,9 @@ extension ContiguousArray : WitnessedArbitrary {
 extension Dictionary where Key : Arbitrary, Value : Arbitrary {
 	/// Returns a generator of `Dictionary`s of arbitrary `Key`s and `Value`s.
 	public static var arbitrary : Gen<Dictionary<Key, Value>> {
-		return [Key].arbitrary.flatMap { k in
-			return [Value].arbitrary.flatMap { v in
-				return Gen.pure(Dictionary(zip(k, v).map({ (k, v) -> (key: Key, value: Value) in
-                    (key: k, value: v)
-                })))
+    return [Key].arbitrary.flatMap { (k : [Key]) in
+      return [Value].arbitrary.flatMap { (v : [Value]) in
+				return Gen.pure(Dictionary(zip(k, v)))
 			}
 		}
 	}
@@ -261,7 +259,7 @@ extension Repeated : WitnessedArbitrary {
 
 	/// Given a witness and a function to test, converts them into a universally
 	/// quantified property over `Repeat`s.
-	public static func forAllWitnessed<A : Arbitrary>(_ wit : (A) -> Element, pf : ((Repeated<Element>) -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Element, pf : ((Repeated<Element>) -> Testable)) -> Property {
 		return forAllShrink(Repeated<A>.arbitrary, shrinker: { _ in [] }, f: { bl in
 			let xs = bl.map(wit)
 			return pf(repeatElement(xs.first!, count: xs.count))
@@ -294,7 +292,7 @@ extension Set : WitnessedArbitrary {
 
 	/// Given a witness and a function to test, converts them into a universally
 	/// quantified property over `Set`s.
-	public static func forAllWitnessed<A : Arbitrary>(_ wit : (A) -> Element, pf : ((Set<Element>) -> Testable)) -> Property {
+	public static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Element, pf : ((Set<Element>) -> Testable)) -> Property {
 		return forAll { (xs : [A]) in
 			return pf(Set<Element>(xs.map(wit)))
 		}
@@ -347,7 +345,9 @@ private func shrinkOne<A : Arbitrary>(_ xs : [A]) -> [[A]] {
 }
 
 extension Dictionary {
-	private init<S : Sequence where S.Iterator.Element == Element>(_ pairs : S) {
+	fileprivate init<S : Sequence>(_ pairs : S)
+    where S.Iterator.Element == (Key, Value)
+  {
 		self.init()
 		var g = pairs.makeIterator()
 		while let (k, v): (Key, Value) = g.next() {

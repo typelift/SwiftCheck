@@ -292,7 +292,7 @@ extension SetOf : CoArbitrary {
 
 /// Generates pointers of varying size of random values of type T.
 public struct PointerOf<T : Arbitrary> : Arbitrary, CustomStringConvertible {
-	private let _impl : PointerOfImpl<T>
+	fileprivate let _impl : PointerOfImpl<T>
 
 	/// Retrieves the underlying pointer value.
 	public var getPointer : UnsafePointer<T> {
@@ -316,7 +316,7 @@ public struct PointerOf<T : Arbitrary> : Arbitrary, CustomStringConvertible {
 
 /// Generates a Swift function from T to U.
 public struct ArrowOf<T : Hashable & CoArbitrary, U : Arbitrary> : Arbitrary, CustomStringConvertible {
-	private let _impl : ArrowOfImpl<T, U>
+	fileprivate let _impl : ArrowOfImpl<T, U>
 
 	/// Retrieves the underlying function value, `T -> U`.
 	public var getArrow : (T) -> U {
@@ -345,7 +345,7 @@ extension ArrowOf : CustomReflectable {
 
 /// Generates two isomorphic Swift functions from `T` to `U` and back again.
 public struct IsoOf<T : Hashable & CoArbitrary & Arbitrary, U : Equatable & CoArbitrary & Arbitrary> : Arbitrary, CustomStringConvertible {
-	private let _impl : IsoOfImpl<T, U>
+	fileprivate let _impl : IsoOfImpl<T, U>
 
 	/// Retrieves the underlying embedding function, `T -> U`.
 	public var getTo : (T) -> U {
@@ -506,9 +506,9 @@ private func undefined<A>() -> A {
 	fatalError("")
 }
 
-private final class ArrowOfImpl<T : Hashable & CoArbitrary, U : Arbitrary> : Arbitrary, CustomStringConvertible {
-	private var table : Dictionary<T, U>
-	private var arr : (T) -> U
+fileprivate final class ArrowOfImpl<T : Hashable & CoArbitrary, U : Arbitrary> : Arbitrary, CustomStringConvertible {
+	fileprivate var table : Dictionary<T, U>
+	fileprivate var arr : (T) -> U
 
 	init (_ table : Dictionary<T, U>, _ arr : ((T) -> U)) {
 		self.table = table
@@ -552,10 +552,10 @@ private final class ArrowOfImpl<T : Hashable & CoArbitrary, U : Arbitrary> : Arb
 	}
 }
 
-private final class IsoOfImpl<T : Hashable & CoArbitrary & Arbitrary, U : Equatable & CoArbitrary & Arbitrary> : Arbitrary, CustomStringConvertible {
-	var table : Dictionary<T, U>
-	var embed : (T) -> U
-	var project : (U) -> T
+fileprivate final class IsoOfImpl<T : Hashable & CoArbitrary & Arbitrary, U : Equatable & CoArbitrary & Arbitrary> : Arbitrary, CustomStringConvertible {
+	fileprivate var table : Dictionary<T, U>
+	fileprivate var embed : (T) -> U
+	fileprivate var project : (U) -> T
 
 	init (_ table : Dictionary<T, U>, _ embed : ((T) -> U), _ project : ((U) -> T)) {
 		self.table = table
@@ -686,7 +686,9 @@ public final class GenComposer {
     ///  - returns: A random `T`.
     ///
     ///  - seealso: generate\<T\>(gen:)
-    public func generate<T where T: Arbitrary>() -> T {
+    public func generate<T>() -> T
+      where T: Arbitrary
+    {
         return generate(using: T.arbitrary)
     }
 }
@@ -713,9 +715,9 @@ extension Gen {
     ///     }
     /// 
     /// - parameter build: Function which is passed a GenComposer which can be used
-    /// 
+    ///
     /// - returns: A generator which uses the `build` function to create arbitrary instances of `A`.
-    public static func compose(build: (GenComposer) -> A) -> Gen<A> {
+    public static func compose(build: @escaping (GenComposer) -> A) -> Gen<A> {
         return Gen(unGen: { (stdgen, size) -> A in
             let composer = GenComposer(stdgen: stdgen, size: size)
             return build(composer)

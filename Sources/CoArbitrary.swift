@@ -33,7 +33,7 @@ extension Integer {
 /// function if you can, it can be quite an expensive operation given a detailed
 /// enough description.
 public func coarbitraryPrintable<A, B>(_ x : A) -> (Gen<B>) -> Gen<B> {
-	return String.coarbitrary(String(x))
+	return String.coarbitrary(String(describing: x))
 }
 
 extension Bool : CoArbitrary {

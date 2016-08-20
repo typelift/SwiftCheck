@@ -57,7 +57,7 @@ public struct CheckerState {
 	public init(  name							: String
 				, maxAllowableSuccessfulTests	: Int
 				, maxAllowableDiscardedTests	: Int
-				, computeSize					: (Int, Int) -> Int
+				, computeSize					: @escaping (Int, Int) -> Int
 				, successfulTestCount			: Int
 				, discardedTestCount			: Int
 				, labels						: Dictionary<String, Int>

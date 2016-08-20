@@ -145,7 +145,7 @@ extension UnicodeScalar : RandomType {
 	/// Returns a random `UnicodeScalar` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(_ range : (UnicodeScalar, UnicodeScalar), gen : G) -> (UnicodeScalar, G) {
 		let (val, gg) = UInt32.randomInRange((range.0.value, range.1.value), gen: gen)
-		return (UnicodeScalar(val), gg)
+		return (UnicodeScalar(val)!, gg)
 	}
 }
 

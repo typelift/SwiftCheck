@@ -9,17 +9,6 @@
 import SwiftCheck
 import class XCTest.XCTestCase
 
-extension Dictionary {
-	init<S : Sequence where S.Iterator.Element == Element>(_ pairs : S) {
-		self.init()
-		var g = pairs.makeIterator()
-		while let (k, v) : (Key, Value) = g.next() {
-			self[k] = v
-		}
-	}
-}
-
-
 class TestSpec : XCTestCase {
 	func testAll() {
         let dictionaryGen: Gen<Dictionary<String, Int>> = Gen<(String, Int)>.zip(String.arbitrary, Int.arbitrary).proliferate.map { _ -> Dictionary<String, Int> in [:] }

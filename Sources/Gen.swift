@@ -44,7 +44,9 @@ public struct Gen<A> {
 	/// collection and produces only that value.
 	///
 	/// The input collection is required to be non-empty.
-	public static func fromElementsOf<S : Indexable where S.Index : Comparable & RandomType>(_ xs : S) -> Gen<S._Element> {
+	public static func fromElementsOf<S : Indexable>(_ xs : S) -> Gen<S._Element>
+    where S.Index : Comparable & RandomType
+  {
 		return Gen.fromElementsIn(xs.startIndex...xs.index(xs.endIndex, offsetBy: -1)).map { i in
 			return xs[i]
 		}
@@ -82,7 +84,7 @@ public struct Gen<A> {
 	}
 
 	/// Constructs a generator that depends on a size parameter.
-	public static func sized(_ f : (Int) -> Gen<A>) -> Gen<A> {
+	public static func sized(_ f : @escaping (Int) -> Gen<A>) -> Gen<A> {
 		return Gen(unGen: { r, n in
 			return f(n).unGen(r, n)
 		})
@@ -103,9 +105,11 @@ public struct Gen<A> {
 	/// Constructs a Generator that randomly selects and uses a particular 
 	/// generator from the given sequence of Generators.
 	///
-	/// If control over the distribution of generators is needed, see 
+	/// If control over the distribution of generators is needed, see
 	/// `Gen.frequency` or `Gen.weighted`.
-    public static func oneOf<S : BidirectionalCollection where S.Iterator.Element == Gen<A>, S.Index : RandomType & Comparable, S.Index : RandomType>(_ gs : S) -> Gen<A> {
+    public static func oneOf<S : BidirectionalCollection>(_ gs : S) -> Gen<A>
+      where S.Iterator.Element == Gen<A>, S.Index : RandomType & Comparable, S.Index : RandomType
+    {
 		assert(gs.count != 0, "oneOf used with empty list")
 
 		return choose((gs.startIndex, gs.index(before: gs.endIndex))) >>- { x in
@@ -116,10 +120,12 @@ public struct Gen<A> {
 	/// Given a sequence of Generators and weights associated with them, this 
 	/// function randomly selects and uses a Generator.
 	///
-	/// Only use this function when you need to assign uneven "weights" to each 
-	/// generator.  If all generators need to have an equal chance of being 
+	/// Only use this function when you need to assign uneven "weights" to each
+	/// generator.  If all generators need to have an equal chance of being
 	/// selected, use `Gen.oneOf`.
-	public static func frequency<S : Sequence where S.Iterator.Element == (Int, Gen<A>)>(_ xs : S) -> Gen<A> {
+	public static func frequency<S : Sequence>(_ xs : S) -> Gen<A>
+    where S.Iterator.Element == (Int, Gen<A>)
+  {
 		let xs: [(Int, Gen<A>)] = Array(xs)
 		assert(xs.count != 0, "frequency used with empty list")
 
@@ -133,10 +139,12 @@ public struct Gen<A> {
 	///
 	/// This function operates in exactly the same manner as `Gen.frequency`, 
 	/// `Gen.fromElementsOf`, and `Gen.fromElementsIn` but for any type rather 
-	/// than only Generators.  It can help in cases where your `Gen.from*` call 
-	/// contains only `Gen.pure` calls by allowing you to remove every 
+	/// than only Generators.  It can help in cases where your `Gen.from*` call
+	/// contains only `Gen.pure` calls by allowing you to remove every
 	/// `Gen.pure` in favor of a direct list of values.
-	public static func weighted<S : Sequence where S.Iterator.Element == (Int, A)>(_ xs : S) -> Gen<A> {
+	public static func weighted<S : Sequence>(_ xs : S) -> Gen<A>
+    where S.Iterator.Element == (Int, A)
+  {
 		return frequency(xs.map { ($0, Gen.pure($1)) })
 	}
 }
@@ -260,55 +268,55 @@ extension Gen /*: Cartesian*/ {
 
 	/// Returns a new generator that applies a given function to any outputs the
 	/// two receivers create.
-	public static func map<A1, A2, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, transform: (A1, A2) -> R) -> Gen<R> {
+	public static func map<A1, A2, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, transform: @escaping (A1, A2) -> R) -> Gen<R> {
 		return zip(ga1, ga2).map(transform)
 	}
 
 	/// Returns a new generator that applies a given function to any outputs the
 	/// three receivers create.
-	public static func map<A1, A2, A3, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, transform: (A1, A2, A3) -> R) -> Gen<R> {
+	public static func map<A1, A2, A3, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, transform: @escaping (A1, A2, A3) -> R) -> Gen<R> {
 		return zip(ga1, ga2, ga3).map(transform)
 	}
 
 	/// Returns a new generator that applies a given function to any outputs the
 	/// four receivers create.
-	public static func map<A1, A2, A3, A4, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4 : Gen<A4>, transform: (A1, A2, A3, A4) -> R) -> Gen<R> {
+	public static func map<A1, A2, A3, A4, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4 : Gen<A4>, transform: @escaping (A1, A2, A3, A4) -> R) -> Gen<R> {
 		return zip(ga1, ga2, ga3, ga4).map(transform)
 	}
 
 	/// Returns a new generator that applies a given function to any outputs the
 	/// five receivers create.
-	public static func map<A1, A2, A3, A4, A5, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, transform: (A1, A2, A3, A4, A5) -> R) -> Gen<R> {
+	public static func map<A1, A2, A3, A4, A5, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, transform: @escaping (A1, A2, A3, A4, A5) -> R) -> Gen<R> {
 		return zip(ga1, ga2, ga3, ga4, ga5).map(transform)
 	}
 
 	/// Returns a new generator that applies a given function to any outputs the
 	/// six receivers create.
-	public static func map<A1, A2, A3, A4, A5, A6, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, _ ga6 : Gen<A6>, transform: (A1, A2, A3, A4, A5, A6) -> R) -> Gen<R> {
+	public static func map<A1, A2, A3, A4, A5, A6, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, _ ga6 : Gen<A6>, transform: @escaping (A1, A2, A3, A4, A5, A6) -> R) -> Gen<R> {
 		return zip(ga1, ga2, ga3, ga4, ga5, ga6).map(transform)
 	}
 
 	/// Returns a new generator that applies a given function to any outputs the
 	/// seven receivers create.
-	public static func map<A1, A2, A3, A4, A5, A6, A7, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, _ ga6 : Gen<A6>,  _ ga7 : Gen<A7>, transform: (A1, A2, A3, A4, A5, A6, A7) -> R) -> Gen<R> {
+	public static func map<A1, A2, A3, A4, A5, A6, A7, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, _ ga6 : Gen<A6>,  _ ga7 : Gen<A7>, transform: @escaping (A1, A2, A3, A4, A5, A6, A7) -> R) -> Gen<R> {
 		return zip(ga1, ga2, ga3, ga4, ga5, ga6, ga7).map(transform)
 	}
 
 	/// Returns a new generator that applies a given function to any outputs the
 	/// eight receivers create.
-	public static func map<A1, A2, A3, A4, A5, A6, A7, A8, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, _ ga6 : Gen<A6>,  _ ga7 : Gen<A7>, _ ga8 : Gen<A8>, transform: (A1, A2, A3, A4, A5, A6, A7, A8) -> R) -> Gen<R> {
+	public static func map<A1, A2, A3, A4, A5, A6, A7, A8, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, _ ga6 : Gen<A6>,  _ ga7 : Gen<A7>, _ ga8 : Gen<A8>, transform: @escaping (A1, A2, A3, A4, A5, A6, A7, A8) -> R) -> Gen<R> {
 		return zip(ga1, ga2, ga3, ga4, ga5, ga6, ga7, ga8).map(transform)
 	}
 
 	/// Returns a new generator that applies a given function to any outputs the
 	/// nine receivers create.
-	public static func map<A1, A2, A3, A4, A5, A6, A7, A8, A9, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, _ ga6 : Gen<A6>,  _ ga7 : Gen<A7>, _ ga8 : Gen<A8>, _ ga9 : Gen<A9>, transform: (A1, A2, A3, A4, A5, A6, A7, A8, A9) -> R) -> Gen<R> {
+	public static func map<A1, A2, A3, A4, A5, A6, A7, A8, A9, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, _ ga6 : Gen<A6>,  _ ga7 : Gen<A7>, _ ga8 : Gen<A8>, _ ga9 : Gen<A9>, transform: @escaping (A1, A2, A3, A4, A5, A6, A7, A8, A9) -> R) -> Gen<R> {
 		return zip(ga1, ga2, ga3, ga4, ga5, ga6, ga7, ga8, ga9).map(transform)
 	}
 
 	/// Returns a new generator that applies a given function to any outputs the
 	/// ten receivers create.
-	public static func map<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, _ ga6 : Gen<A6>,  _ ga7 : Gen<A7>, _ ga8 : Gen<A8>, _ ga9 : Gen<A9>, _ ga10 : Gen<A10>, transform: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) -> R) -> Gen<R> {
+	public static func map<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, _ ga6 : Gen<A6>,  _ ga7 : Gen<A7>, _ ga8 : Gen<A8>, _ ga9 : Gen<A9>, _ ga10 : Gen<A10>, transform: @escaping (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) -> R) -> Gen<R> {
 		return zip(ga1, ga2, ga3, ga4, ga5, ga6, ga7, ga8, ga9, ga10).map(transform)
 	}
 }
@@ -332,7 +340,7 @@ extension Gen {
 
 	/// Modifiers a Generator's size parameter by transforming it with the given
 	/// function.
-	public func scale(_ f : (Int) -> Int) -> Gen<A> {
+	public func scale(_ f : @escaping (Int) -> Int) -> Gen<A> {
 		return Gen.sized { n in
 			return self.resize(f(n))
 		}
@@ -343,10 +351,10 @@ extension Gen {
 	/// it never occured.
 	///
 	/// Because the Generator will spin until it reaches a non-failing case, 
-	/// executing a condition that fails more often than it succeeds may result 
-	/// in a space leak.  At that point, it is better to use `suchThatOptional` 
+	/// executing a condition that fails more often than it succeeds may result
+	/// in a space leak.  At that point, it is better to use `suchThatOptional`
 	/// or `.invert` the test case.
-	public func suchThat(_ p : (A) -> Bool) -> Gen<A> {
+	public func suchThat(_ p : @escaping (A) -> Bool) -> Gen<A> {
 		return self.suchThatOptional(p).flatMap { mx in
 			switch mx {
 			case .some(let x):
@@ -360,10 +368,10 @@ extension Gen {
 	}
 
 	/// Modifies a Generator such that it attempts to generate values that 
-	/// satisfy a predicate.  All attempts are encoded in the form of an 
-	/// `Optional` where values satisfying the predicate are wrapped in `.Some` 
+	/// satisfy a predicate.  All attempts are encoded in the form of an
+	/// `Optional` where values satisfying the predicate are wrapped in `.Some`
 	/// and failing values are `.None`.
-	public func suchThatOptional(_ p : (A) -> Bool) -> Gen<Optional<A>> {
+	public func suchThatOptional(_ p : @escaping (A) -> Bool) -> Gen<Optional<A>> {
 		return Gen<Optional<A>>.sized { n in
 			return attemptBoundedTry(self, 0, max(n, 1), p)
 		}
@@ -396,7 +404,7 @@ extension Gen {
 extension Gen /*: Functor*/ {
 	/// Returns a new generator that applies a given function to any outputs the
 	/// receiver creates.
-	public func map<B>(_ f : (A) -> B) -> Gen<B> {
+	public func map<B>(_ f : @escaping (A) -> B) -> Gen<B> {
 		return f <^> self
 	}
 }
@@ -407,9 +415,9 @@ extension Gen /*: Functor*/ {
 /// This function is most useful for converting between generators of inter-
 /// related types.  For example, you might have a Generator of `Character` 
 /// values that you then `.proliferate` into an `Array` of `Character`s.  You
-/// can then use `fmap` to convert that generator of `Array`s to a generator of 
+/// can then use `fmap` to convert that generator of `Array`s to a generator of
 /// `String`s.
-public func <^> <A, B>(f : (A) -> B, g : Gen<A>) -> Gen<B> {
+public func <^> <A, B>(f : @escaping (A) -> B, g : Gen<A>) -> Gen<B> {
 	return Gen(unGen: { r, n in
 		return f(g.unGen(r, n))
 	})
@@ -457,10 +465,10 @@ extension Gen /*: Monad*/ {
 	/// This generator is then given a new random seed and returned.
 	///
 	/// `flatMap` allows for the creation of Generators that depend on other
-	/// generators.  One might, for example, use a Generator of integers to 
-	/// control the length of a Generator of strings, or use it to choose a 
+	/// generators.  One might, for example, use a Generator of integers to
+	/// control the length of a Generator of strings, or use it to choose a
 	/// random index into a Generator of arrays.
-	public func flatMap<B>(_ fn : (A) -> Gen<B>) -> Gen<B> {
+	public func flatMap<B>(_ fn : @escaping (A) -> Gen<B>) -> Gen<B> {
 		return self >>- fn
 	}
 }
@@ -469,10 +477,10 @@ extension Gen /*: Monad*/ {
 /// generator.  This generator is then given a new random seed and returned.
 ///
 /// `flatMap` allows for the creation of Generators that depend on other 
-/// generators.  One might, for example, use a Generator of integers to control 
-/// the length of a Generator of strings, or use it to choose a random index 
+/// generators.  One might, for example, use a Generator of integers to control
+/// the length of a Generator of strings, or use it to choose a random index
 /// into a Generator of arrays.
-public func >>- <A, B>(m : Gen<A>, fn : (A) -> Gen<B>) -> Gen<B> {
+public func >>- <A, B>(m : Gen<A>, fn : @escaping (A) -> Gen<B>) -> Gen<B> {
 	return Gen(unGen: { r, n in
 		let (r1, r2) = r.split
 		let m2 = fn(m.unGen(r1, n))
@@ -505,7 +513,7 @@ public func join<A>(_ rs : Gen<Gen<A>>) -> Gen<A> {
 
 /// Lifts a function from some A to some R to a function from generators of A to
 /// generators of R.
-public func liftM<A, R>(_ f : (A) -> R, _ m1 : Gen<A>) -> Gen<R> {
+public func liftM<A, R>(_ f : @escaping (A) -> R, _ m1 : Gen<A>) -> Gen<R> {
 	return m1.flatMap{ x1 in
 		return Gen.pure(f(x1))
 	}
@@ -519,7 +527,7 @@ public func promote<A>(_ x : Rose<Gen<A>>) -> Gen<Rose<A>> {
 }
 
 /// Promotes a function returning generators to a generator of functions.
-public func promote<A, B>(_ m : (A) -> Gen<B>) -> Gen<(A) -> B> {
+public func promote<A, B>(_ m : @escaping (A) -> Gen<B>) -> Gen<(A) -> B> {
 	return delay().flatMap { eval in
 		return Gen<(A) -> B>.pure(eval • m)
 	}
@@ -541,7 +549,7 @@ private func vary<S : Integer>(_ k : S, _ rng : StdGen) -> StdGen {
 	return (k == (k / 2)) ? gen : vary(k / 2, rng)
 }
 
-private func attemptBoundedTry<A>(_ gen: Gen<A>, _ k : Int, _ bound : Int, _ pred : (A) -> Bool) -> Gen<Optional<A>> {
+private func attemptBoundedTry<A>(_ gen: Gen<A>, _ k : Int, _ bound : Int, _ pred : @escaping (A) -> Bool) -> Gen<Optional<A>> {
 	if bound == 0 {
 		return Gen.pure(.none)
 	}

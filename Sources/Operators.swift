@@ -12,219 +12,200 @@
 
 // MARK: Combinators
 
+precedencegroup CompositionPrecedence {
+  associativity: right
+  higherThan: BitwiseShiftPrecedence
+}
+
 /// Compose | Applies one function to the result of another function to produce a third function.
-infix operator • {
-	associativity right
-	precedence 190
+infix operator • : CompositionPrecedence
+
+precedencegroup RightAssociativeCombinatorPrecedence {
+  associativity: right
+  lowerThan: DefaultPrecedence
+}
+
+precedencegroup LeftAssociativeCombinatorPrecedence {
+  associativity: left
+  lowerThan: DefaultPrecedence
 }
 
 /// Apply | Applies an argument to a function.
-infix operator § {
-	associativity right
-	precedence 95
-}
+infix operator § : RightAssociativeCombinatorPrecedence
 
 /// Pipe Backward | Applies the function to its left to an argument on its right.
-infix operator <| {
-	associativity right
-	precedence 95
-}
+infix operator <| : RightAssociativeCombinatorPrecedence
 
 /// Pipe forward | Applies an argument on the left to a function on the right.
-infix operator |> {
-	associativity left
-	precedence 95
-}
+infix operator |> : LeftAssociativeCombinatorPrecedence
 
 /// On | Given a "combining" function and a function that converts arguments to the target of the
 /// combiner, returns a function that applies the right hand side to two arguments, then runs both
 /// results through the combiner.
-infix operator |*| {
-	associativity left
-	precedence 100
-}
-
+infix operator |*| : LeftAssociativeCombinatorPrecedence
 
 // MARK: Control.*
 
-/// Fmap | Maps a function over the value encapsulated by a functor.
-infix operator <^> {
-	associativity left
-	// https://github.com/thoughtbot/Runes/blob/master/Source/Runes.swift
-	precedence 130
+precedencegroup FunctorPrecedence {
+  associativity: left
+  higherThan: DefaultPrecedence
 }
+
+precedencegroup FunctorSequencePrecedence {
+  associativity: left
+  higherThan: FunctorPrecedence
+}
+
+precedencegroup MonadPrecedenceLeft {
+  associativity: left
+  higherThan: FunctorSequencePrecedence
+}
+
+precedencegroup MonadPrecedenceRight {
+  associativity: right
+  higherThan: FunctorSequencePrecedence
+}
+
+/// Fmap | Maps a function over the value encapsulated by a functor.
+infix operator <^> : FunctorPrecedence
 
 /// Replace | Maps all the values encapsulated by a functor to a user-specified constant.
-infix operator <^ {
-	associativity left
-	precedence 140
-}
+infix operator <^ : FunctorSequencePrecedence
 
 /// Replace Backwards | Maps all the values encapsulated by a functor to a user-specified constant.
-infix operator ^> {
-	associativity left
-	precedence 140
-}
+infix operator ^> : FunctorSequencePrecedence
 
 
 /// Ap | Applies a function encapsulated by a functor to the value encapsulated by another functor.
-infix operator <*> {
-	associativity left
-	// https://github.com/thoughtbot/Runes/blob/master/Source/Runes.swift
-	precedence 130
-}
+infix operator <*> : FunctorPrecedence
 
 /// Sequence Right | Disregards the Functor on the Left.
 ///
 /// Default definition:
 ///		`const(id) <^> a <*> b`
-infix operator *> {
-	associativity left
-	precedence 140
-}
+infix operator *> : FunctorSequencePrecedence
 
 /// Sequence Left | Disregards the Functor on the Right.
 ///
 /// Default definition:
 ///		`const <^> a <*> b`
-infix operator <* {
-	associativity left
-	precedence 140
-}
+infix operator <* : FunctorSequencePrecedence
 
 /// Bind | Sequences and composes two monadic actions by passing the value inside the monad on the
 /// left to a function on the right yielding a new monad.
-infix operator >>- {
-	associativity left
-	// https://github.com/thoughtbot/Runes/blob/master/Source/Runes.swift
-	precedence 100
-}
+infix operator >>- : MonadPrecedenceLeft
 
-/// Bind Backwards | Composes two monadic actions by passing the value inside the monad on the 
+/// Bind Backwards | Composes two monadic actions by passing the value inside the monad on the
 /// right to the funciton on the left.
-infix operator -<< {
-	associativity right
-	// https://github.com/thoughtbot/Runes/blob/master/Source/Runes.swift
-	precedence 100
-}
+infix operator -<< : MonadPrecedenceRight
 
 /// Left-to-Right Kleisli | Composition for monads.
-infix operator >>->> {
-	associativity right
-	precedence 110
-}
+infix operator >>->> : MonadPrecedenceRight
 
 /// Right-to-Left Kleisli | Composition for monads.
-infix operator <<-<< {
-	associativity right
-	precedence 110
-}
+infix operator <<-<< : MonadPrecedenceRight
 
 /// Extend | Duplicates the surrounding context and computes a value from it while remaining in the
 /// original context.
-infix operator ->> {
-	associativity left
-	precedence 110
+infix operator ->> : MonadPrecedenceLeft
+
+precedencegroup FunctorExtrasPrecedence {
+  associativity: left
+  higherThan: FunctorSequencePrecedence
 }
 
 /// Imap | Maps covariantly over the index of a right-leaning bifunctor.
-infix operator <^^> {
-	associativity left
-	precedence 140
-}
+infix operator <^^> : FunctorExtrasPrecedence
 
 /// Contramap | Contravariantly maps a function over the value encapsulated by a functor.
-infix operator <!> {
-	associativity left
-	precedence 140
-}
+infix operator <!> : FunctorExtrasPrecedence
 
 // MARK: Data.Result
 
-/// From | Creates a Result given a function that can possibly fail with an error.
-infix operator !! {
-	associativity none
-	precedence 120
+precedencegroup ResultPrecedence {
+  associativity: none
+  higherThan: FunctorPrecedence
 }
+
+/// From | Creates a Result given a function that can possibly fail with an error.
+infix operator !! : ResultPrecedence
 
 // MARK: Data.Monoid
 
 /// Append | Alias for a Semigroup's operation.
-infix operator <> {
-	associativity right
-	precedence 160
-}
+infix operator <> : AdditionPrecedence
 
 // MARK: Control.Category
+
+precedencegroup CategoryPrecedence {
+  associativity: right
+  higherThan: MonadPrecedenceRight
+}
 
 /// Right-to-Left Composition | Composes two categories to form a new category with the source of
 /// the second category and the target of the first category.
 ///
 /// This function is literally `•`, but for Categories.
-infix operator <<< {
-	associativity right
-	precedence 110
-}
+infix operator <<< : CategoryPrecedence
 
 /// Left-to-Right Composition | Composes two categories to form a new category with the source of
 /// the first category and the target of the second category.
 ///
 /// Function composition with the arguments flipped.
-infix operator >>> {
-	associativity right
-	precedence 110
-}
+infix operator >>> : CategoryPrecedence
 
 // MARK: Control.Arrow
 
+precedencegroup ArrowPrecedence {
+  associativity: right
+  higherThan: CategoryPrecedence
+}
+
 /// Split | Splits two computations and combines the result into one Arrow yielding a tuple of
 /// the result of each side.
-infix operator *** {
-	associativity right
-	precedence 130
-}
+infix operator *** : ArrowPrecedence
 
 /// Fanout | Given two functions with the same source but different targets, this function
 /// splits the computation and combines the result of each Arrow into a tuple of the result of
 /// each side.
-infix operator &&& {
-	associativity right
-	precedence 130
-}
+infix operator &&& : ArrowPrecedence
 
 // MARK: Control.Arrow.Choice
 
-/// Splat | Splits two computations and combines the results into Eithers on the left and right.
-infix operator +++ {
-	associativity right
-	precedence 120
+precedencegroup ArrowChoicePrecedence {
+  associativity: right
+  higherThan: ArrowPrecedence
 }
+
+/// Splat | Splits two computations and combines the results into Eithers on the left and right.
+infix operator +++ : ArrowChoicePrecedence
 
 /// Fanin | Given two functions with the same target but different sources, this function splits
 /// the input between the two and merges the output.
-infix operator ||| {
-	associativity right
-	precedence 120
-}
+infix operator ||| : ArrowChoicePrecedence
 
 // MARK: Control.Arrow.Plus
 
-/// Op | Combines two ArrowZero monoids.
-infix operator <+> {
-	associativity right
-	precedence 150
+precedencegroup ArrowPlusPrecedence {
+  associativity: right
+  higherThan: ArrowChoicePrecedence
 }
 
+/// Op | Combines two ArrowZero monoids.
+infix operator <+> : ArrowPlusPrecedence
+
 // MARK: Data.JSON
+
+precedencegroup JSONPrecedence {
+  associativity: right
+  higherThan: ArrowPlusPrecedence
+}
 
 /// Retrieve | Retrieves a value from a dictionary of JSON values using a given keypath.
 ///
 /// If the given keypath is not present or the retrieved value is not of the appropriate type, this
 /// function returns `.None`.
-infix operator <? {
-	associativity left
-	precedence 150
-}
+infix operator <? : JSONPrecedence
 
 /// Force Retrieve | Retrieves a value from a dictionary of JSON values using a given keypath,
 /// forcing any Optionals it finds.
@@ -232,15 +213,12 @@ infix operator <? {
 /// If the given keypath is not present or the retrieved value is not of the appropriate type, this
 /// function will terminate with a fatal error.  It is recommended that you use Force Retrieve's
 /// total cousin `<?` (Retrieve).
-infix operator <! {
-	associativity left
-	precedence 150
-}
+infix operator <! : JSONPrecedence
 
 // MARK: Data.Set
 
 /// Intersection | Returns the intersection of two sets.
-infix operator ∩ {}
+infix operator ∩
 
 /// Union | Returns the union of two sets.
-infix operator ∪ {}
+infix operator ∪

@@ -291,7 +291,7 @@ class GenSpec : XCTestCase {
 	}
 }
 
-internal func curry<A, B, C>(_ f : (A, B) -> C) -> (A) -> (B) -> C {
+internal func curry<A, B, C>(_ f : @escaping (A, B) -> C) -> (A) -> (B) -> C {
 	return { a in { b in f(a, b) } }
 }
 
@@ -299,7 +299,7 @@ internal func id<A>(_ x : A) -> A {
 	return x
 }
 
-internal func • <A, B, C>(f : (B) -> C, g : (A) -> B) -> (A) -> C {
+internal func • <A, B, C>(f : @escaping (B) -> C, g : @escaping (A) -> B) -> (A) -> C {
 	return { f(g($0)) }
 }
 

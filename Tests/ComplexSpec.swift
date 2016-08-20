@@ -58,7 +58,7 @@ class ComplexSpec : XCTestCase {
 			gen4
 		])
 
-		let ipGen = { $0.initial } <^> glue([ipHexDigits, ipHexDigits, ipHexDigits, ipHexDigits])
+    let ipGen = { $0.initial } <^> glue([ipHexDigits, ipHexDigits, ipHexDigits, ipHexDigits])
 
 		property("Generated IPs contain 3 sections") <- forAll(ipGen) { (e : String) in
 			return e.characters.filter({ $0 == ":" }).count == 3
@@ -73,7 +73,7 @@ func glue(_ parts : [Gen<String>]) -> Gen<String> {
 }
 
 extension String {
-	private var initial : String {
+	fileprivate var initial : String {
 		return self[self.startIndex..<self.characters.index(before: self.endIndex)]
 	}
 }

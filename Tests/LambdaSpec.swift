@@ -30,7 +30,7 @@ func == (l : Name, r : Name) -> Bool {
 	return l.unName == r.unName
 }
 
-private func liftM2<A, B, C>(_ f : (A, B) -> C, _ m1 : Gen<A>, _ m2 : Gen<B>) -> Gen<C> {
+private func liftM2<A, B, C>(_ f : @escaping (A, B) -> C, _ m1 : Gen<A>, _ m2 : Gen<B>) -> Gen<C> {
 	return m1.flatMap { x1 in
 		return m2.flatMap { x2 in
 			return Gen.pure(f(x1, x2))

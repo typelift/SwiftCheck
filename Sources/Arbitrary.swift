@@ -295,12 +295,12 @@ extension Double : Arbitrary {
 extension UnicodeScalar : Arbitrary {
 	/// Returns a generator of `UnicodeScalar` values.
 	public static var arbitrary : Gen<UnicodeScalar> {
-		return UInt32.arbitrary.flatMap(Gen<UnicodeScalar>.pure • UnicodeScalar.init)
+    return UInt32.arbitrary.flatMap { Gen<UnicodeScalar>.pure(UnicodeScalar($0)!) }
 	}
 
 	/// The default shrinking function for `UnicodeScalar` values.
 	public static func shrink(_ x : UnicodeScalar) -> [UnicodeScalar] {
-		let s : UnicodeScalar = UnicodeScalar(UInt32(tolower(Int32(x.value))))
+		let s : UnicodeScalar = UnicodeScalar(UInt32(tolower(Int32(x.value))))!
 		return [ "a", "b", "c", s, "A", "B", "C", "1", "2", "3", "\n", " " ].nub.filter { $0 < x }
 	}
 }
@@ -371,7 +371,7 @@ private func asAny<T>(_ x : T) -> Any {
 }
 
 extension Array where Element : Hashable {
-	private var nub : [Element] {
+	fileprivate var nub : [Element] {
 		return [Element](Set(self))
 	}
 }

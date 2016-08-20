@@ -40,12 +40,12 @@ public func property(_ msg : String, arguments : CheckerArguments? = nil, file :
 /// Describes a checker that uses XCTest to assert all testing failures and
 /// display them in both the testing log and Xcode.
 public struct AssertiveQuickCheck {
-	private let msg : String
-	private let file : StaticString
-	private let line : UInt
-	private let args : CheckerArguments
-	
-	private init(msg : String, file : StaticString, line : UInt, args : CheckerArguments) {
+	fileprivate let msg : String
+	fileprivate let file : StaticString
+	fileprivate let line : UInt
+	fileprivate let args : CheckerArguments
+
+	fileprivate init(msg : String, file : StaticString, line : UInt, args : CheckerArguments) {
 		self.msg = msg
 		self.file = file
 		self.line = line
@@ -62,12 +62,12 @@ public func reportProperty(_ msg : String, arguments : CheckerArguments? = nil, 
 /// Describes a checker that only reports failures to the testing log but does
 /// not assert when a property fails.
 public struct ReportiveQuickCheck {
-	private let msg : String
-	private let file : StaticString
-	private let line : UInt
-	private let args : CheckerArguments
-	
-	private init(msg : String, file : StaticString, line : UInt, args : CheckerArguments) {
+	fileprivate let msg : String
+	fileprivate let file : StaticString
+	fileprivate let line : UInt
+	fileprivate let args : CheckerArguments
+
+	fileprivate init(msg : String, file : StaticString, line : UInt, args : CheckerArguments) {
 		self.msg = msg
 		self.file = file
 		self.line = line
@@ -137,10 +137,10 @@ public struct CheckerArguments {
 	internal var name : String
 }
 
-infix operator <- {}
+infix operator <-
 
 /// Binds a Testable value to a property.
-public func <- (checker : AssertiveQuickCheck, test : @autoclosure(escaping)() -> Testable) {
+public func <- (checker : AssertiveQuickCheck, test : @autoclosure @escaping () -> Testable) {
 	switch quickCheckWithResult(checker.args, test()) {
 	case let .failure(_, _, seed, sz, reason, _, _):
 		XCTFail(reason + "; Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
@@ -173,17 +173,19 @@ public func <- (checker : ReportiveQuickCheck, test : () -> Testable) {
 }
 
 /// Binds a Testable value to a property.
-public func <- (checker : ReportiveQuickCheck, test : @autoclosure(escaping)() -> Testable) {
+public func <- (checker : ReportiveQuickCheck, test : @autoclosure @escaping () -> Testable) {
 	_ = quickCheckWithResult(checker.args, test())
 }
 
-infix operator ==> {
-	associativity right
-	precedence 100
+precedencegroup SwiftCheckImplicationPrecedence {
+  associativity: right
+  lowerThan: ComparisonPrecedence
 }
 
+infix operator ==> : SwiftCheckImplicationPrecedence
+
 /// Models implication for properties.  That is, the property holds if the first
-/// argument is false (in which case the test case is discarded), or if the 
+/// argument is false (in which case the test case is discarded), or if the
 /// given property holds.
 public func ==> (b : Bool, p : @autoclosure() -> Testable) -> Property {
 	if b {
@@ -202,24 +204,25 @@ public func ==> (b : Bool, p : () -> Testable) -> Property {
 	return Discard().property
 }
 
-infix operator ==== {
-	precedence 140
-}
+infix operator ==== : ComparisonPrecedence
 
 /// Like equality but prints a verbose description when it fails.
-public func ==== <A where A : Equatable>(x : A, y : A) -> Property {
-	return (x == y).counterexample(String(x) + " /= " + String(y))
+public func ==== <A>(x : A, y : A) -> Property
+  where A : Equatable
+{
+	return (x == y).counterexample(String(describing: x) + " /= " + String(describing: y))
 }
 
-
-infix operator <?> {
-	associativity left
-	precedence 200
+precedencegroup SwiftCheckLabelPrecedence {
+  associativity: right
+  higherThan: BitwiseShiftPrecedence
 }
+
+infix operator <?> : SwiftCheckLabelPrecedence
 
 /// Attaches a label to a property.
 ///
-/// Labelled properties aid in testing conjunctions and disjunctions, or any 
+/// Labelled properties aid in testing conjunctions and disjunctions, or any
 /// other cases where test cases need to be distinct from one another.  In 
 /// addition to shrunken test cases, upon failure SwiftCheck will print a 
 /// distribution map for the property that shows a percentage success rate for 
@@ -228,12 +231,15 @@ public func <?> (p : Testable, s : String) -> Property {
 	return p.label(s)
 }
 
-infix operator ^&&^ {
-	associativity right
-	precedence 110
+precedencegroup SwiftCheckLogicalPrecedence {
+  associativity: left
+  higherThan: LogicalConjunctionPrecedence
+  lowerThan: ComparisonPrecedence
 }
 
-/// Takes the conjunction of two properties and treats them as a single large 
+infix operator ^&&^ : SwiftCheckLogicalPrecedence
+
+/// Takes the conjunction of two properties and treats them as a single large
 /// property.
 ///
 /// Conjoined properties succeed only when both sub-properties succeed and fail 
@@ -243,12 +249,9 @@ public func ^&&^ (p1 : Testable, p2 : Testable) -> Property {
 }
 
 
-infix operator ^||^ {
-	associativity right
-	precedence 110
-}
+infix operator ^||^ : SwiftCheckLogicalPrecedence
 
-/// Takes the disjunction of two properties and treats them as a single large 
+/// Takes the disjunction of two properties and treats them as a single large
 /// property.
 ///
 /// Disjoined properties succeed only when one or more sub-properties succeed 
