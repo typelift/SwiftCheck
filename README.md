@@ -1,5 +1,8 @@
+[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 [![Build Status](https://travis-ci.org/typelift/SwiftCheck.svg?branch=master)](https://travis-ci.org/typelift/SwiftCheck)
-
+[![Gitter chat](https://badges.gitter.im/DPVN/chat.png)](https://gitter.im/typelift/general?utm_source=share-link&utm_medium=link&utm_campaign=share-link)
+ 
+ 
 SwiftCheck
 ==========
 
@@ -69,7 +72,7 @@ property("Shrunken lists of integers always contain [] or [0]") <- forAll { (l :
     return (!l.getArray.isEmpty && l.getArray != [0]) ==> {
         let ls = self.shrinkArbitrary(l).map { $0.getArray }
         return (ls.filter({ $0 == [] || $0 == [0] }).count >= 1)
-    }()
+    }
 }
 ```
 
@@ -175,7 +178,7 @@ Test Case '-[SwiftCheckTests.PrimeSpec testAll]' started.
 Indicating that our sieve has failed on the input number 4.  A quick look back
 at the comments describing the sieve reveals the mistake immediately:
 
-```
+```diff
 - for i in stride(from: 2 * p, to: n, by: p) {
 + for i in stride(from: 2 * p, through: n, by: p) {
 ```
@@ -227,13 +230,80 @@ class SimpleSpec : XCTestCase {
 }
 ```
 
+There's also a `Gen.compose` method which allows you to procedurally compose values from multiple generators to construct instances of a type:
+
+``` swift
+public struct ArbitraryLargeFoo {
+	let a : Int8
+	let b : Int16
+	let c : Int32
+	let d : Int64
+	let e : UInt8
+	let f : UInt16
+	let g : UInt32
+	let h : UInt64
+	let i : Int
+	let j : UInt
+	let k : Bool
+	let l : (Bool, Bool)
+	let m : (Bool, Bool, Bool)
+	let n : (Bool, Bool, Bool, Bool)
+	
+    public static var arbitrary: Gen<ArbitraryLargeFoo> = Gen<ArbitraryLargeFoo>.compose { c in
+        // c is a `GenComposer` which will generate the values you need, either from the default `arbitrary` member of the
+        // type or a given generator
+        let evenInt16 = Int16.arbitrary.suchThat { $0 % 2 == 0 }
+        return ArbitraryLargeFoo(
+            a: c.generate(), // `generate()` infers the type to return a value from `Int8.arbitrary`
+            b: c.generate(evenInt16), // returns a value from `evenInt16`
+            c: c.generate(),
+            d: c.generate(),
+            e: c.generate(),
+            f: c.generate(),
+            g: c.generate(),
+            h: c.generate(),
+            i: c.generate(),
+            j: c.generate(),
+            k: c.generate(),
+            l: (c.generate(), c.generate()),
+            m: (c.generate(), c.generate(), c.generate()),
+            n: (c.generate(), c.generate(), c.generate(), c.generate())
+        )   
+    }
+}
+
+```
+
+`Gen.compose` can also be used with types that can only be customized with setters:
+
+``` swift
+public struct ArbitraryMutableFoo : Arbitrary {
+    var a: Int8
+    var b: Int16
+    
+    public init() {
+        a = 0
+        b = 0
+    }
+    
+    public static var arbitrary: Gen<ArbitraryMutableFoo> {
+        return Gen.compose { c in
+            var foo = ArbitraryMutableFoo()
+            foo.a = c.generate()
+            foo.b = c.generate()
+            return foo
+        }
+    }
+}
+```
+
 For everything else, SwiftCheck defines a number of combinators to make working
 with custom generators as simple as possible:
 
 ```swift
 let onlyEven = Int.arbitrary.suchThat { $0 % 2 == 0 }
 
-let vowels = Gen.fromElementsOf(["A", "E", "I", "O", "U" ])
+let vowels = Gen.fromElementsOf([ "A", "E", "I", "O", "U" ])
 
 let randomHexValue = Gen<UInt>.choose((0, 15))
 
@@ -250,7 +320,7 @@ let weightedOptionals = Gen<Int?>.frequency([
 ```
  
 For instances of many complex or "real world" generators, see 
-[`ComplexSpec.swift`](SwiftCheckTests/ComplexSpec.swift).
+[`ComplexSpec.swift`](Tests/ComplexSpec.swift).
 
 System Requirements
 ===================
@@ -261,7 +331,15 @@ Setup
 =====
 
 SwiftCheck can be included one of two ways:
+ 
+**Using The Swift Package Manager**
 
+- Add SwiftCheck to your `Package.swift` file's dependencies section:
+
+```swift
+.Package(url: "https://github.com/typelift/SwiftCheck.git", versions: Version(0,6,0)..<Version(1,0,0))
+```
+ 
 **Using Carthage**
 
 - Add SwiftCheck to your Cartfile
@@ -273,6 +351,11 @@ SwiftCheck can be included one of two ways:
 - Set the directory to `Frameworks`
 - Click the + and add SwiftCheck
 
+**Using CocoaPods**
+
+- Add [our Pod](https://cocoapods.org/pods/SwiftCheck) to your podfile.
+- Run `$ pod install` in your project directory.
+ 
 **Framework**
 
 - Drag SwiftCheck.xcodeproj into your project tree

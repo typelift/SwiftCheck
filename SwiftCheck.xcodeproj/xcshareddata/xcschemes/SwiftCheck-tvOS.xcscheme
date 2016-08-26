@@ -14,23 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "84DF75F71B0BD54600C912B0"
+               BlueprintIdentifier = "8240CCB01C3A123600EF4D29"
                BuildableName = "SwiftCheck.framework"
-               BlueprintName = "SwiftCheck-iOS"
-               ReferencedContainer = "container:SwiftCheck.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "NO"
-            buildForProfiling = "NO"
-            buildForArchiving = "NO"
-            buildForAnalyzing = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "84DF76011B0BD54600C912B0"
-               BuildableName = "SwiftCheck-iOSTests.xctest"
-               BlueprintName = "SwiftCheck-iOSTests"
+               BlueprintName = "SwiftCheck-tvOS"
                ReferencedContainer = "container:SwiftCheck.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -46,9 +32,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "84DF76011B0BD54600C912B0"
-               BuildableName = "SwiftCheck-iOSTests.xctest"
-               BlueprintName = "SwiftCheck-iOSTests"
+               BlueprintIdentifier = "8240CCB91C3A123700EF4D29"
+               BuildableName = "SwiftCheck-tvOSTests.xctest"
+               BlueprintName = "SwiftCheck-tvOSTests"
                ReferencedContainer = "container:SwiftCheck.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -56,9 +42,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "84DF75F71B0BD54600C912B0"
+            BlueprintIdentifier = "8240CCB01C3A123600EF4D29"
             BuildableName = "SwiftCheck.framework"
-            BlueprintName = "SwiftCheck-iOS"
+            BlueprintName = "SwiftCheck-tvOS"
             ReferencedContainer = "container:SwiftCheck.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -78,9 +64,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "84DF75F71B0BD54600C912B0"
+            BlueprintIdentifier = "8240CCB01C3A123600EF4D29"
             BuildableName = "SwiftCheck.framework"
-            BlueprintName = "SwiftCheck-iOS"
+            BlueprintName = "SwiftCheck-tvOS"
             ReferencedContainer = "container:SwiftCheck.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -96,9 +82,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "84DF75F71B0BD54600C912B0"
+            BlueprintIdentifier = "8240CCB01C3A123600EF4D29"
             BuildableName = "SwiftCheck.framework"
-            BlueprintName = "SwiftCheck-iOS"
+            BlueprintName = "SwiftCheck-tvOS"
             ReferencedContainer = "container:SwiftCheck.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

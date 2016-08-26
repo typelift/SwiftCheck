@@ -1,9 +1,58 @@
-language: objective-c
-osx_image: xcode7
-
-before_install:
-    - gem install xcpretty-travis-formatter --no-rdoc --no-ri --no-document --quiet
-
-script:
-    - set -o pipefail && xcodebuild -project SwiftCheck.xcodeproj -scheme SwiftCheck -sdk macosx ONLY_ACTIVE_ARCH=NO clean build test | xcpretty -c -f `xcpretty-travis-formatter`
-    - set -o pipefail && xcodebuild -project SwiftCheck.xcodeproj -scheme SwiftCheck-iOS -sdk iphonesimulator ONLY_ACTIVE_ARCH=NO clean build test | xcpretty -c -f `xcpretty-travis-formatter`
+env:
+  global:
+    - LC_CTYPE=en_US.UTF-8
+matrix:
+  include:
+    - os: osx
+      language: objective-c
+      osx_image: xcode7.3
+      before_install:
+        - git submodule update --init --recursive
+      script:
+        - pod lib lint
+        - carthage build --no-skip-current
+    - os: osx
+      language: objective-c
+      osx_image: xcode7.3
+      before_install:
+        - git submodule update --init --recursive
+      script:
+        - set -o pipefail
+        - xcodebuild test -scheme SwiftCheck | xcpretty -c
+        # -- Start iOS --
+        # !!!: Make sure desired device name & OS version are suitable for the Xcode version installed on osx_image
+        - iOS_DEVICE_NAME="iPad Pro"
+        - iOS_RUNTIME_VERSION="9.3"
+        # Get simulator identifier for desired device/runtime pair
+        - SIMULATOR_ID=$(xcrun instruments -s | grep -o "${iOS_DEVICE_NAME} (${iOS_RUNTIME_VERSION}) \[.*\]" | grep -o "\[.*\]" | sed "s/^\[\(.*\)\]$/\1/")
+        - echo $SIMULATOR_ID
+        - echo $iOS_DEVICE_NAME
+        - echo $iOS_RUNTIME_VERSION
+        # !!!: Start simulator w/ desired device—helps avoid issues w/ Xcode timing out when waiting for simulator to become ready
+        - open -b com.apple.iphonesimulator --args -CurrentDeviceUDID $SIMULATOR_ID
+        - xcodebuild test -scheme SwiftCheck-iOS -destination "platform=iOS Simulator,name=${iOS_DEVICE_NAME},OS=${iOS_RUNTIME_VERSION}" | xcpretty -c
+        # -- End iOS --
+        - xcodebuild test -scheme SwiftCheck-tvOS -destination 'platform=tvOS Simulator,name=Apple TV 1080p' | xcpretty -c
+    - os: linux
+      language: generic
+      sudo: required
+      dist: trusty
+      before_install:
+        - git submodule update --init --recursive
+        - wget -q -O - https://swift.org/keys/all-keys.asc | gpg --import -
+        - wget https://swift.org/builds/development/ubuntu1404/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04.tar.gz
+        - tar xzf swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04.tar.gz
+        - export PATH=${PWD}/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04/usr/bin:"${PATH}"
+        - wget -q -O - https://swift.org/keys/all-keys.asc | gpg --import -
+        - wget https://swift.org/builds/development/ubuntu1404/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04.tar.gz
+        - tar xzf swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04.tar.gz
+        - export PATH=${PWD}/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04/usr/bin:"${PATH}"
+      script:
+        - swift build
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/1d781e1bcbabade5de35
+    on_success: always
+    on_failure: always
+    on_start: always
