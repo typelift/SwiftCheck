@@ -420,7 +420,6 @@ private func test(_ st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Resul
 					return reportExistentialFailure(fail.1, res: fail.0)
 				} else {
 					state = fail.1
-					break
 				}
 			default:
 				return fail.0
@@ -575,7 +574,6 @@ private func runATest(_ st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> E
 		}
 	default:
 		fatalError("Pattern Match Failed: Rose should have been reduced to MkRose, not IORose.")
-		break
 	}
 }
 
@@ -651,7 +649,7 @@ private func findMinimalFailingTestCase(_ st : CheckerState, res : TestResult, t
 		failedShrinkStepDistance = 0
 
 		// Try all possible courses of action in this Rose Tree
-		branches.forEach { r in
+		for r in branches {
 			switch r.reduce {
 			case .mkRose(let resC, let ts1):
 				let res1 = resC()
