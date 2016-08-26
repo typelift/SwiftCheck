@@ -70,45 +70,51 @@ extension Testable {
 	/// Discarded tests remain discarded under inversion.
 	public var invert : Property {
 		return self.mapResult { res in
-			return TestResult(ok:            res.ok.map(!)
-				, expect:        res.expect
-				, reason:        res.reason
-				, theException: res.theException
-				, labels:        res.labels
-				, stamp:        res.stamp
-				, callbacks:    res.callbacks
-				, abort:        res.abort
-				, quantifier:    res.quantifier)
+			return TestResult(
+				ok:            res.ok.map(!),
+				expect:        res.expect,
+				reason:        res.reason,
+				theException:  res.theException,
+				labels:        res.labels,
+				stamp:         res.stamp,
+				callbacks:     res.callbacks,
+				abort:         res.abort,
+				quantifier:    res.quantifier
+			)
 		}
 	}
 
 	/// Modifies a property so that it only will be tested once.
 	public var once : Property {
 		return self.mapResult { res in
-			return TestResult(ok:           res.ok
-				, expect:       res.expect
-				, reason:       res.reason
-				, theException: res.theException
-				, labels:       res.labels
-				, stamp:        res.stamp
-				, callbacks:    res.callbacks
-				, abort:        true
-				, quantifier:    res.quantifier)
+			return TestResult(
+				ok:            res.ok,
+				expect:        res.expect,
+				reason:        res.reason,
+				theException:  res.theException,
+				labels:        res.labels,
+				stamp:         res.stamp,
+				callbacks:     res.callbacks,
+				abort:         true,
+				quantifier:    res.quantifier
+			)
 		}
 	}
 
 	/// Attaches a callback to a test case.
 	public func withCallback(_ cb : Callback) -> Property {
 		return self.mapResult { (res) in
-			return TestResult(ok:           res.ok
-				, expect:       res.expect
-				, reason:       res.reason
-				, theException: res.theException
-				, labels:       res.labels
-				, stamp:        res.stamp
-				, callbacks:    [cb] + res.callbacks
-				, abort:        res.abort
-				, quantifier:    res.quantifier)
+			return TestResult(
+				ok:            res.ok,
+				expect:        res.expect,
+				reason:        res.reason,
+				theException:  res.theException,
+				labels:        res.labels,
+				stamp:         res.stamp,
+				callbacks:     [cb] + res.callbacks,
+				abort:         res.abort,
+				quantifier:    res.quantifier
+			)
 		}
 	}
 
@@ -171,15 +177,17 @@ extension Testable {
 		}
 
 		return self.mapResult { res in
-			return TestResult(ok:           res.ok
-				, expect:       res.expect
-				, reason:       res.reason
-				, theException: res.theException
-				, labels:       res.labels
-				, stamp:        res.stamp
-				, callbacks:    res.callbacks + chattyCallbacks(res.callbacks)
-				, abort:        res.abort
-				, quantifier:    res.quantifier)
+			return TestResult(
+				ok:            res.ok,
+				expect:        res.expect,
+				reason:        res.reason,
+				theException:  res.theException,
+				labels:        res.labels,
+				stamp:         res.stamp,
+				callbacks:     res.callbacks + chattyCallbacks(res.callbacks),
+				abort:         res.abort,
+				quantifier:    res.quantifier
+			)
 		}
 	}
 
@@ -188,15 +196,17 @@ extension Testable {
 	/// If the property does not fail, SwiftCheck will report an error.
 	public var expectFailure : Property {
 		return self.mapTotalResult { res in
-			return TestResult(ok:           res.ok
-				, expect:       false
-				, reason:       res.reason
-				, theException: res.theException
-				, labels:       res.labels
-				, stamp:        res.stamp
-				, callbacks:    res.callbacks
-				, abort:        res.abort
-				, quantifier:    res.quantifier)
+			return TestResult(
+				ok:            res.ok,
+				expect:        false,
+				reason:        res.reason,
+				theException:  res.theException,
+				labels:        res.labels,
+				stamp:         res.stamp,
+				callbacks:     res.callbacks,
+				abort:         res.abort,
+				quantifier:    res.quantifier
+			)
 		}
 	}
 
@@ -229,15 +239,17 @@ extension Testable {
 	public func cover(_ b : Bool, percentage : Int, label : String) -> Property {
 		if b {
 			return self.mapResult { res in
-				return TestResult(ok:           res.ok
-					, expect:       res.expect
-					, reason:       res.reason
-					, theException: res.theException
-					, labels:       insertWith(max, k: label, v: percentage, m: res.labels)
-					, stamp:        res.stamp.union([label])
-					, callbacks:    res.callbacks
-					, abort:        res.abort
-					, quantifier:    res.quantifier)
+				return TestResult(
+					ok:            res.ok,
+					expect:        res.expect,
+					reason:        res.reason,
+					theException:  res.theException,
+					labels:        insertWith(max, k: label, v: percentage, m: res.labels),
+					stamp:         res.stamp.union([label]),
+					callbacks:     res.callbacks,
+					abort:         res.abort,
+					quantifier:    res.quantifier
+				)
 			}
 		}
 		return self.property
@@ -330,37 +342,38 @@ public enum Quantification {
 public struct TestResult {
 	/// The result of executing the test case.  For Discarded test cases the
 	/// value of this property is `.None`.
-	let ok                : Optional<Bool>
+	let ok            : Optional<Bool>
 	/// Indicates what the expected result of the property is.
-	let expect            : Bool
+	let expect        : Bool
 	/// A message indicating the reason a test case failed.
-	let reason            : String
+	let reason        : String
 	/// The exception that was thrown if one occured during testing.
-	let theException    : Optional<String>
+	let theException  : Optional<String>
 	/// All the labels used during the test case.
-	let labels            : Dictionary<String, Int>
+	let labels        : Dictionary<String, Int>
 	/// The collected values for the test case.
-	let stamp            : Set<String>
+	let stamp         : Set<String>
 	/// Callbacks attached to the test case.
-	let callbacks        : [Callback]
+	let callbacks     : [Callback]
 	/// Indicates that any further testing of the property should cease.
-	let abort            : Bool
+	let abort         : Bool
 	/// The quantifier being applied to this test case.
-	let quantifier        : Quantification
+	let quantifier    : Quantification
 
 	/// Provides a pattern-match-friendly view of the current state of a test
 	/// result.
 	public enum TestResultMatcher {
 		/// A case-able view of the current state of a test result.
-		case matchResult( ok    : Optional<Bool>
-			, expect            : Bool
-			, reason            : String
-			, theException        : Optional<String>
-			, labels            : Dictionary<String, Int>
-			, stamp                : Set<String>
-			, callbacks            : Array<Callback>
-			, abort                : Bool
-			, quantifier        : Quantification
+		case matchResult(
+			ok            : Optional<Bool>,
+			expect        : Bool,
+			reason        : String,
+			theException  : Optional<String>,
+			labels        : Dictionary<String, Int>,
+			stamp         : Set<String>,
+			callbacks     : Array<Callback>,
+			abort         : Bool,
+			quantifier    : Quantification
 		)
 	}
 
@@ -372,16 +385,17 @@ public struct TestResult {
 
 	/// Creates and returns a new test result initialized with the given
 	/// parameters.
-	public init(  ok : Optional<Bool>
-		, expect : Bool
-		, reason : String
-		, theException : Optional<String>
-		, labels : Dictionary<String, Int>
-		, stamp : Set<String>
-		, callbacks : [Callback]
-		, abort : Bool
-		, quantifier : Quantification)
-	{
+	public init(
+		ok : Optional<Bool>,
+		expect : Bool,
+		reason : String,
+		theException : Optional<String>,
+		labels : Dictionary<String, Int>,
+		stamp : Set<String>,
+		callbacks : [Callback],
+		abort : Bool,
+		quantifier : Quantification
+	) {
 		self.ok = ok
 		self.expect = expect
 		self.reason = reason
@@ -427,19 +441,20 @@ private func exception(_ msg : String) -> (Error) -> TestResult {
 private func props<A>(_ shrinker : @escaping (A) -> [A], original : A, pf : @escaping (A) -> Testable) -> Rose<Gen<Prop>> {
 	return .mkRose({ pf(original).property.unProperty }, { shrinker(original).map { x1 in
 		return props(shrinker, original: x1, pf: pf)
-		}})
+	}})
 }
 
 private func result(_ ok : Bool?, reason : String = "") -> TestResult {
-	return TestResult( ok: ok
-		, expect: true
-		, reason: reason
-		, theException: .none
-		, labels: [:]
-		, stamp: Set()
-		, callbacks: []
-		, abort: false
-		, quantifier: .universal
+	return TestResult(
+		ok:            ok,
+		expect:        true,
+		reason:        reason,
+		theException:  .none,
+		labels:        [:],
+		stamp:         Set(),
+		callbacks:     [],
+		abort:         false,
+		quantifier:    .universal
 	)
 }
 
@@ -521,29 +536,33 @@ private func mplus(_ l : Optional<String>, r : Optional<String>) -> Optional<Str
 
 private func addCallbacks(_ result : TestResult) -> (TestResult) -> TestResult {
 	return { res in
-		return TestResult(ok:           res.ok
-			, expect:       res.expect
-			, reason:       res.reason
-			, theException: res.theException
-			, labels:       res.labels
-			, stamp:        res.stamp
-			, callbacks:    result.callbacks + res.callbacks
-			, abort:        res.abort
-			, quantifier:    res.quantifier)
+		return TestResult(
+			ok:            res.ok,
+			expect:        res.expect,
+			reason:        res.reason,
+			theException:  res.theException,
+			labels:        res.labels,
+			stamp:         res.stamp,
+			callbacks:     result.callbacks + res.callbacks,
+			abort:         res.abort,
+			quantifier:    res.quantifier
+		)
 	}
 }
 
 private func addLabels(_ result : TestResult) -> (TestResult) -> TestResult {
 	return { res in
-		return TestResult(ok:           res.ok
-			, expect:       res.expect
-			, reason:       res.reason
-			, theException: res.theException
-			, labels:       unionWith(max, l: res.labels, r: result.labels)
-			, stamp:        res.stamp.union(result.stamp)
-			, callbacks:    res.callbacks
-			, abort:        res.abort
-			, quantifier:    res.quantifier)
+		return TestResult(
+			ok:            res.ok,
+			expect:        res.expect,
+			reason:        res.reason,
+			theException:  res.theException,
+			labels:        unionWith(max, l: res.labels, r: result.labels),
+			stamp:         res.stamp.union(result.stamp),
+			callbacks:     res.callbacks,
+			abort:         res.abort,
+			quantifier:    res.quantifier
+		)
 	}
 }
 
@@ -622,15 +641,17 @@ private func disj(_ p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResu
 																	 f: { _ in
 																		return print("")
 					})]
-					return Rose<TestResult>.pure(TestResult(ok: .some(false),
-															expect: true,
-															reason: sep(result1.reason, r: result2.reason),
-															theException: mplus(result1.theException, r: result2.theException),
-															labels: [:],
-															stamp: Set(),
-															callbacks: result1.callbacks + callbacks + result2.callbacks,
-															abort: false,
-															quantifier: .universal))
+					return Rose<TestResult>.pure(TestResult(
+						ok:            .some(false),
+						expect:        true,
+						reason:        sep(result1.reason, r: result2.reason),
+						theException:  mplus(result1.theException, r: result2.theException),
+						labels:        [:],
+						stamp:         Set(),
+						callbacks:     result1.callbacks + callbacks + result2.callbacks,
+						abort:         false,
+						quantifier:    .universal
+					))
 				case .none:
 					return Rose<TestResult>.pure(result2)
 				}

@@ -32,7 +32,7 @@ extension Gen {
 	/// - returns: A generator which uses the `build` function to create arbitrary instances of `A`.
 	public static func compose(build: @escaping (GenComposer) -> A) -> Gen<A> {
 		return Gen(unGen: { (stdgen, size) -> A in
-			let composer = GenComposer(stdgen: stdgen, size: size)
+			let composer = GenComposer(stdgen, size)
 			return build(composer)
 		})
 	}
@@ -48,7 +48,7 @@ public final class GenComposer {
 	private var stdgen: StdGen
 	private var size: Int
 	
-	init(stdgen: StdGen, size: Int) {
+	fileprivate init(_ stdgen : StdGen, _ size : Int) {
 		self.stdgen = stdgen
 		self.size = size
 	}
