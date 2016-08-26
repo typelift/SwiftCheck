@@ -246,8 +246,8 @@ let allowedLocalCharacters : Gen<Character> = Gen<Character>.oneOf([
 
 let localEmail = allowedLocalCharacters
 					.proliferateNonEmpty // Make a non-empty array of characters
-                    .suchThat({ $0[$0.index(before: $0.endIndex)] != "." }) // Such that the last character isn't a dot.
-                    .map { String($0) } // Then make a string.
+					.suchThat({ $0[$0.index(before: $0.endIndex)] != "." }) // Such that the last character isn't a dot.
+					.map { String($0) } // Then make a string.
 
 //: The RFC says that the host name can only consist of lowercase letters, numbers, and dashes.  We'll skip some
 //: steps here and combine them all into one big generator.
@@ -487,7 +487,7 @@ func sieve(n : Int) -> [Int] {
 	marked[1] = true
 
 	for p in 2..<n {
-        for i in stride(from: 2 * p, to: n, by: p) {
+		for i in stride(from: 2 * p, to: n, by: p) {
 			marked[i] = true
 		}
 	}
@@ -591,7 +591,7 @@ func sieveProperly(_ n : Int) -> [Int] {
 
 	for p in 2..<n {
 
-        for i in stride(from: 2 * p, through: n, by: p) {
+		for i in stride(from: 2 * p, through: n, by: p) {
 			marked[i] = true
 		}
 	}
