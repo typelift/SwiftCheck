@@ -7,15 +7,18 @@
 //
 
 extension Gen {
-	/// Create a generator by procedurally composing generated values from other generators.
+	/// Construct a `Gen`erator suitable for initializing an aggregate value.
 	///
-	/// This is useful in cases where it's cumbersome to functionally compose multiple
-	/// generators using `zip` and `map`. For example:
+	/// When using SwiftCheck with most classes and structures that contain more
+	/// than one field that conforms to `Arbitrary`, the monadic and applicative
+	/// syntax can be unwieldy.  `Gen.compose` simplifies the construction of
+	/// these values by exposing a simple, natural, and imperative interface to
+	/// instance generation.  For example:
 	///
-	///     public static var arbitrary: Gen<ArbitraryLargeFoo> {
-	///         return Gen<ArbitraryLargeFoo>.compose { c in
-	///             return ArbitraryLargeFoo(
-	///                 // use the nullary method to get an `arbitrary` value
+	///     public static var arbitrary : Gen<MyClass> {
+	///         return Gen<MyClass>.compose { c in
+	///             return MyClass(
+	///                 // Use the nullary method to get an `arbitrary` value.
 	///                 a: c.generate(),
 	///
 	///                 // or pass a custom generator
@@ -27,9 +30,11 @@ extension Gen {
 	///         }
 	///     }
 	///
-	/// - parameter build: Function which is passed a GenComposer which can be used
+	/// - parameter build: A closure with a `GenComposer` that uses an
+	///   underlying `Gen`erator to construct arbitrary values.
 	///
-	/// - returns: A generator which uses the `build` function to create arbitrary instances of `A`.
+	/// - returns: A generator which uses the `build` function to build 
+	///   instances of `A`.
 	public static func compose(build: @escaping (GenComposer) -> A) -> Gen<A> {
 		return Gen(unGen: { (stdgen, size) -> A in
 			let composer = GenComposer(stdgen, size)
@@ -38,10 +43,10 @@ extension Gen {
 	}
 }
 
-/// Class used to generate values from mulitple `Gen` instances.
+/// `GenComposer` presents an imperative interface over top of `Gen`.  
 ///
-/// Given a StdGen and size, generate values from other generators, splitting the StdGen
-/// after each call to `generate`, ensuring sufficient entropy across generators.
+/// Instances of this class may not be constructed manually.  
+/// Use `Gen.compose` instead.
 ///
 /// - seealso: Gen.compose
 public final class GenComposer {
@@ -53,30 +58,32 @@ public final class GenComposer {
 		self.size = size
 	}
 	
-	// Split internal StdGen to ensure sufficient entropy over multiple `generate` calls.
-	private func split() -> StdGen {
-		let old = stdgen
-		stdgen = old.split.0
-		return old
-	}
 	
 	/// Generate a new `T` with a specific generator.
 	///
 	/// - parameter gen: The generator used to create a random value.
 	///
-	/// - returns: A random `T` using the receiver's stdgen and size.
-	public func generate<T>(using gen: Gen<T>) -> T {
-		return gen.unGen(split(), size)
+	/// - returns: A random value of type `T` using the given `Gen`erator 
+	///   for that type.
+	public func generate<T>(using gen : Gen<T>) -> T {
+		return gen.unGen(self.split, size)
 	}
 	
-	///  Generate a new `T` with its default `arbitrary` generator.
+	/// Generate a new value of type `T` with the default `Gen`erator 
+	/// for that type.
 	///
-	///  - returns: A random `T`.
+	///  - returns: An arbitrary value of type `T`.
 	///
 	///  - seealso: generate\<T\>(gen:)
 	public func generate<T>() -> T
 		where T: Arbitrary
 	{
 		return generate(using: T.arbitrary)
+	}
+	
+	private var split : StdGen {
+		let old = stdgen
+		stdgen = old.split.0
+		return old
 	}
 }

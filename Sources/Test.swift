@@ -97,96 +97,196 @@
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for that type.
+///
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : Arbitrary>(_ pf : ((A) throws -> Testable)) -> Property {
 	return forAllShrink(A.arbitrary, shrinker: A.shrink, f: pf)
 }
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 2 types.
+///
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : Arbitrary, B : Arbitrary>(_ pf : @escaping (A, B) throws -> Testable) -> Property {
 	return forAll { t in forAll { b in try pf(t, b) } }
 }
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 3 types.
+///
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary>(_ pf : @escaping (A, B, C) throws -> Testable) -> Property {
 	return forAll { t in forAll { b, c in try pf(t, b, c) } }
 }
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 4 types.
+///
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary>(_ pf : @escaping (A, B, C, D) throws -> Testable) -> Property {
 	return forAll { t in forAll { b, c, d in try pf(t, b, c, d) } }
 }
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 5 types.
+///
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary>(_ pf : @escaping (A, B, C, D, E) throws -> Testable) -> Property {
 	return forAll { t in forAll { b, c, d, e in try pf(t, b, c, d, e) } }
 }
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 6 types.
+///
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary>(_ pf : @escaping (A, B, C, D, E, F) throws -> Testable) -> Property {
 	return forAll { t in forAll { b, c, d, e, f in try pf(t, b, c, d, e, f) } }
 }
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 7 types.
+///
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary>(_ pf : @escaping (A, B, C, D, E, F, G) throws -> Testable) -> Property {
 	return forAll { t in forAll { b, c, d, e, f, g in try pf(t, b, c, d, e, f, g) } }
 }
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 8 types.
+///
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary, H : Arbitrary>(_ pf : @escaping (A, B, C, D, E, F, G, H) throws -> Testable) -> Property {
 	return forAll { t in forAll { b, c, d, e, f, g, h in try pf(t, b, c, d, e, f, g, h) } }
 }
 
 /// Given an explicit generator, converts a function to a universally quantified
 /// property using the default shrinker for that type.
+///
+/// - parameter gen: A generator for values of type `A`.
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : Arbitrary>(_ gen : Gen<A>, pf : ((A) throws -> Testable)) -> Property {
 	return forAllShrink(gen, shrinker: A.shrink, f: pf)
 }
 
 /// Given 2 explicit generators, converts a function to a universally quantified
 /// property using the default shrinkers for those 2 types.
+///
+/// - parameter genA: A generator for values of type `A`.
+/// - parameter genB: A generator for values of type `B`.
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : Arbitrary, B : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, pf : @escaping (A, B) throws -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB, pf: { b in try pf(t, b) }) })
 }
 
 /// Given 3 explicit generators, converts a function to a universally quantified
 /// property using the default shrinkers for those 3 types.
+///
+/// - parameter genA: A generator for values of type `A`.
+/// - parameter genB: A generator for values of type `B`.
+/// - parameter genC: A generator for values of type `C`.
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, pf : @escaping (A, B, C) throws -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB, genC, pf: { b, c in try pf(t, b, c) }) })
 }
 
 /// Given 4 explicit generators, converts a function to a universally quantified
 /// property using the default shrinkers for those 4 types.
+///
+/// - parameter genA: A generator for values of type `A`.
+/// - parameter genB: A generator for values of type `B`.
+/// - parameter genC: A generator for values of type `C`.
+/// - parameter genD: A generator for values of type `D`.
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, pf : @escaping (A, B, C, D) throws -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB, genC, genD, pf: { b, c, d in try pf(t, b, c, d) }) })
 }
 
 /// Given 5 explicit generators, converts a function to a universally quantified
 /// property using the default shrinkers for those 5 types.
+///
+/// - parameter genA: A generator for values of type `A`.
+/// - parameter genB: A generator for values of type `B`.
+/// - parameter genC: A generator for values of type `C`.
+/// - parameter genD: A generator for values of type `D`.
+/// - parameter genE: A generator for values of type `E`.
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, pf : @escaping (A, B, C, D, E) throws -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB, genC, genD, genE, pf: { b, c, d, e in try pf(t, b, c, d, e) }) })
 }
 
 /// Given 6 explicit generators, converts a function to a universally quantified
 /// property using the default shrinkers for those 6 types.
+///
+/// - parameter genA: A generator for values of type `A`.
+/// - parameter genB: A generator for values of type `B`.
+/// - parameter genC: A generator for values of type `C`.
+/// - parameter genD: A generator for values of type `D`.
+/// - parameter genE: A generator for values of type `E`.
+/// - parameter genF: A generator for values of type `F`.
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, pf : @escaping (A, B, C, D, E, F) throws -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB, genC, genD, genE, genF, pf: { b, c, d, e, f in try pf(t, b, c, d, e, f) }) })
 }
 
 /// Given 7 explicit generators, converts a function to a universally quantified
 /// property using the default shrinkers for those 7 types.
+///
+/// - parameter genA: A generator for values of type `A`.
+/// - parameter genB: A generator for values of type `B`.
+/// - parameter genC: A generator for values of type `C`.
+/// - parameter genD: A generator for values of type `D`.
+/// - parameter genE: A generator for values of type `E`.
+/// - parameter genF: A generator for values of type `F`.
+/// - parameter genG: A generator for values of type `G`.
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, _ genG : Gen<G>, pf : @escaping (A, B, C, D, E, F, G) throws -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB, genC, genD, genE, genF, genG, pf: { b, c, d, e, f, g in try pf(t, b, c, d, e, f, g) }) })
 }
 
 /// Given 8 explicit generators, converts a function to a universally quantified
 /// property using the default shrinkers for those 8 types.
+///
+/// - parameter genA: A generator for values of type `A`.
+/// - parameter genB: A generator for values of type `B`.
+/// - parameter genC: A generator for values of type `C`.
+/// - parameter genD: A generator for values of type `D`.
+/// - parameter genE: A generator for values of type `E`.
+/// - parameter genF: A generator for values of type `F`.
+/// - parameter genG: A generator for values of type `G`.
+/// - parameter genH: A generator for values of type `H`.
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary, H : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, _ genG : Gen<G>, _ genH : Gen<H>, pf : @escaping (A, B, C, D, E, F, G, H) throws -> Testable) -> Property {
 	return forAll(genA, pf: { t in forAll(genB, genC, genD, genE, genF, genG, genH, pf: { b, c, d, e, f, g, h in try pf(t, b, c, d, e, f, g, h) }) })
 }
@@ -196,6 +296,11 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 ///
 /// This variant of `forAll` does not shrink its argument but allows generators
 /// of any type, not just those that conform to `Arbitrary`.
+///
+/// - parameter gen: A generator for values of type `A`.
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAllNoShrink<A>(_ gen : Gen<A>, pf : ((A) throws -> Testable)) -> Property {
 	return forAllShrink(gen, shrinker: { _ in [A]() }, f: pf)
 }
@@ -205,6 +310,12 @@ public func forAllNoShrink<A>(_ gen : Gen<A>, pf : ((A) throws -> Testable)) -> 
 ///
 /// This variant of `forAll` does not shrink its argument but allows generators
 /// of any type, not just those that conform to `Arbitrary`.
+///
+/// - parameter genA: A generator for values of type `A`.
+/// - parameter genB: A generator for values of type `B`.
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAllNoShrink<A, B>(_ genA : Gen<A>, _ genB : Gen<B>, pf : @escaping (A, B) throws -> Testable) -> Property {
 	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, pf: { b in try pf(t, b) }) })
 }
@@ -214,6 +325,13 @@ public func forAllNoShrink<A, B>(_ genA : Gen<A>, _ genB : Gen<B>, pf : @escapin
 ///
 /// This variant of `forAll` does not shrink its argument but allows generators
 /// of any type, not just those that conform to `Arbitrary`.
+///
+/// - parameter genA: A generator for values of type `A`.
+/// - parameter genB: A generator for values of type `B`.
+/// - parameter genC: A generator for values of type `C`.
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAllNoShrink<A, B, C>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, pf : @escaping (A, B, C) throws -> Testable) -> Property {
 	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, genC, pf: { b, c in try pf(t, b, c) }) })
 }
@@ -223,6 +341,14 @@ public func forAllNoShrink<A, B, C>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : G
 ///
 /// This variant of `forAll` does not shrink its argument but allows generators
 /// of any type, not just those that conform to `Arbitrary`.
+///
+/// - parameter genA: A generator for values of type `A`.
+/// - parameter genB: A generator for values of type `B`.
+/// - parameter genC: A generator for values of type `C`.
+/// - parameter genD: A generator for values of type `D`.
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAllNoShrink<A, B, C, D>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, pf : @escaping (A, B, C, D) throws -> Testable) -> Property {
 	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, genC, genD, pf: { b, c, d in try pf(t, b, c, d) }) })
 }
@@ -232,6 +358,15 @@ public func forAllNoShrink<A, B, C, D>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC 
 ///
 /// This variant of `forAll` does not shrink its argument but allows generators
 /// of any type, not just those that conform to `Arbitrary`.
+///
+/// - parameter genA: A generator for values of type `A`.
+/// - parameter genB: A generator for values of type `B`.
+/// - parameter genC: A generator for values of type `C`.
+/// - parameter genD: A generator for values of type `D`.
+/// - parameter genE: A generator for values of type `E`.
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAllNoShrink<A, B, C, D, E>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, pf : @escaping (A, B, C, D, E) throws -> Testable) -> Property {
 	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, genC, genD, genE, pf: { b, c, d, e in try pf(t, b, c, d, e) }) })
 }
@@ -241,6 +376,16 @@ public func forAllNoShrink<A, B, C, D, E>(_ genA : Gen<A>, _ genB : Gen<B>, _ ge
 ///
 /// This variant of `forAll` does not shrink its argument but allows generators
 /// of any type, not just those that conform to `Arbitrary`.
+///
+/// - parameter genA: A generator for values of type `A`.
+/// - parameter genB: A generator for values of type `B`.
+/// - parameter genC: A generator for values of type `C`.
+/// - parameter genD: A generator for values of type `D`.
+/// - parameter genE: A generator for values of type `E`.
+/// - parameter genF: A generator for values of type `F`.
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAllNoShrink<A, B, C, D, E, F>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, pf : @escaping (A, B, C, D, E, F) throws -> Testable) -> Property {
 	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, genC, genD, genE, genF, pf: { b, c, d, e, f in try pf(t, b, c, d, e, f) }) })
 }
@@ -250,6 +395,17 @@ public func forAllNoShrink<A, B, C, D, E, F>(_ genA : Gen<A>, _ genB : Gen<B>, _
 ///
 /// This variant of `forAll` does not shrink its argument but allows generators
 /// of any type, not just those that conform to `Arbitrary`.
+///
+/// - parameter genA: A generator for values of type `A`.
+/// - parameter genB: A generator for values of type `B`.
+/// - parameter genC: A generator for values of type `C`.
+/// - parameter genD: A generator for values of type `D`.
+/// - parameter genE: A generator for values of type `E`.
+/// - parameter genF: A generator for values of type `F`.
+/// - parameter genG: A generator for values of type `G`.
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAllNoShrink<A, B, C, D, E, F, G>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, _ genG : Gen<G>, pf : @escaping (A, B, C, D, E, F, G) throws -> Testable) -> Property {
 	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, genC, genD, genE, genF, genG, pf: { b, c, d, e, f, g in try pf(t, b, c, d, e, f, g) }) })
 }
@@ -259,12 +415,32 @@ public func forAllNoShrink<A, B, C, D, E, F, G>(_ genA : Gen<A>, _ genB : Gen<B>
 ///
 /// This variant of `forAll` does not shrink its argument but allows generators
 /// of any type, not just those that conform to `Arbitrary`.
+///
+/// - parameter genA: A generator for values of type `A`.
+/// - parameter genB: A generator for values of type `B`.
+/// - parameter genC: A generator for values of type `C`.
+/// - parameter genD: A generator for values of type `D`.
+/// - parameter genE: A generator for values of type `E`.
+/// - parameter genF: A generator for values of type `F`.
+/// - parameter genG: A generator for values of type `G`.
+/// - parameter genH: A generator for values of type `H`.
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAllNoShrink<A, B, C, D, E, F, G, H>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, _ genG : Gen<G>, _ genH : Gen<H>, pf : @escaping (A, B, C, D, E, F, G, H) throws -> Testable) -> Property {
 	return forAllNoShrink(genA, pf: { t in forAllNoShrink(genB, genC, genD, genE, genF, genG, genH, pf: { b, c, d, e, f, g, h in try pf(t, b, c, d, e, f, g, h) }) })
 }
 
 /// Given an explicit generator and shrinker, converts a function to a
 /// universally quantified property.
+///
+/// - parameter gen: A generator for values of type `A`.
+/// - parameter shrinker: The shrinking function.
+/// - parameter f: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block against values
+///   generated with the given generator and shrunk on failure by the given
+///   shrinking function.
 public func forAllShrink<A>(_ gen : Gen<A>, shrinker : @escaping (A) -> [A], f : @escaping (A) throws -> Testable) -> Property {
 	return Property(gen.flatMap { x in
 		return shrinking(shrinker, initial: x, prop: { xs  in
@@ -295,12 +471,20 @@ public func forAllShrink<A>(_ gen : Gen<A>, shrinker : @escaping (A) -> [A], f :
 /// `SNF` involves turning every `exists` into a function returning the
 /// existential value, taking any other parameters being quantified over as
 /// needed.
+///
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func exists<A : Arbitrary>(_ pf : @escaping (A) throws -> Testable) -> Property {
 	return exists(A.arbitrary, pf: pf)
 }
 
 /// Given an explicit generator, converts a function to an existentially
 /// quantified property using the default shrinker for that type.
+///
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func exists<A : Arbitrary>(_ gen : Gen<A>, pf : @escaping (A) throws -> Testable) -> Property {
 	return forAllNoShrink(A.arbitrary, pf: { try pf($0).invert }).invert.mapResult { res in
 		return TestResult(
@@ -318,6 +502,9 @@ public func exists<A : Arbitrary>(_ gen : Gen<A>, pf : @escaping (A) throws -> T
 }
 
 /// Tests a property and prints the results to stdout.
+///
+/// - parameter prop: The property to be tested.
+/// - parameter name: The name of the property being tested.
 public func quickCheck(_ prop : Testable, name : String = "") {
 	_ = quickCheckWithResult(CheckerArguments(name: name), prop)
 }
@@ -620,7 +807,7 @@ private func doneTesting(_ st : CheckerState) -> Result {
 		printCond(st.silence, "*** Insufficient coverage after " + "\(st.successfulTestCount)" + pluralize(" test", i: st.successfulTestCount))
 		printDistributionGraph(st)
 		return .insufficientCoverage( 
-			numTests: st.successfulTestCount,
+			numTests:  st.successfulTestCount,
 			usedSeed:  st.randomSeedGenerator,
 			usedSize:  st.computeSize(st.successfulTestCount, st.discardedTestCount),
 			labels:    summary(st),
@@ -633,7 +820,7 @@ private func doneTesting(_ st : CheckerState) -> Result {
 	}
 }
 
-private func giveUp(_ st: CheckerState) -> Result {
+private func giveUp(_ st : CheckerState) -> Result {
 	printDistributionGraph(st)
 	return .gaveUp(numTests: st.successfulTestCount, labels: summary(st), output: "")
 }

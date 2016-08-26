@@ -66,6 +66,10 @@ public protocol WitnessedArbitrary {
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for that type.
+///
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : WitnessedArbitrary>(_ pf : ((A) -> Testable)) -> Property
 	where A.Param : Arbitrary
 {
@@ -74,6 +78,10 @@ public func forAll<A : WitnessedArbitrary>(_ pf : ((A) -> Testable)) -> Property
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 2 types.
+///
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : WitnessedArbitrary, B : WitnessedArbitrary>(_ pf : @escaping (A, B) -> Testable) -> Property
 	where A.Param : Arbitrary, B.Param : Arbitrary
 {
@@ -82,6 +90,10 @@ public func forAll<A : WitnessedArbitrary, B : WitnessedArbitrary>(_ pf : @escap
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 3 types.
+///
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : WitnessedArbitrary, B : WitnessedArbitrary, C : WitnessedArbitrary>(_ pf : @escaping (A, B, C) -> Testable) -> Property
 	where A.Param : Arbitrary, B.Param : Arbitrary, C.Param : Arbitrary
 {
@@ -90,6 +102,10 @@ public func forAll<A : WitnessedArbitrary, B : WitnessedArbitrary, C : Witnessed
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 4 types.
+///
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : WitnessedArbitrary, B : WitnessedArbitrary, C : WitnessedArbitrary, D : WitnessedArbitrary>(_ pf : @escaping (A, B, C, D) -> Testable) -> Property
 	where A.Param : Arbitrary, B.Param : Arbitrary, C.Param : Arbitrary, D.Param : Arbitrary
 {
@@ -98,6 +114,10 @@ public func forAll<A : WitnessedArbitrary, B : WitnessedArbitrary, C : Witnessed
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 5 types.
+///
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : WitnessedArbitrary, B : WitnessedArbitrary, C : WitnessedArbitrary, D : WitnessedArbitrary, E : WitnessedArbitrary>(_ pf : @escaping (A, B, C, D, E) -> Testable) -> Property
 	where A.Param : Arbitrary, B.Param : Arbitrary, C.Param : Arbitrary, D.Param : Arbitrary, E.Param : Arbitrary
 {
@@ -106,6 +126,10 @@ public func forAll<A : WitnessedArbitrary, B : WitnessedArbitrary, C : Witnessed
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 6 types.
+///
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : WitnessedArbitrary, B : WitnessedArbitrary, C : WitnessedArbitrary, D : WitnessedArbitrary, E : WitnessedArbitrary, F : WitnessedArbitrary>(_ pf : @escaping (A, B, C, D, E, F) -> Testable) -> Property
 	where A.Param : Arbitrary, B.Param : Arbitrary, C.Param : Arbitrary, D.Param : Arbitrary, E.Param : Arbitrary, F.Param : Arbitrary
 {
@@ -114,6 +138,10 @@ public func forAll<A : WitnessedArbitrary, B : WitnessedArbitrary, C : Witnessed
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 7 types.
+///
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : WitnessedArbitrary, B : WitnessedArbitrary, C : WitnessedArbitrary, D : WitnessedArbitrary, E : WitnessedArbitrary, F : WitnessedArbitrary, G : WitnessedArbitrary>(_ pf : @escaping (A, B, C, D, E, F, G) -> Testable) -> Property
 	where A.Param : Arbitrary, B.Param : Arbitrary, C.Param : Arbitrary, D.Param : Arbitrary, E.Param : Arbitrary, F.Param : Arbitrary, G.Param : Arbitrary
 {
@@ -122,6 +150,10 @@ public func forAll<A : WitnessedArbitrary, B : WitnessedArbitrary, C : Witnessed
 
 /// Converts a function into a universally quantified property using the default
 /// shrinker and generator for 8 types.
+///
+/// - parameter pf: A block that carries the property or invariant to be tested.
+///
+/// - returns: A `Property` that executes the given testing block.
 public func forAll<A : WitnessedArbitrary, B : WitnessedArbitrary, C : WitnessedArbitrary, D : WitnessedArbitrary, E : WitnessedArbitrary, F : WitnessedArbitrary, G : WitnessedArbitrary, H : WitnessedArbitrary>(_ pf : @escaping (A, B, C, D, E, F, G, H) -> Testable) -> Property
 	where A.Param : Arbitrary, B.Param : Arbitrary, C.Param : Arbitrary, D.Param : Arbitrary, E.Param : Arbitrary, F.Param : Arbitrary, G.Param : Arbitrary, H.Param : Arbitrary
 {

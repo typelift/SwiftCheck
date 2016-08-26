@@ -549,7 +549,7 @@ private func vary<S : Integer>(_ k : S, _ rng : StdGen) -> StdGen {
 	return (k == (k / 2)) ? gen : vary(k / 2, rng)
 }
 
-private func attemptBoundedTry<A>(_ gen: Gen<A>, _ k : Int, _ bound : Int, _ pred : @escaping (A) -> Bool) -> Gen<Optional<A>> {
+private func attemptBoundedTry<A>(_ gen : Gen<A>, _ k : Int, _ bound : Int, _ pred : @escaping (A) -> Bool) -> Gen<Optional<A>> {
 	if bound == 0 {
 		return Gen.pure(.none)
 	}
