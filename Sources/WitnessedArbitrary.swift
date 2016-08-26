@@ -137,7 +137,7 @@ extension Optional where Wrapped : Arbitrary {
 		return Gen<Optional<Wrapped>>.frequency([
 			(1, Gen<Optional<Wrapped>>.pure(.none)),
 			(3, liftM(Optional<Wrapped>.some, Wrapped.arbitrary)),
-			])
+		])
 	}
 
 	/// The default shrinking function for `Optional`s of arbitrary `Wrapped`s.

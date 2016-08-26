@@ -339,7 +339,7 @@ extension ArrowOf : CustomReflectable {
 		return Mirror(self, children: [
 			"types": "\(T.self) -> \(U.self)",
 			"currentMap": self._impl.table,
-			])
+		])
 	}
 }
 
@@ -374,7 +374,7 @@ extension IsoOf : CustomReflectable {
 			"embed": "\(T.self) -> \(U.self)",
 			"project": "\(U.self) -> \(T.self)",
 			"currentMap": self._impl.table,
-			])
+		])
 	}
 }
 

@@ -348,18 +348,18 @@ extension Mirror : Arbitrary {
 			Float.arbitrary.map(asAny),
 			Double.arbitrary.map(asAny),
 			Character.arbitrary.map(asAny),
-			])
+		])
 
 		let genAnyWitnessed : Gen<Any> = Gen<Any>.oneOf([
 			Optional<Int>.arbitrary.map(asAny),
 			Array<Int>.arbitrary.map(asAny),
 			Set<Int>.arbitrary.map(asAny),
-			])
+		])
 
 		return Gen<Any>.oneOf([
 			genAny,
 			genAnyWitnessed,
-			]).map(Mirror.init)
+		]).map(Mirror.init)
 	}
 }
 
