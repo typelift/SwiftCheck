@@ -64,7 +64,7 @@ extension Exp : Arbitrary {
 			] + ((n <= 0) ? [] : [
 				(5, liftM2(Exp.lam, Name.arbitrary, arbExpr((n - 1)))),
 				(5, liftM2(Exp.app, arbExpr(n/2), arbExpr(n/2))),
-				]))
+			]))
 	}
 
 	static var arbitrary : Gen<Exp> {

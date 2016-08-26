@@ -16,6 +16,11 @@
 /// `disjoin(_:)` and `verbose(_:)`.
 ///
 /// When conjoining properties all calls to `expectFailure` will fail.
+///
+/// - parameter ps: A variadic list of properties to be conjoined.
+///
+/// - returns: A `Property` that evaluates to the result of conjoining each
+///   of the given `Testable` expressions.
 public func conjoin(_ ps : Testable...) -> Property {
 	return Property(sequence(ps.map({ (p : Testable) in
 		return p.property.unProperty.map { $0.unProp }
@@ -35,6 +40,11 @@ public func conjoin(_ ps : Testable...) -> Property {
 ///
 /// When disjoining properties all calls to `expectFailure` will fail.  You can,
 /// however, `invert` the property.
+///
+/// - parameter ps: A variadic list of properties to be disjoined.
+///
+/// - returns: A `Property` that evaluates to the result of disjoining each
+///   of the given `Testable` expressions.
 public func disjoin(_ ps : Testable...) -> Property {
 	return Property(sequence(ps.map({ (p : Testable) in
 		return p.property.unProperty.map { $0.unProp }
@@ -49,6 +59,11 @@ public func disjoin(_ ps : Testable...) -> Property {
 /// The resulting property makes 100 random choices to test any of the given
 /// properties.  Thus, running multiple test cases will result in distinct
 /// arbitrary sequences of each property being tested.
+///
+/// - parameter ps: A variadic list of properties to be randomly conjoined.
+///
+/// - returns: A `Property` that evaluates to the result of randomly conjoining
+///   any of the given `Testable` expressions.
 public func conjamb(_ ps : () -> Testable...) -> Property {
 	let ls = ps.lazy.map { $0().property.unProperty }
 	return Property(Gen.oneOf(ls))
@@ -70,59 +85,75 @@ extension Testable {
 	/// Discarded tests remain discarded under inversion.
 	public var invert : Property {
 		return self.mapResult { res in
-			return TestResult(ok:            res.ok.map(!)
-				, expect:        res.expect
-				, reason:        res.reason
-				, theException: res.theException
-				, labels:        res.labels
-				, stamp:        res.stamp
-				, callbacks:    res.callbacks
-				, abort:        res.abort
-				, quantifier:    res.quantifier)
+			return TestResult(
+				ok:            res.ok.map(!),
+				expect:        res.expect,
+				reason:        res.reason,
+				theException:  res.theException,
+				labels:        res.labels,
+				stamp:         res.stamp,
+				callbacks:     res.callbacks,
+				abort:         res.abort,
+				quantifier:    res.quantifier
+			)
 		}
 	}
 
 	/// Modifies a property so that it only will be tested once.
 	public var once : Property {
 		return self.mapResult { res in
-			return TestResult(ok:           res.ok
-				, expect:       res.expect
-				, reason:       res.reason
-				, theException: res.theException
-				, labels:       res.labels
-				, stamp:        res.stamp
-				, callbacks:    res.callbacks
-				, abort:        true
-				, quantifier:    res.quantifier)
+			return TestResult(
+				ok:            res.ok,
+				expect:        res.expect,
+				reason:        res.reason,
+				theException:  res.theException,
+				labels:        res.labels,
+				stamp:         res.stamp,
+				callbacks:     res.callbacks,
+				abort:         true,
+				quantifier:    res.quantifier
+			)
 		}
 	}
 
 	/// Attaches a callback to a test case.
 	public func withCallback(_ cb : Callback) -> Property {
 		return self.mapResult { (res) in
-			return TestResult(ok:           res.ok
-				, expect:       res.expect
-				, reason:       res.reason
-				, theException: res.theException
-				, labels:       res.labels
-				, stamp:        res.stamp
-				, callbacks:    [cb] + res.callbacks
-				, abort:        res.abort
-				, quantifier:    res.quantifier)
+			return TestResult(
+				ok:            res.ok,
+				expect:        res.expect,
+				reason:        res.reason,
+				theException:  res.theException,
+				labels:        res.labels,
+				stamp:         res.stamp,
+				callbacks:     [cb] + res.callbacks,
+				abort:         res.abort,
+				quantifier:    res.quantifier
+			)
 		}
 	}
 
 	/// Adds the given string to the counterexamples of a failing property.
-	public func counterexample(_ s : String) -> Property {
+	///
+	/// - parameter example: A string describing a counteraxmple that causes
+	///   this property to fail.
+	///
+	/// - returns: A `Property` that prints the counterexample value on failure.
+	public func counterexample(_ example : String) -> Property {
 		return self.withCallback(Callback.afterFinalFailure(kind: .counterexample) { _ in
-			return print(s)
+			return print(example)
 		})
 	}
 
 	/// Executes an action after the last failure of the property.
-	public func whenFail(_ m : @escaping () -> ()) -> Property {
+	///
+	/// - parameter callback: A callback block to be executed after all failures
+	///   have been processed.
+	///
+	/// - returns: A `Property` that executes the given callback block on failure.
+	public func whenFail(_ callback : @escaping () -> ()) -> Property {
 		return self.withCallback(Callback.afterFinalFailure(kind: .notCounterexample) { _ in
-			return m()
+			return callback()
 		})
 	}
 
@@ -130,10 +161,13 @@ extension Testable {
 	///
 	/// Because the action is executed after every failing test it can be used
 	/// to track the list of failures generated by the shrinking mechanism.
-	public func whenEachFail(_ m : @escaping () -> ()) -> Property {
+	///
+	/// - parameter callback: A callback block to be executed after each 
+	///   failing case of the property has been processed.
+	public func whenEachFail(_ callback : @escaping () -> ()) -> Property {
 		return self.withCallback(Callback.afterFinalFailure(kind: .notCounterexample) { (st, res) in
 			if res.ok == .some(false) {
-				m()
+				callback()
 			}
 		})
 	}
@@ -171,15 +205,17 @@ extension Testable {
 		}
 
 		return self.mapResult { res in
-			return TestResult(ok:           res.ok
-				, expect:       res.expect
-				, reason:       res.reason
-				, theException: res.theException
-				, labels:       res.labels
-				, stamp:        res.stamp
-				, callbacks:    res.callbacks + chattyCallbacks(res.callbacks)
-				, abort:        res.abort
-				, quantifier:    res.quantifier)
+			return TestResult(
+				ok:            res.ok,
+				expect:        res.expect,
+				reason:        res.reason,
+				theException:  res.theException,
+				labels:        res.labels,
+				stamp:         res.stamp,
+				callbacks:     res.callbacks + chattyCallbacks(res.callbacks),
+				abort:         res.abort,
+				quantifier:    res.quantifier
+			)
 		}
 	}
 
@@ -188,15 +224,17 @@ extension Testable {
 	/// If the property does not fail, SwiftCheck will report an error.
 	public var expectFailure : Property {
 		return self.mapTotalResult { res in
-			return TestResult(ok:           res.ok
-				, expect:       false
-				, reason:       res.reason
-				, theException: res.theException
-				, labels:       res.labels
-				, stamp:        res.stamp
-				, callbacks:    res.callbacks
-				, abort:        res.abort
-				, quantifier:    res.quantifier)
+			return TestResult(
+				ok:            res.ok,
+				expect:        false,
+				reason:        res.reason,
+				theException:  res.theException,
+				labels:        res.labels,
+				stamp:         res.stamp,
+				callbacks:     res.callbacks,
+				abort:         res.abort,
+				quantifier:    res.quantifier
+			)
 		}
 	}
 
@@ -207,18 +245,34 @@ extension Testable {
 	/// addition to shrunken test cases, upon failure SwiftCheck will print a
 	/// distribution map for the property that shows a percentage success rate
 	/// for the property.
-	public func label(_ s : String) -> Property {
-		return self.classify(true, label: s)
+	///
+	/// - parameter label: The label to apply to the property.
+	///
+	/// - returns: A `Property` with the given label attached.
+	public func label(_ label : String) -> Property {
+		return self.classify(true, label: label)
 	}
 
 	/// Labels a property with a printable value.
-	public func collect<A>(_ x : A) -> Property {
-		return self.label(String(describing: x))
+	///
+	/// - parameter value: The value whose reflected representation will label
+	///   the property.
+	///
+	/// - returns: A `Property` labelled with the reflected representation of 
+	///   the given value.
+	public func collect<A>(_ value : A) -> Property {
+		return self.label(String(describing: value))
 	}
 
 	/// Conditionally labels a property with a value.
-	public func classify(_ b : Bool, label : String) -> Property {
-		return self.cover(b, percentage: 0, label: label)
+	///
+	/// - parameter condition: The condition to evaluate.
+	/// - parameter label: The label to apply to the property if the given 
+	///   condition evaluates to true.
+	///
+	/// - returns: A property that carries a label dependent upon the condition.
+	public func classify(_ condition : Bool, label : String) -> Property {
+		return self.cover(condition, percentage: 0, label: label)
 	}
 
 	/// Checks that at least the given proportion of successful test cases
@@ -226,18 +280,28 @@ extension Testable {
 	///
 	/// Discarded tests (i.e. ones with a false precondition) do not affect
 	/// coverage.
-	public func cover(_ b : Bool, percentage : Int, label : String) -> Property {
-		if b {
+	///
+	/// - parameter condition: The condition to evaluate.
+	/// - parameter percentage: A value from 0-100 inclusive that describes
+	///   the expected percentage the given condition will evaluate to true.
+	/// - parameter label: The label to apply to the property if the given 
+	///   condition evaluates to true.
+	///
+	/// - returns: A property that carries a label dependent upon the condition.
+	public func cover(_ condition : Bool, percentage : Int, label : String) -> Property {
+		if condition {
 			return self.mapResult { res in
-				return TestResult(ok:           res.ok
-					, expect:       res.expect
-					, reason:       res.reason
-					, theException: res.theException
-					, labels:       insertWith(max, k: label, v: percentage, m: res.labels)
-					, stamp:        res.stamp.union([label])
-					, callbacks:    res.callbacks
-					, abort:        res.abort
-					, quantifier:    res.quantifier)
+				return TestResult(
+					ok:            res.ok,
+					expect:        res.expect,
+					reason:        res.reason,
+					theException:  res.theException,
+					labels:        insertWith(max, k: label, v: percentage, m: res.labels),
+					stamp:         res.stamp.union([label]),
+					callbacks:     res.callbacks,
+					abort:         res.abort,
+					quantifier:    res.quantifier
+				)
 			}
 		}
 		return self.property
@@ -248,36 +312,64 @@ extension Testable {
 	/// This function can be used to completely change the evaluation schema of
 	/// generated test cases by replacing the test's rose tree with a custom
 	/// one.
-	public func mapProp(_ f : @escaping (Prop) -> Prop) -> Property {
-		return Property(f <^> self.property.unProperty)
+	///
+	/// - parameter transform: The transformation function to apply to the 
+	///   `Prop`s of this `Property`.
+	///
+	/// - returns: A `Property` that applies the given transformation upon evaluation.
+	public func mapProp(_ transform : @escaping (Prop) -> Prop) -> Property {
+		return Property(transform <^> self.property.unProperty)
 	}
 
 	/// Applies a function that modifies the test case generator's size.
-	public func mapSize(_ f : @escaping (Int) -> Int) -> Property {
+	///
+	/// - parameter transform: The transformation function to apply to the size
+	///   of the generators underlying this `Property`.
+	///
+	/// - returns: A `Property` that applies the given transformation upon evaluation.
+	public func mapSize(_ transform : @escaping (Int) -> Int) -> Property {
 		return Property(Gen.sized { n in
-			return self.property.unProperty.resize(f(n))
+			return self.property.unProperty.resize(transform(n))
 		})
 	}
 
 	/// Applies a function that modifies the result of a test case.
-	public func mapTotalResult(_ f : @escaping (TestResult) -> TestResult) -> Property {
+	///
+	/// - parameter transform: The transformation function to apply to the
+	///   result of executing this `Property`.
+	///
+	/// - returns: A `Property` that modifies its final result by executing the
+	///   given transformation block.
+	public func mapTotalResult(_ transform : @escaping (TestResult) -> TestResult) -> Property {
 		return self.mapRoseResult { rs in
-			return protectResults(f <^> rs)
+			return protectResults(transform <^> rs)
 		}
 	}
 
 	/// Applies a function that modifies the result of a test case.
-	public func mapResult(_ f : @escaping (TestResult) -> TestResult) -> Property {
+	///
+	/// - parameter transform: The transformation function to apply to the
+	///   result of executing this `Property`.
+	///
+	/// - returns: A `Property` that modifies its final result by executing the
+	///   given transformation block.
+	public func mapResult(_ transform : @escaping (TestResult) -> TestResult) -> Property {
 		return self.mapRoseResult { rs in
-			return f <^> rs
+			return transform <^> rs
 		}
 	}
 
 	/// Applies a function that modifies the underlying Rose Tree that a test
 	/// case has generated.
-	public func mapRoseResult(_ f : @escaping (Rose<TestResult>) -> Rose<TestResult>) -> Property {
+	///
+	/// - parameter transform: The transformation function to apply to the 
+	///   rose tree used to execute this `Property`.
+	///
+	/// - returns: A `Property` that modifies its evaluation strategy by
+	///   executing the given transformation block.
+	public func mapRoseResult(_ transform : @escaping (Rose<TestResult>) -> Rose<TestResult>) -> Property {
 		return self.mapProp { t in
-			return Prop(unProp: f(t.unProp))
+			return Prop(unProp: transform(t.unProp))
 		}
 	}
 }
@@ -287,6 +379,12 @@ extension Testable {
 ///
 /// Shrinking is handled automatically by SwiftCheck.  Invoking this function is
 /// only necessary when you must override the default behavior.
+///
+/// - parameter shrinker: The custom shrinking function to use for this type.
+/// - parameter initial: The initial value that kicks off the shrinking process.
+/// - parameter prop: The property to be tested.
+///
+/// - returns: A `Property` that shrinks its arguments with the given function.
 public func shrinking<A>(_ shrinker : @escaping (A) -> [A], initial : A, prop : @escaping (A) -> Testable) -> Property {
 	return Property(promote(props(shrinker, original: initial, pf: prop)).map { rs in
 		return Prop(unProp: joinRose(rs.map { x in
@@ -330,37 +428,38 @@ public enum Quantification {
 public struct TestResult {
 	/// The result of executing the test case.  For Discarded test cases the
 	/// value of this property is `.None`.
-	let ok                : Optional<Bool>
+	let ok            : Optional<Bool>
 	/// Indicates what the expected result of the property is.
-	let expect            : Bool
+	let expect        : Bool
 	/// A message indicating the reason a test case failed.
-	let reason            : String
+	let reason        : String
 	/// The exception that was thrown if one occured during testing.
-	let theException    : Optional<String>
+	let theException  : Optional<String>
 	/// All the labels used during the test case.
-	let labels            : Dictionary<String, Int>
+	let labels        : Dictionary<String, Int>
 	/// The collected values for the test case.
-	let stamp            : Set<String>
+	let stamp         : Set<String>
 	/// Callbacks attached to the test case.
-	let callbacks        : [Callback]
+	let callbacks     : [Callback]
 	/// Indicates that any further testing of the property should cease.
-	let abort            : Bool
+	let abort         : Bool
 	/// The quantifier being applied to this test case.
-	let quantifier        : Quantification
+	let quantifier    : Quantification
 
 	/// Provides a pattern-match-friendly view of the current state of a test
 	/// result.
 	public enum TestResultMatcher {
 		/// A case-able view of the current state of a test result.
-		case matchResult( ok    : Optional<Bool>
-			, expect            : Bool
-			, reason            : String
-			, theException        : Optional<String>
-			, labels            : Dictionary<String, Int>
-			, stamp                : Set<String>
-			, callbacks            : Array<Callback>
-			, abort                : Bool
-			, quantifier        : Quantification
+		case matchResult(
+			ok            : Optional<Bool>,
+			expect        : Bool,
+			reason        : String,
+			theException  : Optional<String>,
+			labels        : Dictionary<String, Int>,
+			stamp         : Set<String>,
+			callbacks     : Array<Callback>,
+			abort         : Bool,
+			quantifier    : Quantification
 		)
 	}
 
@@ -372,16 +471,17 @@ public struct TestResult {
 
 	/// Creates and returns a new test result initialized with the given
 	/// parameters.
-	public init(  ok : Optional<Bool>
-		, expect : Bool
-		, reason : String
-		, theException : Optional<String>
-		, labels : Dictionary<String, Int>
-		, stamp : Set<String>
-		, callbacks : [Callback]
-		, abort : Bool
-		, quantifier : Quantification)
-	{
+	public init(
+		ok : Optional<Bool>,
+		expect : Bool,
+		reason : String,
+		theException : Optional<String>,
+		labels : Dictionary<String, Int>,
+		stamp : Set<String>,
+		callbacks : [Callback],
+		abort : Bool,
+		quantifier : Quantification
+	) {
 		self.ok = ok
 		self.expect = expect
 		self.reason = reason
@@ -427,19 +527,20 @@ private func exception(_ msg : String) -> (Error) -> TestResult {
 private func props<A>(_ shrinker : @escaping (A) -> [A], original : A, pf : @escaping (A) -> Testable) -> Rose<Gen<Prop>> {
 	return .mkRose({ pf(original).property.unProperty }, { shrinker(original).map { x1 in
 		return props(shrinker, original: x1, pf: pf)
-		}})
+	}})
 }
 
 private func result(_ ok : Bool?, reason : String = "") -> TestResult {
-	return TestResult( ok: ok
-		, expect: true
-		, reason: reason
-		, theException: .none
-		, labels: [:]
-		, stamp: Set()
-		, callbacks: []
-		, abort: false
-		, quantifier: .universal
+	return TestResult(
+		ok:            ok,
+		expect:        true,
+		reason:        reason,
+		theException:  .none,
+		labels:        [:],
+		stamp:         Set(),
+		callbacks:     [],
+		abort:         false,
+		quantifier:    .universal
 	)
 }
 
@@ -521,29 +622,33 @@ private func mplus(_ l : Optional<String>, r : Optional<String>) -> Optional<Str
 
 private func addCallbacks(_ result : TestResult) -> (TestResult) -> TestResult {
 	return { res in
-		return TestResult(ok:           res.ok
-			, expect:       res.expect
-			, reason:       res.reason
-			, theException: res.theException
-			, labels:       res.labels
-			, stamp:        res.stamp
-			, callbacks:    result.callbacks + res.callbacks
-			, abort:        res.abort
-			, quantifier:    res.quantifier)
+		return TestResult(
+			ok:            res.ok,
+			expect:        res.expect,
+			reason:        res.reason,
+			theException:  res.theException,
+			labels:        res.labels,
+			stamp:         res.stamp,
+			callbacks:     result.callbacks + res.callbacks,
+			abort:         res.abort,
+			quantifier:    res.quantifier
+		)
 	}
 }
 
 private func addLabels(_ result : TestResult) -> (TestResult) -> TestResult {
 	return { res in
-		return TestResult(ok:           res.ok
-			, expect:       res.expect
-			, reason:       res.reason
-			, theException: res.theException
-			, labels:       unionWith(max, l: res.labels, r: result.labels)
-			, stamp:        res.stamp.union(result.stamp)
-			, callbacks:    res.callbacks
-			, abort:        res.abort
-			, quantifier:    res.quantifier)
+		return TestResult(
+			ok:            res.ok,
+			expect:        res.expect,
+			reason:        res.reason,
+			theException:  res.theException,
+			labels:        unionWith(max, l: res.labels, r: result.labels),
+			stamp:         res.stamp.union(result.stamp),
+			callbacks:     res.callbacks,
+			abort:         res.abort,
+			quantifier:    res.quantifier
+		)
 	}
 }
 
@@ -622,15 +727,17 @@ private func disj(_ p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResu
 																	 f: { _ in
 																		return print("")
 					})]
-					return Rose<TestResult>.pure(TestResult(ok: .some(false),
-															expect: true,
-															reason: sep(result1.reason, r: result2.reason),
-															theException: mplus(result1.theException, r: result2.theException),
-															labels: [:],
-															stamp: Set(),
-															callbacks: result1.callbacks + callbacks + result2.callbacks,
-															abort: false,
-															quantifier: .universal))
+					return Rose<TestResult>.pure(TestResult(
+						ok:            .some(false),
+						expect:        true,
+						reason:        sep(result1.reason, r: result2.reason),
+						theException:  mplus(result1.theException, r: result2.theException),
+						labels:        [:],
+						stamp:         Set(),
+						callbacks:     result1.callbacks + callbacks + result2.callbacks,
+						abort:         false,
+						quantifier:    .universal
+					))
 				case .none:
 					return Rose<TestResult>.pure(result2)
 				}

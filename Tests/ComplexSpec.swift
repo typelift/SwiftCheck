@@ -16,7 +16,7 @@ let special : Gen<Character> = Gen<Character>.fromElementsOf(["!", "#", "$", "%"
 let hexDigits = Gen<Character>.oneOf([
 	Gen<Character>.fromElementsIn("A"..."F"),
 	numeric,
-	])
+])
 
 class ComplexSpec : XCTestCase {
 	func testEmailAddressProperties() {
@@ -25,13 +25,13 @@ class ComplexSpec : XCTestCase {
 			lower,
 			numeric,
 			special,
-			]).proliferateNonEmpty.suchThat({ $0[($0.endIndex - 1)] != "." }).map(String.init(stringInterpolationSegment:))
+		]).proliferateNonEmpty.suchThat({ $0[($0.endIndex - 1)] != "." }).map(String.init(stringInterpolationSegment:))
 
 		let hostname = Gen<Character>.oneOf([
 			lower,
 			numeric,
 			Gen.pure("-"),
-			]).proliferateNonEmpty.map(String.init(stringInterpolationSegment:))
+		]).proliferateNonEmpty.map(String.init(stringInterpolationSegment:))
 
 		let tld = lower.proliferateNonEmpty.suchThat({ $0.count > 1 }).map(String.init(stringInterpolationSegment:))
 
@@ -41,7 +41,7 @@ class ComplexSpec : XCTestCase {
 
 		property("Generated email addresses contain 1 @", arguments: args) <- forAll(emailGen) { (e : String) in
 			return e.characters.filter({ $0 == "@" }).count == 1
-			}.once
+		}.once
 	}
 
 	func testIPv6Properties() {
@@ -56,7 +56,7 @@ class ComplexSpec : XCTestCase {
 			gen2,
 			gen3,
 			gen4
-			])
+		])
 
 		let ipGen = { $0.initial } <^> glue([ipHexDigits, ipHexDigits, ipHexDigits, ipHexDigits])
 

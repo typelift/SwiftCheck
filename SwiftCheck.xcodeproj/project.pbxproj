@@ -102,6 +102,9 @@
 		826D81C31C953D2D0022266C /* TestSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D819B1C953D2D0022266C /* TestSpec.swift */; };
 		826D81C41C953D2D0022266C /* TestSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D819B1C953D2D0022266C /* TestSpec.swift */; };
 		826D81C51C953D2D0022266C /* TestSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D819B1C953D2D0022266C /* TestSpec.swift */; };
+		82BA08CF1D6FFBD20068D32F /* Compose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BA08CE1D6FFBD20068D32F /* Compose.swift */; };
+		82BA08D01D6FFBD20068D32F /* Compose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BA08CE1D6FFBD20068D32F /* Compose.swift */; };
+		82BA08D11D6FFBD20068D32F /* Compose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BA08CE1D6FFBD20068D32F /* Compose.swift */; };
 		841408BB1B1A85A900BA2B6C /* SwiftCheck.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		844FCC99198B320500EB242A /* SwiftCheck.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 844FCC8D198B320500EB242A /* SwiftCheck.framework */; };
 		84DF76031B0BD54600C912B0 /* SwiftCheck.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */; };
@@ -190,6 +193,7 @@
 		826D819A1C953D2D0022266C /* SimpleSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SimpleSpec.swift; path = Tests/SimpleSpec.swift; sourceTree = SOURCE_ROOT; };
 		826D819B1C953D2D0022266C /* TestSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TestSpec.swift; path = Tests/TestSpec.swift; sourceTree = SOURCE_ROOT; };
 		826D81C61C953D350022266C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Tests/Info.plist; sourceTree = SOURCE_ROOT; };
+		82BA08CE1D6FFBD20068D32F /* Compose.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Compose.swift; path = Sources/Compose.swift; sourceTree = SOURCE_ROOT; };
 		844FCC8D198B320500EB242A /* SwiftCheck.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCheck.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		844FCC98198B320500EB242A /* SwiftCheckTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftCheckTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCheck.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -273,6 +277,7 @@
 			children = (
 				826D81461C953D070022266C /* Arbitrary.swift */,
 				826D81481C953D070022266C /* CoArbitrary.swift */,
+				82BA08CE1D6FFBD20068D32F /* Compose.swift */,
 				826D81491C953D070022266C /* Gen.swift */,
 				826D814B1C953D070022266C /* Lattice.swift */,
 				826D814C1C953D070022266C /* Modifiers.swift */,
@@ -591,6 +596,7 @@
 				826D81601C953D070022266C /* CoArbitrary.swift in Sources */,
 				826D81631C953D070022266C /* Gen.swift in Sources */,
 				826D818D1C953D070022266C /* WitnessedArbitrary.swift in Sources */,
+				82BA08D11D6FFBD20068D32F /* Compose.swift in Sources */,
 				826D817B1C953D070022266C /* State.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -635,6 +641,7 @@
 				826D815E1C953D070022266C /* CoArbitrary.swift in Sources */,
 				826D81611C953D070022266C /* Gen.swift in Sources */,
 				826D818B1C953D070022266C /* WitnessedArbitrary.swift in Sources */,
+				82BA08CF1D6FFBD20068D32F /* Compose.swift in Sources */,
 				826D81791C953D070022266C /* State.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -679,6 +686,7 @@
 				826D815F1C953D070022266C /* CoArbitrary.swift in Sources */,
 				826D81621C953D070022266C /* Gen.swift in Sources */,
 				826D818C1C953D070022266C /* WitnessedArbitrary.swift in Sources */,
+				82BA08D01D6FFBD20068D32F /* Compose.swift in Sources */,
 				826D817A1C953D070022266C /* State.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

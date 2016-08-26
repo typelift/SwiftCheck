@@ -70,7 +70,7 @@ extension Integer {
 			}
 			let n = i / 2
 			return .some((n, n))
-			}, initial: self < 0 ? (Self.multiplyWithOverflow(self, -1).0) : self)
+		}, initial: self < 0 ? (Self.multiplyWithOverflow(self, -1).0) : self)
 	}
 }
 
@@ -257,7 +257,7 @@ extension Float : Arbitrary {
 			}
 			let n = i / 2.0
 			return .some((n, n))
-			}, initial: x)
+		}, initial: x)
 	}
 }
 
@@ -288,7 +288,7 @@ extension Double : Arbitrary {
 			}
 			let n = i / 2.0
 			return .some((n, n))
-			}, initial: x)
+		}, initial: x)
 	}
 }
 
@@ -348,18 +348,18 @@ extension Mirror : Arbitrary {
 			Float.arbitrary.map(asAny),
 			Double.arbitrary.map(asAny),
 			Character.arbitrary.map(asAny),
-			])
+		])
 
 		let genAnyWitnessed : Gen<Any> = Gen<Any>.oneOf([
 			Optional<Int>.arbitrary.map(asAny),
 			Array<Int>.arbitrary.map(asAny),
 			Set<Int>.arbitrary.map(asAny),
-			])
+		])
 
 		return Gen<Any>.oneOf([
 			genAny,
 			genAnyWitnessed,
-			]).map(Mirror.init)
+		]).map(Mirror.init)
 	}
 }
 

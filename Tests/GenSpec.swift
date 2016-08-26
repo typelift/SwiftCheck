@@ -30,7 +30,7 @@ class GenSpec : XCTestCase {
 			let g = Gen.weighted([
 				(10, 0),
 				(5, 1),
-				])
+			])
 
 			return forAll(g) { (i : Int) in
 				return true
