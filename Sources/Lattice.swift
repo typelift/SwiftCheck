@@ -13,34 +13,34 @@
 /// a "limit" is flexible, generally custom types that wish to conform to
 /// `LatticeType` must come with some kind of supremum or infimum.
 public protocol LatticeType {
-    /// The lower limit of the type.
-    static var min : Self { get }
-    /// The upper limit of the type.
-    static var max : Self { get }
+	/// The lower limit of the type.
+	static var min : Self { get }
+	/// The upper limit of the type.
+	static var max : Self { get }
 }
 
 extension Bool : LatticeType {
-    /// The lower limit of the `Bool` type.
-    public static var min : Bool {
-        return false
-    }
+	/// The lower limit of the `Bool` type.
+	public static var min : Bool {
+		return false
+	}
 
-    /// The upper limit of the `Bool` type.
-    public static var max : Bool {
-        return true
-    }
+	/// The upper limit of the `Bool` type.
+	public static var max : Bool {
+		return true
+	}
 }
 
 extension Character : LatticeType {
-    /// The lower limit of the `Character` type.
-    public static var min : Character {
-        return "\0"
-    }
+	/// The lower limit of the `Character` type.
+	public static var min : Character {
+		return "\0"
+	}
 
-    /// The upper limit of the `Character` type.
-    public static var max : Character {
-        return "\u{FFFFF}"
-    }
+	/// The upper limit of the `Character` type.
+	public static var max : Character {
+		return "\u{FFFFF}"
+	}
 }
 
 extension UInt : LatticeType {}
@@ -55,39 +55,39 @@ extension Int32 : LatticeType {}
 extension Int64 : LatticeType {}
 
 extension Float : LatticeType {
-    /// The lower limit of the `Float` type.
-    public static var min : Float {
-        return FLT_MIN
-    }
+	/// The lower limit of the `Float` type.
+	public static var min : Float {
+		return FLT_MIN
+	}
 
-    /// The upper limit of the `Float` type.
-    public static var max : Float {
-        return FLT_MAX
-    }
+	/// The upper limit of the `Float` type.
+	public static var max : Float {
+		return FLT_MAX
+	}
 }
 
 extension Double : LatticeType {
-    /// The lower limit of the `Double` type.
-    public static var min : Double {
-        return DBL_MIN
-    }
+	/// The lower limit of the `Double` type.
+	public static var min : Double {
+		return DBL_MIN
+	}
 
-    /// The upper limit of the `Double` type.
-    public static var max : Double {
-        return DBL_MAX
-    }
+	/// The upper limit of the `Double` type.
+	public static var max : Double {
+		return DBL_MAX
+	}
 }
 
 extension AnyIndex : LatticeType {
-    /// The lower limit of the `AnyForwardIndex` type.
-    public static var min : AnyIndex {
-        return AnyIndex(Int64.min)
-    }
+	/// The lower limit of the `AnyForwardIndex` type.
+	public static var min : AnyIndex {
+		return AnyIndex(Int64.min)
+	}
 
-    /// The upper limit of the `AnyForwardIndex` type.
-    public static var max : AnyIndex {
-        return AnyIndex(Int64.max)
-    }
+	/// The upper limit of the `AnyForwardIndex` type.
+	public static var max : AnyIndex {
+		return AnyIndex(Int64.max)
+	}
 }
 
 /// float.h does not export Float80's limits, nor does the Swift Standard Library.
@@ -103,14 +103,14 @@ extension AnyIndex : LatticeType {
 //}
 
 #if os(Linux)
-    import Glibc
+	import Glibc
 
-    /// Matches http://www.opensource.apple.com/source/gcc/gcc-934.3/float.h
-    public var FLT_MAX: Float = 3.40282347e+38
-    public var FLT_MIN: Float = 1.17549435e-38
+	/// Matches http://www.opensource.apple.com/source/gcc/gcc-934.3/float.h
+	public var FLT_MAX: Float = 3.40282347e+38
+	public var FLT_MIN: Float = 1.17549435e-38
 
-    public var DBL_MAX: Double = 1.7976931348623157e+308
-    public var DBL_MIN: Double = 2.2250738585072014e-308
+	public var DBL_MAX: Double = 1.7976931348623157e+308
+	public var DBL_MIN: Double = 2.2250738585072014e-308
 #else
-    import Darwin
+	import Darwin
 #endif
