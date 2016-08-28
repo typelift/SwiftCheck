@@ -21,7 +21,7 @@ struct Path<A : Arbitrary> : Arbitrary {
 	}
 
 	static var arbitrary : Gen<Path<A>> {
-		return A.arbitrary >>- { x in
+		return A.arbitrary.flatMap { x in
 			return pathFrom(x).map(Path.init)
 		}
 	}

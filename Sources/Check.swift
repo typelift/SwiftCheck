@@ -1,5 +1,5 @@
 //
-//  Operators.swift
+//  Check.swift
 //  SwiftCheck
 //
 //  Created by Robert Widmann on 5/4/15.

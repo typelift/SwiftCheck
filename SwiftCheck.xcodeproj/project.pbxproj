@@ -27,9 +27,6 @@
 		826D816A1C953D070022266C /* Modifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D814C1C953D070022266C /* Modifiers.swift */; };
 		826D816B1C953D070022266C /* Modifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D814C1C953D070022266C /* Modifiers.swift */; };
 		826D816C1C953D070022266C /* Modifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D814C1C953D070022266C /* Modifiers.swift */; };
-		826D816D1C953D070022266C /* Operators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D814D1C953D070022266C /* Operators.swift */; };
-		826D816E1C953D070022266C /* Operators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D814D1C953D070022266C /* Operators.swift */; };
-		826D816F1C953D070022266C /* Operators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D814D1C953D070022266C /* Operators.swift */; };
 		826D81701C953D070022266C /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D814E1C953D070022266C /* Property.swift */; };
 		826D81711C953D070022266C /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D814E1C953D070022266C /* Property.swift */; };
 		826D81721C953D070022266C /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D814E1C953D070022266C /* Property.swift */; };
@@ -51,9 +48,9 @@
 		826D81821C953D070022266C /* Testable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81541C953D070022266C /* Testable.swift */; };
 		826D81831C953D070022266C /* Testable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81541C953D070022266C /* Testable.swift */; };
 		826D81841C953D070022266C /* Testable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81541C953D070022266C /* Testable.swift */; };
-		826D81851C953D070022266C /* TestOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81551C953D070022266C /* TestOperators.swift */; };
-		826D81861C953D070022266C /* TestOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81551C953D070022266C /* TestOperators.swift */; };
-		826D81871C953D070022266C /* TestOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81551C953D070022266C /* TestOperators.swift */; };
+		826D81851C953D070022266C /* Check.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81551C953D070022266C /* Check.swift */; };
+		826D81861C953D070022266C /* Check.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81551C953D070022266C /* Check.swift */; };
+		826D81871C953D070022266C /* Check.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81551C953D070022266C /* Check.swift */; };
 		826D81881C953D070022266C /* Witness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81561C953D070022266C /* Witness.swift */; };
 		826D81891C953D070022266C /* Witness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81561C953D070022266C /* Witness.swift */; };
 		826D818A1C953D070022266C /* Witness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81561C953D070022266C /* Witness.swift */; };
@@ -167,7 +164,6 @@
 		826D814A1C953D070022266C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Sources/Info.plist; sourceTree = SOURCE_ROOT; };
 		826D814B1C953D070022266C /* Lattice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Lattice.swift; path = Sources/Lattice.swift; sourceTree = SOURCE_ROOT; };
 		826D814C1C953D070022266C /* Modifiers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Modifiers.swift; path = Sources/Modifiers.swift; sourceTree = SOURCE_ROOT; };
-		826D814D1C953D070022266C /* Operators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Operators.swift; path = Sources/Operators.swift; sourceTree = SOURCE_ROOT; };
 		826D814E1C953D070022266C /* Property.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Property.swift; path = Sources/Property.swift; sourceTree = SOURCE_ROOT; };
 		826D814F1C953D070022266C /* Random.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Random.swift; path = Sources/Random.swift; sourceTree = SOURCE_ROOT; };
 		826D81501C953D070022266C /* Rose.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Rose.swift; path = Sources/Rose.swift; sourceTree = SOURCE_ROOT; };
@@ -175,7 +171,7 @@
 		826D81521C953D070022266C /* SwiftCheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SwiftCheck.h; path = Sources/SwiftCheck.h; sourceTree = SOURCE_ROOT; };
 		826D81531C953D070022266C /* Test.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Test.swift; path = Sources/Test.swift; sourceTree = SOURCE_ROOT; };
 		826D81541C953D070022266C /* Testable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Testable.swift; path = Sources/Testable.swift; sourceTree = SOURCE_ROOT; };
-		826D81551C953D070022266C /* TestOperators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TestOperators.swift; path = Sources/TestOperators.swift; sourceTree = SOURCE_ROOT; };
+		826D81551C953D070022266C /* Check.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Check.swift; path = Sources/Check.swift; sourceTree = SOURCE_ROOT; };
 		826D81561C953D070022266C /* Witness.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Witness.swift; path = Sources/Witness.swift; sourceTree = SOURCE_ROOT; };
 		826D81571C953D070022266C /* WitnessedArbitrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WitnessedArbitrary.swift; path = Sources/WitnessedArbitrary.swift; sourceTree = SOURCE_ROOT; };
 		826D818E1C953D2D0022266C /* BooleanIdentitySpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BooleanIdentitySpec.swift; path = Tests/BooleanIdentitySpec.swift; sourceTree = SOURCE_ROOT; };
@@ -276,19 +272,18 @@
 			isa = PBXGroup;
 			children = (
 				826D81461C953D070022266C /* Arbitrary.swift */,
+				826D81551C953D070022266C /* Check.swift */,
 				826D81481C953D070022266C /* CoArbitrary.swift */,
 				82BA08CE1D6FFBD20068D32F /* Compose.swift */,
 				826D81491C953D070022266C /* Gen.swift */,
 				826D814B1C953D070022266C /* Lattice.swift */,
 				826D814C1C953D070022266C /* Modifiers.swift */,
-				826D814D1C953D070022266C /* Operators.swift */,
 				826D814E1C953D070022266C /* Property.swift */,
 				826D814F1C953D070022266C /* Random.swift */,
 				826D81501C953D070022266C /* Rose.swift */,
 				826D81511C953D070022266C /* State.swift */,
 				826D81531C953D070022266C /* Test.swift */,
 				826D81541C953D070022266C /* Testable.swift */,
-				826D81551C953D070022266C /* TestOperators.swift */,
 				826D81561C953D070022266C /* Witness.swift */,
 				826D81571C953D070022266C /* WitnessedArbitrary.swift */,
 				844FCC90198B320500EB242A /* Supporting Files */,
@@ -586,12 +581,11 @@
 				826D81691C953D070022266C /* Lattice.swift in Sources */,
 				826D81751C953D070022266C /* Random.swift in Sources */,
 				826D81841C953D070022266C /* Testable.swift in Sources */,
-				826D816F1C953D070022266C /* Operators.swift in Sources */,
 				826D818A1C953D070022266C /* Witness.swift in Sources */,
 				826D815A1C953D070022266C /* Arbitrary.swift in Sources */,
 				826D816C1C953D070022266C /* Modifiers.swift in Sources */,
 				826D81811C953D070022266C /* Test.swift in Sources */,
-				826D81871C953D070022266C /* TestOperators.swift in Sources */,
+				826D81871C953D070022266C /* Check.swift in Sources */,
 				826D81781C953D070022266C /* Rose.swift in Sources */,
 				826D81601C953D070022266C /* CoArbitrary.swift in Sources */,
 				826D81631C953D070022266C /* Gen.swift in Sources */,
@@ -631,12 +625,11 @@
 				826D81671C953D070022266C /* Lattice.swift in Sources */,
 				826D81731C953D070022266C /* Random.swift in Sources */,
 				826D81821C953D070022266C /* Testable.swift in Sources */,
-				826D816D1C953D070022266C /* Operators.swift in Sources */,
 				826D81881C953D070022266C /* Witness.swift in Sources */,
 				826D81581C953D070022266C /* Arbitrary.swift in Sources */,
 				826D816A1C953D070022266C /* Modifiers.swift in Sources */,
 				826D817F1C953D070022266C /* Test.swift in Sources */,
-				826D81851C953D070022266C /* TestOperators.swift in Sources */,
+				826D81851C953D070022266C /* Check.swift in Sources */,
 				826D81761C953D070022266C /* Rose.swift in Sources */,
 				826D815E1C953D070022266C /* CoArbitrary.swift in Sources */,
 				826D81611C953D070022266C /* Gen.swift in Sources */,
@@ -676,12 +669,11 @@
 				826D81681C953D070022266C /* Lattice.swift in Sources */,
 				826D81741C953D070022266C /* Random.swift in Sources */,
 				826D81831C953D070022266C /* Testable.swift in Sources */,
-				826D816E1C953D070022266C /* Operators.swift in Sources */,
 				826D81891C953D070022266C /* Witness.swift in Sources */,
 				826D81591C953D070022266C /* Arbitrary.swift in Sources */,
 				826D816B1C953D070022266C /* Modifiers.swift in Sources */,
 				826D81801C953D070022266C /* Test.swift in Sources */,
-				826D81861C953D070022266C /* TestOperators.swift in Sources */,
+				826D81861C953D070022266C /* Check.swift in Sources */,
 				826D81771C953D070022266C /* Rose.swift in Sources */,
 				826D815F1C953D070022266C /* CoArbitrary.swift in Sources */,
 				826D81621C953D070022266C /* Gen.swift in Sources */,

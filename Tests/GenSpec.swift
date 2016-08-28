@@ -94,11 +94,11 @@ class GenSpec : XCTestCase {
 		}
 
 		property("Gen.proliferateSized n generates arrays of length n") <- forAll(Gen<Int>.choose((0, 100))) { n in
-			let g = ArrayOf.init <^> Int.arbitrary.proliferateSized(n)
+			let g = Int.arbitrary.proliferateSized(n).map(ArrayOf.init)
 			return forAll(g) { $0.getArray.count == n }
 		}
 
-		property("Gen.proliferateSized 0 generates only empty arrays") <- forAll(ArrayOf.init <^> Int.arbitrary.proliferateSized(0)) {
+		property("Gen.proliferateSized 0 generates only empty arrays") <- forAll(Int.arbitrary.proliferateSized(0).map(ArrayOf.init)) {
 			return $0.getArray.isEmpty
 		}
 
@@ -252,40 +252,40 @@ class GenSpec : XCTestCase {
 
 		property("Gen obeys the Functor composition law") <- forAll { (f : ArrowOf<Int, Int>, g : ArrowOf<Int, Int>) in
 			return forAllNoShrink(lawfulGen) { (x : Gen<Int>) in
-				return ((f.getArrow • g.getArrow) <^> x) == (x.map(g.getArrow).map(f.getArrow))
+				return (x.map(f.getArrow • g.getArrow)) == (x.map(g.getArrow).map(f.getArrow))
 			}
 		}
 
 		property("Gen obeys the Applicative identity law") <- forAllNoShrink(lawfulGen) { (x : Gen<Int>) in
-			return (Gen.pure(id) <*> x) == x
+			return (x.ap(Gen.pure(id))) == x
 		}
 
 		property("Gen obeys the first Applicative composition law") <- forAllNoShrink(lawfulArrowGen, lawfulArrowGen, lawfulGen) { (fl : Gen<ArrowOf<Int, Int>>, gl : Gen<ArrowOf<Int, Int>>, x : Gen<Int>) in
 			let f = fl.map({ $0.getArrow })
 			let g = gl.map({ $0.getArrow })
-			return (curry(•) <^> f <*> g <*> x) == (f <*> (g <*> x))
+			return x.ap(g.ap(f.map(curry(•)))) == x.ap(g).ap(f)
 		}
 
 		property("Gen obeys the second Applicative composition law") <- forAllNoShrink(lawfulArrowGen, lawfulArrowGen, lawfulGen) { (fl : Gen<ArrowOf<Int, Int>>, gl : Gen<ArrowOf<Int, Int>>, x : Gen<Int>) in
 			let f = fl.map({ $0.getArrow })
 			let g = gl.map({ $0.getArrow })
-			return (Gen.pure(curry(•)) <*> f <*> g <*> x) == (f <*> (g <*> x))
+			return x.ap(g.ap(f.ap(Gen.pure(curry(•))))) == x.ap(g).ap(f)
 		}
 
 		property("Gen obeys the Monad left identity law") <- forAll { (a : Int, fa : ArrowOf<Int, Int>) in
 			let f : (Int) -> Gen<Int> = Gen<Int>.pure • fa.getArrow
-			return (Gen<Int>.pure(a) >>- f) == f(a)
+			return Gen<Int>.pure(a).flatMap(f) == f(a)
 		}
 
 		property("Gen obeys the Monad right identity law") <- forAllNoShrink(lawfulGen) { (m : Gen<Int>) in
-			return (m >>- Gen<Int>.pure) == m
+			return (m.flatMap(Gen<Int>.pure)) == m
 		}
 
 		property("Gen obeys the Monad associativity law") <- forAll { (fa : ArrowOf<Int, Int>, ga : ArrowOf<Int, Int>) in
 			let f : (Int) -> Gen<Int> = Gen<Int>.pure • fa.getArrow
 			let g : (Int) -> Gen<Int> = Gen<Int>.pure • ga.getArrow
 			return forAllNoShrink(lawfulGen) { (m : Gen<Int>) in
-				return ((m >>- f) >>- g) == (m >>- { x in f(x) >>- g })
+				return m.flatMap(f).flatMap(g) == m.flatMap({ x in f(x).flatMap(g) })
 			}
 		}
 	}
@@ -298,6 +298,8 @@ internal func curry<A, B, C>(_ f : @escaping (A, B) -> C) -> (A) -> (B) -> C {
 internal func id<A>(_ x : A) -> A {
 	return x
 }
+
+infix operator • : NilCoalescingPrecedence
 
 internal func • <A, B, C>(f : @escaping (B) -> C, g : @escaping (A) -> B) -> (A) -> C {
 	return { f(g($0)) }

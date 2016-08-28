@@ -106,6 +106,6 @@ extension Bool : Testable {
 
 extension Gen /*: Testable*/ where A : Testable {
 	public var property : Property {
-		return Property(self >>- { $0.property.unProperty })
+		return Property(self.flatMap { $0.property.unProperty })
 	}
 }

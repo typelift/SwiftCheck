@@ -197,28 +197,6 @@ generatorBoundedSizeArrays.generate
 generatorBoundedSizeArrays.generate
 generatorBoundedSizeArrays.generate
 
-
-//: Because SwiftCheck is based on the functional concepts in our other library
-//: [Swiftz](https://github.com/typelift/Swiftz), each of these functions has an operator alias:
-//:
-//: * `<^>` is an alias for `map`
-//: * `<*>` is an alias for `ap`
-//: * `>>-` is an alias for `flatMap`
-
-let fromTwoToSix_ = { $0 + 1 } <^> fromOnetoFive
-
-fromTwoToSix_.generate
-fromTwoToSix_.generate
-fromTwoToSix_.generate
-
-let generatorBoundedSizeArrays_ = fromOnetoFive >>- { len in
-	return characterArray.suchThat { xs in xs.count <= len }
-}
-
-generatorBoundedSizeArrays_.generate
-generatorBoundedSizeArrays_.generate
-generatorBoundedSizeArrays_.generate
-
 //: # Practical Generators
 
 //: For our purposes, we will say that an email address consists of 3 parts: A local part, a

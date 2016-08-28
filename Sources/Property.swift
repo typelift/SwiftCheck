@@ -318,7 +318,7 @@ extension Testable {
 	///
 	/// - returns: A `Property` that applies the given transformation upon evaluation.
 	public func mapProp(_ transform : @escaping (Prop) -> Prop) -> Property {
-		return Property(transform <^> self.property.unProperty)
+		return Property(self.property.unProperty.map(transform))
 	}
 
 	/// Applies a function that modifies the test case generator's size.
@@ -342,7 +342,7 @@ extension Testable {
 	///   given transformation block.
 	public func mapTotalResult(_ transform : @escaping (TestResult) -> TestResult) -> Property {
 		return self.mapRoseResult { rs in
-			return protectResults(transform <^> rs)
+			return protectResults(rs.map(transform))
 		}
 	}
 
@@ -355,7 +355,7 @@ extension Testable {
 	///   given transformation block.
 	public func mapResult(_ transform : @escaping (TestResult) -> TestResult) -> Property {
 		return self.mapRoseResult { rs in
-			return transform <^> rs
+			return rs.map(transform)
 		}
 	}
 
@@ -568,7 +568,7 @@ internal func id<A>(_ x : A) -> A {
 	return x
 }
 
-internal func • <A, B, C>(f : @escaping (B) -> C, g : @escaping (A) -> B) -> (A) -> C {
+internal func comp<A, B, C>(_ f : @escaping (B) -> C, _ g : @escaping (A) -> B) -> (A) -> C {
 	return { f(g($0)) }
 }
 
@@ -679,11 +679,11 @@ private func conj(_ k : @escaping (TestResult) -> TestResult, xs : [Rose<TestRes
 
 				switch result().ok {
 				case .some(true):
-					return conj(addLabels(result()) • addCallbacks(result()) • k, xs: [Rose<TestResult>](xs[1..<xs.endIndex]))
+					return conj(comp(addLabels(result()), comp(addCallbacks(result()), k)), xs: [Rose<TestResult>](xs[1..<xs.endIndex]))
 				case .some(false):
 					return rose
 				case .none:
-					let rose2 = conj(addCallbacks(result()) • k, xs: [Rose<TestResult>](xs[1..<xs.endIndex])).reduce
+					let rose2 = conj(comp(addCallbacks(result()), k), xs: [Rose<TestResult>](xs[1..<xs.endIndex])).reduce
 					switch rose2 {
 					case .mkRose(let result2, _):
 						switch result2().ok {

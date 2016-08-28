@@ -95,7 +95,7 @@ public struct Gen<A> {
 	/// When using this function, it is necessary to explicitly specialize the
 	/// generic parameter `A`.  For example:
 	///
-	///     Gen<UInt32>.choose((32, 255)) >>- (Gen<Character>.pure • Character.init • UnicodeScalar.init)
+	///     Gen<UInt32>.choose((32, 255)).flatMap(Gen<Character>.pure • Character.init • UnicodeScalar.init)
 	public static func choose<A : RandomType>(_ rng : (A, A)) -> Gen<A> {
 		return Gen<A>(unGen: { s, _ in
 			return A.randomInRange(rng, gen: s).0
@@ -112,7 +112,7 @@ public struct Gen<A> {
 	{
 		assert(gs.count != 0, "oneOf used with empty list")
 
-		return choose((gs.startIndex, gs.index(before: gs.endIndex))) >>- { x in
+		return choose((gs.startIndex, gs.index(before: gs.endIndex))).flatMap { x in
 			return gs[x]
 		}
 	}
@@ -381,7 +381,7 @@ extension Gen {
 	/// determined by the receiver's size parameter.
 	public var proliferate : Gen<[A]> {
 		return Gen<[A]>.sized { n in
-			return Gen.choose((0, n)) >>- self.proliferateSized
+			return Gen.choose((0, n)).flatMap(self.proliferateSized)
 		}
 	}
 
@@ -389,7 +389,7 @@ extension Gen {
 	/// length determined by the receiver's size parameter.
 	public var proliferateNonEmpty : Gen<[A]> {
 		return Gen<[A]>.sized { n in
-			return Gen.choose((1, max(1, n))) >>- self.proliferateSized
+			return Gen.choose((1, max(1, n))).flatMap(self.proliferateSized)
 		}
 	}
 
@@ -404,23 +404,17 @@ extension Gen {
 extension Gen /*: Functor*/ {
 	/// Returns a new generator that applies a given function to any outputs the
 	/// receiver creates.
+	///
+	/// This function is most useful for converting between generators of inter-
+	/// related types.  For example, you might have a Generator of `Character`
+	/// values that you then `.proliferate` into an `Array` of `Character`s.  You
+	/// can then use `fmap` to convert that generator of `Array`s to a generator of
+	/// `String`s.
 	public func map<B>(_ f : @escaping (A) -> B) -> Gen<B> {
-		return f <^> self
+		return Gen<B>(unGen: { r, n in
+			return f(self.unGen(r, n))
+		})
 	}
-}
-
-/// Fmap | Returns a new generator that applies a given function to any outputs
-/// the given generator creates.
-///
-/// This function is most useful for converting between generators of inter-
-/// related types.  For example, you might have a Generator of `Character`
-/// values that you then `.proliferate` into an `Array` of `Character`s.  You
-/// can then use `fmap` to convert that generator of `Array`s to a generator of
-/// `String`s.
-public func <^> <A, B>(f : @escaping (A) -> B, g : Gen<A>) -> Gen<B> {
-	return Gen(unGen: { r, n in
-		return f(g.unGen(r, n))
-	})
 }
 
 extension Gen /*: Applicative*/ {
@@ -434,30 +428,11 @@ extension Gen /*: Applicative*/ {
 	/// Given a generator of functions, applies any generated function to any
 	/// outputs the receiver creates.
 	public func ap<B>(_ fn : Gen<(A) -> B>) -> Gen<B> {
-		return fn <*> self
+		return Gen<B>(unGen: { r, n in
+			let (r1, r2) = r.split
+			return fn.unGen(r1, n)(self.unGen(r2, n))
+		})
 	}
-}
-
-/// Ap | Returns a Generator that uses the first given Generator to produce
-/// functions and the second given Generator to produce values that it applies
-/// to those functions.  It can be used in conjunction with <^> to simplify the
-/// application of "combining" functions to a large amount of sub-generators.
-/// For example:
-///
-///     struct Foo { let b : Int; let c : Int; let d : Int }
-///
-///     let genFoo = curry(Foo.init) <^> Int.arbitrary <*> Int.arbitrary <*> Int.arbitrary
-///
-/// This combinator acts like `zip`, but instead of creating pairs it creates
-/// values after applying the zipped function to the zipped value.
-///
-/// Promotes function application to a Generator of functions applied to a
-/// Generator of values.
-public func <*> <A, B>(fn : Gen<(A) -> B>, g : Gen<A>) -> Gen<B> {
-	return Gen(unGen: { r, n in
-		let (r1, r2) = r.split
-		return fn.unGen(r1, n)(g.unGen(r2, n))
-	})
 }
 
 extension Gen /*: Monad*/ {
@@ -469,23 +444,12 @@ extension Gen /*: Monad*/ {
 	/// control the length of a Generator of strings, or use it to choose a
 	/// random index into a Generator of arrays.
 	public func flatMap<B>(_ fn : @escaping (A) -> Gen<B>) -> Gen<B> {
-		return self >>- fn
+		return Gen<B>(unGen: { r, n in
+			let (r1, r2) = r.split
+			let m2 = fn(self.unGen(r1, n))
+			return m2.unGen(r2, n)
+		})
 	}
-}
-
-/// Flat Map | Applies the function to any generated values to yield a new
-/// generator.  This generator is then given a new random seed and returned.
-///
-/// `flatMap` allows for the creation of Generators that depend on other
-/// generators.  One might, for example, use a Generator of integers to control
-/// the length of a Generator of strings, or use it to choose a random index
-/// into a Generator of arrays.
-public func >>- <A, B>(m : Gen<A>, fn : @escaping (A) -> Gen<B>) -> Gen<B> {
-	return Gen(unGen: { r, n in
-		let (r1, r2) = r.split
-		let m2 = fn(m.unGen(r1, n))
-		return m2.unGen(r2, n)
-	})
 }
 
 /// Creates and returns a Generator of arrays of values drawn from each
@@ -529,7 +493,7 @@ public func promote<A>(_ x : Rose<Gen<A>>) -> Gen<Rose<A>> {
 /// Promotes a function returning generators to a generator of functions.
 public func promote<A, B>(_ m : @escaping (A) -> Gen<B>) -> Gen<(A) -> B> {
 	return delay().flatMap { eval in
-		return Gen<(A) -> B>.pure(eval • m)
+		return Gen<(A) -> B>.pure(comp(eval, m))
 	}
 }
 

@@ -58,7 +58,7 @@ class ComplexSpec : XCTestCase {
 			gen4
 		])
 
-		let ipGen = { $0.initial } <^> glue([ipHexDigits, ipHexDigits, ipHexDigits, ipHexDigits])
+		let ipGen = glue([ipHexDigits, ipHexDigits, ipHexDigits, ipHexDigits]).map { $0.initial }
 
 		property("Generated IPs contain 3 sections") <- forAll(ipGen) { (e : String) in
 			return e.characters.filter({ $0 == ":" }).count == 3
