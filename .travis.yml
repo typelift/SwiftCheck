@@ -5,15 +5,16 @@ matrix:
   include:
     - os: osx
       language: objective-c
-      osx_image: xcode7.3
+      osx_image: xcode8
       before_install:
         - git submodule update --init --recursive
       script:
-        - pod lib lint
+      # Restore pod build before shipping for 3.0 
+      # - pod lib lint
         - carthage build --no-skip-current
     - os: osx
       language: objective-c
-      osx_image: xcode7.3
+      osx_image: xcode8
       before_install:
         - git submodule update --init --recursive
       script:
@@ -21,8 +22,8 @@ matrix:
         - xcodebuild test -scheme SwiftCheck | xcpretty -c
         # -- Start iOS --
         # !!!: Make sure desired device name & OS version are suitable for the Xcode version installed on osx_image
-        - iOS_DEVICE_NAME="iPad Pro"
-        - iOS_RUNTIME_VERSION="9.3"
+        - iOS_DEVICE_NAME="iPad Pro (12.9 inch)"
+        - iOS_RUNTIME_VERSION="10.0"
         # Get simulator identifier for desired device/runtime pair
         - SIMULATOR_ID=$(xcrun instruments -s | grep -o "${iOS_DEVICE_NAME} (${iOS_RUNTIME_VERSION}) \[.*\]" | grep -o "\[.*\]" | sed "s/^\[\(.*\)\]$/\1/")
         - echo $SIMULATOR_ID
@@ -40,13 +41,9 @@ matrix:
       before_install:
         - git submodule update --init --recursive
         - wget -q -O - https://swift.org/keys/all-keys.asc | gpg --import -
-        - wget https://swift.org/builds/development/ubuntu1404/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04.tar.gz
-        - tar xzf swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04.tar.gz
-        - export PATH=${PWD}/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04/usr/bin:"${PATH}"
-        - wget -q -O - https://swift.org/keys/all-keys.asc | gpg --import -
-        - wget https://swift.org/builds/development/ubuntu1404/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04.tar.gz
-        - tar xzf swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04.tar.gz
-        - export PATH=${PWD}/swift-DEVELOPMENT-SNAPSHOT-2016-02-08-a-ubuntu14.04/usr/bin:"${PATH}"
+        - wget https://swift.org/builds/swift-3.0-preview-6/ubuntu1404/swift-3.0-PREVIEW-6/swift-3.0-PREVIEW-6-ubuntu14.04.tar.gz
+        - tar xzf swift-3.0-PREVIEW-6-ubuntu14.04.tar.gz
+        - export PATH=${PWD}/swift-3.0-PREVIEW-6-ubuntu14.04/usr/bin:"${PATH}"
       script:
         - swift build
 notifications:
