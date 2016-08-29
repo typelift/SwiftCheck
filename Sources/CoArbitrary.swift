@@ -69,7 +69,10 @@ extension String : CoArbitrary {
 		if x.isEmpty {
 			return { $0.variant(0) }
 		}
-		return Character.coarbitrary(x[x.startIndex]) • String.coarbitrary(x[x.characters.index(after: x.startIndex)..<x.endIndex])
+		return comp(
+			Character.coarbitrary(x[x.startIndex]), 
+			String.coarbitrary(x[x.characters.index(after: x.startIndex)..<x.endIndex])
+		)
 	}
 }
 
@@ -164,7 +167,7 @@ extension Array : CoArbitrary {
 		if a.isEmpty {
 			return { $0.variant(0) }
 		}
-		return { $0.variant(1) } • [Element].coarbitrary([Element](a[1..<a.endIndex]))
+		return comp({ $0.variant(1) }, [Element].coarbitrary([Element](a[1..<a.endIndex])))
 	}
 }
 

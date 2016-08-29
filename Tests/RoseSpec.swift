@@ -40,39 +40,39 @@ class RoseSpec : XCTestCase {
 
 		property("Rose obeys the Functor composition law", arguments: smallArgs) <- forAll { (f : ArrowOf<Int, Int>, g : ArrowOf<Int, Int>) in
 			return forAll { (x : RoseTreeOf<Int>) in
-				return ((f.getArrow • g.getArrow) <^> x.getRose) == (x.getRose.map(g.getArrow).map(f.getArrow))
+				return x.getRose.map(f.getArrow • g.getArrow) == x.getRose.map(g.getArrow).map(f.getArrow)
 			}
 		}
 
 		property("Rose obeys the Applicative identity law", arguments: smallArgs) <- forAll { (x : RoseTreeOf<Int>) in
-			return (Rose.pure(id) <*> x.getRose) == x.getRose
+			return x.getRose.ap(Rose.pure(id)) == x.getRose
 		}
 
 		property("Rose obeys the first Applicative composition law", arguments: smallArgs) <- forAll{ (fl : RoseTreeOf<ArrowOf<Int, Int>>, gl : RoseTreeOf<ArrowOf<Int, Int>>, x : RoseTreeOf<Int>) in
 			let f = fl.getRose.map({ $0.getArrow })
 			let g = gl.getRose.map({ $0.getArrow })
-			return (curry(•) <^> f <*> g <*> x.getRose) == (f <*> (g <*> x.getRose))
+			return x.getRose.ap(g.ap(f.map(curry(•)))) == x.getRose.ap(g).ap(f)
 		}
 
 		property("Rose obeys the second Applicative composition law", arguments: smallArgs) <- forAll { (fl : RoseTreeOf<ArrowOf<Int, Int>>, gl : RoseTreeOf<ArrowOf<Int, Int>>, x : RoseTreeOf<Int>) in
 			let f = fl.getRose.map({ $0.getArrow })
 			let g = gl.getRose.map({ $0.getArrow })
-			return (Rose.pure(curry(•)) <*> f <*> g <*> x.getRose) == (f <*> (g <*> x.getRose))
+			return x.getRose.ap(g.ap(f.ap(Rose.pure(curry(•))))) == x.getRose.ap(g).ap(f)
 		}
 
 		property("Rose obeys the Monad left identity law", arguments: smallArgs) <- forAll { (a : Int, f : ArrowOf<Int, RoseTreeOf<Int>>) in
-			return (Rose<Int>.pure(a) >>- { f.getArrow($0).getRose }) == f.getArrow(a).getRose
+			return (Rose<Int>.pure(a).flatMap { f.getArrow($0).getRose }) == f.getArrow(a).getRose
 		}
 
 		property("Rose obeys the Monad right identity law", arguments: smallArgs) <- forAll { (m : RoseTreeOf<Int>) in
-			return (m.getRose >>- Rose.pure) == m.getRose
+			return m.getRose.flatMap(Rose.pure) == m.getRose
 		}
 
 		property("Rose obeys the Monad associativity law", arguments: smallArgs) <- forAll { (f : ArrowOf<Int, RoseTreeOf<Int>>, g : ArrowOf<Int, RoseTreeOf<Int>>) in
 			return forAll { (m : RoseTreeOf<Int>) in
-				return ((m.getRose >>- { f.getArrow($0).getRose }) >>- { g.getArrow($0).getRose })
-					==
-					(m.getRose >>- { x in f.getArrow(x).getRose >>- { g.getArrow($0).getRose } })
+				return m.getRose.flatMap({ f.getArrow($0).getRose }).flatMap({ g.getArrow($0).getRose })
+						==
+						m.getRose.flatMap({ x in f.getArrow(x).getRose.flatMap({ g.getArrow($0).getRose }) })
 			}
 		}
 	}
@@ -94,7 +94,7 @@ struct RoseTreeOf<A : Arbitrary> : Arbitrary {
 
 private func arbTree<A>(_ n : Int) -> Gen<RoseTreeOf<A>> {
 	if n == 0 {
-		return A.arbitrary >>- { Gen.pure(RoseTreeOf(Rose.pure($0))) }
+		return A.arbitrary.flatMap { Gen.pure(RoseTreeOf(Rose.pure($0))) }
 	}
 	return Positive<Int>.arbitrary.flatMap { m in
 		let n2 = n / (m.getPositive + 1)

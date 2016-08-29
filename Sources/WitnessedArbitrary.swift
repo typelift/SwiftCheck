@@ -42,7 +42,7 @@ extension Array : WitnessedArbitrary {
 extension AnyBidirectionalCollection where Element : Arbitrary {
 	/// Returns a generator of `AnyBidirectionalCollection`s of arbitrary `Element`s.
 	public static var arbitrary : Gen<AnyBidirectionalCollection<Element>> {
-		return AnyBidirectionalCollection.init <^> [Element].arbitrary
+		return [Element].arbitrary.map(AnyBidirectionalCollection.init)
 	}
 
 	/// The default shrinking function for `AnyBidirectionalCollection`s of arbitrary `Element`s.
@@ -66,7 +66,7 @@ extension AnyBidirectionalCollection : WitnessedArbitrary {
 extension AnySequence where Element : Arbitrary {
 	/// Returns a generator of `AnySequence`s of arbitrary `Element`s.
 	public static var arbitrary : Gen<AnySequence<Element>> {
-		return AnySequence.init <^> [Element].arbitrary
+		return [Element].arbitrary.map(AnySequence.init)
 	}
 
 	/// The default shrinking function for `AnySequence`s of arbitrary `Element`s.
@@ -90,7 +90,7 @@ extension AnySequence : WitnessedArbitrary {
 extension ArraySlice where Element : Arbitrary {
 	/// Returns a generator of `ArraySlice`s of arbitrary `Element`s.
 	public static var arbitrary : Gen<ArraySlice<Element>> {
-		return ArraySlice.init <^> [Element].arbitrary
+		return [Element].arbitrary.map(ArraySlice.init)
 	}
 
 	/// The default shrinking function for `ArraySlice`s of arbitrary `Element`s.
@@ -114,7 +114,7 @@ extension ArraySlice : WitnessedArbitrary {
 extension CollectionOfOne where Element : Arbitrary {
 	/// Returns a generator of `CollectionOfOne`s of arbitrary `Element`s.
 	public static var arbitrary : Gen<CollectionOfOne<Element>> {
-		return CollectionOfOne.init <^> Element.arbitrary
+		return Element.arbitrary.map(CollectionOfOne.init)
 	}
 }
 
@@ -165,7 +165,7 @@ extension Optional : WitnessedArbitrary {
 extension ContiguousArray where Element : Arbitrary {
 	/// Returns a generator of `ContiguousArray`s of arbitrary `Element`s.
 	public static var arbitrary : Gen<ContiguousArray<Element>> {
-		return ContiguousArray.init <^> [Element].arbitrary
+		return [Element].arbitrary.map(ContiguousArray.init)
 	}
 
 	/// The default shrinking function for `ContiguousArray`s of arbitrary `Element`s.
@@ -250,7 +250,7 @@ extension Repeated where Element : Arbitrary {
 			return repeatElement(element , count: count)
 		}
 
-		return constructor <^> Gen<(Element, Int)>.zip(Element.arbitrary, Int.arbitrary)
+		return Gen<(Element, Int)>.zip(Element.arbitrary, Int.arbitrary).map(constructor)
 	}
 }
 
@@ -276,7 +276,7 @@ extension Set where Element : Arbitrary & Hashable {
 					return Gen.pure(Set([]))
 				}
 
-				return Set.init <^> sequence(Array((0...k)).map { _ in Element.arbitrary })
+				return sequence(Array((0...k)).map { _ in Element.arbitrary }).map(Set.init)
 			}
 		}
 	}

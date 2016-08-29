@@ -68,7 +68,7 @@ public struct Blind<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 
 	/// Returns a generator of `Blind` values.
 	public static var arbitrary : Gen<Blind<A>> {
-		return Blind.init <^> A.arbitrary
+		return A.arbitrary.map(Blind.init)
 	}
 
 	/// The default shrinking function for `Blind` values.
@@ -100,7 +100,7 @@ public struct Static<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 
 	/// Returns a generator of `Static` values.
 	public static var arbitrary : Gen<Static<A>> {
-		return Static.init <^> A.arbitrary
+		return A.arbitrary.map(Static.init)
 	}
 }
 
@@ -132,7 +132,7 @@ public struct ArrayOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 
 	/// Returns a generator of `ArrayOf` values.
 	public static var arbitrary : Gen<ArrayOf<A>> {
-		return ArrayOf.init <^> Array<A>.arbitrary
+		return Array<A>.arbitrary.map(ArrayOf.init)
 	}
 
 	/// The default shrinking function for an `ArrayOf` values.
@@ -147,7 +147,7 @@ extension ArrayOf : CoArbitrary {
 		if a.isEmpty {
 			return { $0.variant(0) }
 		}
-		return { $0.variant(1) } • ArrayOf.coarbitrary(ArrayOf([A](a[1..<a.endIndex])))
+		return comp({ $0.variant(1) }, ArrayOf.coarbitrary(ArrayOf([A](a[1..<a.endIndex]))))
 	}
 }
 
@@ -173,7 +173,7 @@ public struct OrderedArrayOf<A : Arbitrary & Comparable> : Arbitrary, CustomStri
 
 	/// Returns a generator for an `OrderedArrayOf` values.
 	public static var arbitrary : Gen<OrderedArrayOf<A>> {
-		return OrderedArrayOf.init <^> Array<A>.arbitrary
+		return Array<A>.arbitrary.map(OrderedArrayOf.init)
 	}
 
 	/// The default shrinking function for an `OrderedArrayOf` values.
@@ -199,7 +199,7 @@ public struct DictionaryOf<K : Hashable & Arbitrary, V : Arbitrary> : Arbitrary,
 
 	/// Returns a generator for a `DictionaryOf` values.
 	public static var arbitrary : Gen<DictionaryOf<K, V>> {
-		return DictionaryOf.init <^> Dictionary<K, V>.arbitrary
+		return Dictionary<K, V>.arbitrary.map(DictionaryOf.init)
 	}
 
 	/// The default shrinking function for a `DictionaryOf` values.
@@ -230,7 +230,7 @@ public struct OptionalOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 
 	/// Returns a generator for `OptionalOf` values.
 	public static var arbitrary : Gen<OptionalOf<A>> {
-		return OptionalOf.init <^> Optional<A>.arbitrary
+		return Optional<A>.arbitrary.map(OptionalOf.init)
 	}
 
 	/// The default shrinking function for `OptionalOf` values.
@@ -270,7 +270,7 @@ public struct SetOf<A : Hashable & Arbitrary> : Arbitrary, CustomStringConvertib
 					return Gen.pure(SetOf(Set([])))
 				}
 
-				return (SetOf.init • Set.init) <^> sequence(Array((0...k)).map { _ in A.arbitrary })
+				return sequence(Array((0...k)).map { _ in A.arbitrary }).map(comp(SetOf.init, Set.init))
 			}
 		}
 	}
@@ -420,7 +420,7 @@ public struct Positive<A : Arbitrary & SignedNumber> : Arbitrary, CustomStringCo
 
 	/// Returns a generator of `Positive` values.
 	public static var arbitrary : Gen<Positive<A>> {
-		return A.arbitrary.map(Positive.init • abs).suchThat { $0.getPositive > 0 }
+		return A.arbitrary.map(comp(Positive.init, abs)).suchThat { $0.getPositive > 0 }
 	}
 
 	/// The default shrinking function for `Positive` values.
@@ -452,7 +452,7 @@ public struct NonZero<A : Arbitrary & Integer> : Arbitrary, CustomStringConverti
 
 	/// Returns a generator of `NonZero` values.
 	public static var arbitrary : Gen<NonZero<A>> {
-		return NonZero.init <^> A.arbitrary.suchThat { $0 != 0 }
+		return A.arbitrary.suchThat({ $0 != 0 }).map(NonZero.init)
 	}
 
 	/// The default shrinking function for `NonZero` values.
@@ -483,7 +483,7 @@ public struct NonNegative<A : Arbitrary & Integer> : Arbitrary, CustomStringConv
 
 	/// Returns a generator of `NonNegative` values.
 	public static var arbitrary : Gen<NonNegative<A>> {
-		return NonNegative.init <^> A.arbitrary.suchThat { $0 >= 0 }
+		return A.arbitrary.suchThat({ $0 >= 0 }).map(NonNegative.init)
 	}
 
 	/// The default shrinking function for `NonNegative` values.
@@ -533,9 +533,9 @@ fileprivate final class ArrowOfImpl<T : Hashable & CoArbitrary, U : Arbitrary> :
 	}
 
 	static var arbitrary : Gen<ArrowOfImpl<T, U>> {
-		return ArrowOfImpl.init <^> promote { a in
+		return promote({ a in
 			return T.coarbitrary(a)(U.arbitrary)
-		}
+		}).map(ArrowOfImpl.init)
 	}
 
 	static func shrink(_ f : ArrowOfImpl<T, U>) -> [ArrowOfImpl<T, U>] {
@@ -644,7 +644,7 @@ private final class PointerOfImpl<T : Arbitrary> : Arbitrary {
 				return Gen.pure(PointerOfImpl(UnsafeMutablePointer<T>.allocate(capacity: size), size))
 			}
 			let pt = UnsafeMutablePointer<T>.allocate(capacity: n)
-			let gt = pt.initialize <^> sequence(Array((0..<n)).map { _ in T.arbitrary })
+			let gt = sequence(Array((0..<n)).map { _ in T.arbitrary }).map(pt.initialize)
 			return gt.map { _ in PointerOfImpl(pt, n) }
 		}
 	}

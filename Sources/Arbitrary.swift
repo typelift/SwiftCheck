@@ -242,9 +242,9 @@ extension Float : Arbitrary {
 			let numerator = Gen<Int64>.choose((Int64(-n) * precision, Int64(n) * precision))
 			let denominator = Gen<Int64>.choose((1, precision))
 
-			return numerator
-				>>- { a in denominator
-					>>- { b in Gen<Float>.pure(Float(a) / Float(b)) } }
+			return numerator.flatMap { a in
+				return denominator.flatMap { b in Gen<Float>.pure(Float(a) / Float(b)) } 
+			}
 		}
 	}
 
@@ -273,9 +273,10 @@ extension Double : Arbitrary {
 			let numerator = Gen<Int64>.choose((Int64(-n) * precision, Int64(n) * precision))
 			let denominator = Gen<Int64>.choose((1, precision))
 
-			return numerator
-				>>- { a in denominator
-					>>- { b in Gen<Double>.pure(Double(a) / Double(b)) } }
+			return numerator.flatMap { a in 
+				return denominator.flatMap { b in Gen<Double>.pure(Double(a) / Double(b)) 
+				} 
+			}
 		}
 	}
 
@@ -308,7 +309,7 @@ extension String : Arbitrary {
 	/// Returns a generator of `String` values.
 	public static var arbitrary : Gen<String> {
 		let chars = Gen.sized(Character.arbitrary.proliferateSized)
-		return chars >>- { Gen<String>.pure(String($0)) }
+		return chars.flatMap { Gen<String>.pure(String($0)) }
 	}
 
 	/// The default shrinking function for `String` values.
@@ -320,7 +321,7 @@ extension String : Arbitrary {
 extension Character : Arbitrary {
 	/// Returns a generator of `Character` values.
 	public static var arbitrary : Gen<Character> {
-		return Gen<UInt32>.choose((32, 255)) >>- (Gen<Character>.pure • Character.init • UnicodeScalar.init)
+		return Gen<UInt32>.choose((32, 255)).flatMap(comp(Gen<Character>.pure, comp(Character.init, UnicodeScalar.init)))
 	}
 
 	/// The default shrinking function for `Character` values.
@@ -333,7 +334,7 @@ extension Character : Arbitrary {
 extension AnyIndex : Arbitrary {
 	/// Returns a generator of `AnyForwardIndex` values.
 	public static var arbitrary : Gen<AnyIndex> {
-		return Gen<Int64>.choose((1, Int64.max)).flatMap(Gen<AnyIndex>.pure • AnyIndex.init)
+		return Gen<Int64>.choose((1, Int64.max)).flatMap(comp(Gen<AnyIndex>.pure, AnyIndex.init))
 	}
 }
 
