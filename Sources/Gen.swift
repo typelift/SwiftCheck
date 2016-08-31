@@ -90,13 +90,7 @@ public struct Gen<A> {
 		})
 	}
 
-	/// Constructs a generator by applying the given function to the minimum 
-	/// and maximum bounds of a bounded type.
-	public static func withBounds<A : LatticeType>(_ f : @escaping (A, A) -> Gen<A>) -> Gen<A> {
-		return f(A.min, A.max)
-	}
-	
-	/// Constructs a random element in the range of two `RandomType`s.
+	/// Constructs a random element in the inclusive range of two `RandomType`s.
 	///
 	/// When using this function, it is necessary to explicitly specialize the
 	/// generic parameter `A`.  For example:
