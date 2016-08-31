@@ -15,7 +15,7 @@ class GenSpec : XCTestCase {
 			let g = Gen.frequency([
 				(10, Gen.pure(0)),
 				(5, Gen.pure(1)),
-				])
+			])
 
 			return forAll(g) { (i : Int) in
 				return true
@@ -107,8 +107,8 @@ class GenSpec : XCTestCase {
 			return forAll(Gen<Int>.sized { xx in
 				n = xx
 				return Int.arbitrary
-				}.resize(n)) { (x : Int) in
-					return x <= n
+			}.resize(n)) { (x : Int) in
+				return x <= n
 			}
 		}
 

@@ -84,7 +84,7 @@ public struct CheckerArguments {
 	/// passes.
 	///
 	/// The default value of this property is 100.  In general, some tests may require more than
-	/// this amount, but less is rare.  If you need a value less than or equal to 1, use `.once`
+	/// this amount, but less is rare.  If you need a value of 1, use `.once`
 	/// on the property instead.
 	let maxAllowableSuccessfulTests : Int
 	/// The maximum number of tests cases that can be discarded before testing gives up on the

@@ -49,9 +49,27 @@ class PropertySpec : XCTestCase {
 				let b = bomb! // Will explode if we test more than once
 				bomb = nil
 				return b == n
-				}.once
+			}.once
 		}
 
+		property("Again undoes once") <- forAll { (n : Int) in
+			var counter : Int = 0
+			quickCheck(forAll { (_ : Int) in
+				counter += 1
+				return true
+			}.once.again)
+			return counter > 1
+		}
+		
+		property("Once undoes again") <- forAll { (n : Int) in
+			var bomb : Optional<Int> = .some(n)
+			return forAll { (_ : Int) in
+				let b = bomb! // Will explode if we test more than once
+				bomb = nil
+				return b == n
+			}.again.once
+		}
+		
 		property("Conjamb randomly picks from multiple generators") <- forAll { (n : Int, m : Int, o : Int) in
 			return conjamb({
 				return true <?> "picked 1"

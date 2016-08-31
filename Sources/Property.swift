@@ -26,7 +26,7 @@ public func conjoin(_ ps : Testable...) -> Property {
 		return p.property.unProperty.map { $0.unProp }
 	})).flatMap({ roses in
 		return Gen.pure(Prop(unProp: conj(id, xs: roses)))
-	}))
+	})).again
 }
 
 /// Takes the disjunction of multiple properties and reports all successes and
@@ -50,7 +50,7 @@ public func disjoin(_ ps : Testable...) -> Property {
 		return p.property.unProperty.map { $0.unProp }
 	})).flatMap({ roses in
 		return Gen.pure(Prop(unProp: roses.reduce(.mkRose({ TestResult.failed() }, { [] }), disj)))
-	}))
+	})).again
 }
 
 /// Takes the nondeterministic conjunction of multiple properties and treats
@@ -66,7 +66,7 @@ public func disjoin(_ ps : Testable...) -> Property {
 ///   any of the given `Testable` expressions.
 public func conjamb(_ ps : () -> Testable...) -> Property {
 	let ls = ps.lazy.map { $0().property.unProperty }
-	return Property(Gen.oneOf(ls))
+	return Property(Gen.oneOf(ls)).again
 }
 
 extension Testable {
@@ -100,6 +100,8 @@ extension Testable {
 	}
 
 	/// Modifies a property so that it only will be tested once.
+	///
+	/// Undoes the effect of `.again`.
 	public var once : Property {
 		return self.mapResult { res in
 			return TestResult(
@@ -111,6 +113,25 @@ extension Testable {
 				stamp:         res.stamp,
 				callbacks:     res.callbacks,
 				abort:         true,
+				quantifier:    res.quantifier
+			)
+		}
+	}
+	
+	/// Modifies a property so that it will be tested many times.
+	///
+	/// Undoes the effect of `.once`.
+	public var again : Property {
+		return self.mapResult { res in
+			return TestResult(
+				ok:            res.ok,
+				expect:        res.expect,
+				reason:        res.reason,
+				theException:  res.theException,
+				labels:        res.labels,
+				stamp:         res.stamp,
+				callbacks:     res.callbacks,
+				abort:         false,
 				quantifier:    res.quantifier
 			)
 		}
@@ -516,6 +537,20 @@ public struct TestResult {
 		}
 		return result(Optional.some(false), reason: "Falsifiable")
 	}
+	
+	private static func result(_ ok : Bool?, reason : String = "") -> TestResult {
+		return TestResult(
+			ok:            ok,
+			expect:        true,
+			reason:        reason,
+			theException:  .none,
+			labels:        [:],
+			stamp:         Set(),
+			callbacks:     [],
+			abort:         false,
+			quantifier:    .universal
+		)
+	}
 }
 
 // MARK: - Implementation Details
@@ -528,20 +563,6 @@ private func props<A>(_ shrinker : @escaping (A) -> [A], original : A, pf : @esc
 	return .mkRose({ pf(original).property.unProperty }, { shrinker(original).map { x1 in
 		return props(shrinker, original: x1, pf: pf)
 	}})
-}
-
-private func result(_ ok : Bool?, reason : String = "") -> TestResult {
-	return TestResult(
-		ok:            ok,
-		expect:        true,
-		reason:        reason,
-		theException:  .none,
-		labels:        [:],
-		stamp:         Set(),
-		callbacks:     [],
-		abort:         false,
-		quantifier:    .universal
-	)
 }
 
 private func protectResults(_ rs : Rose<TestResult>) -> Rose<TestResult> {

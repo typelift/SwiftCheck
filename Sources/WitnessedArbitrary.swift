@@ -9,15 +9,7 @@
 extension Array where Element : Arbitrary {
 	/// Returns a generator of `Array`s of arbitrary `Element`s.
 	public static var arbitrary : Gen<Array<Element>> {
-		return Gen.sized { n in
-			return Gen<Int>.choose((0, n)).flatMap { k in
-				if k == 0 {
-					return Gen.pure([])
-				}
-
-				return sequence((0...k).map { _ in Element.arbitrary })
-			}
-		}
+		return Element.arbitrary.proliferate
 	}
 
 	/// The default shrinking function for `Array`s of arbitrary `Element`s.

@@ -90,6 +90,12 @@ public struct Gen<A> {
 		})
 	}
 
+	/// Constructs a generator by applying the given function to the minimum 
+	/// and maximum bounds of a bounded type.
+	public static func withBounds<A : LatticeType>(_ f : @escaping (A, A) -> Gen<A>) -> Gen<A> {
+		return f(A.min, A.max)
+	}
+	
 	/// Constructs a random element in the range of two `RandomType`s.
 	///
 	/// When using this function, it is necessary to explicitly specialize the
@@ -101,6 +107,18 @@ public struct Gen<A> {
 			return A.randomInRange(rng, gen: s).0
 		})
 	}
+	
+	/// Constructs a random element in the range of a bounded `RandomType`.
+	///
+	/// When using this function, it is necessary to explicitly specialize the
+	/// generic parameter `A`.  For example:
+	///
+	///     Gen<UInt32>.chooseAny().flatMap(Gen<Character>.pure • Character.init • UnicodeScalar.init)
+	public static func chooseAny<A : RandomType & LatticeType>() -> Gen<A> {
+		return Gen<A>(unGen: { (s, _) in
+			return randomBound(s).0
+		})
+	}
 
 	/// Constructs a Generator that randomly selects and uses a particular
 	/// generator from the given sequence of Generators.
@@ -108,7 +126,7 @@ public struct Gen<A> {
 	/// If control over the distribution of generators is needed, see
 	/// `Gen.frequency` or `Gen.weighted`.
 	public static func oneOf<S : BidirectionalCollection>(_ gs : S) -> Gen<A>
-		where S.Iterator.Element == Gen<A>, S.Index : RandomType & Comparable, S.Index : RandomType
+		where S.Iterator.Element == Gen<A>, S.Index : RandomType & Comparable
 	{
 		assert(gs.count != 0, "oneOf used with empty list")
 
