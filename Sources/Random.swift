@@ -218,7 +218,7 @@ extension UInt : RandomType {
 	/// Returns a random `UInt` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(_ range : (UInt, UInt), gen : G) -> (UInt, G) {
 		let (minl, maxl) = range
-		let (bb, gg) = Int64.randomInRange((Int64(Int(bitPattern: minl)), Int64(Int(bitPattern: maxl))), gen: gen)
+		let (bb, gg) = UInt64.randomInRange((UInt64(minl), UInt64(maxl)), gen: gen)
 		return (UInt(truncatingBitPattern: bb), gg)
 	}
 }
@@ -227,7 +227,7 @@ extension UInt8 : RandomType {
 	/// Returns a random `UInt8` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(_ range : (UInt8, UInt8), gen : G) -> (UInt8, G) {
 		let (minl, maxl) = range
-		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
+		let (bb, gg) = UInt64.randomInRange((UInt64(minl), UInt64(maxl)), gen: gen)
 		return (UInt8(truncatingBitPattern: bb), gg)
 	}
 }
@@ -236,7 +236,7 @@ extension UInt16 : RandomType {
 	/// Returns a random `UInt16` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(_ range : (UInt16, UInt16), gen : G) -> (UInt16, G) {
 		let (minl, maxl) = range
-		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
+		let (bb, gg) = UInt64.randomInRange((UInt64(minl), UInt64(maxl)), gen: gen)
 		return (UInt16(truncatingBitPattern: bb), gg)
 	}
 }
@@ -245,7 +245,7 @@ extension UInt32 : RandomType {
 	/// Returns a random `UInt32` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(_ range : (UInt32, UInt32), gen : G) -> (UInt32, G) {
 		let (minl, maxl) = range
-		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
+		let (bb, gg) = UInt64.randomInRange((UInt64(minl), UInt64(maxl)), gen: gen)
 		return (UInt32(truncatingBitPattern: bb), gg)
 	}
 }
