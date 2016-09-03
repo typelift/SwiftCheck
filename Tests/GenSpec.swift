@@ -15,12 +15,31 @@ class GenSpec : XCTestCase {
 			let g = Gen.frequency([
 				(10, Gen.pure(0)),
 				(5, Gen.pure(1)),
-				])
+			])
 
 			return forAll(g) { (i : Int) in
 				return true
 			}
 		}
+
+		property("Gen.choose stays in bounds") <- forAll { (x : Int, y : Int) in 
+			let (mx, mn) = (Swift.max(x, y), Swift.min(x, y))
+			return forAll(Gen<Int>.choose((mn, mx))) { n in
+				return mn <= n && n <= mx
+			}
+		}
+
+		property("Gen<Int>.chooseAny stays in bounds") <- forAll(Gen<Int>.chooseAny()) { x in Int.min <= x && x <= Int.max }
+		property("Gen<Int8>.chooseAny stays in bounds") <- forAll(Gen<Int8>.chooseAny()) { x in Int8.min <= x && x <= Int8.max }
+		property("Gen<Int16>.chooseAny stays in bounds") <- forAll(Gen<Int16>.chooseAny()) { x in Int16.min <= x && x <= Int16.max }
+		property("Gen<Int32>.chooseAny stays in bounds") <- forAll(Gen<Int32>.chooseAny()) { x in Int32.min <= x && x <= Int32.max }
+		property("Gen<Int64>.chooseAny stays in bounds") <- forAll(Gen<Int64>.chooseAny()) { x in Int64.min <= x && x <= Int64.max }
+
+		property("Gen<UInt>.chooseAny stays in bounds") <- forAll(Gen<UInt>.chooseAny()) { x in UInt.min <= x && x <= UInt.max }
+		property("Gen<UInt8>.chooseAny stays in bounds") <- forAll(Gen<UInt8>.chooseAny()) { x in UInt8.min <= x && x <= UInt8.max }
+		property("Gen<UInt16>.chooseAny stays in bounds") <- forAll(Gen<UInt16>.chooseAny()) { x in UInt16.min <= x && x <= UInt16.max }
+		property("Gen<UInt32>.chooseAny stays in bounds") <- forAll(Gen<UInt32>.chooseAny()) { x in UInt32.min <= x && x <= UInt32.max }
+		property("Gen<UInt64>.chooseAny stays in bounds") <- forAll(Gen<UInt64>.chooseAny()) { x in UInt64.min <= x && x <= UInt64.max }
 
 		property("Gen.frequency with N arguments behaves") <- forAll(Gen<Int>.choose((1, 1000))) { n in
 			return forAll(Gen.frequency(Array(repeating: (1, Gen.pure(0)), count: n))) { $0 == 0 }
@@ -107,8 +126,8 @@ class GenSpec : XCTestCase {
 			return forAll(Gen<Int>.sized { xx in
 				n = xx
 				return Int.arbitrary
-				}.resize(n)) { (x : Int) in
-					return x <= n
+			}.resize(n)) { (x : Int) in
+				return x <= n
 			}
 		}
 

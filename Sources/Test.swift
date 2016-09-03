@@ -450,7 +450,7 @@ public func forAllShrink<A>(_ gen : Gen<A>, shrinker : @escaping (A) -> [A], f :
 				return TestResult.failed("Test case threw an exception: \"\(e)\"").counterexample(String(describing: xs))
 			}
 		}).unProperty
-	})
+	}).again
 }
 
 /// Converts a function into an existentially quantified property using the
@@ -581,8 +581,7 @@ internal func quickCheckWithResult(_ args : CheckerArguments, _ p : Testable) ->
 		arguments:                    args,
 		silence:                      args.silence
 	)
-	let modP : Property = (p.exhaustive ? p.property.once : p.property)
-	return test(istate, caseGen: modP.unProperty.unGen)
+	return test(istate, caseGen: p.property.unProperty.unGen)
 }
 
 // Main Testing Loop:

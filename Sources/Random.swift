@@ -218,7 +218,7 @@ extension UInt : RandomType {
 	/// Returns a random `UInt` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(_ range : (UInt, UInt), gen : G) -> (UInt, G) {
 		let (minl, maxl) = range
-		let (bb, gg) = Int64.randomInRange((Int64(Int(bitPattern: minl)), Int64(Int(bitPattern: maxl))), gen: gen)
+		let (bb, gg) = UInt64.randomInRange((UInt64(minl), UInt64(maxl)), gen: gen)
 		return (UInt(truncatingBitPattern: bb), gg)
 	}
 }
@@ -227,7 +227,7 @@ extension UInt8 : RandomType {
 	/// Returns a random `UInt8` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(_ range : (UInt8, UInt8), gen : G) -> (UInt8, G) {
 		let (minl, maxl) = range
-		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
+		let (bb, gg) = UInt64.randomInRange((UInt64(minl), UInt64(maxl)), gen: gen)
 		return (UInt8(truncatingBitPattern: bb), gg)
 	}
 }
@@ -236,7 +236,7 @@ extension UInt16 : RandomType {
 	/// Returns a random `UInt16` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(_ range : (UInt16, UInt16), gen : G) -> (UInt16, G) {
 		let (minl, maxl) = range
-		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
+		let (bb, gg) = UInt64.randomInRange((UInt64(minl), UInt64(maxl)), gen: gen)
 		return (UInt16(truncatingBitPattern: bb), gg)
 	}
 }
@@ -245,7 +245,7 @@ extension UInt32 : RandomType {
 	/// Returns a random `UInt32` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(_ range : (UInt32, UInt32), gen : G) -> (UInt32, G) {
 		let (minl, maxl) = range
-		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
+		let (bb, gg) = UInt64.randomInRange((UInt64(minl), UInt64(maxl)), gen: gen)
 		return (UInt32(truncatingBitPattern: bb), gg)
 	}
 }
@@ -253,9 +253,29 @@ extension UInt32 : RandomType {
 extension UInt64 : RandomType {
 	/// Returns a random `UInt64` value using the given range and generator.
 	public static func randomInRange<G : RandomGeneneratorType>(_ range : (UInt64, UInt64), gen : G) -> (UInt64, G) {
-		let (minl, maxl) = range
-		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
-		return (UInt64(bb), gg)
+		let (l, h) = range
+		if l > h {
+			return UInt64.randomInRange((h, l), gen: gen)
+		} else {
+			let (genlo, genhi) : (Int64, Int64) = (1, 2147483562)
+			let b = Double(genhi - genlo + 1)
+			let q : Double = 1000
+			let k = Double(h) - Double(l) +  1
+			let magtgt = k * q
+			
+			func entropize(_ mag : Double, _ v : Double, _ g : G) -> (Double, G) {
+				if mag >= magtgt {
+					return (v, g)
+				} else {
+					let (x, g_) = g.next
+					let v_ = (v * b + (Double(x) - Double(genlo)))
+					return entropize(mag * b, v_, g_)
+				}
+			}
+			
+			let (v, rng_) = entropize(1, 0, gen)
+			return (UInt64(Double(l) + (v.truncatingRemainder(dividingBy: k))), rng_)
+		}
 	}
 }
 
