@@ -101,7 +101,7 @@
 /// - parameter pf: A block that carries the property or invariant to be tested.
 ///
 /// - returns: A `Property` that executes the given testing block.
-public func forAll<A : Arbitrary>(_ pf : ((A) throws -> Testable)) -> Property {
+public func forAll<A : Arbitrary>(_ pf : @escaping (A) throws -> Testable) -> Property {
 	return forAllShrink(A.arbitrary, shrinker: A.shrink, f: pf)
 }
 
@@ -182,7 +182,7 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 /// - parameter pf: A block that carries the property or invariant to be tested.
 ///
 /// - returns: A `Property` that executes the given testing block.
-public func forAll<A : Arbitrary>(_ gen : Gen<A>, pf : ((A) throws -> Testable)) -> Property {
+public func forAll<A : Arbitrary>(_ gen : Gen<A>, pf : @escaping (A) throws -> Testable) -> Property {
 	return forAllShrink(gen, shrinker: A.shrink, f: pf)
 }
 
@@ -301,7 +301,7 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 /// - parameter pf: A block that carries the property or invariant to be tested.
 ///
 /// - returns: A `Property` that executes the given testing block.
-public func forAllNoShrink<A>(_ gen : Gen<A>, pf : ((A) throws -> Testable)) -> Property {
+public func forAllNoShrink<A>(_ gen : Gen<A>, pf : @escaping (A) throws -> Testable) -> Property {
 	return forAllShrink(gen, shrinker: { _ in [A]() }, f: pf)
 }
 

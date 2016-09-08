@@ -61,7 +61,7 @@ public protocol WitnessedArbitrary {
 
 	/// A property test that relies on a witness that the given type parameter
 	/// is actually `Arbitrary`.
-	static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Param, pf : ((Self) -> Testable)) -> Property
+	static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Param, pf : @escaping (Self) -> Testable) -> Property
 }
 
 /// Converts a function into a universally quantified property using the default
@@ -70,7 +70,7 @@ public protocol WitnessedArbitrary {
 /// - parameter pf: A block that carries the property or invariant to be tested.
 ///
 /// - returns: A `Property` that executes the given testing block.
-public func forAll<A : WitnessedArbitrary>(_ pf : ((A) -> Testable)) -> Property
+public func forAll<A : WitnessedArbitrary>(_ pf : @escaping (A) -> Testable) -> Property
 	where A.Param : Arbitrary
 {
 	return A.forAllWitnessed(id, pf: pf)
