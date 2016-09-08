@@ -510,12 +510,12 @@ fileprivate final class ArrowOfImpl<T : Hashable & CoArbitrary, U : Arbitrary> :
 	fileprivate var table : Dictionary<T, U>
 	fileprivate var arr : (T) -> U
 
-	init (_ table : Dictionary<T, U>, _ arr : ((T) -> U)) {
+	init (_ table : Dictionary<T, U>, _ arr : @escaping (T) -> U) {
 		self.table = table
 		self.arr = arr
 	}
 
-	convenience init(_ arr : ((T) -> U)) {
+	convenience init(_ arr : @escaping (T) -> U) {
 		self.init(Dictionary(), { (_ : T) -> U in return undefined() })
 
 		self.arr = { [unowned self] x in
@@ -557,13 +557,13 @@ fileprivate final class IsoOfImpl<T : Hashable & CoArbitrary & Arbitrary, U : Eq
 	fileprivate var embed : (T) -> U
 	fileprivate var project : (U) -> T
 
-	init (_ table : Dictionary<T, U>, _ embed : ((T) -> U), _ project : ((U) -> T)) {
+	init (_ table : Dictionary<T, U>, _ embed : @escaping (T) -> U, _ project : @escaping (U) -> T) {
 		self.table = table
 		self.embed = embed
 		self.project = project
 	}
 
-	convenience init(_ embed : ((T) -> U), _ project : ((U) -> T)) {
+	convenience init(_ embed : @escaping (T) -> U, _ project : @escaping (U) -> T) {
 		self.init(Dictionary(), { (_ : T) -> U in return undefined() }, { (_ : U) -> T in return undefined() })
 
 		self.embed = { [unowned self] t in

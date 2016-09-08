@@ -44,7 +44,7 @@ public struct Gen<A> {
 	/// collection and produces only that value.
 	///
 	/// The input collection is required to be non-empty.
-	public static func fromElementsOf<S : Indexable>(_ xs : S) -> Gen<S._Element>
+	public static func fromElementsOf<S : Collection>(_ xs : S) -> Gen<S._Element>
 		where S.Index : Comparable & RandomType
 	{
 		return Gen.fromElementsIn(xs.startIndex...xs.index(xs.endIndex, offsetBy: -1)).map { i in
