@@ -607,7 +607,7 @@ property("All Prime") <- forAll { (n : Positive<Int>) in
 	return sieveProperly(n.getPositive).filter(isPrime) == sieveProperly(n.getPositive)
 }
 
-//; # One More Thing
+//: # One More Thing
 
 //: When working with failing tests, it's often tough to be able to replicate the exact conditions
 //: that cause a failure or a bug.  With SwiftCheck, that is now a thing of the past.  The framework
