@@ -618,17 +618,6 @@ private func insertWith<K : Hashable, V>(_ f : (V, V) -> V, k : K, v : V, m : Di
 	return res
 }
 
-private func sep(_ l : String, r : String) -> String {
-	if l.isEmpty {
-		return r
-	}
-
-	if r.isEmpty {
-		return l
-	}
-	return l + ", " + r
-}
-
 private func mplus(_ l : Optional<String>, r : Optional<String>) -> Optional<String> {
 	if let ls = l, let rs = r {
 		return .some(ls + rs)
@@ -751,7 +740,7 @@ private func disj(_ p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResu
 					return Rose<TestResult>.pure(TestResult(
 						ok:            .some(false),
 						expect:        true,
-						reason:        sep(result1.reason, r: result2.reason),
+						reason:        [result1.reason, result2.reason].joined(separator: ", "),
 						theException:  mplus(result1.theException, r: result2.theException),
 						labels:        [:],
 						stamp:         Set(),

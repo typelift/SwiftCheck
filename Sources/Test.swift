@@ -101,7 +101,9 @@
 /// - parameter pf: A block that carries the property or invariant to be tested.
 ///
 /// - returns: A `Property` that executes the given testing block.
-public func forAll<A : Arbitrary>(_ pf : @escaping (A) throws -> Testable) -> Property {
+public func forAll<A>(_ pf : @escaping (A) throws -> Testable) -> Property
+	where A : Arbitrary
+{
 	return forAllShrink(A.arbitrary, shrinker: A.shrink, f: pf)
 }
 
@@ -111,7 +113,9 @@ public func forAll<A : Arbitrary>(_ pf : @escaping (A) throws -> Testable) -> Pr
 /// - parameter pf: A block that carries the property or invariant to be tested.
 ///
 /// - returns: A `Property` that executes the given testing block.
-public func forAll<A : Arbitrary, B : Arbitrary>(_ pf : @escaping (A, B) throws -> Testable) -> Property {
+public func forAll<A, B>(_ pf : @escaping (A, B) throws -> Testable) -> Property
+	where A : Arbitrary, B : Arbitrary
+{
 	return forAll { t in forAll { b in try pf(t, b) } }
 }
 
@@ -121,7 +125,9 @@ public func forAll<A : Arbitrary, B : Arbitrary>(_ pf : @escaping (A, B) throws 
 /// - parameter pf: A block that carries the property or invariant to be tested.
 ///
 /// - returns: A `Property` that executes the given testing block.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary>(_ pf : @escaping (A, B, C) throws -> Testable) -> Property {
+public func forAll<A, B, C>(_ pf : @escaping (A, B, C) throws -> Testable) -> Property
+	where A : Arbitrary, B : Arbitrary, C : Arbitrary
+{
 	return forAll { t in forAll { b, c in try pf(t, b, c) } }
 }
 
@@ -131,7 +137,9 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary>(_ pf : @escaping
 /// - parameter pf: A block that carries the property or invariant to be tested.
 ///
 /// - returns: A `Property` that executes the given testing block.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary>(_ pf : @escaping (A, B, C, D) throws -> Testable) -> Property {
+public func forAll<A, B, C, D>(_ pf : @escaping (A, B, C, D) throws -> Testable) -> Property
+	where A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary
+{
 	return forAll { t in forAll { b, c, d in try pf(t, b, c, d) } }
 }
 
@@ -141,7 +149,9 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary>(_
 /// - parameter pf: A block that carries the property or invariant to be tested.
 ///
 /// - returns: A `Property` that executes the given testing block.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary>(_ pf : @escaping (A, B, C, D, E) throws -> Testable) -> Property {
+public func forAll<A, B, C, D, E>(_ pf : @escaping (A, B, C, D, E) throws -> Testable) -> Property
+	where A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary
+{
 	return forAll { t in forAll { b, c, d, e in try pf(t, b, c, d, e) } }
 }
 
@@ -151,7 +161,9 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 /// - parameter pf: A block that carries the property or invariant to be tested.
 ///
 /// - returns: A `Property` that executes the given testing block.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary>(_ pf : @escaping (A, B, C, D, E, F) throws -> Testable) -> Property {
+public func forAll<A, B, C, D, E, F>(_ pf : @escaping (A, B, C, D, E, F) throws -> Testable) -> Property
+	where A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary
+{
 	return forAll { t in forAll { b, c, d, e, f in try pf(t, b, c, d, e, f) } }
 }
 
@@ -161,7 +173,9 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 /// - parameter pf: A block that carries the property or invariant to be tested.
 ///
 /// - returns: A `Property` that executes the given testing block.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary>(_ pf : @escaping (A, B, C, D, E, F, G) throws -> Testable) -> Property {
+public func forAll<A, B, C, D, E, F, G>(_ pf : @escaping (A, B, C, D, E, F, G) throws -> Testable) -> Property
+	where A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary
+{
 	return forAll { t in forAll { b, c, d, e, f, g in try pf(t, b, c, d, e, f, g) } }
 }
 
@@ -171,7 +185,9 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 /// - parameter pf: A block that carries the property or invariant to be tested.
 ///
 /// - returns: A `Property` that executes the given testing block.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary, H : Arbitrary>(_ pf : @escaping (A, B, C, D, E, F, G, H) throws -> Testable) -> Property {
+public func forAll<A, B, C, D, E, F, G, H>(_ pf : @escaping (A, B, C, D, E, F, G, H) throws -> Testable) -> Property
+	where A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary, H : Arbitrary
+{
 	return forAll { t in forAll { b, c, d, e, f, g, h in try pf(t, b, c, d, e, f, g, h) } }
 }
 
@@ -182,7 +198,9 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 /// - parameter pf: A block that carries the property or invariant to be tested.
 ///
 /// - returns: A `Property` that executes the given testing block.
-public func forAll<A : Arbitrary>(_ gen : Gen<A>, pf : @escaping (A) throws -> Testable) -> Property {
+public func forAll<A>(_ gen : Gen<A>, pf : @escaping (A) throws -> Testable) -> Property
+	where A : Arbitrary
+{
 	return forAllShrink(gen, shrinker: A.shrink, f: pf)
 }
 
@@ -194,7 +212,9 @@ public func forAll<A : Arbitrary>(_ gen : Gen<A>, pf : @escaping (A) throws -> T
 /// - parameter pf: A block that carries the property or invariant to be tested.
 ///
 /// - returns: A `Property` that executes the given testing block.
-public func forAll<A : Arbitrary, B : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, pf : @escaping (A, B) throws -> Testable) -> Property {
+public func forAll<A, B>(_ genA : Gen<A>, _ genB : Gen<B>, pf : @escaping (A, B) throws -> Testable) -> Property
+	where A : Arbitrary, B : Arbitrary
+{
 	return forAll(genA, pf: { t in forAll(genB, pf: { b in try pf(t, b) }) })
 }
 
@@ -207,7 +227,9 @@ public func forAll<A : Arbitrary, B : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B
 /// - parameter pf: A block that carries the property or invariant to be tested.
 ///
 /// - returns: A `Property` that executes the given testing block.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, pf : @escaping (A, B, C) throws -> Testable) -> Property {
+public func forAll<A, B, C>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, pf : @escaping (A, B, C) throws -> Testable) -> Property
+	where A : Arbitrary, B : Arbitrary, C : Arbitrary
+{
 	return forAll(genA, pf: { t in forAll(genB, genC, pf: { b, c in try pf(t, b, c) }) })
 }
 
@@ -221,7 +243,9 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary>(_ genA : Gen<A>,
 /// - parameter pf: A block that carries the property or invariant to be tested.
 ///
 /// - returns: A `Property` that executes the given testing block.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, pf : @escaping (A, B, C, D) throws -> Testable) -> Property {
+public func forAll<A, B, C, D>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, pf : @escaping (A, B, C, D) throws -> Testable) -> Property
+	where A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary
+{
 	return forAll(genA, pf: { t in forAll(genB, genC, genD, pf: { b, c, d in try pf(t, b, c, d) }) })
 }
 
@@ -236,7 +260,9 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary>(_
 /// - parameter pf: A block that carries the property or invariant to be tested.
 ///
 /// - returns: A `Property` that executes the given testing block.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, pf : @escaping (A, B, C, D, E) throws -> Testable) -> Property {
+public func forAll<A, B, C, D, E>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, pf : @escaping (A, B, C, D, E) throws -> Testable) -> Property
+	where A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary
+{
 	return forAll(genA, pf: { t in forAll(genB, genC, genD, genE, pf: { b, c, d, e in try pf(t, b, c, d, e) }) })
 }
 
@@ -252,7 +278,9 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 /// - parameter pf: A block that carries the property or invariant to be tested.
 ///
 /// - returns: A `Property` that executes the given testing block.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, pf : @escaping (A, B, C, D, E, F) throws -> Testable) -> Property {
+public func forAll<A, B, C, D, E, F>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, pf : @escaping (A, B, C, D, E, F) throws -> Testable) -> Property
+	where A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary
+{
 	return forAll(genA, pf: { t in forAll(genB, genC, genD, genE, genF, pf: { b, c, d, e, f in try pf(t, b, c, d, e, f) }) })
 }
 
@@ -269,7 +297,9 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 /// - parameter pf: A block that carries the property or invariant to be tested.
 ///
 /// - returns: A `Property` that executes the given testing block.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, _ genG : Gen<G>, pf : @escaping (A, B, C, D, E, F, G) throws -> Testable) -> Property {
+public func forAll<A, B, C, D, E, F, G>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, _ genG : Gen<G>, pf : @escaping (A, B, C, D, E, F, G) throws -> Testable) -> Property
+	where A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary
+{
 	return forAll(genA, pf: { t in forAll(genB, genC, genD, genE, genF, genG, pf: { b, c, d, e, f, g in try pf(t, b, c, d, e, f, g) }) })
 }
 
@@ -287,7 +317,9 @@ public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E
 /// - parameter pf: A block that carries the property or invariant to be tested.
 ///
 /// - returns: A `Property` that executes the given testing block.
-public func forAll<A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary, H : Arbitrary>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, _ genG : Gen<G>, _ genH : Gen<H>, pf : @escaping (A, B, C, D, E, F, G, H) throws -> Testable) -> Property {
+public func forAll<A, B, C, D, E, F, G, H>(_ genA : Gen<A>, _ genB : Gen<B>, _ genC : Gen<C>, _ genD : Gen<D>, _ genE : Gen<E>, _ genF : Gen<F>, _ genG : Gen<G>, _ genH : Gen<H>, pf : @escaping (A, B, C, D, E, F, G, H) throws -> Testable) -> Property
+	where A : Arbitrary, B : Arbitrary, C : Arbitrary, D : Arbitrary, E : Arbitrary, F : Arbitrary, G : Arbitrary, H : Arbitrary
+{
 	return forAll(genA, pf: { t in forAll(genB, genC, genD, genE, genF, genG, genH, pf: { b, c, d, e, f, g, h in try pf(t, b, c, d, e, f, g, h) }) })
 }
 
@@ -789,7 +821,7 @@ private func doneTesting(_ st : CheckerState) -> Result {
 	if !st.hasFulfilledExpectedFailure {
 		if insufficientCoverage(st) {
 			printCond(st.silence, "+++ OK, failed as expected. ")
-			printCond(st.silence, "*** Insufficient coverage after " + "\(st.successfulTestCount)" + pluralize(" test", i: st.successfulTestCount))
+			printCond(st.silence, "*** Insufficient coverage after " + "\(st.successfulTestCount)" + pluralize(" test", st.successfulTestCount))
 			printDistributionGraph(st)
 			return .success(numTests: st.successfulTestCount, labels: summary(st), output: "")
 		}
@@ -803,7 +835,7 @@ private func doneTesting(_ st : CheckerState) -> Result {
 			output:    ""
 		)
 	} else if insufficientCoverage(st) {
-		printCond(st.silence, "*** Insufficient coverage after " + "\(st.successfulTestCount)" + pluralize(" test", i: st.successfulTestCount))
+		printCond(st.silence, "*** Insufficient coverage after " + "\(st.successfulTestCount)" + pluralize(" test", st.successfulTestCount))
 		printDistributionGraph(st)
 		return .insufficientCoverage( 
 			numTests:  st.successfulTestCount,
@@ -813,7 +845,7 @@ private func doneTesting(_ st : CheckerState) -> Result {
 			output:    ""
 		)
 	} else {
-		printCond(st.silence, "*** Passed " + "\(st.successfulTestCount)" + pluralize(" test", i: st.successfulTestCount))
+		printCond(st.silence, "*** Passed " + "\(st.successfulTestCount)" + pluralize(" test", st.successfulTestCount))
 		printDistributionGraph(st)
 		return .success(numTests: st.successfulTestCount, labels: summary(st), output: "")
 	}
@@ -915,7 +947,7 @@ private func reportMinimumCaseFound(_ st : CheckerState, res : TestResult) -> (I
 	let shrinkMsg = st.successfulShrinkCount > 1 ? (" and \(st.successfulShrinkCount) shrink") : ""
 
 	printCond(st.silence, "Proposition: " + st.name)
-	printCond(st.silence, res.reason + pluralize(testMsg, i: (st.successfulTestCount + 1)) + (st.successfulShrinkCount > 1 ? pluralize(shrinkMsg, i: st.successfulShrinkCount) : "") + "):")
+	printCond(st.silence, res.reason + pluralize(testMsg, (st.successfulTestCount + 1)) + (st.successfulShrinkCount > 1 ? pluralize(shrinkMsg, st.successfulShrinkCount) : "") + "):")
 	dispatchAfterFinalFailureCallbacks(st, res: res)
 	return (st.successfulShrinkCount, st.failedShrinkStepCount - st.failedShrinkStepDistance, st.failedShrinkStepDistance)
 }
@@ -927,7 +959,7 @@ private func reportExistentialFailure(_ st : CheckerState, res : Result) -> Resu
 
 		printCond(st.silence, "*** Failed! ", terminator: "")
 		printCond(st.silence, "Proposition: " + st.name)
-		printCond(st.silence, reason + pluralize(testMsg, i: st.discardedTestCount) + "):")
+		printCond(st.silence, reason + pluralize(testMsg, st.discardedTestCount) + "):")
 		dispatchAfterFinalFailureCallbacks(st, res: lastTest)
 		return res
 	default:
@@ -1009,7 +1041,7 @@ private func printDistributionGraph(_ st : CheckerState) {
 	}
 }
 
-private func pluralize(_ s : String, i : Int) -> String {
+private func pluralize(_ s : String, _ i : Int) -> String {
 	if i == 1 {
 		return s
 	}
