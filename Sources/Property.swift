@@ -218,7 +218,7 @@ extension Testable {
 			return [c] + cbs.map { (c : Callback) -> Callback in
 				switch c {
 				case let .afterFinalFailure(.counterexample, f):
-					return .afterTest(kind: .counterexample, f: f)
+					return .afterTest(kind: .counterexample, f)
 				default:
 					return c
 				}
@@ -420,9 +420,9 @@ public func shrinking<A>(_ shrinker : @escaping (A) -> [A], initial : A, prop : 
 /// to do with as it sees fit.
 public enum Callback {
 	/// A callback that is posted after a test case has completed.
-	case afterTest(kind : CallbackKind, f : (CheckerState, TestResult) -> ())
+	case afterTest(kind : CallbackKind, (CheckerState, TestResult) -> ())
 	/// The callback is posted after all cases in the test have failed.
-	case afterFinalFailure(kind : CallbackKind, f : (CheckerState, TestResult) -> ())
+	case afterFinalFailure(kind : CallbackKind, (CheckerState, TestResult) -> ())
 }
 
 /// The type of callbacks SwiftCheck can dispatch.
@@ -733,10 +733,7 @@ private func disj(_ p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResu
 				case .some(true):
 					return Rose<TestResult>.pure(result2)
 				case .some(false):
-					let callbacks : [Callback] = [.afterFinalFailure(kind: .counterexample,
-																	 f: { _ in
-																		return print("")
-					})]
+					let callbacks : [Callback] = [.afterFinalFailure(kind: .counterexample, { _ in return print("") })]
 					return Rose<TestResult>.pure(TestResult(
 						ok:            .some(false),
 						expect:        true,
