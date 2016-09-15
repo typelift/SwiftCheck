@@ -293,35 +293,17 @@ extension Set : WitnessedArbitrary {
 
 // MARK: - Implementation Details Follow
 
-private func bits<N : Integer>(_ n : N) -> Int {
-	if n / 2 == 0 {
-		return 0
-	}
-	return 1 + bits(n / 2)
-}
-
 private func removes<A : Arbitrary>(_ k : Int, n : Int, xs : [A]) -> [[A]] {
-	let xs1 : [A] = take(k, xs: xs)
-	let xs2 : [A] = drop(k, xs: xs)
-
+	let xs2 : [A] = Array(xs.suffix(max(0, xs.count - k)))
 	if k > n {
 		return []
 	} else if xs2.isEmpty {
 		return [[]]
 	} else {
+		let xs1 : [A] = Array(xs.prefix(k))
 		let rec : [[A]] = removes(k, n: n - k, xs: xs2).map({ xs1 + $0 })
 		return [xs2] + rec
 	}
-}
-
-private func take<T>(_ num : Int, xs : [T]) -> [T] {
-	let n = (num < xs.count) ? num : xs.count
-	return [T](xs[0..<n])
-}
-
-private func drop<T>(_ num : Int, xs : [T]) -> [T] {
-	let n = (num < xs.count) ? num : xs.count
-	return [T](xs[n..<xs.endIndex])
 }
 
 private func shrinkOne<A : Arbitrary>(_ xs : [A]) -> [[A]] {

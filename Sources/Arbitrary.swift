@@ -342,18 +342,18 @@ extension Mirror : Arbitrary {
 	/// Returns a generator of `Mirror` values.
 	public static var arbitrary : Gen<Mirror> {
 		let genAny : Gen<Any> = Gen<Any>.oneOf([
-			Bool.arbitrary.map(asAny),
-			Int.arbitrary.map(asAny),
-			UInt.arbitrary.map(asAny),
-			Float.arbitrary.map(asAny),
-			Double.arbitrary.map(asAny),
-			Character.arbitrary.map(asAny),
+			Bool.arbitrary.map { x in x as Any },
+			Int.arbitrary.map { x in x as Any },
+			UInt.arbitrary.map { x in x as Any },
+			Float.arbitrary.map { x in x as Any },
+			Double.arbitrary.map { x in x as Any },
+			Character.arbitrary.map { x in x as Any },
 		])
 
 		let genAnyWitnessed : Gen<Any> = Gen<Any>.oneOf([
-			Optional<Int>.arbitrary.map(asAny),
-			Array<Int>.arbitrary.map(asAny),
-			Set<Int>.arbitrary.map(asAny),
+			Optional<Int>.arbitrary.map { x in x as Any },
+			Array<Int>.arbitrary.map { x in x as Any },
+			Set<Int>.arbitrary.map { x in x as Any },
 		])
 
 		return Gen<Any>.oneOf([
@@ -365,10 +365,6 @@ extension Mirror : Arbitrary {
 
 
 // MARK: - Implementation Details Follow
-
-private func asAny<T>(_ x : T) -> Any {
-	return x
-}
 
 extension Array where Element : Hashable {
 	fileprivate var nub : [Element] {
