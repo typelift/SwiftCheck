@@ -30,7 +30,7 @@ func == (l : Name, r : Name) -> Bool {
 	return l.unName == r.unName
 }
 
-private func liftM2<A, B, C>(f : (A, B) -> C, _ m1 : Gen<A>, _ m2 : Gen<B>) -> Gen<C> {
+private func liftM2<A, B, C>(_ f : @escaping (A, B) -> C, _ m1 : Gen<A>, _ m2 : Gen<B>) -> Gen<C> {
 	return m1.flatMap { x1 in
 		return m2.flatMap { x2 in
 			return Gen.pure(f(x1, x2))
@@ -39,18 +39,18 @@ private func liftM2<A, B, C>(f : (A, B) -> C, _ m1 : Gen<A>, _ m2 : Gen<B>) -> G
 }
 
 indirect enum Exp : Equatable {
-	case Lam(Name, Exp)
-	case App(Exp, Exp)
-	case Var(Name)
+	case lam(Name, Exp)
+	case app(Exp, Exp)
+	case `var`(Name)
 }
 
 func == (l : Exp, r : Exp) -> Bool {
 	switch (l, r) {
-	case let (.Lam(ln, le), .Lam(rn, re)):
+	case let (.lam(ln, le), .lam(rn, re)):
 		return ln == rn && le == re
-	case let (.App(ln, le), .App(rn, re)):
+	case let (.app(ln, le), .app(rn, re)):
 		return ln == rn && le == re
-	case let (.Var(n1), .Var(n2)):
+	case let (.var(n1), .var(n2)):
 		return n1 == n2
 	default:
 		return false
@@ -58,66 +58,66 @@ func == (l : Exp, r : Exp) -> Bool {
 }
 
 extension Exp : Arbitrary {
-	private static func arbExpr(n : Int) -> Gen<Exp> {
+	private static func arbExpr(_ n : Int) -> Gen<Exp> {
 		return Gen<Exp>.frequency([
-			(2, liftM(Exp.Var, Name.arbitrary)),
-		] + ((n <= 0) ? [] : [
-			(5, liftM2(Exp.Lam, Name.arbitrary, arbExpr(n.predecessor()))),
-			(5, liftM2(Exp.App, arbExpr(n/2), arbExpr(n/2))),
-		]))
+			(2, liftM(Exp.var, Name.arbitrary)),
+			] + ((n <= 0) ? [] : [
+				(5, liftM2(Exp.lam, Name.arbitrary, arbExpr((n - 1)))),
+				(5, liftM2(Exp.app, arbExpr(n/2), arbExpr(n/2))),
+			]))
 	}
 
 	static var arbitrary : Gen<Exp> {
 		return Gen<Exp>.sized(self.arbExpr)
 	}
 
-	static func shrink(e : Exp) -> [Exp] {
+	static func shrink(_ e : Exp) -> [Exp] {
 		switch e {
-		case .Var(_):
+		case .var(_):
 			return []
-		case let .Lam(x, a):
-			return [a] + Exp.shrink(a).map { .Lam(x, $0) }
-		case let .App(a, b):
+		case let .lam(x, a):
+			return [a] + Exp.shrink(a).map { .lam(x, $0) }
+		case let .app(a, b):
 			let part1 : [Exp] = [a, b]
 				+ [a].flatMap({ (expr : Exp) -> Exp? in
-					if case let .Lam(x, a) = expr {
+					if case let .lam(x, a) = expr {
 						return a.subst(x, b)
 					}
 					return nil
 				})
 
-			let part2 : [Exp] = Exp.shrink(a).map { App($0, b) }
-				+ Exp.shrink(b).map { App(a, $0) }
+			let part2 : [Exp] = Exp.shrink(a).map { app($0, b) }
+				+ Exp.shrink(b).map { app(a, $0) }
 			return part1 + part2
 		}
 	}
 
 	var free : Set<Name> {
 		switch self {
-		case let .Var(x):
+		case let .var(x):
 			return Set([x])
-		case let .Lam(x, a):
-			return a.free.subtract([x])
-		case let .App(a, b):
+		case let .lam(x, a):
+			return a.free.subtracting([x])
+		case let .app(a, b):
 			return a.free.union(b.free)
 		}
 	}
 
-	func rename(x : Name, _ y : Name) -> Exp {
+	func rename(_ x : Name, _ y : Name) -> Exp {
 		if x == y {
 			return self
 		}
-		return self.subst(x, .Var(y))
+		return self.subst(x, .var(y))
 	}
 
-	func subst(x : Name, _ c : Exp) -> Exp {
+	func subst(_ x : Name, _ c : Exp) -> Exp {
 		switch self {
-		case let .Var(y) where x == y :
+		case let .var(y) where x == y :
 			return c
-		case let .Lam(y, a) where x != y:
-			return .Lam(y, a.subst(x, c))
-		case let .App(a, b):
-			return .App(a.subst(x, c), b.subst(x, c))
+		case let .lam(y, a) where x != y:
+			return .lam(y, a.subst(x, c))
+		case let .app(a, b):
+			return .app(a.subst(x, c), b.subst(x, c))
 		default:
 			return self
 		}
@@ -125,14 +125,14 @@ extension Exp : Arbitrary {
 
 	var eval : Exp {
 		switch self {
-		case .Var(_):
+		case .var(_):
 			fatalError("Cannot evaluate free variable!")
-		case let .App(a, b):
+		case let .app(a, b):
 			switch a.eval {
-			case let .Lam(x, aPrime):
+			case let .lam(x, aPrime):
 				return aPrime.subst(x, b)
 			default:
-				return .App(a.eval, b.eval)
+				return .app(a.eval, b.eval)
 			}
 		default:
 			return self
@@ -143,24 +143,24 @@ extension Exp : Arbitrary {
 extension Exp : CustomStringConvertible {
 	var description : String {
 		switch self {
-		case let .Var(x):
+		case let .var(x):
 			return "$" + x.description
-		case let .Lam(x, t):
+		case let .lam(x, t):
 			return "(λ $\(x.description).\(t.description))"
-		case let .App(a, b):
+		case let .app(a, b):
 			return "(\(a.description) \(b.description))"
 		}
 	}
 }
 
 extension Name {
-	func fresh(ys : Set<Name>) -> Name {
+	func fresh(_ ys : Set<Name>) -> Name {
 		let zz = "abcdefghijklmnopqrstuvwxyz".unicodeScalars.map { Name(unName: String($0)) }
-		return Set(zz).subtract(ys).first ?? self
+		return Set(zz).subtracting(ys).first ?? self
 	}
 }
 
-private func showResult<A>(x : A, f : A -> Testable) -> Property {
+private func showResult<A>(_ x : A, f : (A) -> Testable) -> Property {
 	return f(x).whenFail {
 		print("Result: \(x)")
 	}
@@ -173,9 +173,9 @@ class LambdaSpec : XCTestCase {
 		property("Free variable capture occurs", arguments: tiny) <- forAll { (a : Exp, x : Name, b : Exp) in
 			return showResult(a.subst(x, b)) { subst_x_b_a in
 				return a.free.contains(x)
-					==> subst_x_b_a.free == a.free.subtract([x]).union(b.free)
+					==> subst_x_b_a.free == a.free.subtracting([x]).union(b.free)
 			}
-		}.expectFailure
+			}.expectFailure
 
 		property("Substitution of a free variable into a fresh expr is idempotent", arguments: tiny) <- forAll { (a : Exp, x : Name, b : Exp) in
 			return showResult(a.subst(x, b)) { subst_x_b_a in

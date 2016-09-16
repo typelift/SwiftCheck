@@ -14,17 +14,17 @@ func ==(l : Property, r : Property) -> Bool {
 	let res2 = quickCheckWithResult(CheckerArguments(name: "", silence: true), r)
 
 	switch (res1, res2) {
-	case (.Success(_, _, _), .Success(_, _, _)):
+	case (.success(_, _, _), .success(_, _, _)):
 		return true
-	case (.GaveUp(_, _, _), .GaveUp(_, _, _)):
+	case (.gaveUp(_, _, _), .gaveUp(_, _, _)):
 		return true
-	case (.Failure(_, _, _, _, _, _, _), .Failure(_, _, _, _, _, _, _)):
+	case (.failure(_, _, _, _, _, _, _), .failure(_, _, _, _, _, _, _)):
 		return true
-	case (.ExistentialFailure(_, _, _, _, _, _, _), .ExistentialFailure(_, _, _, _, _, _, _)):
+	case (.existentialFailure(_, _, _, _, _, _, _), .existentialFailure(_, _, _, _, _, _, _)):
 		return true
-	case (.NoExpectedFailure(_, _, _, _, _), .NoExpectedFailure(_, _, _, _, _)):
+	case (.noExpectedFailure(_, _, _, _, _), .noExpectedFailure(_, _, _, _, _)):
 		return true
-	case (.InsufficientCoverage(_, _, _, _, _), .InsufficientCoverage(_, _, _, _, _)):
+	case (.insufficientCoverage(_, _, _, _, _), .insufficientCoverage(_, _, _, _, _)):
 		return true
 	default:
 		return false
@@ -34,7 +34,7 @@ func ==(l : Property, r : Property) -> Bool {
 func ==(l : Property, r : Bool) -> Bool {
 	let res1 = quickCheckWithResult(CheckerArguments(name: "", silence: true), l)
 	switch res1 {
-	case .Success(_, _, _):
+	case .success(_, _, _):
 		return r == true
 	default:
 		return r == false
@@ -44,7 +44,7 @@ func ==(l : Property, r : Bool) -> Bool {
 class PropertySpec : XCTestCase {
 	func testProperties() {
 		property("Once really only tests a property once") <- forAll { (n : Int) in
-			var bomb : Optional<Int> = .Some(n)
+			var bomb : Optional<Int> = .some(n)
 			return forAll { (_ : Int) in
 				let b = bomb! // Will explode if we test more than once
 				bomb = nil
@@ -52,31 +52,49 @@ class PropertySpec : XCTestCase {
 			}.once
 		}
 
+		property("Again undoes once") <- forAll { (n : Int) in
+			var counter : Int = 0
+			quickCheck(forAll { (_ : Int) in
+				counter += 1
+				return true
+			}.once.again)
+			return counter > 1
+		}
+		
+		property("Once undoes again") <- forAll { (n : Int) in
+			var bomb : Optional<Int> = .some(n)
+			return forAll { (_ : Int) in
+				let b = bomb! // Will explode if we test more than once
+				bomb = nil
+				return b == n
+			}.again.once
+		}
+		
 		property("Conjamb randomly picks from multiple generators") <- forAll { (n : Int, m : Int, o : Int) in
 			return conjamb({
 				return true <?> "picked 1"
-			}, {
-				return true <?> "picked 2"
-			}, {
-				return true <?> "picked 3"
+				}, {
+					return true <?> "picked 2"
+				}, {
+					return true <?> "picked 3"
 			})
 		}
 
 		property("Invert turns passing properties to failing properties") <- forAll { (n : Int) in
 			return n == n
-		}.invert.expectFailure
+			}.invert.expectFailure
 
 		property("Invert turns failing properties to passing properties") <- forAll { (n : Int) in
 			return n != n
-		}.invert
+			}.invert
 
 		property("Invert turns throwing properties to passing properties") <- forAll { (n : Int) in
-			throw SwiftCheckError.Bogus
-		}.invert
+			throw SwiftCheckError.bogus
+			}.invert
 
 		property("Invert does not affect discards") <- forAll { (n : Int) in
 			return Discard()
-		}.invert
+			}.invert
 
 		property("Existential Quantification works") <- exists { (x : Int) in
 			return true
@@ -84,7 +102,7 @@ class PropertySpec : XCTestCase {
 
 		property("Cover reports failures properly") <- forAll { (s : Set<Int>) in
 			return (s.count == [Int](s).count).cover(s.count >= 15, percentage: 70, label: "large")
-		}.expectFailure
+			}.expectFailure
 
 		property("Prop ==> true") <- forAllNoShrink(Bool.arbitrary, Gen.pure(true)) { (p1, p2) in
 			let p = p2 ==> p1
@@ -92,7 +110,7 @@ class PropertySpec : XCTestCase {
 		}
 
 		property("==> Short Circuits") <- forAll { (n : Int) in
-			func isPositive(n : Int) -> Bool {
+			func isPositive(_ n : Int) -> Bool {
 				if n > 0 {
 					return true
 				} else if (n & 1) == 0 {

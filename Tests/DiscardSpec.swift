@@ -14,11 +14,12 @@ class DiscardSpec : XCTestCase {
 		property("P != NP") <- Discard()
 		property("P = NP") <- Discard().expectFailure
 
-		let args = CheckerArguments(  replay: Optional.Some((newStdGen(), 10))
-									, maxAllowableSuccessfulTests: 200
-									, maxAllowableDiscardedTests: 0
-									, maxTestCaseSize: 1000
-									)
+		let args = CheckerArguments(
+			replay: Optional.some((newStdGen(), 10)),
+			maxAllowableSuccessfulTests: 200,
+			maxAllowableDiscardedTests: 0,
+			maxTestCaseSize: 1000
+		)
 
 		property("Discards forbidden", arguments: args) <- forAll { (x : UInt) in
 			return Discard()

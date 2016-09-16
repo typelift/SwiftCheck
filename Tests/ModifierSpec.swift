@@ -20,7 +20,7 @@ class ModifierSpec : XCTestCase {
 		}
 
 		property("Pointers behave") <- forAll { (x : PointerOf<Int>) in
-			return x.getPointer == nil || x.size != 0
+			return x.size != 0
 		}
 
 		property("Positive propositions only generate positive numbers") <- forAll { (x : Positive<Int>) in
@@ -40,10 +40,9 @@ class ModifierSpec : XCTestCase {
 		}
 
 		property("The reverse of the reverse of an array is that array") <- forAll { (xs : ArrayOf<Int>) in
-			return
-				(xs.getArray.reverse().reverse() == xs.getArray) <?> "Left identity"
+			return (xs.getArray.reversed().reversed() == xs.getArray) <?> "Left identity"
 				^&&^
-				(xs.getArray == xs.getArray.reverse().reverse()) <?> "Right identity"
+				(xs.getArray == xs.getArray.reversed().reversed()) <?> "Right identity"
 		}
 
 		property("map behaves") <- forAll { (xs : ArrayOf<Int>, f : ArrowOf<Int, Int>) in
@@ -51,15 +50,14 @@ class ModifierSpec : XCTestCase {
 		}
 
 		property("IsoOf generates a real isomorphism") <- forAll { (x : Int, y : String, iso : IsoOf<Int, String>) in
-			return
-				iso.getFrom(iso.getTo(x)) == x
+			return iso.getFrom(iso.getTo(x)) == x
 				^&&^
 				iso.getTo(iso.getFrom(y)) == y
 		}
 
 		property("filter behaves") <- forAll { (xs : ArrayOf<Int>, pred : ArrowOf<Int, Bool>) in
 			let f = pred.getArrow
-			return (xs.getArray.filter(f).reduce(true, combine: { $0.0 && f($0.1) }) as Bool)
+			return (xs.getArray.filter(f).reduce(true, { $0.0 && f($0.1) }) as Bool)
 		}
 	}
 }

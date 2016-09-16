@@ -7,22 +7,11 @@
 //
 
 import SwiftCheck
-import XCTest
-
-extension Dictionary {
-	init<S : SequenceType where S.Generator.Element == Element>(_ pairs : S) {
-		self.init()
-		var g = pairs.generate()
-		while let (k, v) : (Key, Value) = g.next() {
-			self[k] = v
-		}
-	}
-}
-
+import class XCTest.XCTestCase
 
 class TestSpec : XCTestCase {
 	func testAll() {
-		let dictionaryGen = Gen<(String, Int)>.zip(String.arbitrary, Int.arbitrary).proliferate.map(Dictionary.init)
+		let dictionaryGen: Gen<Dictionary<String, Int>> = Gen<(String, Int)>.zip(String.arbitrary, Int.arbitrary).proliferate.map { _ -> Dictionary<String, Int> in [:] }
 
 		property("Dictionaries behave") <- forAllNoShrink(dictionaryGen) { (xs : Dictionary<String, Int>) in
 			return true
@@ -37,18 +26,16 @@ class TestSpec : XCTestCase {
 		}
 
 		property("The reverse of the reverse of an array is that array") <- forAll { (xs : Array<Int>) in
-			return
-				(xs.reverse().reverse() == xs) <?> "Left identity"
+			return (xs.reversed().reversed() == xs) <?> "Left identity"
 				^&&^
-				(xs == xs.reverse().reverse()) <?> "Right identity"
+				(xs == xs.reversed().reversed()) <?> "Right identity"
 		}
 
 		property("Failing conjunctions print labelled properties") <- forAll { (xs : Array<Int>) in
-			return
-				(xs.sort().sort() == xs.sort()).verbose <?> "Sort Left"
+			return (xs.sorted().sorted() == xs.sorted()).verbose <?> "Sort Left"
 				^&&^
-				((xs.sort() != xs.sort().sort()).verbose <?> "Bad Sort Right")
-		}.expectFailure
+				((xs.sorted() != xs.sorted().sorted()).verbose <?> "Bad Sort Right")
+			}.expectFailure
 
 		property("map behaves") <- forAll { (xs : Array<Int>) in
 			return forAll { (f : ArrowOf<Int, Int>) in
@@ -59,7 +46,7 @@ class TestSpec : XCTestCase {
 		property("filter behaves") <- forAll { (xs : Array<Int>) in
 			return forAll { (pred : ArrowOf<Int, Bool>) in
 				let f = pred.getArrow
-				return (xs.filter(f).reduce(true, combine: { $0.0 && f($0.1) }) as Bool)
+				return (xs.filter(f).reduce(true, { $0.0 && f($0.1) }) as Bool)
 			}
 		}
 	}
