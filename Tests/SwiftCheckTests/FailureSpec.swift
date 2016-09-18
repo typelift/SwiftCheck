@@ -9,6 +9,12 @@
 import SwiftCheck
 import XCTest
 
+#if os(Linux)
+	import Glibc
+#else
+	import Darwin
+#endif
+
 enum SwiftCheckError : Error {
 	case bogus
 }
@@ -60,4 +66,11 @@ class FailureSpec : XCTestCase {
 	override func tearDown() {
 		XCTAssert(failCount == tests.count)
 	}
+
+
+	#if !(os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
+	static var allTests = testCase([
+		("testProperties", testProperties),
+	])
+	#endif
 }

@@ -25,4 +25,11 @@ class DiscardSpec : XCTestCase {
 			return Discard()
 		}.expectFailure
 	}
+
+
+	#if !(os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
+	static var allTests = testCase([
+		("testDiscardFailure", testDiscardFailure),
+	])
+	#endif
 }

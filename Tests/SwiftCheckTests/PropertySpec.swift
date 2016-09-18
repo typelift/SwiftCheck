@@ -168,4 +168,10 @@ class PropertySpec : XCTestCase {
 			return ((x ^&&^ y) ^||^ (x ^&&^ z) ^||^ (y.invert ^&&^ z)) == ((x ^&&^ y) ^||^ (y.invert ^&&^ z))
 		}
 	}
+
+	#if !(os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
+	static var allTests = testCase([
+		("testProperties", testProperties),
+	])
+	#endif
 }

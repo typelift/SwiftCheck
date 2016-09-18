@@ -8,6 +8,7 @@
 
 import SwiftCheck
 import XCTest
+import Foundation
 
 class GenSpec : XCTestCase {
 	func testAll() {
@@ -308,6 +309,13 @@ class GenSpec : XCTestCase {
 			}
 		}
 	}
+
+	#if !(os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
+	static var allTests = testCase([
+		("testAll", testAll),
+		("testLaws", testLaws),
+	])
+	#endif
 }
 
 internal func curry<A, B, C>(_ f : @escaping (A, B) -> C) -> (A) -> (B) -> C {

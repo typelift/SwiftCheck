@@ -23,8 +23,8 @@ enum ExplicitRawIntValues : Int {
 	case two = 2
 }
 
-class RawRepresentableSpec: XCTestCase {
-	func testRepresentable() {
+class RawRepresentableSpec : XCTestCase {
+	func testAll() {
 		property("only generates Foo, Bar, or Baz") <- forAll { (e: ImplicitRawValues) in
 			return [.foo, .bar, .baz].contains(e)
 		}
@@ -33,4 +33,10 @@ class RawRepresentableSpec: XCTestCase {
 			return [.zero, .one, .two].contains(e)
 		}
 	}
+
+	#if !(os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
+	static var allTests = testCase([
+		("testAll", testAll),
+	])
+	#endif
 }
