@@ -60,4 +60,10 @@ class ModifierSpec : XCTestCase {
 			return (xs.getArray.filter(f).reduce(true, { $0.0 && f($0.1) }) as Bool)
 		}
 	}
+
+	#if !(os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
+	static var allTests = testCase([
+		("testModifiers", testModifiers),
+	])
+	#endif
 }

@@ -206,5 +206,11 @@ class SimpleSpec : XCTestCase {
 		// !!!: for some reason this always gets a size of 0, so using mapSize as a hack to increase size
 		}.mapSize { $0 + 100 })
 	}
-}
 
+	#if !(os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
+	static var allTests = testCase([
+		("testAll", testAll),
+		("testComposeWithMutableType", testComposeWithMutableType),
+	])
+	#endif
+}

@@ -64,6 +64,13 @@ class ComplexSpec : XCTestCase {
 			return e.characters.filter({ $0 == ":" }).count == 3
 		}
 	}
+
+	#if !(os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
+	static var allTests = testCase([
+		("testEmailAddressProperties", testEmailAddressProperties),
+		("testIPv6Properties", testIPv6Properties),
+	])
+	#endif
 }
 
 // MARK: String Conveniences

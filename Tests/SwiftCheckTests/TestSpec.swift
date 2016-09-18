@@ -7,7 +7,7 @@
 //
 
 import SwiftCheck
-import class XCTest.XCTestCase
+import XCTest
 
 class TestSpec : XCTestCase {
 	func testAll() {
@@ -50,5 +50,10 @@ class TestSpec : XCTestCase {
 			}
 		}
 	}
-}
 
+	#if !(os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
+	static var allTests = testCase([
+		("testAll", testAll),
+	])
+	#endif
+}

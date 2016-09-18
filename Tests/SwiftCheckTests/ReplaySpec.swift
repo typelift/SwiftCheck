@@ -10,7 +10,7 @@ import SwiftCheck
 import XCTest
 
 class ReplaySpec : XCTestCase {
-	func testProperties() {
+	func testAll() {
 		property("Test is replayed at specific args") <- forAll { (seedl : Int, seedr : Int, size : Int) in
 			let replayArgs = CheckerArguments(replay: .some(StdGen(seedl, seedr), size))
 			var foundArgs : [Int] = []
@@ -28,4 +28,10 @@ class ReplaySpec : XCTestCase {
 			return foundArgs == foundArgs2
 		}
 	}
+
+	#if !(os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
+	static var allTests = testCase([
+		("testAll", testAll),
+	])
+	#endif
 }

@@ -76,6 +76,13 @@ class RoseSpec : XCTestCase {
 			}
 		}
 	}
+
+	#if !(os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
+	static var allTests = testCase([
+		("testAll", testAll),
+		("testLaws", testLaws),
+	])
+	#endif
 }
 
 struct RoseTreeOf<A : Arbitrary> : Arbitrary {

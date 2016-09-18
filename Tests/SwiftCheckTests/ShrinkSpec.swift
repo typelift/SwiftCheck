@@ -38,4 +38,10 @@ class ShrinkSpec : XCTestCase {
 			}
 		}
 	}
+
+	#if !(os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
+	static var allTests = testCase([
+		("testAll", testAll),
+	])
+	#endif
 }
