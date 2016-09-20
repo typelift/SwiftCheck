@@ -19,7 +19,8 @@ SwiftCheck is a testing library that automatically generates random data for
 testing of program properties.  A property is a particular facet of an algorithm
 or data structure that must be invariant under a given set of input data,
 basically an `XCTAssert` on steroids.  Where before all we could do was define
-methods prefixed by `test` and assert, SwiftCheck allows program properties and tests to be treated like *data*.
+methods prefixed by `test` and assert, SwiftCheck allows program properties and 
+tests to be treated like *data*.
 
 To define a program property the `forAll` quantifier is used with a type
 signature like `(A, B, C, ... Z) -> Testable where A : Arbitrary, B : Arbitrary ...
@@ -156,8 +157,8 @@ func isPrime(n : Int) -> Bool {
 
 ```
 
-We would like to test whether our sieve works properly, so we run it through SwiftCheck
-with the following property:
+We would like to test whether our sieve works properly, so we run it through 
+SwiftCheck with the following property:
 
 ```swift
 import SwiftCheck
@@ -206,10 +207,6 @@ public struct ArbitraryFoo {
     let x : Int
     let y : Int
 
-    public static func create(x : Int) -> Int -> ArbitraryFoo {
-        return { y in ArbitraryFoo(x: x, y: y) }
-    }
-
     public var description : String {
         return "Arbitrary Foo!"
     }
@@ -217,7 +214,7 @@ public struct ArbitraryFoo {
 
 extension ArbitraryFoo : Arbitrary {
     public static var arbitrary : Gen<ArbitraryFoo> {
-        return ArbitraryFoo.create <^> Int.arbitrary <*> Int.arbitrary
+        return Gen<(Int, Int)>.zip(Int.arbitrary, Int.arbitrary).map(ArbitraryFoo.init)
     }
 }
 
@@ -225,6 +222,49 @@ class SimpleSpec : XCTestCase {
     func testAll() {
         property("ArbitraryFoo Properties are Reflexive") <- forAll { (i : ArbitraryFoo) in
             return i.x == i.x && i.y == i.y
+        }
+    }
+}
+```
+
+There's also a `Gen.compose` method which allows you to procedurally compose 
+values from multiple generators to construct instances of a type:
+
+``` swift
+public static var arbitrary : Gen<MyClass> {
+    return Gen<MyClass>.compose { c in
+        return MyClass(
+            // Use the nullary method to get an `arbitrary` value.
+            a: c.generate(),
+
+            // or pass a custom generator
+            b: c.generate(Bool.suchThat { $0 == false }),
+
+            // .. and so on, for as many values and types as you need.
+            c: c.generate(), ...
+        )
+    }
+}
+```
+
+`Gen.compose` can also be used with types that can only be customized with setters:
+
+``` swift
+public struct ArbitraryMutableFoo : Arbitrary {
+    var a: Int8
+    var b: Int16
+    
+    public init() {
+        a = 0
+        b = 0
+    }
+    
+    public static var arbitrary: Gen<ArbitraryMutableFoo> {
+        return Gen.compose { c in
+            var foo = ArbitraryMutableFoo()
+            foo.a = c.generate()
+            foo.b = c.generate()
+            return foo
         }
     }
 }
@@ -244,11 +284,11 @@ let uppers : Gen<Character>= Gen<Character>.fromElementsIn("A"..."Z")
 let lowers : Gen<Character> = Gen<Character>.fromElementsIn("a"..."z")
 let numbers : Gen<Character> = Gen<Character>.fromElementsIn("0"..."9")
  
-/// This generator will generate `.None` 1/4 of the time and an arbitrary
-/// `.Some` 3/4 of the time
+/// This generator will generate `.none` 1/4 of the time and an arbitrary
+/// `.some` 3/4 of the time
 let weightedOptionals = Gen<Int?>.frequency([
 	(1, Gen<Int?>.pure(nil)),
-	(3, Optional.Some <^> Int.arbitrary)
+	(3, Int.arbitrary.map(Optional.some))
 ])
 ```
  

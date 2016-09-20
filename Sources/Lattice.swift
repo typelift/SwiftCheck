@@ -7,10 +7,10 @@
 //  Released under the MIT license.
 //
 
-/// Lattice types are types that have definable upper and lower limits.  For 
-/// types like the `Int` and `Float`, their limits are the minimum and maximum 
-/// possible values representable in their bit- width.  While the definition of 
-/// a "limit" is flexible, generally custom types that wish to conform to 
+/// Lattice types are types that have definable upper and lower limits.  For
+/// types like the `Int` and `Float`, their limits are the minimum and maximum
+/// possible values representable in their bit- width.  While the definition of
+/// a "limit" is flexible, generally custom types that wish to conform to
 /// `LatticeType` must come with some kind of supremum or infimum.
 public protocol LatticeType {
 	/// The lower limit of the type.
@@ -78,45 +78,33 @@ extension Double : LatticeType {
 	}
 }
 
-extension AnyForwardIndex : LatticeType {
+extension AnyIndex : LatticeType {
 	/// The lower limit of the `AnyForwardIndex` type.
-	public static var min : AnyForwardIndex {
-		return AnyForwardIndex(Int64.min)
+	public static var min : AnyIndex {
+		return AnyIndex(Int64.min)
 	}
 
 	/// The upper limit of the `AnyForwardIndex` type.
-	public static var max : AnyForwardIndex {
-		return AnyForwardIndex(Int64.max)
-	}
-}
-
-extension AnyRandomAccessIndex : LatticeType {
-	/// The lower limit of the `AnyRandomAccessIndex` type.
-	public static var min : AnyRandomAccessIndex {
-		return AnyRandomAccessIndex(Int64.min)
-	}
-
-	/// The upper limit of the `AnyRandomAccessIndex` type.
-	public static var max : AnyRandomAccessIndex {
-		return AnyRandomAccessIndex(Int64.max)
+	public static var max : AnyIndex {
+		return AnyIndex(Int64.max)
 	}
 }
 
 /// float.h does not export Float80's limits, nor does the Swift Standard Library.
 // rdar://18404510
 //extension Swift.Float80 : LatticeType {
-//	public static var min : Swift.Float80 {
-//		return LDBL_MIN
-//	}
+//    public static var min : Swift.Float80 {
+//        return LDBL_MIN
+//    }
 //
-//	public static var min : Swift.Float80 {
-//		return LDBL_MAX
-//	}
+//    public static var min : Swift.Float80 {
+//        return LDBL_MAX
+//    }
 //}
 
 #if os(Linux)
 	import Glibc
-	
+
 	/// Matches http://www.opensource.apple.com/source/gcc/gcc-934.3/float.h
 	public var FLT_MAX: Float = 3.40282347e+38
 	public var FLT_MIN: Float = 1.17549435e-38

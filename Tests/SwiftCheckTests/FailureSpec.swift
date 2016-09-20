@@ -9,8 +9,14 @@
 import SwiftCheck
 import XCTest
 
-enum SwiftCheckError : ErrorType {
-	case Bogus
+#if os(Linux)
+	import Glibc
+#else
+	import Darwin
+#endif
+
+enum SwiftCheckError : Error {
+	case bogus
 }
 
 class FailureSpec : XCTestCase {
@@ -35,10 +41,10 @@ class FailureSpec : XCTestCase {
 				}
 			}
 		},
-		forAll { (_ : Int) in throw SwiftCheckError.Bogus },
-		forAll { (_ : Int, _ : Float, _ : Int) in throw SwiftCheckError.Bogus }.expectFailure.expectFailure,
-		exists { (_ : Int) in throw SwiftCheckError.Bogus },
-	]
+		forAll { (_ : Int) in throw SwiftCheckError.bogus },
+		forAll { (_ : Int, _ : Float, _ : Int) in throw SwiftCheckError.bogus }.expectFailure.expectFailure,
+		exists { (_ : Int) in throw SwiftCheckError.bogus },
+		]
 
 	func testProperties() {
 		self.tests.forEach { t in
@@ -48,16 +54,23 @@ class FailureSpec : XCTestCase {
 
 	/// h/t @robrix for the suggestion ~( https://github.com/antitypical/Assertions/blob/master/AssertionsTests/AssertionsTests.swift )
 	/// and @ishikawa for the idea ~( https://github.com/antitypical/Assertions/pull/3#issuecomment-76337761 )
-	override func recordFailureWithDescription(message : String, inFile file : String, atLine line : UInt, expected : Bool) {
+	override func recordFailure(withDescription message : String, inFile file : String, atLine line : UInt, expected : Bool) {
 		if !expected {
 			assert(false, "Assertion should never throw.")
 		} else {
-//			super.recordFailureWithDescription(message, inFile: file, atLine: line, expected: expected)
-			failCount = failCount.successor()
+			//            super.recordFailureWithDescription(message, inFile: file, atLine: line, expected: expected)
+			failCount = (failCount + 1)
 		}
 	}
 
 	override func tearDown() {
 		XCTAssert(failCount == tests.count)
 	}
+
+
+	#if !(os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
+	static var allTests = testCase([
+		("testProperties", testProperties),
+	])
+	#endif
 }

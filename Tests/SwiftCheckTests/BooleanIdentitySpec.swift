@@ -57,4 +57,10 @@ class BooleanIdentitySpec : XCTestCase {
 			return ((x && y) || (x && z) || (!y && z)) == ((x && y) || (!y && z))
 		}
 	}
+
+	#if !(os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
+	static var allTests = testCase([
+		("testAll", testAll),
+	])
+	#endif
 }
