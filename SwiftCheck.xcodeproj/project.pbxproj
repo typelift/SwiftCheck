@@ -105,12 +105,9 @@
 		841408BB1B1A85A900BA2B6C /* SwiftCheck.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		844FCC99198B320500EB242A /* SwiftCheck.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 844FCC8D198B320500EB242A /* SwiftCheck.framework */; };
 		84DF76031B0BD54600C912B0 /* SwiftCheck.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */; };
-		FAAB9E811D91C1400097AC78 /* Cartesian.swift.gyb in Resources */ = {isa = PBXBuildFile; fileRef = FAAB9E801D91C1400097AC78 /* Cartesian.swift.gyb */; };
-		FAAB9E821D91C1400097AC78 /* Cartesian.swift.gyb in Resources */ = {isa = PBXBuildFile; fileRef = FAAB9E801D91C1400097AC78 /* Cartesian.swift.gyb */; };
-		FAAB9E831D91C1400097AC78 /* Cartesian.swift.gyb in Resources */ = {isa = PBXBuildFile; fileRef = FAAB9E801D91C1400097AC78 /* Cartesian.swift.gyb */; };
-		FAAB9E851D91C1670097AC78 /* Cartesian.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAAB9E841D91C1670097AC78 /* Cartesian.swift */; };
-		FAAB9E861D91C1670097AC78 /* Cartesian.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAAB9E841D91C1670097AC78 /* Cartesian.swift */; };
-		FAAB9E871D91C1670097AC78 /* Cartesian.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAAB9E841D91C1670097AC78 /* Cartesian.swift */; };
+		FAAB9E891D91C28F0097AC78 /* Cartesian.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAAB9E881D91C28F0097AC78 /* Cartesian.swift */; };
+		FAAB9E8A1D91C28F0097AC78 /* Cartesian.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAAB9E881D91C28F0097AC78 /* Cartesian.swift */; };
+		FAAB9E8B1D91C28F0097AC78 /* Cartesian.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAAB9E881D91C28F0097AC78 /* Cartesian.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -203,8 +200,7 @@
 		84DF76021B0BD54600C912B0 /* SwiftCheck-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SwiftCheck-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAAB9E791D91B96C0097AC78 /* Cartesian.swift.gyb */ = {isa = PBXFileReference; lastKnownFileType = text; path = Cartesian.swift.gyb; sourceTree = "<group>"; };
 		FAAB9E7A1D91B96C0097AC78 /* compile.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = compile.sh; sourceTree = "<group>"; };
-		FAAB9E801D91C1400097AC78 /* Cartesian.swift.gyb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Cartesian.swift.gyb; path = Sources/Cartesian.swift.gyb; sourceTree = SOURCE_ROOT; };
-		FAAB9E841D91C1670097AC78 /* Cartesian.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cartesian.swift; sourceTree = "<group>"; };
+		FAAB9E881D91C28F0097AC78 /* Cartesian.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Cartesian.swift; path = Sources/Cartesian.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -283,9 +279,8 @@
 		844FCC8F198B320500EB242A /* SwiftCheck */ = {
 			isa = PBXGroup;
 			children = (
-				FAAB9E7F1D91C12E0097AC78 /* Generated Files */,
 				826D81461C953D070022266C /* Arbitrary.swift */,
-				FAAB9E801D91C1400097AC78 /* Cartesian.swift.gyb */,
+				FAAB9E881D91C28F0097AC78 /* Cartesian.swift */,
 				826D81551C953D070022266C /* Check.swift */,
 				826D81481C953D070022266C /* CoArbitrary.swift */,
 				82BA08CE1D6FFBD20068D32F /* Compose.swift */,
@@ -352,15 +347,6 @@
 				FAAB9E7A1D91B96C0097AC78 /* compile.sh */,
 			);
 			path = Templates;
-			sourceTree = SOURCE_ROOT;
-		};
-		FAAB9E7F1D91C12E0097AC78 /* Generated Files */ = {
-			isa = PBXGroup;
-			children = (
-				FAAB9E841D91C1670097AC78 /* Cartesian.swift */,
-			);
-			name = "Generated Files";
-			path = "Sources/Generated Files";
 			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXGroup section */
@@ -566,7 +552,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FAAB9E831D91C1400097AC78 /* Cartesian.swift.gyb in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -581,7 +566,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FAAB9E811D91C1400097AC78 /* Cartesian.swift.gyb in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -596,7 +580,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FAAB9E821D91C1400097AC78 /* Cartesian.swift.gyb in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -621,7 +604,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "./Utils/gyb -o Sources/Generated\\ Files/Cartesian.swift Sources/Cartesian.swift.gyb";
+			shellScript = "pushd Templates\n./compile.sh\npopd\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -634,7 +617,7 @@
 				826D81691C953D070022266C /* Lattice.swift in Sources */,
 				826D81751C953D070022266C /* Random.swift in Sources */,
 				826D81841C953D070022266C /* Testable.swift in Sources */,
-				FAAB9E871D91C1670097AC78 /* Cartesian.swift in Sources */,
+				FAAB9E8B1D91C28F0097AC78 /* Cartesian.swift in Sources */,
 				826D818A1C953D070022266C /* Witness.swift in Sources */,
 				826D815A1C953D070022266C /* Arbitrary.swift in Sources */,
 				826D816C1C953D070022266C /* Modifiers.swift in Sources */,
@@ -679,7 +662,7 @@
 				826D81671C953D070022266C /* Lattice.swift in Sources */,
 				826D81731C953D070022266C /* Random.swift in Sources */,
 				826D81821C953D070022266C /* Testable.swift in Sources */,
-				FAAB9E851D91C1670097AC78 /* Cartesian.swift in Sources */,
+				FAAB9E891D91C28F0097AC78 /* Cartesian.swift in Sources */,
 				826D81881C953D070022266C /* Witness.swift in Sources */,
 				826D81581C953D070022266C /* Arbitrary.swift in Sources */,
 				826D816A1C953D070022266C /* Modifiers.swift in Sources */,
@@ -724,7 +707,7 @@
 				826D81681C953D070022266C /* Lattice.swift in Sources */,
 				826D81741C953D070022266C /* Random.swift in Sources */,
 				826D81831C953D070022266C /* Testable.swift in Sources */,
-				FAAB9E861D91C1670097AC78 /* Cartesian.swift in Sources */,
+				FAAB9E8A1D91C28F0097AC78 /* Cartesian.swift in Sources */,
 				826D81891C953D070022266C /* Witness.swift in Sources */,
 				826D81591C953D070022266C /* Arbitrary.swift in Sources */,
 				826D816B1C953D070022266C /* Modifiers.swift in Sources */,
