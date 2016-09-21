@@ -6,6 +6,10 @@
 //  Copyright © 2016 Typelift. All rights reserved.
 //
 
+// This is a GYB generated file; any changes will be overwritten
+// during the build phase. Edit the template instead,
+// found in Templates/Cartesian.swift.gyb
+
 %{
 MAX_ARITY = 22
 }%
