@@ -8,7 +8,7 @@ matrix:
       osx_image: xcode8
       before_install:
         - git submodule update --init --recursive
-        - pushd Templates
+        - pushd Utilities
         - ./compile.sh
         - popd
       script:
@@ -20,7 +20,7 @@ matrix:
       osx_image: xcode8
       before_install:
         - git submodule update --init --recursive
-        - pushd Templates
+        - pushd Utilities
         - ./compile.sh
         - popd
       script:
@@ -50,7 +50,7 @@ matrix:
         - wget https://swift.org/builds/swift-3.0-release/ubuntu1404/swift-3.0-RELEASE/swift-3.0-RELEASE-ubuntu14.04.tar.gz
         - tar xzf swift-3.0-RELEASE-ubuntu14.04.tar.gz
         - export PATH=${PWD}/swift-3.0-RELEASE-ubuntu14.04/usr/bin:"${PATH}"
-        - pushd Templates
+        - pushd Utilities
         - ./compile.sh
         - popd
       script:

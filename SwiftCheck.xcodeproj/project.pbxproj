@@ -204,7 +204,6 @@
 		FA3C18581D9300EF003DEB10 /* CartesianSpec.swift.gyb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CartesianSpec.swift.gyb; sourceTree = "<group>"; };
 		FA3C185A1D93056D003DEB10 /* CartesianSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CartesianSpec.swift; path = Tests/SwiftCheckTests/CartesianSpec.swift; sourceTree = SOURCE_ROOT; };
 		FAAB9E791D91B96C0097AC78 /* Cartesian.swift.gyb */ = {isa = PBXFileReference; lastKnownFileType = text; path = Cartesian.swift.gyb; sourceTree = "<group>"; };
-		FAAB9E7A1D91B96C0097AC78 /* compile.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = compile.sh; sourceTree = "<group>"; };
 		FAAB9E881D91C28F0097AC78 /* Cartesian.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Cartesian.swift; path = Sources/Cartesian.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -351,7 +350,6 @@
 			children = (
 				FAAB9E791D91B96C0097AC78 /* Cartesian.swift.gyb */,
 				FA3C18581D9300EF003DEB10 /* CartesianSpec.swift.gyb */,
-				FAAB9E7A1D91B96C0097AC78 /* compile.sh */,
 			);
 			path = Templates;
 			sourceTree = SOURCE_ROOT;
@@ -611,7 +609,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "pushd Templates\n./compile.sh\npopd\n";
+			shellScript = "pushd Utilities\n./compile.sh\npopd\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
