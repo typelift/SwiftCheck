@@ -105,6 +105,9 @@
 		841408BB1B1A85A900BA2B6C /* SwiftCheck.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		844FCC99198B320500EB242A /* SwiftCheck.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 844FCC8D198B320500EB242A /* SwiftCheck.framework */; };
 		84DF76031B0BD54600C912B0 /* SwiftCheck.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */; };
+		FA3C185B1D93056D003DEB10 /* CartesianSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3C185A1D93056D003DEB10 /* CartesianSpec.swift */; };
+		FA3C185C1D93056D003DEB10 /* CartesianSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3C185A1D93056D003DEB10 /* CartesianSpec.swift */; };
+		FA3C185D1D93056D003DEB10 /* CartesianSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3C185A1D93056D003DEB10 /* CartesianSpec.swift */; };
 		FAAB9E891D91C28F0097AC78 /* Cartesian.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAAB9E881D91C28F0097AC78 /* Cartesian.swift */; };
 		FAAB9E8A1D91C28F0097AC78 /* Cartesian.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAAB9E881D91C28F0097AC78 /* Cartesian.swift */; };
 		FAAB9E8B1D91C28F0097AC78 /* Cartesian.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAAB9E881D91C28F0097AC78 /* Cartesian.swift */; };
@@ -198,6 +201,8 @@
 		844FCC98198B320500EB242A /* SwiftCheckTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftCheckTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCheck.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		84DF76021B0BD54600C912B0 /* SwiftCheck-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SwiftCheck-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FA3C18581D9300EF003DEB10 /* CartesianSpec.swift.gyb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CartesianSpec.swift.gyb; sourceTree = "<group>"; };
+		FA3C185A1D93056D003DEB10 /* CartesianSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CartesianSpec.swift; path = Tests/SwiftCheckTests/CartesianSpec.swift; sourceTree = SOURCE_ROOT; };
 		FAAB9E791D91B96C0097AC78 /* Cartesian.swift.gyb */ = {isa = PBXFileReference; lastKnownFileType = text; path = Cartesian.swift.gyb; sourceTree = "<group>"; };
 		FAAB9E7A1D91B96C0097AC78 /* compile.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = compile.sh; sourceTree = "<group>"; };
 		FAAB9E881D91C28F0097AC78 /* Cartesian.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Cartesian.swift; path = Sources/Cartesian.swift; sourceTree = SOURCE_ROOT; };
@@ -313,6 +318,7 @@
 			children = (
 				825C9AC81D8EE445003313E1 /* LinuxMain.swift */,
 				825C9AD01D8EE86E003313E1 /* BooleanIdentitySpec.swift */,
+				FA3C185A1D93056D003DEB10 /* CartesianSpec.swift */,
 				825C9AD11D8EE86E003313E1 /* ComplexSpec.swift */,
 				825C9AD21D8EE86E003313E1 /* DiscardSpec.swift */,
 				825C9AD31D8EE86E003313E1 /* FailureSpec.swift */,
@@ -344,6 +350,7 @@
 			isa = PBXGroup;
 			children = (
 				FAAB9E791D91B96C0097AC78 /* Cartesian.swift.gyb */,
+				FA3C18581D9300EF003DEB10 /* CartesianSpec.swift.gyb */,
 				FAAB9E7A1D91B96C0097AC78 /* compile.sh */,
 			);
 			path = Templates;
@@ -639,6 +646,7 @@
 				825C9AFB1D8EE86E003313E1 /* RawRepresentableSpec.swift in Sources */,
 				825C9B071D8EE86E003313E1 /* SimpleSpec.swift in Sources */,
 				825C9B041D8EE86E003313E1 /* ShrinkSpec.swift in Sources */,
+				FA3C185D1D93056D003DEB10 /* CartesianSpec.swift in Sources */,
 				825C9ACF1D8EE84F003313E1 /* TestSpec.swift in Sources */,
 				825C9AEC1D8EE86E003313E1 /* GenSpec.swift in Sources */,
 				825C9AF51D8EE86E003313E1 /* PathSpec.swift in Sources */,
@@ -684,6 +692,7 @@
 				825C9AF91D8EE86E003313E1 /* RawRepresentableSpec.swift in Sources */,
 				825C9B051D8EE86E003313E1 /* SimpleSpec.swift in Sources */,
 				825C9B021D8EE86E003313E1 /* ShrinkSpec.swift in Sources */,
+				FA3C185B1D93056D003DEB10 /* CartesianSpec.swift in Sources */,
 				825C9ACD1D8EE84F003313E1 /* TestSpec.swift in Sources */,
 				825C9AEA1D8EE86E003313E1 /* GenSpec.swift in Sources */,
 				825C9AF31D8EE86E003313E1 /* PathSpec.swift in Sources */,
@@ -729,6 +738,7 @@
 				825C9AFA1D8EE86E003313E1 /* RawRepresentableSpec.swift in Sources */,
 				825C9B061D8EE86E003313E1 /* SimpleSpec.swift in Sources */,
 				825C9B031D8EE86E003313E1 /* ShrinkSpec.swift in Sources */,
+				FA3C185C1D93056D003DEB10 /* CartesianSpec.swift in Sources */,
 				825C9ACE1D8EE84F003313E1 /* TestSpec.swift in Sources */,
 				825C9AEB1D8EE86E003313E1 /* GenSpec.swift in Sources */,
 				825C9AF41D8EE86E003313E1 /* PathSpec.swift in Sources */,

@@ -169,11 +169,9 @@ class GenSpec : XCTestCase {
 			}
 		}
 
-		property("Gen.zip2 behaves") <- forAll { (x : Int, y : Int) in
+		property("Gen.zip2 behaves") <- forAll { (x : Int, y : Int) -> Property in
 			let g = Gen<(Int, Int)>.zip(Gen.pure(x), Gen.pure(y))
-			return forAllNoShrink(g) { (x1, y1) in
-				return (x1, y1) == (x, y)
-			}
+			return forAllNoShrink(g) { $0 == (x, y) }
 		}
 
 		property("Gen.zip2 obeys the Cartesian associativity law") <- forAll { (x : Int, y : Int, z : Int) in
