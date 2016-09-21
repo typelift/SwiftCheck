@@ -161,6 +161,24 @@ public struct Gen<A> {
 	}
 }
 
+// MARK: Monoidal Functor methods.
+
+extension Gen {
+	/// Zips together two generators and returns a generator of tuples.
+	public static func zip<A1, A2>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>) -> Gen<(A1, A2)> {
+		return Gen<(A1, A2)> { r, n in
+			let (r1, r2) = r.split
+			return (ga1.unGen(r1, n), ga2.unGen(r2, n))
+		}
+	}
+
+	/// Returns a new generator that applies a given function to any outputs the
+	/// two receivers create.
+	public static func map<A1, A2, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, transform: @escaping (A1, A2) -> R) -> Gen<R> {
+		return zip(ga1, ga2).map(transform)
+	}
+}
+
 // MARK: Generator Modifiers
 
 extension Gen {
