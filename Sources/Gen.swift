@@ -173,7 +173,7 @@ extension Gen {
 	}
 
 	/// Returns a new generator that applies a given function to any outputs the
-	/// two receivers create.
+	/// given generators produce.
 	public static func map<A1, A2, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, transform: @escaping (A1, A2) -> R) -> Gen<R> {
 		return zip(ga1, ga2).map(transform)
 	}
