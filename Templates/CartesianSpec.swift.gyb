@@ -1,0 +1,54 @@
+//
+//  CartesianSpec.swift
+//  SwiftCheck
+//
+//  Created by Adam Kuipers on 9/21/16.
+//  Copyright © 2016 Typelift. All rights reserved.
+//
+
+// This is a GYB generated file; any changes will be overwritten
+// during the build phase. Edit the template instead,
+// found in Templates/CartesianSpec.swift.gyb
+
+%{
+MAX_ARITY = 22
+}%
+
+import SwiftCheck
+import XCTest
+import Foundation
+
+final class CartesianSpec : XCTestCase {
+	func testGeneratedZips() {
+% for arity in range(3, MAX_ARITY + 1):
+%{
+gen_type_argument_list = ', '.join(['Int' for _ in range(1, arity + 1)])
+zip_argument_list      = ', '.join(['Gen.pure({0})'.format(n) for n in range(1, arity + 1)])
+tupled_parameters      = ', '.join(['x{0}'.format(n) for n in range(1, arity + 1)])
+}%
+
+		let g${arity} = Gen<(${gen_type_argument_list})>.zip(${zip_argument_list})
+
+		property("Gen.zip${arity} behaves") <- forAllNoShrink(g${arity}) { (tuple : (${gen_type_argument_list})) -> Bool in
+			tuple.0 == 1 && tuple.${arity - 1} == ${arity}
+		}
+% end
+	}
+
+	func testGeneratedMaps() {
+% for arity in range(3, MAX_ARITY + 1):
+%{
+gen_type_argument_list = ', '.join(['Int' for _ in range(1, arity + 1)])
+map_argument_list      = ', '.join(['Gen.pure({0})'.format(n) for n in range(1, arity + 1)])
+tupled_parameters      = ', '.join(['x{0}'.format(n) for n in range(1, arity + 1)])
+max_argument_list      = ', '.join(['${0}'.format(n) for n in range(0, arity)])
+}%
+
+		let g${arity} = Gen<(${gen_type_argument_list})>.map(${map_argument_list}) { max(${max_argument_list}) }
+
+		property("Gen.zip${arity} behaves") <- forAllNoShrink(g${arity}) { maxInt in
+			maxInt == ${arity}
+		}
+% end
+	}
+}

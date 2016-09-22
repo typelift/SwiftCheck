@@ -8,8 +8,11 @@ matrix:
       osx_image: xcode8
       before_install:
         - git submodule update --init --recursive
+        - pushd Utilities
+        - ./compile.sh
+        - popd
       script:
-      # Restore pod build before shipping for 3.0 
+      # Restore pod build before shipping for 3.0
       # - pod lib lint
         - carthage build --no-skip-current
     - os: osx
@@ -17,6 +20,9 @@ matrix:
       osx_image: xcode8
       before_install:
         - git submodule update --init --recursive
+        - pushd Utilities
+        - ./compile.sh
+        - popd
       script:
         - set -o pipefail
         - xcodebuild test -scheme SwiftCheck | xcpretty -c
@@ -44,6 +50,9 @@ matrix:
         - wget https://swift.org/builds/swift-3.0-release/ubuntu1404/swift-3.0-RELEASE/swift-3.0-RELEASE-ubuntu14.04.tar.gz
         - tar xzf swift-3.0-RELEASE-ubuntu14.04.tar.gz
         - export PATH=${PWD}/swift-3.0-RELEASE-ubuntu14.04/usr/bin:"${PATH}"
+        - pushd Utilities
+        - ./compile.sh
+        - popd
       script:
         - swift test
 notifications:

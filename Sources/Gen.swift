@@ -161,175 +161,21 @@ public struct Gen<A> {
 	}
 }
 
-extension Gen /*: Cartesian*/ {
-	/// Zips together 2 generators of type `A` and `B` into a generator of pairs.
-	public static func zip<A, B>(_ gen1 : Gen<A>, _ gen2 : Gen<B>) -> Gen<(A, B)> {
-		return Gen<(A, B)>(unGen: { r, n in
+// MARK: Monoidal Functor methods.
+
+extension Gen {
+	/// Zips together two generators and returns a generator of tuples.
+	public static func zip<A1, A2>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>) -> Gen<(A1, A2)> {
+		return Gen<(A1, A2)> { r, n in
 			let (r1, r2) = r.split
-			return (gen1.unGen(r1, n), gen2.unGen(r2, n))
-		})
-	}
-
-	/// Zips together 3 generators of type `A`, `B`, and `C` into a generator of
-	/// triples.
-	public static func zip<A, B, C>(_ gen1 : Gen<A>, _ gen2 : Gen<B>, _ gen3 : Gen<C>) -> Gen<(A, B, C)> {
-		return Gen<(A, B, C)>(unGen: { r, n in
-			let (r1, r2_) = r.split
-			let (r2, r3) = r2_.split
-			return (gen1.unGen(r1, n), gen2.unGen(r2, n), gen3.unGen(r3, n))
-		})
-	}
-
-	/// Zips together 4 generators of type `A`, `B`, `C`, and `D` into a
-	/// generator of quadruples.
-	public static func zip<A, B, C, D>(_ gen1 : Gen<A>, _ gen2 : Gen<B>, _ gen3 : Gen<C>, _ gen4 : Gen<D>) -> Gen<(A, B, C, D)> {
-		return Gen<(A, B, C, D)>(unGen: { r, n in
-			let (r1_, r2_) = r.split
-			let (r1, r2) = r1_.split
-			let (r3, r4) = r2_.split
-			return (gen1.unGen(r1, n), gen2.unGen(r2, n), gen3.unGen(r3, n), gen4.unGen(r4, n))
-		})
-	}
-
-	/// Zips together 5 generators of type `A`, `B`, `C`, `D`, and `E` into a
-	/// generator of quintuples.
-	public static func zip<A, B, C, D, E>(_ gen1 : Gen<A>, _ gen2 : Gen<B>, _ gen3 : Gen<C>, _ gen4 : Gen<D>, _ gen5 : Gen<E>) -> Gen<(A, B, C, D, E)> {
-		return Gen<(A, B, C, D, E)>(unGen: { r, n in
-			let (r1_, r2_) = r.split
-			let (r1__, r1) = r1_.split
-			let (r2, r3) = r2_.split
-			let (r4, r5) = r1__.split
-			return (gen1.unGen(r1, n), gen2.unGen(r2, n), gen3.unGen(r3, n), gen4.unGen(r4, n), gen5.unGen(r5, n))
-		})
-	}
-
-	/// Zips together 6 generators of type `A`, `B`, `C`, `D` `E`, and `F` into
-	/// a generator of sextuples.
-	public static func zip<A, B, C, D, E, F>(_ gen1 : Gen<A>, _ gen2 : Gen<B>, _ gen3 : Gen<C>, _ gen4 : Gen<D>, _ gen5 : Gen<E>, _ gen6 : Gen<F>) -> Gen<(A, B, C, D, E, F)> {
-		return Gen<(A, B, C, D, E, F)>(unGen: { r, n in
-			let (r1_, r2_) = r.split
-			let (r1__, r2__) = r1_.split
-			let (r1, r2) = r2_.split
-			let (r3, r4) = r1__.split
-			let (r5, r6) = r2__.split
-			return (gen1.unGen(r1, n), gen2.unGen(r2, n), gen3.unGen(r3, n), gen4.unGen(r4, n), gen5.unGen(r5, n), gen6.unGen(r6, n))
-		})
-	}
-
-	/// Zips together 7 generators of type `A`, `B`, `C`, `D` `E`, `F`, and `G`
-	/// into a generator of septuples.
-	public static func zip<A, B, C, D, E, F, G>(_ gen1 : Gen<A>, _ gen2 : Gen<B>, _ gen3 : Gen<C>, _ gen4 : Gen<D>, _ gen5 : Gen<E>, _ gen6 : Gen<F>, _ gen7 : Gen<G>) -> Gen<(A, B, C, D, E, F, G)> {
-		return Gen<(A, B, C, D, E, F, G)>(unGen: { r, n in
-			let (r1_, r2_) = r.split
-			let (r1__, r2__) = r1_.split
-			let (r1___, r1) = r2_.split
-			let (r2, r3) = r1__.split
-			let (r4, r5) = r2__.split
-			let (r6, r7) = r1___.split
-			return (gen1.unGen(r1, n), gen2.unGen(r2, n), gen3.unGen(r3, n), gen4.unGen(r4, n), gen5.unGen(r5, n), gen6.unGen(r6, n), gen7.unGen(r7, n))
-		})
-	}
-
-	/// Zips together 8 generators of type `A`, `B`, `C`, `D` `E`, `F`, `G`, and
-	/// `H` into a generator of octuples.
-	public static func zip<A, B, C, D, E, F, G, H>(_ gen1 : Gen<A>, _ gen2 : Gen<B>, _ gen3 : Gen<C>, _ gen4 : Gen<D>, _ gen5 : Gen<E>, _ gen6 : Gen<F>, _ gen7 : Gen<G>, _ gen8 : Gen<H>) -> Gen<(A, B, C, D, E, F, G, H)> {
-		return Gen<(A, B, C, D, E, F, G, H)>(unGen: { r, n in
-			let (r1_, r2_) = r.split
-			let (r1__, r2__) = r1_.split
-			let (r1___, r2___) = r2_.split
-			let (r1, r2) = r1__.split
-			let (r3, r4) = r2__.split
-			let (r5, r6) = r1___.split
-			let (r7, r8) = r2___.split
-			return (gen1.unGen(r1, n), gen2.unGen(r2, n), gen3.unGen(r3, n), gen4.unGen(r4, n), gen5.unGen(r5, n), gen6.unGen(r6, n), gen7.unGen(r7, n), gen8.unGen(r8, n))
-		})
-	}
-
-	/// Zips together 9 generators of type `A`, `B`, `C`, `D` `E`, `F`, `G`,
-	/// `H`, and `I` into a generator of nonuples.
-	public static func zip<A, B, C, D, E, F, G, H, I>(_ gen1 : Gen<A>, _ gen2 : Gen<B>, _ gen3 : Gen<C>, _ gen4 : Gen<D>, _ gen5 : Gen<E>, _ gen6 : Gen<F>, _ gen7 : Gen<G>, _ gen8 : Gen<H>, _ gen9 : Gen<I>) -> Gen<(A, B, C, D, E, F, G, H, I)> {
-		return Gen<(A, B, C, D, E, F, G, H, I)>(unGen: { r, n in
-			let (r1_, r2_) = r.split
-			let (r1__, r2__) = r1_.split
-			let (r1___, r2___) = r2_.split
-			let (r1____, r1) = r1__.split
-			let (r2, r3) = r2__.split
-			let (r4, r5) = r1___.split
-			let (r6, r7) = r2___.split
-			let (r8, r9) = r1____.split
-			return (gen1.unGen(r1, n), gen2.unGen(r2, n), gen3.unGen(r3, n), gen4.unGen(r4, n), gen5.unGen(r5, n), gen6.unGen(r6, n), gen7.unGen(r7, n), gen8.unGen(r8, n), gen9.unGen(r9, n))
-		})
-	}
-
-	/// Zips together 10 generators of type `A`, `B`, `C`, `D` `E`, `F`, `G`,
-	/// `H`, `I`, and `J` into a generator of decuples.
-	public static func zip<A, B, C, D, E, F, G, H, I, J>(_ gen1 : Gen<A>, _ gen2 : Gen<B>, _ gen3 : Gen<C>, _ gen4 : Gen<D>, _ gen5 : Gen<E>, _ gen6 : Gen<F>, _ gen7 : Gen<G>, _ gen8 : Gen<H>, _ gen9 : Gen<I>, _ gen10 : Gen<J>) -> Gen<(A, B, C, D, E, F, G, H, I, J)> {
-		return Gen<(A, B, C, D, E, F, G, H, I, J)>(unGen: { r, n in
-			let (r1_, r2_) = r.split
-			let (r1__, r2__) = r1_.split
-			let (r1___, r2___) = r2_.split
-			let (r1____, r2____) = r1__.split
-			let (r1, r2) = r2__.split
-			let (r3, r4) = r1___.split
-			let (r5, r6) = r2___.split
-			let (r7, r8) = r1____.split
-			let (r9, r10) = r2____.split
-			return (gen1.unGen(r1, n), gen2.unGen(r2, n), gen3.unGen(r3, n), gen4.unGen(r4, n), gen5.unGen(r5, n), gen6.unGen(r6, n), gen7.unGen(r7, n), gen8.unGen(r8, n), gen9.unGen(r9, n), gen10.unGen(r10, n))
-		})
+			return (ga1.unGen(r1, n), ga2.unGen(r2, n))
+		}
 	}
 
 	/// Returns a new generator that applies a given function to any outputs the
 	/// two receivers create.
 	public static func map<A1, A2, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, transform: @escaping (A1, A2) -> R) -> Gen<R> {
 		return zip(ga1, ga2).map(transform)
-	}
-
-	/// Returns a new generator that applies a given function to any outputs the
-	/// three receivers create.
-	public static func map<A1, A2, A3, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, transform: @escaping (A1, A2, A3) -> R) -> Gen<R> {
-		return zip(ga1, ga2, ga3).map(transform)
-	}
-
-	/// Returns a new generator that applies a given function to any outputs the
-	/// four receivers create.
-	public static func map<A1, A2, A3, A4, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4 : Gen<A4>, transform: @escaping (A1, A2, A3, A4) -> R) -> Gen<R> {
-		return zip(ga1, ga2, ga3, ga4).map(transform)
-	}
-
-	/// Returns a new generator that applies a given function to any outputs the
-	/// five receivers create.
-	public static func map<A1, A2, A3, A4, A5, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, transform: @escaping (A1, A2, A3, A4, A5) -> R) -> Gen<R> {
-		return zip(ga1, ga2, ga3, ga4, ga5).map(transform)
-	}
-
-	/// Returns a new generator that applies a given function to any outputs the
-	/// six receivers create.
-	public static func map<A1, A2, A3, A4, A5, A6, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, _ ga6 : Gen<A6>, transform: @escaping (A1, A2, A3, A4, A5, A6) -> R) -> Gen<R> {
-		return zip(ga1, ga2, ga3, ga4, ga5, ga6).map(transform)
-	}
-
-	/// Returns a new generator that applies a given function to any outputs the
-	/// seven receivers create.
-	public static func map<A1, A2, A3, A4, A5, A6, A7, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, _ ga6 : Gen<A6>,  _ ga7 : Gen<A7>, transform: @escaping (A1, A2, A3, A4, A5, A6, A7) -> R) -> Gen<R> {
-		return zip(ga1, ga2, ga3, ga4, ga5, ga6, ga7).map(transform)
-	}
-
-	/// Returns a new generator that applies a given function to any outputs the
-	/// eight receivers create.
-	public static func map<A1, A2, A3, A4, A5, A6, A7, A8, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, _ ga6 : Gen<A6>,  _ ga7 : Gen<A7>, _ ga8 : Gen<A8>, transform: @escaping (A1, A2, A3, A4, A5, A6, A7, A8) -> R) -> Gen<R> {
-		return zip(ga1, ga2, ga3, ga4, ga5, ga6, ga7, ga8).map(transform)
-	}
-
-	/// Returns a new generator that applies a given function to any outputs the
-	/// nine receivers create.
-	public static func map<A1, A2, A3, A4, A5, A6, A7, A8, A9, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, _ ga6 : Gen<A6>,  _ ga7 : Gen<A7>, _ ga8 : Gen<A8>, _ ga9 : Gen<A9>, transform: @escaping (A1, A2, A3, A4, A5, A6, A7, A8, A9) -> R) -> Gen<R> {
-		return zip(ga1, ga2, ga3, ga4, ga5, ga6, ga7, ga8, ga9).map(transform)
-	}
-
-	/// Returns a new generator that applies a given function to any outputs the
-	/// ten receivers create.
-	public static func map<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, _ ga3 : Gen<A3>, _ ga4: Gen<A4>, _ ga5 : Gen<A5>, _ ga6 : Gen<A6>,  _ ga7 : Gen<A7>, _ ga8 : Gen<A8>, _ ga9 : Gen<A9>, _ ga10 : Gen<A10>, transform: @escaping (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) -> R) -> Gen<R> {
-		return zip(ga1, ga2, ga3, ga4, ga5, ga6, ga7, ga8, ga9, ga10).map(transform)
 	}
 }
 

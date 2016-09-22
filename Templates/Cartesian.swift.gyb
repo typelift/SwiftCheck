@@ -1,0 +1,53 @@
+//
+//  Cartesian.swift.gyb
+//  SwiftCheck
+//
+//  Created by Adam Kuipers on 5/10/16.
+//  Copyright © 2016 Typelift. All rights reserved.
+//
+
+// This is a GYB generated file; any changes will be overwritten
+// during the build phase. Edit the template instead,
+// found in Templates/Cartesian.swift.gyb
+
+%{
+MAX_ARITY = 22
+}%
+
+extension Gen /*: Cartesian*/ {
+
+% for arity in range(3, MAX_ARITY + 1):
+%{
+# Function definition template
+type_parameter_list = ', '.join(['A{0}'.format(n) for n in range(1, arity + 1)])
+parameter_list = ', '.join(['_ ga{0} : Gen<A{0}>'.format(n) for n in range(1, arity + 1)])
+
+# Zip body template
+previous_parameter_range = range(1, arity)
+
+previous_zip_arguments = ', '.join(['ga{0}'.format(n) for n in previous_parameter_range])
+expanded_previous_tuple = ', '.join(['$0.{0}'.format(n - 1) for n in previous_parameter_range])
+
+
+# Map body template
+map_zip_argument_list = ', '.join(['ga{0}'.format(n) for n in range(1, arity + 1)])
+}%
+
+	/// Zips together ${arity} generators generator of tuples.
+	public static func zip<${type_parameter_list}>(${parameter_list}) -> Gen<(${type_parameter_list})> {
+		return Gen
+			.zip(
+				.zip(${previous_zip_arguments}),
+				ga${arity}
+			).map {
+				(${expanded_previous_tuple}, $$1)
+			}
+	}
+
+	/// Returns a new generator that applies a given function to any outputs the
+	/// two receivers create.
+	public static func map<${type_parameter_list}, R>(${parameter_list}, transform: @escaping (${type_parameter_list}) -> R) -> Gen<R> {
+		return zip(${map_zip_argument_list}).map(transform)
+	}
+% end
+}

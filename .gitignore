@@ -24,3 +24,5 @@ Carthage/Build
 Carthage/Checkouts
 build/
 
+# Python
+*.pyc
