@@ -74,14 +74,6 @@ extension Integer {
 	}
 }
 
-extension RawRepresentable where RawValue : Arbitrary & Integer {
-	/// Uses the default generator for `Integer` values to search for a value 
-	/// that can construct an instance of the reciever's type.
-	public static var arbitrary : Gen<Self> {
-		return RawValue.arbitrary.map(Self.init).suchThat { $0 != nil }.map { $0! }
-	}
-}
-
 extension Bool : Arbitrary {
 	/// Returns a generator of `Bool`ean values.
 	public static var arbitrary : Gen<Bool> {
