@@ -21,7 +21,6 @@ XCTMain([
 	ModifierSpec.allTests,
 	PathSpec.allTests,
 	PropertySpec.allTests,
-	RawRepresentableSpec.allTests,
 	ReplaySpec.allTests,
 	RoseSpec.allTests,
 	ShrinkSpec.allTests,
