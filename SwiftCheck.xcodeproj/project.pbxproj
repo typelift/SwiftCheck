@@ -39,9 +39,6 @@
 		825C9AF61D8EE86E003313E1 /* PropertySpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 825C9AD81D8EE86E003313E1 /* PropertySpec.swift */; };
 		825C9AF71D8EE86E003313E1 /* PropertySpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 825C9AD81D8EE86E003313E1 /* PropertySpec.swift */; };
 		825C9AF81D8EE86E003313E1 /* PropertySpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 825C9AD81D8EE86E003313E1 /* PropertySpec.swift */; };
-		825C9AF91D8EE86E003313E1 /* RawRepresentableSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 825C9AD91D8EE86E003313E1 /* RawRepresentableSpec.swift */; };
-		825C9AFA1D8EE86E003313E1 /* RawRepresentableSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 825C9AD91D8EE86E003313E1 /* RawRepresentableSpec.swift */; };
-		825C9AFB1D8EE86E003313E1 /* RawRepresentableSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 825C9AD91D8EE86E003313E1 /* RawRepresentableSpec.swift */; };
 		825C9AFC1D8EE86E003313E1 /* ReplaySpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 825C9ADA1D8EE86E003313E1 /* ReplaySpec.swift */; };
 		825C9AFD1D8EE86E003313E1 /* ReplaySpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 825C9ADA1D8EE86E003313E1 /* ReplaySpec.swift */; };
 		825C9AFE1D8EE86E003313E1 /* ReplaySpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 825C9ADA1D8EE86E003313E1 /* ReplaySpec.swift */; };
@@ -174,7 +171,6 @@
 		825C9AD61D8EE86E003313E1 /* ModifierSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ModifierSpec.swift; path = Tests/SwiftCheckTests/ModifierSpec.swift; sourceTree = SOURCE_ROOT; };
 		825C9AD71D8EE86E003313E1 /* PathSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PathSpec.swift; path = Tests/SwiftCheckTests/PathSpec.swift; sourceTree = SOURCE_ROOT; };
 		825C9AD81D8EE86E003313E1 /* PropertySpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PropertySpec.swift; path = Tests/SwiftCheckTests/PropertySpec.swift; sourceTree = SOURCE_ROOT; };
-		825C9AD91D8EE86E003313E1 /* RawRepresentableSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RawRepresentableSpec.swift; path = Tests/SwiftCheckTests/RawRepresentableSpec.swift; sourceTree = SOURCE_ROOT; };
 		825C9ADA1D8EE86E003313E1 /* ReplaySpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ReplaySpec.swift; path = Tests/SwiftCheckTests/ReplaySpec.swift; sourceTree = SOURCE_ROOT; };
 		825C9ADB1D8EE86E003313E1 /* RoseSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RoseSpec.swift; path = Tests/SwiftCheckTests/RoseSpec.swift; sourceTree = SOURCE_ROOT; };
 		825C9ADC1D8EE86E003313E1 /* ShrinkSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ShrinkSpec.swift; path = Tests/SwiftCheckTests/ShrinkSpec.swift; sourceTree = SOURCE_ROOT; };
@@ -326,7 +322,6 @@
 				825C9AD61D8EE86E003313E1 /* ModifierSpec.swift */,
 				825C9AD71D8EE86E003313E1 /* PathSpec.swift */,
 				825C9AD81D8EE86E003313E1 /* PropertySpec.swift */,
-				825C9AD91D8EE86E003313E1 /* RawRepresentableSpec.swift */,
 				825C9ADA1D8EE86E003313E1 /* ReplaySpec.swift */,
 				825C9ADB1D8EE86E003313E1 /* RoseSpec.swift */,
 				825C9ADC1D8EE86E003313E1 /* ShrinkSpec.swift */,
@@ -641,7 +636,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				825C9AFB1D8EE86E003313E1 /* RawRepresentableSpec.swift in Sources */,
 				825C9B071D8EE86E003313E1 /* SimpleSpec.swift in Sources */,
 				825C9B041D8EE86E003313E1 /* ShrinkSpec.swift in Sources */,
 				FA3C185D1D93056D003DEB10 /* CartesianSpec.swift in Sources */,
@@ -687,7 +681,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				825C9AF91D8EE86E003313E1 /* RawRepresentableSpec.swift in Sources */,
 				825C9B051D8EE86E003313E1 /* SimpleSpec.swift in Sources */,
 				825C9B021D8EE86E003313E1 /* ShrinkSpec.swift in Sources */,
 				FA3C185B1D93056D003DEB10 /* CartesianSpec.swift in Sources */,
@@ -733,7 +726,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				825C9AFA1D8EE86E003313E1 /* RawRepresentableSpec.swift in Sources */,
 				825C9B061D8EE86E003313E1 /* SimpleSpec.swift in Sources */,
 				825C9B031D8EE86E003313E1 /* ShrinkSpec.swift in Sources */,
 				FA3C185C1D93056D003DEB10 /* CartesianSpec.swift in Sources */,
