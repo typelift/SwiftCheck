@@ -102,6 +102,9 @@
 		82BA08CF1D6FFBD20068D32F /* Compose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BA08CE1D6FFBD20068D32F /* Compose.swift */; };
 		82BA08D01D6FFBD20068D32F /* Compose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BA08CE1D6FFBD20068D32F /* Compose.swift */; };
 		82BA08D11D6FFBD20068D32F /* Compose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BA08CE1D6FFBD20068D32F /* Compose.swift */; };
+		82F3714C1DA7041300D60203 /* FileCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82F371481DA7010800D60203 /* FileCheck.swift */; };
+		82F3714D1DA7041400D60203 /* FileCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82F371481DA7010800D60203 /* FileCheck.swift */; };
+		82F3714E1DA7041500D60203 /* FileCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82F371481DA7010800D60203 /* FileCheck.swift */; };
 		841408BB1B1A85A900BA2B6C /* SwiftCheck.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		844FCC99198B320500EB242A /* SwiftCheck.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 844FCC8D198B320500EB242A /* SwiftCheck.framework */; };
 		84DF76031B0BD54600C912B0 /* SwiftCheck.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */; };
@@ -197,6 +200,7 @@
 		826D81C61C953D350022266C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Tests/Info.plist; sourceTree = SOURCE_ROOT; };
 		828B7C861DEF575C0066A994 /* FormatterSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FormatterSpec.swift; path = Tests/SwiftCheckTests/FormatterSpec.swift; sourceTree = SOURCE_ROOT; };
 		82BA08CE1D6FFBD20068D32F /* Compose.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Compose.swift; path = Sources/Compose.swift; sourceTree = SOURCE_ROOT; };
+		82F371481DA7010800D60203 /* FileCheck.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FileCheck.swift; path = Tests/SwiftCheckTests/FileCheck.swift; sourceTree = SOURCE_ROOT; };
 		844FCC8D198B320500EB242A /* SwiftCheck.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCheck.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		844FCC98198B320500EB242A /* SwiftCheckTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftCheckTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		84DF75F81B0BD54600C912B0 /* SwiftCheck.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCheck.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -315,6 +319,7 @@
 		844FCC9C198B320500EB242A /* SwiftCheckTests */ = {
 			isa = PBXGroup;
 			children = (
+				82F371481DA7010800D60203 /* FileCheck.swift */,
 				825C9AC81D8EE445003313E1 /* LinuxMain.swift */,
 				825C9AD01D8EE86E003313E1 /* BooleanIdentitySpec.swift */,
 				FA3C185A1D93056D003DEB10 /* CartesianSpec.swift */,
@@ -649,6 +654,7 @@
 				825C9AF51D8EE86E003313E1 /* PathSpec.swift in Sources */,
 				825C9AE61D8EE86E003313E1 /* DiscardSpec.swift in Sources */,
 				825C9AEF1D8EE86E003313E1 /* LambdaSpec.swift in Sources */,
+				82F3714C1DA7041300D60203 /* FileCheck.swift in Sources */,
 				825C9AE91D8EE86E003313E1 /* FailureSpec.swift in Sources */,
 				825C9B011D8EE86E003313E1 /* RoseSpec.swift in Sources */,
 				825C9AE31D8EE86E003313E1 /* ComplexSpec.swift in Sources */,
@@ -695,6 +701,7 @@
 				825C9AF31D8EE86E003313E1 /* PathSpec.swift in Sources */,
 				825C9AE41D8EE86E003313E1 /* DiscardSpec.swift in Sources */,
 				825C9AED1D8EE86E003313E1 /* LambdaSpec.swift in Sources */,
+				82F3714E1DA7041500D60203 /* FileCheck.swift in Sources */,
 				825C9AE71D8EE86E003313E1 /* FailureSpec.swift in Sources */,
 				825C9AFF1D8EE86E003313E1 /* RoseSpec.swift in Sources */,
 				825C9AE11D8EE86E003313E1 /* ComplexSpec.swift in Sources */,
@@ -741,6 +748,7 @@
 				825C9AF41D8EE86E003313E1 /* PathSpec.swift in Sources */,
 				825C9AE51D8EE86E003313E1 /* DiscardSpec.swift in Sources */,
 				825C9AEE1D8EE86E003313E1 /* LambdaSpec.swift in Sources */,
+				82F3714D1DA7041400D60203 /* FileCheck.swift in Sources */,
 				825C9AE81D8EE86E003313E1 /* FailureSpec.swift in Sources */,
 				825C9B001D8EE86E003313E1 /* RoseSpec.swift in Sources */,
 				825C9AE21D8EE86E003313E1 /* ComplexSpec.swift in Sources */,
