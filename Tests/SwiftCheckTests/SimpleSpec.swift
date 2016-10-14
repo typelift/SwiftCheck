@@ -198,19 +198,10 @@ class SimpleSpec : XCTestCase {
 			return a != b
 		}
 	}
-	
-	func testComposeWithMutableType() {
-		property("composition allows setting values on mutable types")
-		<- (forAll { (a: ArbitraryMutableFoo, b: ArbitraryMutableFoo) in
-			return a != b
-		// !!!: for some reason this always gets a size of 0, so using mapSize as a hack to increase size
-		}.mapSize { $0 + 100 })
-	}
 
 	#if !(os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
 	static var allTests = testCase([
 		("testAll", testAll),
-		("testComposeWithMutableType", testComposeWithMutableType),
 	])
 	#endif
 }

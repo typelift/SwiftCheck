@@ -210,25 +210,29 @@ extension Gen {
 	///
 	/// Because the Generator will spin until it reaches a non-failing case,
 	/// executing a condition that fails more often than it succeeds may result
-	/// in a space leak.  At that point, it is better to use `suchThatOptional`
-	/// or `.invert` the test case.
+	/// in a blocked thread.  At that point, it is better to use 
+	/// `suchThatOptional` or `.invert` the test case.
 	public func suchThat(_ p : @escaping (A) -> Bool) -> Gen<A> {
-		return self.suchThatOptional(p).flatMap { mx in
-			switch mx {
-			case .some(let x):
-				return Gen.pure(x)
-			case .none:
-				return Gen.sized { n in
-					return self.suchThat(p).resize((n + 1))
-				}
+		return Gen<A>(unGen: { r, n in
+			let valGen = self.suchThatOptional(p)
+
+			var size = n
+			var r1 = r
+			var scrutinee : A? = valGen.unGen(r, size)
+			while scrutinee == nil {
+				let (rl, rr) = r1.split
+				size = size + 1
+				scrutinee = valGen.unGen(rr, size)
+				r1 = rl
 			}
-		}
+			return scrutinee!
+		})
 	}
 
 	/// Modifies a Generator such that it attempts to generate values that
 	/// satisfy a predicate.  All attempts are encoded in the form of an
-	/// `Optional` where values satisfying the predicate are wrapped in `.Some`
-	/// and failing values are `.None`.
+	/// `Optional` where values satisfying the predicate are wrapped in `.some`
+	/// and failing values are `.none`.
 	public func suchThatOptional(_ pred : @escaping (A) -> Bool) -> Gen<Optional<A>> {
 		return Gen<Optional<A>>(unGen: { r, n in
 			// Attempts a bounded search over the space of generated values of
@@ -331,11 +335,13 @@ extension Gen /*: Monad*/ {
 /// in the order they were given to the function exactly once.  Thus all arrays
 /// generated are of the same rank as the array that was given.
 public func sequence<A>(_ ms : [Gen<A>]) -> Gen<[A]> {
-	return ms.reduce(Gen<[A]>.pure([]), { n, m in
-		return m.flatMap { x in
-			return n.flatMap { xs in
-				return Gen<[A]>.pure(xs + [x])
-			}
+	return Gen<[A]>(unGen: { r, n in
+		var r1 = r
+		return ms.map { m in
+			let (rl, rr) = r1.split
+			let v = m.unGen(rl, n)
+			r1 = rr
+			return v
 		}
 	})
 }
