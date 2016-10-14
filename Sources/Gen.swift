@@ -229,10 +229,24 @@ extension Gen {
 	/// satisfy a predicate.  All attempts are encoded in the form of an
 	/// `Optional` where values satisfying the predicate are wrapped in `.Some`
 	/// and failing values are `.None`.
-	public func suchThatOptional(_ p : @escaping (A) -> Bool) -> Gen<Optional<A>> {
-		return Gen<Optional<A>>.sized { n in
-			return attemptBoundedTry(self, 0, max(n, 1), p)
-		}
+	public func suchThatOptional(_ pred : @escaping (A) -> Bool) -> Gen<Optional<A>> {
+		return Gen<Optional<A>>(unGen: { r, n in
+			// Attempts a bounded search over the space of generated values of
+			// a size determined by a monotonically decreasing linear function.
+			var bound = max(n, 1)
+			var k = 0
+			var scrutinee : A = self.unGen(r, 2 * k + bound)
+			while !pred(scrutinee) {
+				if bound == 0 {
+					return .none
+				}
+
+				k = k + 1
+				bound = bound - 1
+				scrutinee = self.unGen(r, 2 * k + bound)
+			}
+			return .some(scrutinee)
+		})
 	}
 
 	/// Modifies a Generator such that it produces arrays with a length
@@ -369,18 +383,6 @@ private func vary<S : Integer>(_ k : S, _ rng : StdGen) -> StdGen {
 	let s = rng.split
 	let gen = ((k % 2) == 0) ? s.0 : s.1
 	return (k == (k / 2)) ? gen : vary(k / 2, rng)
-}
-
-private func attemptBoundedTry<A>(_ gen : Gen<A>, _ k : Int, _ bound : Int, _ pred : @escaping (A) -> Bool) -> Gen<Optional<A>> {
-	if bound == 0 {
-		return Gen.pure(.none)
-	}
-	return gen.resize(2 * k + bound).flatMap { x in
-		if pred(x) {
-			return Gen.pure(.some(x))
-		}
-		return attemptBoundedTry(gen, (k + 1), bound - 1, pred)
-	}
 }
 
 private func size<S : Integer>(_ k : S, _ m : Int) -> Int {
