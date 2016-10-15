@@ -210,29 +210,47 @@ extension Gen {
 	///
 	/// Because the Generator will spin until it reaches a non-failing case,
 	/// executing a condition that fails more often than it succeeds may result
-	/// in a space leak.  At that point, it is better to use `suchThatOptional`
-	/// or `.invert` the test case.
+	/// in a blocked thread.  At that point, it is better to use 
+	/// `suchThatOptional` or `.invert` the test case.
 	public func suchThat(_ p : @escaping (A) -> Bool) -> Gen<A> {
-		return self.suchThatOptional(p).flatMap { mx in
-			switch mx {
-			case .some(let x):
-				return Gen.pure(x)
-			case .none:
-				return Gen.sized { n in
-					return self.suchThat(p).resize((n + 1))
-				}
+		return Gen<A>(unGen: { r, n in
+			let valGen = self.suchThatOptional(p)
+
+			var size = n
+			var r1 = r
+			var scrutinee : A? = valGen.unGen(r, size)
+			while scrutinee == nil {
+				let (rl, rr) = r1.split
+				size = size + 1
+				scrutinee = valGen.unGen(rr, size)
+				r1 = rl
 			}
-		}
+			return scrutinee!
+		})
 	}
 
 	/// Modifies a Generator such that it attempts to generate values that
 	/// satisfy a predicate.  All attempts are encoded in the form of an
-	/// `Optional` where values satisfying the predicate are wrapped in `.Some`
-	/// and failing values are `.None`.
-	public func suchThatOptional(_ p : @escaping (A) -> Bool) -> Gen<Optional<A>> {
-		return Gen<Optional<A>>.sized { n in
-			return attemptBoundedTry(self, 0, max(n, 1), p)
-		}
+	/// `Optional` where values satisfying the predicate are wrapped in `.some`
+	/// and failing values are `.none`.
+	public func suchThatOptional(_ pred : @escaping (A) -> Bool) -> Gen<Optional<A>> {
+		return Gen<Optional<A>>(unGen: { r, n in
+			// Attempts a bounded search over the space of generated values of
+			// a size determined by a monotonically decreasing linear function.
+			var bound = max(n, 1)
+			var k = 0
+			var scrutinee : A = self.unGen(r, 2 * k + bound)
+			while !pred(scrutinee) {
+				if bound == 0 {
+					return .none
+				}
+
+				k = k + 1
+				bound = bound - 1
+				scrutinee = self.unGen(r, 2 * k + bound)
+			}
+			return .some(scrutinee)
+		})
 	}
 
 	/// Modifies a Generator such that it produces arrays with a length
@@ -317,11 +335,13 @@ extension Gen /*: Monad*/ {
 /// in the order they were given to the function exactly once.  Thus all arrays
 /// generated are of the same rank as the array that was given.
 public func sequence<A>(_ ms : [Gen<A>]) -> Gen<[A]> {
-	return ms.reduce(Gen<[A]>.pure([]), { n, m in
-		return m.flatMap { x in
-			return n.flatMap { xs in
-				return Gen<[A]>.pure(xs + [x])
-			}
+	return Gen<[A]>(unGen: { r, n in
+		var r1 = r
+		return ms.map { m in
+			let (rl, rr) = r1.split
+			let v = m.unGen(rl, n)
+			r1 = rr
+			return v
 		}
 	})
 }
@@ -369,18 +389,6 @@ private func vary<S : Integer>(_ k : S, _ rng : StdGen) -> StdGen {
 	let s = rng.split
 	let gen = ((k % 2) == 0) ? s.0 : s.1
 	return (k == (k / 2)) ? gen : vary(k / 2, rng)
-}
-
-private func attemptBoundedTry<A>(_ gen : Gen<A>, _ k : Int, _ bound : Int, _ pred : @escaping (A) -> Bool) -> Gen<Optional<A>> {
-	if bound == 0 {
-		return Gen.pure(.none)
-	}
-	return gen.resize(2 * k + bound).flatMap { x in
-		if pred(x) {
-			return Gen.pure(.some(x))
-		}
-		return attemptBoundedTry(gen, (k + 1), bound - 1, pred)
-	}
 }
 
 private func size<S : Integer>(_ k : S, _ m : Int) -> Int {

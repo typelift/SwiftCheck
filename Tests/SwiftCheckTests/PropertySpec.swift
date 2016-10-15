@@ -102,7 +102,7 @@ class PropertySpec : XCTestCase {
 
 		property("Cover reports failures properly") <- forAll { (s : Set<Int>) in
 			return (s.count == [Int](s).count).cover(s.count >= 15, percentage: 70, label: "large")
-			}.expectFailure
+		}.expectFailure
 
 		property("Prop ==> true") <- forAllNoShrink(Bool.arbitrary, Gen.pure(true)) { (p1, p2) in
 			let p = p2 ==> p1
