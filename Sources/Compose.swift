@@ -50,8 +50,8 @@ extension Gen {
 ///
 /// - seealso: Gen.compose
 public final class GenComposer {
-	private var stdgen: StdGen
-	private var size: Int
+	private var stdgen : StdGen
+	private var size : Int
 	
 	fileprivate init(_ stdgen : StdGen, _ size : Int) {
 		self.stdgen = stdgen

@@ -13,7 +13,7 @@ struct Name : Arbitrary, Equatable, Hashable, CustomStringConvertible {
 	let unName : String
 
 	static var arbitrary : Gen<Name> {
-		let gc : Gen<Character> = Gen<Character>.fromElementsIn("a"..."z")
+		let gc : Gen<Character> = Gen<Character>.fromElements(in: "a"..."z")
 		return gc.map { Name(unName: String($0)) }
 	}
 

@@ -66,7 +66,7 @@ public func disjoin(_ ps : Testable...) -> Property {
 ///   any of the given `Testable` expressions.
 public func conjamb(_ ps : () -> Testable...) -> Property {
 	let ls = ps.lazy.map { $0().property.unProperty }
-	return Property(Gen.oneOf(ls)).again
+	return Property(Gen.one(of: ls)).again
 }
 
 extension Testable {
@@ -440,9 +440,9 @@ public enum Quantification {
 	/// Existential Quanfication ("there exists").
 	case existential
 	/// Uniqueness Quantification ("there exists one and only one")
-	//    case Uniqueness
+//    case Uniqueness
 	/// Counting Quantification ("there exist exactly k")
-	//    case Counting
+//    case Counting
 }
 
 /// A `TestResult` represents the result of performing a single test.

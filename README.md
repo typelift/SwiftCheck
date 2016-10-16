@@ -276,13 +276,13 @@ with custom generators as simple as possible:
 ```swift
 let onlyEven = Int.arbitrary.suchThat { $0 % 2 == 0 }
 
-let vowels = Gen.fromElementsOf([ "A", "E", "I", "O", "U" ])
+let vowels = Gen.fromElements(of: [ "A", "E", "I", "O", "U" ])
 
 let randomHexValue = Gen<UInt>.choose((0, 15))
 
-let uppers : Gen<Character>= Gen<Character>.fromElementsIn("A"..."Z")
-let lowers : Gen<Character> = Gen<Character>.fromElementsIn("a"..."z")
-let numbers : Gen<Character> = Gen<Character>.fromElementsIn("0"..."9")
+let uppers : Gen<Character>= Gen<Character>.fromElements(in: "A"..."Z")
+let lowers : Gen<Character> = Gen<Character>.fromElements(in: "a"..."z")
+let numbers : Gen<Character> = Gen<Character>.fromElements(in: "0"..."9")
  
 /// This generator will generate `.none` 1/4 of the time and an arbitrary
 /// `.some` 3/4 of the time

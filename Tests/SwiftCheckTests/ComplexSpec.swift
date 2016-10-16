@@ -9,25 +9,25 @@
 import SwiftCheck
 import XCTest
 
-let upper : Gen<Character>= Gen<Character>.fromElementsIn("A"..."Z")
-let lower : Gen<Character> = Gen<Character>.fromElementsIn("a"..."z")
-let numeric : Gen<Character> = Gen<Character>.fromElementsIn("0"..."9")
-let special : Gen<Character> = Gen<Character>.fromElementsOf(["!", "#", "$", "%", "&", "'", "*", "+", "-", "/", "=", "?", "^", "_", "`", "{", "|", "}", "~", "."])
-let hexDigits = Gen<Character>.oneOf([
-	Gen<Character>.fromElementsIn("A"..."F"),
+let upper : Gen<Character>= Gen<Character>.fromElements(in: "A"..."Z")
+let lower : Gen<Character> = Gen<Character>.fromElements(in: "a"..."z")
+let numeric : Gen<Character> = Gen<Character>.fromElements(in: "0"..."9")
+let special : Gen<Character> = Gen<Character>.fromElements(of: ["!", "#", "$", "%", "&", "'", "*", "+", "-", "/", "=", "?", "^", "_", "`", "{", "|", "}", "~", "."])
+let hexDigits = Gen<Character>.one(of: [
+	Gen<Character>.fromElements(in: "A"..."F"),
 	numeric,
 ])
 
 class ComplexSpec : XCTestCase {
 	func testEmailAddressProperties() {
-		let localEmail = Gen<Character>.oneOf([
+		let localEmail = Gen<Character>.one(of: [
 			upper,
 			lower,
 			numeric,
 			special,
 		]).proliferateNonEmpty.suchThat({ $0[($0.endIndex - 1)] != "." }).map(String.init(stringInterpolationSegment:))
 
-		let hostname = Gen<Character>.oneOf([
+		let hostname = Gen<Character>.one(of: [
 			lower,
 			numeric,
 			Gen.pure("-"),
@@ -46,12 +46,12 @@ class ComplexSpec : XCTestCase {
 
 	func testIPv6Properties() {
 
-		let gen1: Gen<String> = hexDigits.proliferateSized(1).map{ String.init($0) + ":" }
-		let gen2: Gen<String> = hexDigits.proliferateSized(2).map{ String.init($0) + ":" }
-		let gen3: Gen<String> = hexDigits.proliferateSized(3).map{ String.init($0) + ":" }
-		let gen4: Gen<String> = hexDigits.proliferateSized(4).map{ String.init($0) + ":" }
+		let gen1 : Gen<String> = hexDigits.proliferate(withSize: 1).map{ String.init($0) + ":" }
+		let gen2 : Gen<String> = hexDigits.proliferate(withSize: 2).map{ String.init($0) + ":" }
+		let gen3 : Gen<String> = hexDigits.proliferate(withSize: 3).map{ String.init($0) + ":" }
+		let gen4 : Gen<String> = hexDigits.proliferate(withSize: 4).map{ String.init($0) + ":" }
 
-		let ipHexDigits = Gen<String>.oneOf([
+		let ipHexDigits = Gen<String>.one(of: [
 			gen1,
 			gen2,
 			gen3,
