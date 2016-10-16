@@ -265,9 +265,8 @@ extension Double : Arbitrary {
 			let numerator = Gen<Int64>.choose((Int64(-n) * precision, Int64(n) * precision))
 			let denominator = Gen<Int64>.choose((1, precision))
 
-			return numerator.flatMap { a in 
-				return denominator.flatMap { b in Gen<Double>.pure(Double(a) / Double(b)) 
-				} 
+			return Gen<(Int64, Int64)>.zip(numerator, denominator).map { a, b in
+				return Double(a) / Double(b)
 			}
 		}
 	}
@@ -300,7 +299,7 @@ extension UnicodeScalar : Arbitrary {
 extension String : Arbitrary {
 	/// Returns a generator of `String` values.
 	public static var arbitrary : Gen<String> {
-		let chars = Gen.sized(Character.arbitrary.proliferateSized)
+		let chars = Gen.sized(Character.arbitrary.proliferate(withSize:))
 		return chars.flatMap { Gen<String>.pure(String($0)) }
 	}
 
@@ -333,7 +332,7 @@ extension AnyIndex : Arbitrary {
 extension Mirror : Arbitrary {
 	/// Returns a generator of `Mirror` values.
 	public static var arbitrary : Gen<Mirror> {
-		let genAny : Gen<Any> = Gen<Any>.oneOf([
+		let genAny : Gen<Any> = Gen<Any>.one(of: [
 			Bool.arbitrary.map { x in x as Any },
 			Int.arbitrary.map { x in x as Any },
 			UInt.arbitrary.map { x in x as Any },
@@ -342,13 +341,13 @@ extension Mirror : Arbitrary {
 			Character.arbitrary.map { x in x as Any },
 		])
 
-		let genAnyWitnessed : Gen<Any> = Gen<Any>.oneOf([
+		let genAnyWitnessed : Gen<Any> = Gen<Any>.one(of: [
 			Optional<Int>.arbitrary.map { x in x as Any },
 			Array<Int>.arbitrary.map { x in x as Any },
 			Set<Int>.arbitrary.map { x in x as Any },
 		])
 
-		return Gen<Any>.oneOf([
+		return Gen<Any>.one(of: [
 			genAny,
 			genAnyWitnessed,
 		]).map(Mirror.init)

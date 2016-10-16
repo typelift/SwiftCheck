@@ -69,8 +69,7 @@ public struct ArbitraryLargeFoo {
 extension ArbitraryLargeFoo: Equatable {}
 
 public func ==(i: ArbitraryLargeFoo, j: ArbitraryLargeFoo) -> Bool {
-	return
-		i.a == j.a
+	return i.a == j.a
 		&& i.b == j.b
 		&& i.c == j.c
 		&& i.d == j.d
@@ -181,7 +180,7 @@ class SimpleSpec : XCTestCase {
 		let greaterThan_lessThanEqualTo: ((UInt8, UInt8) -> Bool, (UInt8, UInt8) -> Bool) = ((>), (<=))
 		let lessThan_greaterThanEqualTo: ((UInt8, UInt8) -> Bool, (UInt8, UInt8) -> Bool) = ((<), (>=))
 		let equalTo_notEqualTo: ((UInt8, UInt8) -> Bool, (UInt8, UInt8) -> Bool) = ((==), (!=))
-		let inverses = Gen<((UInt8, UInt8) -> Bool, (UInt8, UInt8) -> Bool)>.fromElementsOf([
+		let inverses = Gen<((UInt8, UInt8) -> Bool, (UInt8, UInt8) -> Bool)>.fromElements(of: [
 			greaterThan_lessThanEqualTo,
 			lessThan_greaterThanEqualTo,
 			equalTo_notEqualTo,

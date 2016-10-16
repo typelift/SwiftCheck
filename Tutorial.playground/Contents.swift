@@ -71,7 +71,7 @@ onlyFive.generate
 
 // `Gen.fromElementsIn` constructs a generator that pulls values from inside the  bounds of the 
 // given Range.  Because generation is random, some values may be repeated.
-let fromOnetoFive = Gen<Int>.fromElementsIn(1...5)
+let fromOnetoFive = Gen<Int>.fromElements(in: 1...5)
 
 fromOnetoFive.generate
 fromOnetoFive.generate
@@ -79,13 +79,13 @@ fromOnetoFive.generate
 fromOnetoFive.generate
 fromOnetoFive.generate
 
-let lowerCaseLetters : Gen<Character> = Gen<Character>.fromElementsIn("a"..."z")
+let lowerCaseLetters : Gen<Character> = Gen<Character>.fromElements(in: "a"..."z")
 
 lowerCaseLetters.generate
 lowerCaseLetters.generate
 lowerCaseLetters.generate
 
-let upperCaseLetters : Gen<Character> = Gen<Character>.fromElementsIn("A"..."Z")
+let upperCaseLetters : Gen<Character> = Gen<Character>.fromElements(in: "A"..."Z")
 
 upperCaseLetters.generate
 upperCaseLetters.generate
@@ -94,7 +94,7 @@ upperCaseLetters.generate
 // `Gen.fromElementsOf` works like `Gen.fromElementsIn` but over an Array, not just a Range.
 //
 // mnemonic: Use `fromElementsIn` with an INdex.
-let specialCharacters = Gen<Character>.fromElementsOf([ "!", "@", "#", "$", "%", "^", "&", "*", "(", ")" ])
+let specialCharacters = Gen<Character>.fromElements(of: [ "!", "@", "#", "$", "%", "^", "&", "*", "(", ")" ])
 
 specialCharacters.generate
 specialCharacters.generate
@@ -105,7 +105,7 @@ specialCharacters.generate
 //: amazing ways.
 
 // `Gen.oneOf` randomly picks one of the generators from the given list and draws element from it.
-let uppersAndLowers = Gen<Character>.oneOf([
+let uppersAndLowers = Gen<Character>.one(of: [
 	lowerCaseLetters,
 	upperCaseLetters,
 ])
@@ -206,12 +206,12 @@ generatorBoundedSizeArrays.generate
 //: numbers, and certain kinds of special characters.  We already have generators for upper and
 //: lower cased letters, so all we need are special characters and a more complete number generator:
 
-let numeric : Gen<Character> = Gen<Character>.fromElementsIn("0"..."9")
-let special : Gen<Character> = Gen<Character>.fromElementsOf(["!", "#", "$", "%", "&", "'", "*", "+", "-", "/", "=", "?", "^", "_", "`", "{", "|", "}", "~", "."])
+let numeric : Gen<Character> = Gen<Character>.fromElements(in: "0"..."9")
+let special : Gen<Character> = Gen<Character>.fromElements(of: ["!", "#", "$", "%", "&", "'", "*", "+", "-", "/", "=", "?", "^", "_", "`", "{", "|", "}", "~", "."])
 
 //: Now for the actual generator
 
-let allowedLocalCharacters : Gen<Character> = Gen<Character>.oneOf([
+let allowedLocalCharacters : Gen<Character> = Gen<Character>.one(of: [
 	upperCaseLetters,
 	lowerCaseLetters,
 	numeric,
@@ -230,7 +230,7 @@ let localEmail = allowedLocalCharacters
 //: The RFC says that the host name can only consist of lowercase letters, numbers, and dashes.  We'll skip some
 //: steps here and combine them all into one big generator.
 
-let hostname = Gen<Character>.oneOf([
+let hostname = Gen<Character>.one(of: [
 	lowerCaseLetters,
 	numeric,
 	Gen.pure("-"),
@@ -505,7 +505,7 @@ func isPrime(_ n : Int) -> Bool {
 reportProperty("All Prime") <- forAll { (n : Positive<Int>) in
 	let primes = sieve(n: n.getPositive)
 	return primes.count > 1 ==> {
-		let primeNumberGen = Gen<Int>.fromElementsOf(primes)
+		let primeNumberGen = Gen<Int>.fromElements(of: primes)
 		return forAll(primeNumberGen) { (p : Int) in
 			return isPrime(p)
 		}
@@ -587,7 +587,7 @@ func sieveProperly(_ n : Int) -> [Int] {
 property("All Prime") <- forAll { (n : Positive<Int>) in
 	let primes = sieveProperly(n.getPositive)
 	return primes.count > 1 ==> {
-		let primeNumberGen = Gen<Int>.fromElementsOf(primes)
+		let primeNumberGen = Gen<Int>.fromElements(of: primes)
 		return forAll(primeNumberGen) { (p : Int) in
 			return isPrime(p)
 		}

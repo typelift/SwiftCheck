@@ -14,8 +14,8 @@ struct Path<A : Arbitrary> : Arbitrary {
 
 	private static func pathFrom(_ x : A) -> Gen<[A]> {
 		return Gen.sized { n in
-			return Gen<[A]>.oneOf(
-				[Gen.pure([])] + A.shrink(x).map { pathFrom($0).resize(n - 1) }
+			return Gen<[A]>.one(
+				of: [Gen.pure([])] + A.shrink(x).map { pathFrom($0).resize(n - 1) }
 			).map { [x] + $0 }
 		}
 	}

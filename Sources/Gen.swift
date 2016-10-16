@@ -44,10 +44,10 @@ public struct Gen<A> {
 	/// collection and produces only that value.
 	///
 	/// The input collection is required to be non-empty.
-	public static func fromElementsOf<S : Collection>(_ xs : S) -> Gen<S._Element>
+	public static func fromElements<S : Collection>(of xs : S) -> Gen<S._Element>
 		where S.Index : Comparable & RandomType
 	{
-		return Gen.fromElementsIn(xs.startIndex...xs.index(xs.endIndex, offsetBy: -1)).map { i in
+		return Gen.fromElements(in: xs.startIndex...xs.index(xs.endIndex, offsetBy: -1)).map { i in
 			return xs[i]
 		}
 	}
@@ -56,7 +56,7 @@ public struct Gen<A> {
 	/// interval and produces only that value.
 	///
 	/// The input interval is required to be non-empty.
-	public static func fromElementsIn<R : RandomType>(_ xs : ClosedRange<R>) -> Gen<R> {
+	public static func fromElements<R : RandomType>(in xs : ClosedRange<R>) -> Gen<R> {
 		assert(!xs.isEmpty, "Gen.fromElementsOf used with empty interval")
 
 		return choose((xs.lowerBound, xs.upperBound))
@@ -67,7 +67,7 @@ public struct Gen<A> {
 	/// increases with the receiver's size parameter.
 	///
 	/// The input array is required to be non-empty.
-	public static func fromInitialSegmentsOf<S>(_ xs : [S]) -> Gen<[S]> {
+	public static func fromInitialSegments<S>(of xs : [S]) -> Gen<[S]> {
 		assert(!xs.isEmpty, "Gen.fromInitialSegmentsOf used with empty list")
 
 		return Gen<[S]>.sized { n in
@@ -77,8 +77,8 @@ public struct Gen<A> {
 	}
 
 	/// Constructs a Generator that produces permutations of a given array.
-	public static func fromShufflingElementsOf<S>(_ xs : [S]) -> Gen<[S]> {
-		return choose((Int.min + 1, Int.max)).proliferateSized(xs.count).flatMap { ns in
+	public static func fromShufflingElements<S>(of xs : [S]) -> Gen<[S]> {
+		return choose((Int.min + 1, Int.max)).proliferate(withSize: xs.count).flatMap { ns in
 			return Gen<[S]>.pure(Swift.zip(ns, xs).sorted(by: { l, r in l.0 < r.0 }).map { $0.1 })
 		}
 	}
@@ -119,7 +119,7 @@ public struct Gen<A> {
 	///
 	/// If control over the distribution of generators is needed, see
 	/// `Gen.frequency` or `Gen.weighted`.
-	public static func oneOf<S : BidirectionalCollection>(_ gs : S) -> Gen<A>
+	public static func one<S : BidirectionalCollection>(of gs : S) -> Gen<A>
 		where S.Iterator.Element == Gen<A>, S.Index : RandomType & Comparable
 	{
 		assert(gs.count != 0, "oneOf used with empty list")
@@ -257,7 +257,7 @@ extension Gen {
 	/// determined by the receiver's size parameter.
 	public var proliferate : Gen<[A]> {
 		return Gen<[A]>.sized { n in
-			return Gen.choose((0, n)).flatMap(self.proliferateSized)
+			return Gen.choose((0, n)).flatMap(self.proliferate(withSize:))
 		}
 	}
 
@@ -265,13 +265,51 @@ extension Gen {
 	/// length determined by the receiver's size parameter.
 	public var proliferateNonEmpty : Gen<[A]> {
 		return Gen<[A]>.sized { n in
-			return Gen.choose((1, max(1, n))).flatMap(self.proliferateSized)
+			return Gen.choose((1, max(1, n))).flatMap(self.proliferate(withSize:))
 		}
 	}
 
 	/// Modifies a Generator such that it only produces arrays of a given length.
-	public func proliferateSized(_ k : Int) -> Gen<[A]> {
+	public func proliferate(withSize k : Int) -> Gen<[A]> {
 		return sequence(Array<Gen<A>>(repeating: self, count: k))
+	}
+}
+
+extension Gen {
+	@available(*, unavailable, renamed: "fromElements(of:)")
+	public static func fromElementsOf<S : Collection>(_ xs : S) -> Gen<S._Element>
+		where S.Index : Comparable & RandomType
+	{
+		return Gen.fromElements(of: xs)
+	}
+
+
+	@available(*, unavailable, renamed: "fromElements(in:)")
+	public static func fromElementsIn<R : RandomType>(_ xs : ClosedRange<R>) -> Gen<R> {
+		return Gen.fromElements(in: xs)
+	}
+
+	@available(*, unavailable, renamed: "fromInitialSegments(of:)")
+	public static func fromInitialSegmentsOf<S>(_ xs : [S]) -> Gen<[S]> {
+		return Gen.fromInitialSegments(of: xs)
+	}
+
+	@available(*, unavailable, renamed: "fromShufflingElements(of:)")
+	public static func fromShufflingElementsOf<S>(_ xs : [S]) -> Gen<[S]> {
+		return Gen.fromShufflingElements(of: xs)
+	}
+
+
+	@available(*, unavailable, renamed: "one(of:)")
+	public static func oneOf<S : BidirectionalCollection>(_ gs : S) -> Gen<A>
+		where S.Iterator.Element == Gen<A>, S.Index : RandomType & Comparable
+	{
+		return Gen.one(of: gs)
+	}
+
+	@available(*, unavailable, renamed: "proliferate(withSize:)")
+	public func proliferateSized(_ k : Int) -> Gen<[A]> {
+		return self.proliferate(withSize: k)
 	}
 }
 

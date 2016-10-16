@@ -71,30 +71,30 @@ class GenSpec : XCTestCase {
 				return Discard()
 			}
 			let l = Set(xss)
-			return forAll(Gen<[Int]>.fromElementsOf(xss)) { l.contains($0) }
+			return forAll(Gen<[Int]>.fromElements(of: xss)) { l.contains($0) }
 		}
 
 		property("Gen.fromElementsOf only generates the elements of the given array") <- forAll { (n1 : Int, n2 : Int) in
-			return forAll(Gen<[Int]>.fromElementsOf([n1, n2])) { $0 == n1 || $0 == n2 }
+			return forAll(Gen<[Int]>.fromElements(of: [n1, n2])) { $0 == n1 || $0 == n2 }
 		}
 
 		property("Gen.fromElementsIn only generates the elements of the given interval") <- forAll { (n1 : Int, n2 : Int) in
 			return (n1 < n2) ==> {
 				let interval = n1...n2
-				return forAll(Gen<[Int]>.fromElementsIn(n1...n2)) { interval.contains($0) }
+				return forAll(Gen<[Int]>.fromElements(in: n1...n2)) { interval.contains($0) }
 			}
 		}
 
 		property("Gen.fromInitialSegmentsOf produces only prefixes of the generated array") <- forAll { (xs : Array<Int>) in
 			return !xs.isEmpty ==> {
-				return forAllNoShrink(Gen<[Int]>.fromInitialSegmentsOf(xs)) { (ys : Array<Int>) in
+				return forAllNoShrink(Gen<[Int]>.fromInitialSegments(of: xs)) { (ys : Array<Int>) in
 					return xs.starts(with: ys)
 				}
 			}
 		}
 
 		property("Gen.fromShufflingElementsOf produces only permutations of the generated array") <- forAll { (xs : Array<Int>) in
-			return forAllNoShrink(Gen<[Int]>.fromShufflingElementsOf(xs)) { (ys : Array<Int>) in
+			return forAllNoShrink(Gen<[Int]>.fromShufflingElements(of: xs)) { (ys : Array<Int>) in
 				return (xs.count == ys.count) ^&&^ (xs.sorted() == ys.sorted())
 			}
 		}
@@ -104,21 +104,21 @@ class GenSpec : XCTestCase {
 				return Discard()
 			}
 			let l = Set(xss.getArray)
-			return forAll(Gen.oneOf(xss.getArray.map(Gen.pure))) { l.contains($0) }
+			return forAll(Gen.one(of: xss.getArray.map(Gen.pure))) { l.contains($0) }
 		}
 
 		property("Gen.oneOf multiple generators picks only given generators") <- forAll { (n1 : Int, n2 : Int) in
 			let g1 = Gen.pure(n1)
 			let g2 = Gen.pure(n2)
-			return forAll(Gen.oneOf([g1, g2])) { $0 == n1 || $0 == n2 }
+			return forAll(Gen.one(of: [g1, g2])) { $0 == n1 || $0 == n2 }
 		}
 
 		property("Gen.proliferateSized n generates arrays of length n") <- forAll(Gen<Int>.choose((0, 100))) { n in
-			let g = Int.arbitrary.proliferateSized(n).map(ArrayOf.init)
+			let g = Int.arbitrary.proliferate(withSize: n).map(ArrayOf.init)
 			return forAll(g) { $0.getArray.count == n }
 		}
 
-		property("Gen.proliferateSized 0 generates only empty arrays") <- forAll(Int.arbitrary.proliferateSized(0).map(ArrayOf.init)) {
+		property("Gen.proliferateSized 0 generates only empty arrays") <- forAll(Int.arbitrary.proliferate(withSize: 0).map(ArrayOf.init)) {
 			return $0.getArray.isEmpty
 		}
 
@@ -261,8 +261,8 @@ class GenSpec : XCTestCase {
 
 	func testLaws() {
 		/// Turns out Gen is a really sketchy monad because of the underlying randomness.
-		let lawfulGen = Gen<Gen<Int>>.fromElementsOf((0...500).map(Gen.pure))
-		let lawfulArrowGen = Gen<Gen<ArrowOf<Int, Int>>>.fromElementsOf(ArrowOf<Int, Int>.arbitrary.proliferateSized(10).generate.map(Gen.pure))
+		let lawfulGen = Gen<Gen<Int>>.fromElements(of: (0...500).map(Gen.pure))
+		let lawfulArrowGen = Gen<Gen<ArrowOf<Int, Int>>>.fromElements(of: ArrowOf<Int, Int>.arbitrary.proliferate(withSize: 10).generate.map(Gen.pure))
 
 		property("Gen obeys the Functor identity law") <- forAllNoShrink(lawfulGen) { (x : Gen<Int>) in
 			return (x.map(id)) == id(x)
@@ -331,7 +331,7 @@ internal func • <A, B, C>(f : @escaping (B) -> C, g : @escaping (A) -> B) -> (
 }
 
 private func ==(l : Gen<Int>, r : Gen<Int>) -> Bool {
-	return l.proliferateSized(10).generate == r.proliferateSized(10).generate
+	return l.proliferate(withSize: 10).generate == r.proliferate(withSize: 10).generate
 }
 
 /// `Gen` product is associative and has a natural isomorphism.
@@ -343,8 +343,8 @@ private func ~= (lhs : Gen<(Int, (Int, Int))>, rhs : Gen<((Int, Int), Int)>) -> 
 	let normalizedR = rhs.map { ($0.0, $0.1, $1) }
 	
 	let sampleSize = 10
-	let sampleL = normalizedL.proliferateSized(sampleSize).generate
-	let sampleR = normalizedR.proliferateSized(sampleSize).generate
+	let sampleL = normalizedL.proliferate(withSize: sampleSize).generate
+	let sampleR = normalizedR.proliferate(withSize: sampleSize).generate
 	
 	for (tupleL, tupleR) in zip(sampleL, sampleR) {
 		guard tupleL == tupleR else { return false }

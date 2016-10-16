@@ -105,7 +105,7 @@ private func arbTree<A>(_ n : Int) -> Gen<RoseTreeOf<A>> {
 	}
 	return Positive<Int>.arbitrary.flatMap { m in
 		let n2 = n / (m.getPositive + 1)
-		return Gen<(A, [A])>.zip(A.arbitrary, arbTree(n2).proliferateSized(m.getPositive)).flatMap { (a, f) in
+		return Gen<(A, [A])>.zip(A.arbitrary, arbTree(n2).proliferate(withSize: m.getPositive)).flatMap { (a, f) in
 			return Gen.pure(RoseTreeOf(.mkRose({ a }, { f.map { $0.getRose } })))
 		}
 	}
