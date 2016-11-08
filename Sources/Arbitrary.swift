@@ -242,13 +242,11 @@ extension Float : Arbitrary {
 
 	/// The default shrinking function for `Float` values.
 	public static func shrink(_ x : Float) -> [Float] {
-		return unfoldr({ i in
-			if i == 0.0 {
-				return .none
-			}
-			let n = i / 2.0
-			return .some((n, n))
-		}, initial: x)
+		let tail = Int64(x).shrinkIntegral.map(Float.init(_:))
+		if (x.sign == .minus) {
+			return [abs(x)] + tail
+		}
+		return tail
 	}
 }
 
@@ -273,13 +271,11 @@ extension Double : Arbitrary {
 
 	/// The default shrinking function for `Double` values.
 	public static func shrink(_ x : Double) -> [Double] {
-		return unfoldr({ i in
-			if i == 0.0 {
-				return .none
-			}
-			let n = i / 2.0
-			return .some((n, n))
-		}, initial: x)
+		let tail = Int64(x).shrinkIntegral.map(Double.init(_:))
+		if (x.sign == .minus) {
+			return [abs(x)] + tail
+		}
+		return tail
 	}
 }
 
@@ -367,10 +363,10 @@ private func unfoldr<A, B>(_ f : (B) -> Optional<(A, B)>, initial : B) -> [A] {
 	var acc = [A]()
 	var ini = initial
 	while let next = f(ini) {
-		acc.insert(next.0, at: 0)
+		acc.append(next.0)
 		ini = next.1
 	}
-	return acc
+	return acc.reversed()
 }
 
 #if os(Linux)

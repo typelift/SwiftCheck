@@ -10,7 +10,7 @@ import SwiftCheck
 import XCTest
 
 class BooleanIdentitySpec : XCTestCase {
-	func testAll() {
+	func testAll() {    
 		property("Law of complements") <- forAll { (x : Bool) in
 			return ((x || !x) == true) && ((x && !x) == false)
 		}
