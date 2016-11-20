@@ -9,6 +9,12 @@
 import SwiftCheck
 import XCTest
 
+#if os(Linux)
+	import Glibc
+#else
+	import Darwin
+#endif
+
 class ShrinkSpec : XCTestCase {
 	func shrinkArbitrary<A : Arbitrary>(_ x : A) -> [A] {
 		let xs = A.shrink(x)
@@ -37,6 +43,12 @@ class ShrinkSpec : XCTestCase {
 				return (ls.filter({ $0 == [] || $0 == [0] }).count >= 1)
 			}
 		}
+
+		property("Shrinking Double values does not loop") <- forAll { (n : Double) in
+			let left = pow(n, 0.5)
+			let right = sqrt(n)
+			return left == right
+		}.expectFailure
 	}
 
 	#if !(os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
