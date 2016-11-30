@@ -96,6 +96,9 @@
 		826D818B1C953D070022266C /* WitnessedArbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81571C953D070022266C /* WitnessedArbitrary.swift */; };
 		826D818C1C953D070022266C /* WitnessedArbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81571C953D070022266C /* WitnessedArbitrary.swift */; };
 		826D818D1C953D070022266C /* WitnessedArbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 826D81571C953D070022266C /* WitnessedArbitrary.swift */; };
+		828B7C8A1DEF58CF0066A994 /* FormatterSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 828B7C861DEF575C0066A994 /* FormatterSpec.swift */; };
+		828B7C8B1DEF58D00066A994 /* FormatterSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 828B7C861DEF575C0066A994 /* FormatterSpec.swift */; };
+		828B7C8C1DEF58D10066A994 /* FormatterSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 828B7C861DEF575C0066A994 /* FormatterSpec.swift */; };
 		82BA08CF1D6FFBD20068D32F /* Compose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BA08CE1D6FFBD20068D32F /* Compose.swift */; };
 		82BA08D01D6FFBD20068D32F /* Compose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BA08CE1D6FFBD20068D32F /* Compose.swift */; };
 		82BA08D11D6FFBD20068D32F /* Compose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82BA08CE1D6FFBD20068D32F /* Compose.swift */; };
@@ -192,6 +195,7 @@
 		826D81561C953D070022266C /* Witness.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Witness.swift; path = Sources/Witness.swift; sourceTree = SOURCE_ROOT; };
 		826D81571C953D070022266C /* WitnessedArbitrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WitnessedArbitrary.swift; path = Sources/WitnessedArbitrary.swift; sourceTree = SOURCE_ROOT; };
 		826D81C61C953D350022266C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Tests/Info.plist; sourceTree = SOURCE_ROOT; };
+		828B7C861DEF575C0066A994 /* FormatterSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FormatterSpec.swift; path = Tests/SwiftCheckTests/FormatterSpec.swift; sourceTree = SOURCE_ROOT; };
 		82BA08CE1D6FFBD20068D32F /* Compose.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Compose.swift; path = Sources/Compose.swift; sourceTree = SOURCE_ROOT; };
 		844FCC8D198B320500EB242A /* SwiftCheck.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCheck.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		844FCC98198B320500EB242A /* SwiftCheckTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftCheckTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -317,6 +321,7 @@
 				825C9AD11D8EE86E003313E1 /* ComplexSpec.swift */,
 				825C9AD21D8EE86E003313E1 /* DiscardSpec.swift */,
 				825C9AD31D8EE86E003313E1 /* FailureSpec.swift */,
+				828B7C861DEF575C0066A994 /* FormatterSpec.swift */,
 				825C9AD41D8EE86E003313E1 /* GenSpec.swift */,
 				825C9AD51D8EE86E003313E1 /* LambdaSpec.swift */,
 				825C9AD61D8EE86E003313E1 /* ModifierSpec.swift */,
@@ -649,6 +654,7 @@
 				825C9AE31D8EE86E003313E1 /* ComplexSpec.swift in Sources */,
 				825C9AE01D8EE86E003313E1 /* BooleanIdentitySpec.swift in Sources */,
 				825C9AF21D8EE86E003313E1 /* ModifierSpec.swift in Sources */,
+				828B7C8C1DEF58D10066A994 /* FormatterSpec.swift in Sources */,
 				825C9AF81D8EE86E003313E1 /* PropertySpec.swift in Sources */,
 				825C9AFE1D8EE86E003313E1 /* ReplaySpec.swift in Sources */,
 			);
@@ -694,6 +700,7 @@
 				825C9AE11D8EE86E003313E1 /* ComplexSpec.swift in Sources */,
 				825C9ADE1D8EE86E003313E1 /* BooleanIdentitySpec.swift in Sources */,
 				825C9AF01D8EE86E003313E1 /* ModifierSpec.swift in Sources */,
+				828B7C8A1DEF58CF0066A994 /* FormatterSpec.swift in Sources */,
 				825C9AF61D8EE86E003313E1 /* PropertySpec.swift in Sources */,
 				825C9AFC1D8EE86E003313E1 /* ReplaySpec.swift in Sources */,
 			);
@@ -739,6 +746,7 @@
 				825C9AE21D8EE86E003313E1 /* ComplexSpec.swift in Sources */,
 				825C9ADF1D8EE86E003313E1 /* BooleanIdentitySpec.swift in Sources */,
 				825C9AF11D8EE86E003313E1 /* ModifierSpec.swift in Sources */,
+				828B7C8B1DEF58D00066A994 /* FormatterSpec.swift in Sources */,
 				825C9AF71D8EE86E003313E1 /* PropertySpec.swift in Sources */,
 				825C9AFD1D8EE86E003313E1 /* ReplaySpec.swift in Sources */,
 			);

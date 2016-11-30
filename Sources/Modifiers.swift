@@ -516,14 +516,15 @@ fileprivate final class ArrowOfImpl<T : Hashable & CoArbitrary, U : Arbitrary> :
 	}
 
 	convenience init(_ arr : @escaping (T) -> U) {
-		self.init(Dictionary(), { (_ : T) -> U in return undefined() })
+		var table = [T:U]()
+		self.init(table, { (_ : T) -> U in return undefined() })
 
-		self.arr = { [unowned self] x in
-			if let v = self.table[x] {
+		self.arr = { x in
+			if let v = table[x] {
 				return v
 			}
 			let y = arr(x)
-			self.table[x] = y
+			table[x] = y
 			return y
 		}
 	}
@@ -564,24 +565,25 @@ fileprivate final class IsoOfImpl<T : Hashable & CoArbitrary & Arbitrary, U : Eq
 	}
 
 	convenience init(_ embed : @escaping (T) -> U, _ project : @escaping (U) -> T) {
-		self.init(Dictionary(), { (_ : T) -> U in return undefined() }, { (_ : U) -> T in return undefined() })
+		var table = [T:U]()
+		self.init(table, { (_ : T) -> U in return undefined() }, { (_ : U) -> T in return undefined() })
 
-		self.embed = { [unowned self] t in
-			if let v = self.table[t] {
+		self.embed = { t in
+			if let v = table[t] {
 				return v
 			}
 			let y = embed(t)
-			self.table[t] = y
+			table[t] = y
 			return y
 		}
 
-		self.project = { [unowned self] u in
-			let ts = self.table.filter { $1 == u }.map { $0.0 }
-			if let k = ts.first, let _ = self.table[k] {
+		self.project = { u in
+			let ts = table.filter { $1 == u }.map { $0.0 }
+			if let k = ts.first, let _ = table[k] {
 				return k
 			}
 			let y = project(u)
-			self.table[y] = u
+			table[y] = u
 			return y
 		}
 	}
@@ -601,17 +603,19 @@ fileprivate final class IsoOfImpl<T : Hashable & CoArbitrary & Arbitrary, U : Eq
 	static func shrink(_ f : IsoOfImpl<T, U>) -> [IsoOfImpl<T, U>] {
 		return f.table.flatMap { (x, y) in
 			return Zip2Sequence(_sequence1: T.shrink(x), _sequence2: U.shrink(y)).map({ (y1 , y2) -> IsoOfImpl<T, U> in
-				return IsoOfImpl<T, U>({ (z : T) -> U in
-					if x == z {
-						return y2
-					}
-					return f.embed(z)
+				return IsoOfImpl<T, U>(
+					{ (z : T) -> U in
+						if x == z {
+							return y2
+						}
+						return f.embed(z)
 					}, { (z : U) -> T in
 						if y == z {
 							return y1
 						}
 						return f.project(z)
-				})
+					}
+				)
 			})
 		}
 	}
