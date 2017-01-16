@@ -64,14 +64,19 @@ struct ArbitraryFormatter<Value : Arbitrary & CoArbitrary & Hashable> : Arbitrar
 
 class FormatterSpec : XCTestCase {
 	func testAlwaysCorrectLength() {
-		property(
-			"Any formatted string is shorter or equal than the provided length"
-		) <- forAll { (x: Int, af: ArbitraryFormatter<Int>) in
-			let formatter = af.get
-			let string = formatter.format(x)
-			_ = formatter.unFormat(string)
-			return string.distance(from: string.startIndex, to: string.endIndex) <= String.IndexDistance(formatter.lengthLimit)
-		}
+		/// CHECK: *** Passed 100 tests
+		/// CHECK-NEXT: .
+		XCTAssert(fileCheckOutput {
+			property(
+				"Any formatted string is shorter or equal than the provided length"
+			) <- forAll { (x: Int, af: ArbitraryFormatter<Int>) in
+				let formatter = af.get
+				let string = formatter.format(x)
+				_ = formatter.unFormat(string)
+				return string.distance(from: string.startIndex, to: string.endIndex) <= String.IndexDistance(formatter.lengthLimit)
+			}
+
+		})
 	}
 
 

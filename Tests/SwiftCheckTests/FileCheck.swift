@@ -132,7 +132,7 @@ public func fileCheckOutput(of FD : FileCheckFD = .stdout, withPrefixes prefixes
 }
 
 private func overrideFDAndCollectOutput(file : FileCheckFD, of block : () -> ()) -> String {
-  fflush(stdout)
+  fflush(file.filePtr)
   let oldFd = dup(file.fileno)
 
   let template = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("output.XXXXXX")
@@ -153,12 +153,11 @@ private func overrideFDAndCollectOutput(file : FileCheckFD, of block : () -> ())
     close(newFd)
     fflush(file.filePtr)
 
-
     dup2(oldFd, file.fileno)
     close(oldFd)
 
     let url = URL(fileURLWithFileSystemRepresentation: buffer, isDirectory: false, relativeTo: nil)
-    guard let s = try? String(contentsOf: url) else {
+	guard let s = try? String(contentsOf: url, encoding: .utf8) else {
       return ""
     }
     return s
@@ -189,6 +188,13 @@ func validateCheckPrefixes(_ prefixes : [String]) -> [String]? {
 extension CChar {
 	fileprivate var isPartOfWord : Bool {
 		return isalnum(Int32(self)) != 0 || UInt8(self) == "-".utf8.first! || UInt8(self) == "_".utf8.first!
+	}
+}
+
+extension Character {
+	fileprivate var isPartOfWord : Bool {
+		let utf8Value = String(self).utf8.first!
+		return isalnum(Int32(utf8Value)) != 0 || utf8Value == "-".utf8.first! || utf8Value == "_".utf8.first!
 	}
 }
 
@@ -270,21 +276,35 @@ private func findFirstMatch(in inbuffer : UnsafeBufferPointer<CChar>, among pref
 
 	while !buffer.isEmpty {
 		let str = String(bytesNoCopy: UnsafeMutableRawPointer(mutating: buffer.baseAddress!), length: buffer.count, encoding: .utf8, freeWhenDone: false)!
-		let matches = RE.matches(in: str, options: [], range: NSRange(location: 0, length: buffer.count))
-		guard let prefix = matches.first else {
+		let match = RE.firstMatch(in: str, options: [], range: NSRange(location: 0, length: str.distance(from: str.startIndex, to: str.endIndex)))
+		guard let prefix = match else {
 			return ("", .none, lineNumber, buffer)
 		}
-		let skippedPrefix = buffer.substr(0, prefix.range.location)
-		let prefixStr = substring(in: buffer, with: prefix.range)
+		let skippedPrefix = substring(in: buffer, with: NSMakeRange(0, prefix.range.location))
+		let prefixStr = str.substring(
+			with: Range(
+				uncheckedBounds: (
+					str.index(str.startIndex, offsetBy: prefix.range.location),
+					str.index(str.startIndex, offsetBy: NSMaxRange(prefix.range))
+				)
+			)
+		)
 
-		buffer = buffer.dropFront(prefix.range.location)
-		lineNumber += skippedPrefix.filter({ c in UInt8(c) == "\n".utf8.first! }).count
+		// HACK: Conversion between the buffer and `String` causes index 
+		// mismatches when searching for strings.  We're instead going to do
+		// something terribly inefficient here: Use the regular expression to
+		// look for check prefixes, then use Foundation's Data to find their
+		// actual locations in the buffer.
+		let bd = Data(buffer: buffer)
+		let range = bd.range(of: prefixStr.data(using: .utf8)!)!
+		buffer = buffer.dropFront(range.lowerBound)
+		lineNumber += skippedPrefix.characters.filter({ c in c == "\n" }).count
 		// Check that the matched prefix isn't a suffix of some other check-like
 		// word.
 		// FIXME: This is a very ad-hoc check. it would be better handled in some
 		// other way. Among other things it seems hard to distinguish between
 		// intentional and unintentional uses of this feature.
-		if skippedPrefix.isEmpty || !skippedPrefix.last!.isPartOfWord {
+		if skippedPrefix.isEmpty || !skippedPrefix.characters.last!.isPartOfWord {
 			// Now extract the type.
 			let CheckTy = findCheckType(in: buffer, with: prefixStr)
 
@@ -639,7 +659,7 @@ class Pattern {
 		guard let r = try? NSRegularExpression(pattern: regExToMatch, options: []) else {
 			return nil
 		}
-		let matchInfo = r.matches(in: buffer, options: [], range: NSRange(location: 0, length: buffer.utf8.count))
+		let matchInfo = r.matches(in: buffer, options: [], range: NSRange(location: 0, length: buffer.distance(from: buffer.startIndex, to: buffer.endIndex)))
 
 		// Successful regex match.
 		assert(!matchInfo.isEmpty, "Didn't get any match")
@@ -776,7 +796,16 @@ class Pattern {
 				regExPattern += "("
 				curParen += 1
 
-				let (res, paren) = self.addRegExToRegEx(patternStr.substring(from: patternStr.index(patternStr.startIndex, offsetBy: 2)), curParen)
+				let pat = patternStr.substring(
+					with: Range<String.Index>(
+						uncheckedBounds: (
+							patternStr.index(patternStr.startIndex, offsetBy: 2),
+							patternStr.index(End.upperBound, offsetBy: -2)
+						)
+					)
+				)
+
+				let (res, paren) = self.addRegExToRegEx(pat, curParen)
 				curParen = paren
 				if res {
 					return true
@@ -868,7 +897,7 @@ class Pattern {
 
 				// Handle [[foo:.*]].
 				self.variableDefs[name] = curParen
-				regExPattern += "("
+				self.regExPattern += "("
 				curParen += 1
 
 				let (res, paren) = self.addRegExToRegEx(matchStr.substring(from: matchStr.index(after: ne.lowerBound)), curParen)
@@ -876,15 +905,14 @@ class Pattern {
 				if res {
 					return true
 				}
-
-				regExPattern += ")"
+				self.regExPattern += ")"
 			}
 
 			// Handle fixed string matches.
 			// Find the end, which is the start of the next regex.
 			let fixedMatchEnd = mino(patternStr.range(of: "{{")?.lowerBound, patternStr.range(of: "[[")?.lowerBound)
-			self.regExPattern += NSRegularExpression.escapedPattern(for: patternStr.substring(to: fixedMatchEnd!))
-			patternStr = patternStr.substring(from: fixedMatchEnd!)
+			self.regExPattern += NSRegularExpression.escapedPattern(for: patternStr.substring(to: fixedMatchEnd ?? patternStr.endIndex))
+			patternStr = patternStr.substring(from: fixedMatchEnd ?? patternStr.endIndex)
 		}
 
 		if options.contains(.matchFullLines) {
