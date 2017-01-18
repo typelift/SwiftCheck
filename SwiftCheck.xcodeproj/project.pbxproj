@@ -269,7 +269,10 @@
 				FAAB9E781D91B96C0097AC78 /* Templates */,
 				844FCC8E198B320500EB242A /* Products */,
 			);
+			indentWidth = 4;
 			sourceTree = "<group>";
+			tabWidth = 4;
+			usesTabs = 1;
 		};
 		844FCC8E198B320500EB242A /* Products */ = {
 			isa = PBXGroup;

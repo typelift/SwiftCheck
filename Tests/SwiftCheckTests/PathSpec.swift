@@ -68,25 +68,25 @@ class PathSpec : XCTestCase {
 		property("Int") <- forAll { (x : Path<Int>) in
 			return somePath({ x in
 				return (x < 1000000 || x > -1000000)
-				}, x)
+			}, x)
 		}
 
 		property("Int32") <- forAll { (x : Path<Int32>) in
 			return path({ x in
 				return (x >= -100 || -100 >= 0) && x <= 100
-				}, x)
+			}, x)
 		}
 
 		property("UInt") <- forAll { (x : Path<UInt>) in
 			return somePath({ x in
 				return (x < 1000000 || x > 0)
-				}, x)
+			}, x)
 		}
 
 		property("UInt32") <- forAll { (x : Path<UInt32>) in
 			return path({ x in
 				return (x >= 0 || -100 >= 0) && x <= 100
-				}, x)
+			}, x)
 		}
 
 		property("Large Int") <- forAll { (x : Path<Large<Int>>) in

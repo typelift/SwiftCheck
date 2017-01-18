@@ -175,7 +175,7 @@ class LambdaSpec : XCTestCase {
 				return a.free.contains(x)
 					==> subst_x_b_a.free == a.free.subtracting([x]).union(b.free)
 			}
-			}.expectFailure
+		}.expectFailure
 
 		property("Substitution of a free variable into a fresh expr is idempotent", arguments: tiny) <- forAll { (a : Exp, x : Name, b : Exp) in
 			return showResult(a.subst(x, b)) { subst_x_b_a in

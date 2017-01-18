@@ -93,11 +93,11 @@ public enum FileCheckFD {
 ///
 /// - parameter FD: The file descriptor to override and read from.
 /// - parameter prefixes: Specifies one or more prefixes to match. By default
-///   these patterns are prefixed with "CHECK:".
+///   these patterns are prefixed with "CHECK".
 /// - parameter file: The file to check against.  Defaults to the file that
 ///   containing the call to `fileCheckOutput`.
 /// - parameter options: Optional arguments to modify the behavior of the check.
-/// - parameter blocK: The block in which output will be emitted to the given
+/// - parameter block: The block in which output will be emitted to the given
 ///   file descriptor.
 public func fileCheckOutput(of FD : FileCheckFD = .stdout, withPrefixes prefixes : [String] = ["CHECK"], against file : String = #file, options: FileCheckOptions = [], block : () -> ()) -> Bool {
 	guard let validPrefixes = validateCheckPrefixes(prefixes) else {
@@ -132,36 +132,37 @@ public func fileCheckOutput(of FD : FileCheckFD = .stdout, withPrefixes prefixes
 }
 
 private func overrideFDAndCollectOutput(file : FileCheckFD, of block : () -> ()) -> String {
-  fflush(file.filePtr)
-  let oldFd = dup(file.fileno)
+	fflush(file.filePtr)
+	let oldFd = dup(file.fileno)
 
-  let template = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("output.XXXXXX")
-  return template.withUnsafeFileSystemRepresentation { buffer in
-    guard let buffer = buffer else {
-      return ""
-    }
+	let template = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("output.XXXXXX")
+	return template.withUnsafeFileSystemRepresentation { buffer in
+		guard let buffer = buffer else {
+			return ""
+		}
 
-   	let newFd = mkstemp(UnsafeMutablePointer(mutating: buffer))
-    guard newFd != -1 else {
-      return ""
-    }
+		let newFd = mkstemp(UnsafeMutablePointer(mutating: buffer))
+		guard newFd != -1 else {
+			return ""
+		}
 
-    dup2(newFd, file.fileno)
+		dup2(newFd, file.fileno)
 
-    block()
+		block()
 
-    close(newFd)
-    fflush(file.filePtr)
+		close(newFd)
+		fflush(file.filePtr)
 
-    dup2(oldFd, file.fileno)
-    close(oldFd)
 
-    let url = URL(fileURLWithFileSystemRepresentation: buffer, isDirectory: false, relativeTo: nil)
-	guard let s = try? String(contentsOf: url, encoding: .utf8) else {
-      return ""
-    }
-    return s
-  }
+		dup2(oldFd, file.fileno)
+		close(oldFd)
+
+		let url = URL(fileURLWithFileSystemRepresentation: buffer, isDirectory: false, relativeTo: nil)
+		guard let s = try? String(contentsOf: url, encoding: .utf8) else {
+			return ""
+		}
+		return s
+	}
 }
 
 func validateCheckPrefixes(_ prefixes : [String]) -> [String]? {
@@ -187,25 +188,29 @@ func validateCheckPrefixes(_ prefixes : [String]) -> [String]? {
 
 extension CChar {
 	fileprivate var isPartOfWord : Bool {
-		return isalnum(Int32(self)) != 0 || UInt8(self) == "-".utf8.first! || UInt8(self) == "_".utf8.first!
+		return isalnum(Int32(self)) != 0 || self == ("-" as Character).utf8CodePoint || self == ("_" as Character).utf8CodePoint
 	}
 }
 
 extension Character {
+	var utf8CodePoint : CChar {
+		return String(self).cString(using: .utf8)!.first!
+	}
+
 	fileprivate var isPartOfWord : Bool {
-		let utf8Value = String(self).utf8.first!
-		return isalnum(Int32(utf8Value)) != 0 || utf8Value == "-".utf8.first! || utf8Value == "_".utf8.first!
+		let utf8Value = self.utf8CodePoint
+		return isalnum(Int32(utf8Value)) != 0 || self == "-" || self == "_"
 	}
 }
 
 private func findCheckType(in buf : UnsafeBufferPointer<CChar>, with prefix : String) -> CheckType {
-	let nextChar = UInt8(buf[prefix.utf8.count])
+	let nextChar = buf[prefix.utf8.count]
 
 	// Verify that the : is present after the prefix.
-	if nextChar == ":".utf8.first! {
+	if nextChar == (":" as Character).utf8CodePoint {
 		return .plain
 	}
-	if nextChar != "-".utf8.first! {
+	if nextChar != ("-" as Character).utf8CodePoint {
 		return .none
 	}
 
@@ -216,7 +221,7 @@ private func findCheckType(in buf : UnsafeBufferPointer<CChar>, with prefix : St
 		length: buf.count - (prefix.utf8.count + 1),
 		encoding: .utf8,
 		freeWhenDone: false
-	)!
+  )!
 	if rest.hasPrefix("NEXT:") {
 		return .next
 	}
@@ -245,7 +250,7 @@ private func findCheckType(in buf : UnsafeBufferPointer<CChar>, with prefix : St
 		"NOT-NEXT:",
 		"SAME-NOT:",
 		"NOT-SAME:",
-	]
+  ]
 	if badNotPrefixes.reduce(false, { (acc, s) in acc || rest.hasPrefix(s) }) {
 		return .badNot
 	}
@@ -254,8 +259,8 @@ private func findCheckType(in buf : UnsafeBufferPointer<CChar>, with prefix : St
 }
 
 extension UnsafeBufferPointer {
-	fileprivate func substr(_ Start : Int, _ Size : Int) -> UnsafeBufferPointer<Element> {
-		return UnsafeBufferPointer<Element>(start: self.baseAddress!.advanced(by: Start), count: Size)
+	fileprivate func substr(_ start : Int, _ size : Int) -> UnsafeBufferPointer<Element> {
+		return UnsafeBufferPointer<Element>(start: self.baseAddress!.advanced(by: start), count: size)
 	}
 
 	fileprivate func dropFront(_ n : Int) -> UnsafeBufferPointer<Element> {
@@ -290,7 +295,7 @@ private func findFirstMatch(in inbuffer : UnsafeBufferPointer<CChar>, among pref
 			)
 		)
 
-		// HACK: Conversion between the buffer and `String` causes index 
+		// HACK: Conversion between the buffer and `String` causes index
 		// mismatches when searching for strings.  We're instead going to do
 		// something terribly inefficient here: Use the regular expression to
 		// look for check prefixes, then use Foundation's Data to find their
@@ -306,12 +311,12 @@ private func findFirstMatch(in inbuffer : UnsafeBufferPointer<CChar>, among pref
 		// intentional and unintentional uses of this feature.
 		if skippedPrefix.isEmpty || !skippedPrefix.characters.last!.isPartOfWord {
 			// Now extract the type.
-			let CheckTy = findCheckType(in: buffer, with: prefixStr)
+			let checkTy = findCheckType(in: buffer, with: prefixStr)
 
 
 			// If we've found a valid check type for this prefix, we're done.
-			if CheckTy != .none {
-				return (prefixStr, CheckTy, lineNumber, buffer)
+			if checkTy != .none {
+				return (prefixStr, checkTy, lineNumber, buffer)
 			}
 		}
 		// If we didn't successfully find a prefix, we need to skip this invalid
@@ -327,7 +332,6 @@ private func findFirstMatch(in inbuffer : UnsafeBufferPointer<CChar>, among pref
 
 	return ("", .none, lineNumber, buffer)
 }
-
 
 private func readCheckStrings(in buf : UnsafeBufferPointer<CChar>, withPrefixes prefixes : [String], options: FileCheckOptions, _ RE : NSRegularExpression) -> [CheckString] {
 	// Keeps track of the line on which CheckPrefix instances are found.
@@ -351,35 +355,44 @@ private func readCheckStrings(in buf : UnsafeBufferPointer<CChar>, withPrefixes 
 
 		// Complain about useful-looking but unsupported suffixes.
 		if checkTy == .badNot {
-			diagnose(.error, "unsupported -NOT combo on prefix '\(usedPrefix)'")
+			let loc = CheckLoc.inBuffer(buffer.baseAddress!, buf)
+			diagnose(.error, loc, "unsupported -NOT combo on prefix '\(usedPrefix)'")
 			return []
 		}
 
-		// Okay, we found the prefix, yay. Remember the rest of the line, but 
+		// Okay, we found the prefix, yay. Remember the rest of the line, but
 		// ignore leading whitespace.
 		if !options.contains(.strictWhitespace) || !options.contains(.matchFullLines) {
-			guard let idx = buffer.index(where: { c in UInt8(c) != " ".utf8.first! && UInt8(c) != "\t".utf8.first! }) else {
+			guard let idx = buffer.index(where: { c in c != (" " as Character).utf8CodePoint && c != ("\t" as Character).utf8CodePoint }) else {
 				return []
 			}
 			buffer = buffer.dropFront(idx)
 		}
 
 		// Scan ahead to the end of line.
-		let EOL : Int = buffer.index(of: CChar("\n".utf8.first!)) ?? buffer.index(of: CChar("\r".utf8.first!))!
+		let EOL : Int = buffer.index(of: ("\n" as Character).utf8CodePoint) ?? buffer.index(of: ("\r" as Character).utf8CodePoint)!
 
 		// Remember the location of the start of the pattern, for diagnostics.
-		let PatternLoc : SMLoc = SMLoc(fromPointer: buffer.baseAddress!)
+		let patternLoc = CheckLoc.inBuffer(buffer.baseAddress!, buf)
 
 		// Parse the pattern.
 		let pat : Pattern = Pattern(checking: checkTy)
 		let subBuffer = UnsafeBufferPointer<CChar>(start: buffer.baseAddress, count: EOL)
-		if pat.parse(pattern: subBuffer, withPrefix: usedPrefix, at: lineNumber, options: options) {
+		if pat.parse(in: buf, pattern: subBuffer, withPrefix: usedPrefix, at: lineNumber, options: options) {
 			return []
 		}
 
 		// Verify that CHECK-LABEL lines do not define or use variables
 		if (checkTy == .label) && pat.hasVariable {
-			diagnose(.error, "found '\(usedPrefix)-LABEL:' with variable definition or use")
+			diagnose(.error, patternLoc, "found '\(usedPrefix)-LABEL:' with variable definition or use")
+			return []
+		}
+
+		// Verify that CHECK-NEXT lines have at least one CHECK line before them.
+		if (checkTy == .next || checkTy == .same) && contents.isEmpty {
+			let type = (checkTy == .next) ? "NEXT" : "SAME"
+			let loc = CheckLoc.inBuffer(buffer.baseAddress!, buf)
+			diagnose(.error, loc, "found '\(usedPrefix)-\(type)' without previous '\(usedPrefix): line")
 			return []
 		}
 
@@ -388,13 +401,6 @@ private func readCheckStrings(in buf : UnsafeBufferPointer<CChar>, withPrefixes 
 			count: buffer.count - EOL
 		)
 
-		// Verify that CHECK-NEXT lines have at least one CHECK line before them.
-		if (checkTy == .next || checkTy == .same) && contents.isEmpty {
-			let type = (checkTy == .next) ? "NEXT" : "SAME"
-			diagnose(.error, "found '\(usedPrefix)-\(type)' without previous '\(usedPrefix): line")
-			return []
-		}
-
 		// Handle CHECK-DAG/-NOT.
 		if checkTy == .dag || checkTy == .not {
 			dagNotMatches.append(pat)
@@ -402,30 +408,39 @@ private func readCheckStrings(in buf : UnsafeBufferPointer<CChar>, withPrefixes 
 		}
 
 		// Okay, add the string we captured to the output vector and move on.
-		contents.append(CheckString(pattern: pat, prefix: usedPrefix, loc: PatternLoc))
-//		std::swap(DagNotMatches, CheckStrings.back().DagNotStrings)
-//		DagNotMatches = ImplicitNegativeChecks
+		contents.append(CheckString(pattern: pat, prefix: usedPrefix, loc: patternLoc))
+		//		std::swap(DagNotMatches, CheckStrings.back().DagNotStrings)
+		//		DagNotMatches = ImplicitNegativeChecks
 	}
 
 	// Add an EOF pattern for any trailing CHECK-DAG/-NOTs, and use the first
 	// prefix as a filler for the error message.
-//	if !DagNotMatches.isEmpty {
-//		CheckStrings.emplace_back(Pattern(Check::CheckEOF), *CheckPrefixes.begin(),
-//		                          SMLoc::getFromPointer(Buffer.data()))
-//		std::swap(DagNotMatches, CheckStrings.back().DagNotStrings)
-//	}
-
+	//	if !DagNotMatches.isEmpty {
+	//		CheckStrings.emplace_back(Pattern(Check::CheckEOF), *CheckPrefixes.begin(),
+	//		                          SMLoc::getFromPointer(Buffer.data()))
+	//		std::swap(DagNotMatches, CheckStrings.back().DagNotStrings)
+	//	}
 	if contents.isEmpty {
-		print("error: no check strings found with prefix\(contents.count > 1 ? "es " : " ")")
+		print("error: no check strings found with prefix\(contents.count == 1 ? " " : "es ")")
 		for prefix in prefixes {
 			print("\(prefix):")
 		}
 		return []
 	}
-
 	return contents
 }
-
+private final class BoxedTable {
+	var table : [String:String] = [:]
+	init() {}
+	subscript(_ i : String) -> String? {
+		set {
+			self.table[i] = newValue!
+		}
+		get {
+			return self.table[i]
+		}
+	}
+}
 /// Check the input to FileCheck provided in the \p Buffer against the \p
 /// CheckStrings read from the check file.
 ///
@@ -433,10 +448,8 @@ private func readCheckStrings(in buf : UnsafeBufferPointer<CChar>, withPrefixes 
 private func check(input b : String, against checkStrings : [CheckString]) -> Bool {
 	var buffer = b
 	var failedChecks = false
-
 	// This holds all the current filecheck variables.
-	var variableTable = [String:String]()
-
+	var variableTable = BoxedTable()
 	var i = 0
 	var j = 0
 	var e = checkStrings.count
@@ -450,21 +463,17 @@ private func check(input b : String, against checkStrings : [CheckString]) -> Bo
 				j += 1
 				continue
 			}
-
 			// Scan to next CHECK-LABEL match, ignoring CHECK-NOT and CHECK-DAG
 			guard let (matchLabelPos, matchLabelLen) = checkStr.check(buffer, true, variableTable) else {
 				// Immediately bail of CHECK-LABEL fails, nothing else we can do.
 				return false
 			}
-
 			checkRegion = buffer.substring(to: buffer.index(buffer.startIndex, offsetBy: matchLabelPos + matchLabelLen))
 			buffer = buffer.substring(from: buffer.index(buffer.startIndex, offsetBy: matchLabelPos + matchLabelLen))
 			j += 1
 		}
-
 		while i != j {
 			defer { i += 1 }
-
 			// Check each string within the scanned region, including a second check
 			// of any final CHECK-LABEL (to verify CHECK-NOT and CHECK-DAG)
 			guard let (matchPos, matchLen) = checkStrings[i].check(checkRegion, false, variableTable) else {
@@ -472,32 +481,39 @@ private func check(input b : String, against checkStrings : [CheckString]) -> Bo
 				i = j
 				break
 			}
-
 			checkRegion = checkRegion.substring(from: checkRegion.index(checkRegion.startIndex, offsetBy: matchPos + matchLen))
 		}
-
 		if j == e {
 			break
 		}
 	}
-
 	// Success if no checks failed.
 	return !failedChecks
 }
-
-
-struct SMLoc {
-	let unLoc : UnsafePointer<CChar>?
-
-	init() {
-		self.unLoc = nil
-	}
-
-	init(fromPointer: UnsafePointer<CChar>)  {
-		self.unLoc = fromPointer
+private enum CheckLoc {
+	case inBuffer(UnsafePointer<CChar>, UnsafeBufferPointer<CChar>)
+	case string(String)
+	var message : String {
+		switch self {
+		case let .inBuffer(ptr, buf):
+			var startPtr = ptr
+			while startPtr != buf.baseAddress! && startPtr.predecessor().pointee != ("\n" as Character).utf8CodePoint {
+				startPtr = startPtr.predecessor()
+			}
+			var endPtr = ptr
+			while endPtr != buf.baseAddress!.advanced(by: buf.endIndex) && endPtr.successor().pointee != ("\n" as Character).utf8CodePoint {
+				endPtr = endPtr.successor()
+			}
+			// One more for good measure.
+			if endPtr != buf.baseAddress!.advanced(by: buf.endIndex) {
+				endPtr = endPtr.successor()
+			}
+			return substring(in: buf, with: NSMakeRange(buf.baseAddress!.distance(to: startPtr), startPtr.distance(to: endPtr)))
+		case let .string(s):
+			return s
+		}
 	}
 }
-
 enum CheckType {
 	case none
 	case plain
@@ -507,11 +523,9 @@ enum CheckType {
 	case dag
 	case label
 	case badNot
-
 	/// MatchEOF - When set, this pattern only matches the end of file. This is
 	/// used for trailing CHECK-NOTs.
 	case EOF
-
 	// Get the size of the prefix extension.
 	var size : Int {
 		switch (self) {
@@ -536,46 +550,35 @@ enum CheckType {
 		}
 	}
 }
-
-class Pattern {
-	let patternLoc : SMLoc = SMLoc()
-
+private class Pattern {
+	var patternLoc : CheckLoc = CheckLoc.string("")
 	let type : CheckType
-
 	/// If non-empty, this pattern is a fixed string match with the specified
 	/// fixed string.
 	var fixedString : String = ""
-
 	/// If non-empty, this is a regex pattern.
 	var regExPattern : String = ""
-
 	/// Contains the number of line this pattern is in.
 	var lineNumber : Int = 0
-
 	/// Entries in this vector map to uses of a variable in the pattern, e.g.
 	/// "foo[[bar]]baz".  In this case, the regExPattern will contain "foobaz"
 	/// and we'll get an entry in this vector that tells us to insert the value
 	/// of bar at offset 3.
 	var variableUses : Array<(String, Int)> = []
-
 	/// Maps definitions of variables to their parenthesized capture numbers.
 	/// E.g. for the pattern "foo[[bar:.*]]baz", VariableDefs will map "bar" to 1.
 	var variableDefs : Dictionary<String, Int> = [:]
-
 	var hasVariable : Bool {
 		return !(variableUses.isEmpty && self.variableDefs.isEmpty)
 	}
-
 	init(checking ty : CheckType) {
 		self.type = ty
 	}
-
 	private func addBackrefToRegEx(_ backRef : Int) {
 		assert(backRef >= 1 && backRef <= 9, "Invalid backref number")
 		let Backref = "\\\(backRef)"
 		self.regExPattern += Backref
 	}
-
 	/// - returns: Returns a value on success or nil on a syntax error.
 	private func evaluateExpression(_ e : String) -> String? {
 		var expr = e
@@ -584,22 +587,19 @@ class Pattern {
 			return nil
 		}
 		expr = expr.substring(from: expr.index(expr.startIndex, offsetBy: "@LINE".utf8.count))
-		guard let firstC = expr.utf8.first else {
+		guard let firstC = expr.characters.first else {
 			return "\(self.lineNumber)"
 		}
-
-		if firstC == "+".utf8.first! {
+		if firstC == "+" {
 			expr = expr.substring(from: expr.index(after: expr.startIndex))
-		} else if firstC != "-".utf8.first! {
+		} else if firstC != "-" {
 			return nil
 		}
-
 		guard let offset = Int(expr, radix: 10) else {
 			return nil
 		}
 		return "\(self.lineNumber + offset)"
 	}
-
 	/// Matches the pattern string against the input buffer.
 	///
 	/// This returns the position that is matched or npos if there is no match. If
@@ -608,14 +608,13 @@ class Pattern {
 	///
 	/// The \p VariableTable StringMap provides the current values of filecheck
 	/// variables and is updated if this match defines new values.
-	func match(_ buffer : String, _ variableTable : [String:String]) -> (Int, Int)? {
+	func match(_ buffer : String, _ variableTable : BoxedTable) -> (Int, Int)? {
 		var matchLen : Int = 0
 		// If this is the EOF pattern, match it immediately.
 		if self.type == .EOF {
 			matchLen = 0
 			return (buffer.utf8.count, matchLen)
 		}
-
 		// If this is a fixed string pattern, just match it now.
 		if !self.fixedString.isEmpty {
 			matchLen = self.fixedString.utf8.count
@@ -624,18 +623,15 @@ class Pattern {
 			}
 			return nil
 		}
-
 		// Regex match.
-
 		// If there are variable uses, we need to create a temporary string with the
 		// actual value.
 		var regExToMatch = self.regExPattern
-		if !variableUses.isEmpty {
+		if !self.variableUses.isEmpty {
 			var insertOffset = 0
-			for (v, offset) in variableUses {
+			for (v, offset) in self.variableUses {
 				var value : String = ""
-
-				if v.utf8.first! == "@".utf8.first! {
+				if let c = v.characters.first, c == "@" {
 					guard let v = self.evaluateExpression(v) else {
 						return nil
 					}
@@ -644,72 +640,77 @@ class Pattern {
 					guard let val = variableTable[v] else {
 						return nil
 					}
-
 					// Look up the value and escape it so that we can put it into the regex.
 					value += NSRegularExpression.escapedPattern(for: val)
 				}
-
 				// Plop it into the regex at the adjusted offset.
 				regExToMatch.insert(contentsOf: value.characters, at: regExToMatch.index(regExToMatch.startIndex, offsetBy: offset + insertOffset))
 				insertOffset += value.utf8.count
 			}
 		}
-
 		// Match the newly constructed regex.
 		guard let r = try? NSRegularExpression(pattern: regExToMatch, options: []) else {
 			return nil
 		}
-		let matchInfo = r.matches(in: buffer, options: [], range: NSRange(location: 0, length: buffer.distance(from: buffer.startIndex, to: buffer.endIndex)))
-
+		let matchInfo = r.matches(in: buffer, options: [], range: NSRange(location: 0, length: buffer.utf8.count))
 		// Successful regex match.
-		assert(!matchInfo.isEmpty, "Didn't get any match")
-		let fullMatch = matchInfo.first!
-
-		// If this defines any variables, remember their values.
-		for (_, index) in self.variableDefs {
-			assert(index < matchInfo.count, "Internal paren error")
-//			VariableTable[VariableDef.0] = MatchInfo[VariableDef.second]
+		guard let fullMatch = matchInfo.first else {
+			fatalError("Didn't get any matches!")
 		}
-
+		// If this defines any variables, remember their values.
+		for (v, index) in self.variableDefs {
+			assert(index < fullMatch.numberOfRanges, "Internal paren error")
+			#if os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
+				let r = fullMatch.rangeAt(index)
+			#else
+				let r = fullMatch.range(at: index)
+			#endif
+			variableTable[v] = buffer.substring(
+				with: Range<String.Index>(
+					uncheckedBounds: (
+						buffer.index(buffer.startIndex, offsetBy: r.location),
+						buffer.index(buffer.startIndex, offsetBy: NSMaxRange(r))
+					)
+				)
+			)
+		}
 		matchLen = fullMatch.range.length
 		return (fullMatch.range.location, matchLen)
 	}
-
 	/// Finds the closing sequence of a regex variable usage or definition.
 	///
 	/// \p Str has to point in the beginning of the definition (right after the
 	/// opening sequence). Returns the offset of the closing sequence within Str,
 	/// or npos if it was not found.
-	private func findRegexVarEnd(_ regVar : String) -> Int? {
+	private func findRegexVarEnd(_ regVar : String) -> String.Index? {
 		var string = regVar
 		// Offset keeps track of the current offset within the input Str
-		var offset = 0
+		var offset = regVar.startIndex
 		// [...] Nesting depth
 		var bracketDepth = 0
-
-		while !string.isEmpty {
+		while let firstChar = string.characters.first {
 			if string.hasPrefix("]]") && bracketDepth == 0 {
 				return offset
 			}
-			if string.utf8.first! == "\\".utf8.first! {
+			if firstChar == "\\" {
 				// Backslash escapes the next char within regexes, so skip them both.
 				string = string.substring(from: string.index(string.startIndex, offsetBy: 2))
-				offset += 2
+				offset = regVar.index(offset, offsetBy: 2)
 			} else {
-				switch (string.utf8.first!) {
-				case "[".utf8.first!:
+				switch firstChar {
+				case "[":
 					bracketDepth += 1
-				case "]".utf8.first!:
+				case "]":
 					if bracketDepth == 0 {
-						diagnose(.error, "missing closing \"]\" for regex variable")
-						exit(1)
+						diagnose(.error, .string(regVar), "missing closing \"]\" for regex variable")
+						return nil
 					}
 					bracketDepth -= 1
 				default:
 					break
 				}
 				string = string.substring(from: string.index(after: string.startIndex))
-				offset += 1
+				offset = regVar.index(after: offset)
 			}
 		}
 
@@ -722,7 +723,7 @@ class Pattern {
 			self.regExPattern += RS
 			return (false, cur + r.numberOfCaptureGroups)
 		} catch let e {
-			diagnose(.error, "invalid regex: \(e)")
+			diagnose(.error, self.patternLoc, "invalid regex: \(e)")
 			return (true, cur)
 		}
 	}
@@ -733,7 +734,7 @@ class Pattern {
 	/// SourceMgr used for error reports, and \p LineNumber is the line number in
 	/// the input file from which the pattern string was read. Returns true in
 	/// case of an error, false otherwise.
-	func parse(pattern : UnsafeBufferPointer<CChar>, withPrefix prefix : String, at lineNumber : Int, options: FileCheckOptions) -> Bool {
+	func parse(in buf : UnsafeBufferPointer<CChar>, pattern : UnsafeBufferPointer<CChar>, withPrefix prefix : String, at lineNumber : Int, options: FileCheckOptions) -> Bool {
 		func mino(_ l : String.Index?, _ r : String.Index?) -> String.Index? {
 			if l == nil && r == nil {
 				return nil
@@ -748,11 +749,11 @@ class Pattern {
 
 		self.lineNumber = lineNumber
 		var patternStr = substring(in: pattern, with: NSRange(location: 0, length: pattern.count))
-		//		let patternLoc = SMLoc(fromPointer: pat.baseAddress!)
+		self.patternLoc = CheckLoc.inBuffer(pattern.baseAddress!, buf)
 
 		// Check that there is something on the line.
 		if patternStr.isEmpty {
-			diagnose(.error, "found empty check string with prefix '\(prefix):'")
+			diagnose(.error, self.patternLoc, "found empty check string with prefix '\(prefix):'")
 			return true
 		}
 
@@ -761,7 +762,7 @@ class Pattern {
 			(patternStr.utf8.count < 2 ||
 				(patternStr.range(of: "{{") == nil
 					&&
-				 patternStr.range(of: "[[") == nil))
+					patternStr.range(of: "[[") == nil))
 		{
 			self.fixedString = patternStr
 			return false
@@ -785,7 +786,8 @@ class Pattern {
 			if patternStr.range(of: "{{")?.lowerBound == patternStr.startIndex {
 				// This is the start of a regex match.  Scan for the }}.
 				guard let End = patternStr.range(of: "}}") else {
-					diagnose(.error, "found start of regex string with no end '}}'")
+					let loc = CheckLoc.inBuffer(pattern.baseAddress!, buf)
+					diagnose(.error, loc, "found start of regex string with no end '}}'")
 					return true
 				}
 
@@ -796,16 +798,15 @@ class Pattern {
 				regExPattern += "("
 				curParen += 1
 
-				let pat = patternStr.substring(
+				let substr = patternStr.substring(
 					with: Range<String.Index>(
 						uncheckedBounds: (
 							patternStr.index(patternStr.startIndex, offsetBy: 2),
-							patternStr.index(End.upperBound, offsetBy: -2)
+							End.lowerBound
 						)
 					)
 				)
-
-				let (res, paren) = self.addRegExToRegEx(pat, curParen)
+				let (res, paren) = self.addRegExToRegEx(substr, curParen)
 				curParen = paren
 				if res {
 					return true
@@ -824,20 +825,15 @@ class Pattern {
 			if patternStr.hasPrefix("[[") {
 				// Find the closing bracket pair ending the match.  End is going to be an
 				// offset relative to the beginning of the match string.
-				guard let end = self.findRegexVarEnd(patternStr.substring(from: patternStr.index(patternStr.startIndex, offsetBy: 2))) else {
-					diagnose(.error, "invalid named regex reference, no ]] found")
+				let regVar = patternStr.substring(from: patternStr.index(patternStr.startIndex, offsetBy: 2))
+				guard let end = self.findRegexVarEnd(regVar) else {
+					let loc = CheckLoc.inBuffer(pattern.baseAddress!, buf)
+					diagnose(.error, loc, "invalid named regex reference, no ]] found")
 					return true
 				}
 
-				let matchStr = patternStr.substring(
-					with: Range<String.Index>(
-						uncheckedBounds: (
-							patternStr.index(patternStr.startIndex, offsetBy: 2),
-							patternStr.index(patternStr.startIndex, offsetBy: end)
-						)
-					)
-				)
-				patternStr = patternStr.substring(from: patternStr.index(patternStr.startIndex, offsetBy: end + 4))
+				let matchStr = regVar.substring(to: end)
+				patternStr = patternStr.substring(from: patternStr.index(end, offsetBy: 4))
 
 				// Get the regex name (e.g. "foo").
 				let nameEnd = matchStr.range(of: ":")
@@ -845,11 +841,12 @@ class Pattern {
 				if let end = nameEnd?.lowerBound {
 					name = matchStr.substring(to: end)
 				} else {
-					name = ""
+					name = matchStr
 				}
 
 				if name.isEmpty {
-					diagnose(.error, "invalid name in named regex: empty name")
+					let loc = CheckLoc.inBuffer(pattern.baseAddress!, buf)
+					diagnose(.error, loc, "invalid name in named regex: empty name")
 					return true
 				}
 
@@ -857,25 +854,25 @@ class Pattern {
 				// supports @LINE, @LINE+number, @LINE-number expressions. The check here
 				// is relaxed, more strict check is performed in \c EvaluateExpression.
 				var isExpression = false
-				for (i, c) in name.utf8.enumerated() {
-					if i == 0 && c == "@".utf8.first! {
+				let diagLoc = CheckLoc.inBuffer(pattern.baseAddress!, buf)
+				for (i, c) in name.characters.enumerated() {
+					if i == 0 && c == "@" {
 						if nameEnd == nil {
-							diagnose(.error, "invalid name in named regex definition")
+							diagnose(.error, diagLoc, "invalid name in named regex definition")
 							return true
 						}
 						isExpression = true
 						continue
 					}
-					if (c != "_".utf8.first! && isalnum(Int32(c)) == 0 &&
-						(!isExpression || (c != "+".utf8.first! && c != "-".utf8.first!))) {
-						diagnose(.error, "invalid name in named regex")
+					if c != "_" && isalnum(Int32(c.utf8CodePoint)) == 0 && (!isExpression || (c != "+" && c != "-")) {
+						diagnose(.error, diagLoc, "invalid name in named regex")
 						return true
 					}
 				}
 
 				// Name can't start with a digit.
 				if isdigit(Int32(name.utf8.first!)) != 0 {
-					diagnose(.error, "invalid name in named regex")
+					diagnose(.error, diagLoc, "invalid name in named regex")
 					return true
 				}
 
@@ -883,21 +880,21 @@ class Pattern {
 				guard let ne = nameEnd else {
 					// Handle variables that were defined earlier on the same line by
 					// emitting a backreference.
-					if let VarParenNum = self.variableDefs[name] {
-						if VarParenNum < 1 || VarParenNum > 9 {
-							diagnose(.error, "Can't back-reference more than 9 variables")
+					if let varParenNum = self.variableDefs[name] {
+						if varParenNum < 1 || varParenNum > 9 {
+							diagnose(.error, diagLoc, "Can't back-reference more than 9 variables")
 							return true
 						}
-						self.addBackrefToRegEx(VarParenNum)
+						self.addBackrefToRegEx(varParenNum)
 					} else {
-						variableUses.append((name, regExPattern.utf8.count))
+						variableUses.append((name, regExPattern.characters.count))
 					}
 					continue
 				}
 
 				// Handle [[foo:.*]].
 				self.variableDefs[name] = curParen
-				self.regExPattern += "("
+				regExPattern += "("
 				curParen += 1
 
 				let (res, paren) = self.addRegExToRegEx(matchStr.substring(from: matchStr.index(after: ne.lowerBound)), curParen)
@@ -905,14 +902,19 @@ class Pattern {
 				if res {
 					return true
 				}
-				self.regExPattern += ")"
+
+				regExPattern += ")"
 			}
 
 			// Handle fixed string matches.
 			// Find the end, which is the start of the next regex.
-			let fixedMatchEnd = mino(patternStr.range(of: "{{")?.lowerBound, patternStr.range(of: "[[")?.lowerBound)
-			self.regExPattern += NSRegularExpression.escapedPattern(for: patternStr.substring(to: fixedMatchEnd ?? patternStr.endIndex))
-			patternStr = patternStr.substring(from: fixedMatchEnd ?? patternStr.endIndex)
+			if let fixedMatchEnd = mino(patternStr.range(of: "{{")?.lowerBound, patternStr.range(of: "[[")?.lowerBound) {
+				self.regExPattern += NSRegularExpression.escapedPattern(for: patternStr.substring(to: fixedMatchEnd))
+				patternStr = patternStr.substring(from: fixedMatchEnd)
+			} else {
+				// No more matches, time to quit.
+				break
+			}
 		}
 
 		if options.contains(.matchFullLines) {
@@ -943,9 +945,9 @@ func countNumNewlinesBetween(_ r : String) -> (Int, String.Index?) {
 		NumNewLines += 1
 
 		// Handle \n\r and \r\n as a single newline.
-//		if Range.utf8.count > 1 && (Range.utf8[1] == '\n' || Range[1] == '\r') && (Range[0] != Range[1]) {
-//			Range = Range.substr(1)
-//		}
+		//		if Range.utf8.count > 1 && (Range.utf8[1] == '\n' || Range[1] == '\r') && (Range[0] != Range[1]) {
+		//			Range = Range.substr(1)
+		//		}
 		range = range.substring(from: range.index(after: range.startIndex))
 
 		if NumNewLines == 1 {
@@ -955,7 +957,7 @@ func countNumNewlinesBetween(_ r : String) -> (Int, String.Index?) {
 }
 
 /// CheckString - This is a check that we found in the input file.
-struct CheckString {
+private struct CheckString {
 	/// Pat - The pattern to match.
 	let pattern : Pattern
 
@@ -963,7 +965,7 @@ struct CheckString {
 	let prefix : String
 
 	/// Loc - The location in the match file that the check string was specified.
-	let loc : SMLoc
+	let loc : CheckLoc
 
 	/// DagNotStrings - These are all of the strings that are disallowed from
 	/// occurring between this match string and the previous one (or start of
@@ -971,7 +973,7 @@ struct CheckString {
 	let dagNotStrings : Array<Pattern> = []
 
 	/// Match check string and its "not strings" and/or "dag strings".
-	func check(_ buffer : String, _ isLabelScanMode : Bool,  _ variableTable : [String:String]) -> (Int, Int)? {
+	func check(_ buffer : String, _ isLabelScanMode : Bool,  _ variableTable : BoxedTable) -> (Int, Int)? {
 		var lastPos = 0
 
 		// IsLabelScanMode is true when we are scanning forward to find CHECK-LABEL
@@ -989,7 +991,7 @@ struct CheckString {
 		// Match itself from the last position after matching CHECK-DAG.
 		let matchBuffer = buffer.substring(from: buffer.index(buffer.startIndex, offsetBy: lastPos))
 		guard let (matchPos, matchLen) = self.pattern.match(matchBuffer, variableTable) else {
-//			PrintCheckFailed(*this, MatchBuffer, VariableTable)
+			diagnose(.error, self.loc, self.prefix + ": could not find '\(self.pattern.fixedString)' in input")
 			return nil
 		}
 
@@ -1004,16 +1006,17 @@ struct CheckString {
 					)
 				)
 			)
+			let rest = buffer.substring(from: buffer.index(buffer.startIndex, offsetBy: matchPos))
 
 			// If this check is a "CHECK-NEXT", verify that the previous match was on
 			// the previous line (i.e. that there is one newline between them).
-			if self.checkNext(skippedRegion) {
+			if self.checkNext(skippedRegion, rest) {
 				return nil
 			}
 
 			// If this check is a "CHECK-SAME", verify that the previous match was on
 			// the same line (i.e. that there is no newline between them).
-			if self.checkSame(skippedRegion) {
+			if self.checkSame(skippedRegion, rest) {
 				return nil
 			}
 
@@ -1028,23 +1031,28 @@ struct CheckString {
 	}
 
 	/// Verify there is no newline in the given buffer.
-	func checkSame(_ Buffer : String) -> Bool {
+	private func checkSame(_ buffer : String, _ rest : String) -> Bool {
 		if self.pattern.type != .same {
 			return false
 		}
 
 		// Count the number of newlines between the previous match and this one.
-//	  assert(Buffer.data() !=
-//				 SM.getMemoryBuffer(SM.FindBufferContainingLoc(
-//										SMLoc::getFromPointer(Buffer.data())))
-//					 ->getBufferStart() &&
-//			 "CHECK-SAME can't be the first check in a file")
-
-		let (numNewLines, _ /*firstNewLine*/) = countNumNewlinesBetween(Buffer)
+		//	  assert(Buffer.data() !=
+		//				 SM.getMemoryBuffer(SM.FindBufferContainingLoc(
+		//										SMLoc::getFromPointer(Buffer.data())))
+		//					 ->getBufferStart() &&
+		//			 "CHECK-SAME can't be the first check in a file")
+		let (numNewLines, _ /*firstNewLine*/) = countNumNewlinesBetween(buffer)
 		if numNewLines != 0 {
-			diagnose(.error, self.prefix + "-SAME: is not on the same line as the previous match")
-			diagnose(.note, "'next' match was here")
-			diagnose(.note, "previous match ended here")
+			diagnose(.error, self.loc, self.prefix + "-SAME: is not on the same line as the previous match")
+			rest.cString(using: .utf8)?.withUnsafeBufferPointer { buf in
+				let loc = CheckLoc.inBuffer(buf.baseAddress!, buf)
+				diagnose(.note, loc, "'next' match was here")
+			}
+			buffer.cString(using: .utf8)?.withUnsafeBufferPointer { buf in
+				let loc = CheckLoc.inBuffer(buf.baseAddress!, buf)
+				diagnose(.note, loc, "previous match ended here")
+			}
 			return true
 		}
 
@@ -1052,30 +1060,44 @@ struct CheckString {
 	}
 
 	/// Verify there is a single line in the given buffer.
-	func checkNext(_ Buffer : String) -> Bool {
+	private func checkNext(_ buffer : String, _ rest : String) -> Bool {
 		if self.pattern.type != .next {
 			return false
 		}
 
 		// Count the number of newlines between the previous match and this one.
-//	  assert(Buffer.data() !=
-//				 SM.getMemoryBuffer(SM.FindBufferContainingLoc(
-//										SMLoc::getFromPointer(Buffer.data())))
-//					 ->getBufferStart(), "CHECK-NEXT can't be the first check in a file")
-
-		let (numNewLines, _ /*firstNewLine*/) = countNumNewlinesBetween(Buffer)
+		//	  assert(Buffer.data() !=
+		//				 SM.getMemoryBuffer(SM.FindBufferContainingLoc(
+		//										SMLoc::getFromPointer(Buffer.data())))
+		//					 ->getBufferStart(), "CHECK-NEXT can't be the first check in a file")
+		let (numNewLines, firstNewLine) = countNumNewlinesBetween(buffer)
 		if numNewLines == 0 {
-			diagnose(.error, prefix + "-NEXT: is on the same line as previous match")
-			diagnose(.note, "'next' match was here")
-			diagnose(.note, "previous match ended here")
+			diagnose(.error, self.loc, prefix + "-NEXT: is on the same line as previous match")
+			rest.cString(using: .utf8)?.withUnsafeBufferPointer { buf in
+				let loc = CheckLoc.inBuffer(buf.baseAddress!, buf)
+				diagnose(.note, loc, "'next' match was here")
+			}
+			buffer.cString(using: .utf8)?.withUnsafeBufferPointer { buf in
+				let loc = CheckLoc.inBuffer(buf.baseAddress!, buf)
+				diagnose(.note, loc, "previous match ended here")
+			}
 			return true
 		}
 
 		if numNewLines != 1 {
-			diagnose(.error, prefix + "-NEXT: is not on the line after the previous match")
-			diagnose(.note, "'next' match was here")
-			diagnose(.note, "previous match ended here")
-			diagnose(.note, "non-matching line after previous match is here")
+			diagnose(.error, self.loc, prefix + "-NEXT: is not on the line after the previous match")
+			rest.cString(using: .utf8)?.withUnsafeBufferPointer { buf in
+				let loc = CheckLoc.inBuffer(buf.baseAddress!, buf)
+				diagnose(.note, loc, "'next' match was here")
+			}
+			buffer.cString(using: .utf8)?.withUnsafeBufferPointer { buf in
+				let loc = CheckLoc.inBuffer(buf.baseAddress!, buf)
+				diagnose(.note, loc, "previous match ended here")
+				if let fnl = firstNewLine {
+					let noteLoc = CheckLoc.inBuffer(buf.baseAddress!.advanced(by: buffer.distance(from: buffer.startIndex, to: fnl)), buf)
+					diagnose(.note, noteLoc, "non-matching line after previous match is here")
+				}
+			}
 			return true
 		}
 
@@ -1083,16 +1105,18 @@ struct CheckString {
 	}
 
 	/// Verify there's no "not strings" in the given buffer.
-	func checkNot(_ Buffer : String, _ NotStrings : [Pattern], _ VariableTable : [String:String]) -> Bool {
-		for Pat in NotStrings {
-			assert(Pat.type == .not, "Expect CHECK-NOT!")
+	private func checkNot(_ buffer : String, _ notStrings : [Pattern], _ variableTable : BoxedTable) -> Bool {
+		for pat in notStrings {
+			assert(pat.type == .not, "Expect CHECK-NOT!")
 
-			guard let (_, _)/*(Pos, MatchLen)*/ = Pat.match(Buffer, VariableTable) else {
+			guard let (Pos, _)/*(Pos, MatchLen)*/ = pat.match(buffer, variableTable) else {
 				continue
 			}
-
-			diagnose(.error, self.prefix + "-NOT: string occurred!")
-			diagnose(.note, self.prefix + "-NOT: pattern specified here")
+			buffer.cString(using: .utf8)?.withUnsafeBufferPointer { buf in
+				let loc = CheckLoc.inBuffer(buf.baseAddress!.advanced(by: Pos), buf)
+				diagnose(.error, loc, self.prefix + "-NOT: string occurred!")
+			}
+			diagnose(.note, pat.patternLoc, self.prefix + "-NOT: pattern specified here")
 			return true
 		}
 
@@ -1100,7 +1124,7 @@ struct CheckString {
 	}
 
 	/// Match "dag strings" and their mixed "not strings".
-	func checkDAG(_ buffer : String, _ variableTable : [String:String]) -> Int? {
+	func checkDAG(_ buffer : String, _ variableTable : BoxedTable) -> Int? {
 		var notStrings = [Pattern]()
 		if dagNotStrings.isEmpty {
 			return 0
@@ -1124,7 +1148,7 @@ struct CheckString {
 			// With a group of CHECK-DAGs, a single mismatching means the match on
 			// that group of CHECK-DAGs fails immediately.
 			guard let t = pattern.match(matchBuffer, variableTable) else {
-//				PrintCheckFailed(SM, Pat.getLoc(), Pat, MatchBuffer, VariableTable)
+				//				PrintCheckFailed(SM, Pat.getLoc(), Pat, MatchBuffer, VariableTable)
 				return nil
 			}
 			var matchPos = t.0
@@ -1136,10 +1160,14 @@ struct CheckString {
 			if !notStrings.isEmpty {
 				if matchPos < lastPos {
 					// Reordered?
-					diagnose(.error, prefix + "-DAG: found a match of CHECK-DAG reordering across a CHECK-NOT")
-					diagnose(.note, prefix + "-DAG: the farthest match of CHECK-DAG is found here")
-					diagnose(.note, prefix + "-NOT: the crossed pattern specified here")
-					diagnose(.note, prefix + "-DAG: the reordered pattern specified here")
+					buffer.cString(using: .utf8)?.withUnsafeBufferPointer { buf in
+						let loc1 = CheckLoc.inBuffer(buf.baseAddress!.advanced(by: matchPos), buf)
+						diagnose(.error, loc1, prefix + "-DAG: found a match of CHECK-DAG reordering across a CHECK-NOT")
+						let loc2 = CheckLoc.inBuffer(buf.baseAddress!.advanced(by: lastPos), buf)
+						diagnose(.note, loc2, prefix + "-DAG: the farthest match of CHECK-DAG is found here")
+					}
+					diagnose(.note, notStrings[0].patternLoc, prefix + "-NOT: the crossed pattern specified here")
+					diagnose(.note, pattern.patternLoc, prefix + "-DAG: the reordered pattern specified here")
 					return nil
 				}
 				// All subsequent CHECK-DAGs should be matched from the farthest
@@ -1162,21 +1190,25 @@ struct CheckString {
 				// Clear "not strings".
 				notStrings.removeAll()
 			}
-			
+
 			// Update the last position with CHECK-DAG matches.
 			lastPos = max(matchPos + matchLen, lastPos)
 		}
-		
+
 		return lastPos
 	}
 }
 
-enum DiagnosticKind {
+private enum DiagnosticKind {
 	case error
 	case warning
 	case note
 }
 
-func diagnose(_ kind : DiagnosticKind, _ message : String) {
+private func diagnose(_ kind : DiagnosticKind, _ loc : CheckLoc, _ message : String) {
 	print(message)
+	let msg = loc.message
+	if !msg.isEmpty {
+		print(msg)
+	}
 }

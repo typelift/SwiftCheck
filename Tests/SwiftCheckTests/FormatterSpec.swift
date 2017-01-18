@@ -64,9 +64,9 @@ struct ArbitraryFormatter<Value : Arbitrary & CoArbitrary & Hashable> : Arbitrar
 
 class FormatterSpec : XCTestCase {
 	func testAlwaysCorrectLength() {
-		/// CHECK: *** Passed 100 tests
-		/// CHECK-NEXT: .
 		XCTAssert(fileCheckOutput {
+			/// CHECK: *** Passed 100 tests
+			/// CHECK-NEXT: .
 			property(
 				"Any formatted string is shorter or equal than the provided length"
 			) <- forAll { (x: Int, af: ArbitraryFormatter<Int>) in
