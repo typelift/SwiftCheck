@@ -129,73 +129,97 @@ let composedArbitraryLargeFoo = Gen<ArbitraryLargeFoo>.compose { c in
 
 class SimpleSpec : XCTestCase {
 	func testAll() {
-		property("Integer Equality is Reflexive") <- forAll { (i : Int8) in
-			return i == i
-		}
-
-		property("Unsigned Integer Equality is Reflexive") <- forAll { (i : UInt8) in
-			return i == i
-		}
-
-		property("Float Equality is Reflexive") <- forAll { (i : Float) in
-			return i == i
-		}
-
-		property("Double Equality is Reflexive") <- forAll { (i : Double) in
-			return i == i
-		}
-
-		property("String Equality is Reflexive") <- forAll { (s : String) in
-			return s == s
-		}
-
-		property("ArbitraryFoo Properties are Reflexive") <- forAll { (i : ArbitraryFoo) in
-			return i.x == i.x && i.y == i.y
-		}
-		
-		property("ArbitraryLargeFoo Properties are Reflexive") <- forAll { (i : ArbitraryLargeFoo) in
-			return i.a == i.a
-				&& i.b == i.b
-				&& i.c == i.c
-				&& i.d == i.d
-				&& i.e == i.e
-				&& i.f == i.f
-				&& i.g == i.g
-				&& i.h == i.h
-				&& i.i == i.i
-				&& i.j == i.j
-				&& i.k == i.k
-				&& i.l == i.l
-				&& i.m == i.m
-				&& i.n == i.n
-		}
-		
-		property("All generated Charaters are valid Unicode") <- forAll { (c : Character) in
-			return 
-				(c >= ("\u{0000}" as Character) && c <= ("\u{D7FF}" as Character))
-				||
-				(c >= ("\u{E000}" as Character) && c <= ("\u{10FFFF}" as Character))
-		}
-
-		let greaterThan_lessThanEqualTo: ((UInt8, UInt8) -> Bool, (UInt8, UInt8) -> Bool) = ((>), (<=))
-		let lessThan_greaterThanEqualTo: ((UInt8, UInt8) -> Bool, (UInt8, UInt8) -> Bool) = ((<), (>=))
-		let equalTo_notEqualTo: ((UInt8, UInt8) -> Bool, (UInt8, UInt8) -> Bool) = ((==), (!=))
-		let inverses = Gen<((UInt8, UInt8) -> Bool, (UInt8, UInt8) -> Bool)>.fromElements(of: [
-			greaterThan_lessThanEqualTo,
-			lessThan_greaterThanEqualTo,
-			equalTo_notEqualTo,
-		])
-		
-		property("Inverses work") <- forAllNoShrink(inverses) { (op, iop) in
-			return forAll { (x : UInt8, y : UInt8) in
-				return op(x, y) ==== !iop(x, y)
+		XCTAssert(fileCheckOutput {
+			// CHECK: *** Passed 100 tests
+			// CHECK-NEXT: .
+			property("Integer Equality is Reflexive") <- forAll { (i : Int8) in
+				return i == i
 			}
-		}
-		
-		property("composition generates high-entropy, arbitrary values")
-		<- forAll(composedArbitraryLargeFoo, composedArbitraryLargeFoo) { a, b in
-			return a != b
-		}
+
+			// CHECK-NEXT: *** Passed 100 tests
+			// CHECK-NEXT: .
+			property("Unsigned Integer Equality is Reflexive") <- forAll { (i : UInt8) in
+				return i == i
+			}
+
+			// CHECK-NEXT: *** Passed 100 tests
+			// CHECK-NEXT: .
+			property("Float Equality is Reflexive") <- forAll { (i : Float) in
+				return i == i
+			}
+
+			// CHECK-NEXT: *** Passed 100 tests
+			// CHECK-NEXT: .
+			property("Double Equality is Reflexive") <- forAll { (i : Double) in
+				return i == i
+			}
+
+			// CHECK-NEXT: *** Passed 100 tests
+			// CHECK-NEXT: .
+			property("String Equality is Reflexive") <- forAll { (s : String) in
+				return s == s
+			}
+
+			// CHECK-NEXT: *** Passed 100 tests
+			// CHECK-NEXT: .
+			property("ArbitraryFoo Properties are Reflexive") <- forAll { (i : ArbitraryFoo) in
+				return i.x == i.x && i.y == i.y
+			}
+			
+			// CHECK-NEXT: *** Passed 100 tests
+			// CHECK-NEXT: .
+			property("ArbitraryLargeFoo Properties are Reflexive") <- forAll { (i : ArbitraryLargeFoo) in
+				return i.a == i.a
+					&& i.b == i.b
+					&& i.c == i.c
+					&& i.d == i.d
+					&& i.e == i.e
+					&& i.f == i.f
+					&& i.g == i.g
+					&& i.h == i.h
+					&& i.i == i.i
+					&& i.j == i.j
+					&& i.k == i.k
+					&& i.l == i.l
+					&& i.m == i.m
+					&& i.n == i.n
+			}
+			
+			// CHECK-NEXT: *** Passed 100 tests
+			// CHECK-NEXT: .
+			property("All generated Charaters are valid Unicode") <- forAll { (c : Character) in
+				return 
+					(c >= ("\u{0000}" as Character) && c <= ("\u{D7FF}" as Character))
+					||
+					(c >= ("\u{E000}" as Character) && c <= ("\u{10FFFF}" as Character))
+			}
+
+			let greaterThan_lessThanEqualTo: ((UInt8, UInt8) -> Bool, (UInt8, UInt8) -> Bool) = ((>), (<=))
+			let lessThan_greaterThanEqualTo: ((UInt8, UInt8) -> Bool, (UInt8, UInt8) -> Bool) = ((<), (>=))
+			let equalTo_notEqualTo: ((UInt8, UInt8) -> Bool, (UInt8, UInt8) -> Bool) = ((==), (!=))
+			let inverses = Gen<((UInt8, UInt8) -> Bool, (UInt8, UInt8) -> Bool)>.fromElements(of: [
+				greaterThan_lessThanEqualTo,
+				lessThan_greaterThanEqualTo,
+				equalTo_notEqualTo,
+			])
+			
+			// CHECK-NEXT: *** Passed 100 tests
+			// CHECK-NEXT: .
+			property("Inverses work") <- forAllNoShrink(inverses) { (op, iop) in
+				return forAll { (x : UInt8, y : UInt8) in
+					return op(x, y) ==== !iop(x, y)
+				}
+			}
+			
+			// CHECK-NEXT: *** Passed 100 tests
+			// CHECK-NEXT: .
+			property("composition generates high-entropy, arbitrary values") <- forAll(
+				composedArbitraryLargeFoo,
+				composedArbitraryLargeFoo
+			) { a, b in
+				return a != b
+			}
+		})
 	}
 
 	#if !(os(macOS) || os(iOS) || os(watchOS) || os(tvOS))

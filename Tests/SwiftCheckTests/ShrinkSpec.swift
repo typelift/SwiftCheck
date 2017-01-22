@@ -25,30 +25,44 @@ class ShrinkSpec : XCTestCase {
 	}
 
 	func testAll() {
-		property("Shrink of an integer does not contain that integer") <- forAll { (n : Int) in
-			return !Set(Int.shrink(n)).contains(n)
-		}
-
-		property("Shrinking a non-zero integer always gives 0") <- forAll { (n : Int) in
-			return (n != 0) ==> Set(self.shrinkArbitrary(n)).contains(0)
-		}
-
-		property("Shrinking an array never gives back the original") <- forAll { (l : Array<Int8>) in
-			return Array.shrink(l).filter({ $0 == l }).isEmpty
-		}
-
-		property("Shrunken arrays of integers always contain [] or [0]") <- forAll { (l : ArrayOf<Int>) in
-			return (!l.getArray.isEmpty && l.getArray != [0]) ==> {
-				let ls = self.shrinkArbitrary(l).map { $0.getArray }
-				return (ls.filter({ $0 == [] || $0 == [0] }).count >= 1)
+		XCTAssert(fileCheckOutput {
+			// CHECK: *** Passed 100 tests
+			// CHECK-NEXT: .
+			property("Shrink of an integer does not contain that integer") <- forAll { (n : Int) in
+				return !Set(Int.shrink(n)).contains(n)
 			}
-		}
 
-		property("Shrinking Double values does not loop") <- forAll { (n : Double) in
-			let left = pow(n, 0.5)
-			let right = sqrt(n)
-			return left == right
-		}.expectFailure
+			// CHECK-NEXT: *** Passed 100 tests
+			// CHECK-NEXT: .
+			property("Shrinking a non-zero integer always gives 0") <- forAll { (n : Int) in
+				return (n != 0) ==> Set(self.shrinkArbitrary(n)).contains(0)
+			}
+
+			// CHECK-NEXT: *** Passed 100 tests
+			// CHECK-NEXT: .
+			property("Shrinking an array never gives back the original") <- forAll { (l : Array<Int8>) in
+				return Array.shrink(l).filter({ $0 == l }).isEmpty
+			}
+
+			// CHECK-NEXT: *** Passed 100 tests
+			// CHECK-NEXT: .
+			property("Shrunken arrays of integers always contain [] or [0]") <- forAll { (l : ArrayOf<Int>) in
+				return (!l.getArray.isEmpty && l.getArray != [0]) ==> {
+					let ls = self.shrinkArbitrary(l).map { $0.getArray }
+					return (ls.filter({ $0 == [] || $0 == [0] }).count >= 1)
+				}
+			}
+
+			// CHECK-NEXT: +++ OK, failed as expected. Proposition: Shrinking Double values does not loop
+			// CHECK-NEXT: Falsifiable (after {{[0-9]+}} test{{[s]*}}):
+			// CHECK-NEXT: {{[+-]?([0-9]*[.])?[0-9]+}}
+			// CHECK-NEXT: .
+			property("Shrinking Double values does not loop") <- forAll { (n : Double) in
+				let left = pow(n, 0.5)
+				let right = sqrt(n)
+				return left == right
+			}.expectFailure
+		})
 	}
 
 	#if !(os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
