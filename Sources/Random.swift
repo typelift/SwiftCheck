@@ -209,7 +209,16 @@ extension Int64 : RandomType {
 			}
 
 			let (v, rng_) = entropize(1, 0, gen)
-			return (Int64(Double(l) + (v.truncatingRemainder(dividingBy: k))), rng_)
+			let ret = Double(l) + v.truncatingRemainder(dividingBy: k)
+			// HACK: There exist the following 512 integers that cannot be 
+			// safely converted by `Builtin.fptosi_FPIEEE64_Int64`.  Instead we 
+			// calculate their distance from `max` and perform the calculation
+			// in integer-land by hand.
+			if Double(Int64.max - 512) <= ret && ret <= Double(Int64.max) {
+				let deviation = Int64(Double(Int64.max) - ret)
+				return (Int64.max - deviation, rng_)
+			}
+			return (Int64(ret), rng_)
 		}
 	}
 }
