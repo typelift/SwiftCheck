@@ -288,9 +288,9 @@ emailGen.generate
 //: for `Int` calls `arc4random_uniform`.
 //:
 //: SwiftCheck uses a strategy called a `Modifier Type`–a wrapper around one type that we can't
-//: generate with another that we can–for a few of the more "difficult" types in the Swift STL, but
-//: we also use them in more benign ways too.  For example, we can write a modifier type that only
-//: generates positive numbers:
+//: generate with another that we can–for a few of the more "difficult" types in the Swift Standard 
+//: Library, but we also use them in more benign ways too.  For example, we can write a modifier type
+//: that only generates positive numbers:
 
 public struct ArbitraryPositive<A : Arbitrary & SignedNumber> : Arbitrary {
 	public let getPositive : A

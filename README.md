@@ -24,10 +24,10 @@ tests to be treated like *data*.
 
 To define a program property the `forAll` quantifier is used with a type
 signature like `(A, B, C, ... Z) -> Testable where A : Arbitrary, B : Arbitrary ...
-Z : Arbitrary`.  SwiftCheck implements the `Arbitrary` protocol for most STL types
-and implements the `Testable` protocol for `Bool` and several other related
-types.  For example, if we wanted to test the property that every Integer is
-equal to itself, we would express it as such:
+Z : Arbitrary`.  SwiftCheck implements the `Arbitrary` protocol for most Swift 
+Standard Library types and implements the `Testable` protocol for `Bool` and 
+several other related types.  For example, if we wanted to test the property 
+that every Integer is equal to itself, we would express it as such:
 
 ```swift
 func testAll() {
@@ -193,10 +193,11 @@ Running SwiftCheck again reports a successful sieve of all 100 random cases:
 Custom Types
 ============
 
-SwiftCheck implements random generation for most of the types in the Swift STL.
-Any custom types that wish to take part in testing must conform to the included
-`Arbitrary` protocol.  For the majority of types, this means providing a custom
-means of generating random data and shrinking down to an empty array. 
+SwiftCheck implements random generation for most of the types in the Swift 
+Standard Library. Any custom types that wish to take part in testing must 
+conform to the included `Arbitrary` protocol.  For the majority of types, this
+means providing a custom means of generating random data and shrinking down to 
+an empty array. 
 
 For example:
 
@@ -293,7 +294,7 @@ let weightedOptionals = Gen<Int?>.frequency([
 ```
  
 For instances of many complex or "real world" generators, see 
-[`ComplexSpec.swift`](Tests/ComplexSpec.swift).
+[`ComplexSpec.swift`](Tests/SwiftCheckTests/ComplexSpec.swift).
 
 System Requirements
 ===================
