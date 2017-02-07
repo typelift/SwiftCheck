@@ -54,7 +54,8 @@ public struct Prop : Testable {
 
 /// When returned from a test case, that particular case is discarded.
 public struct Discard : Testable {
-	/// Create a `Discard` suitable for
+	/// Create a `Discard` suitable for disregarding a test case as though a
+	/// precondition was false.
 	public init() { }
 
 	/// Returns a property that always rejects whatever result occurs.

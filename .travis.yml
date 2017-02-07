@@ -35,10 +35,9 @@ matrix:
         - echo $SIMULATOR_ID
         - echo $iOS_DEVICE_NAME
         - echo $iOS_RUNTIME_VERSION
-        # !!!: Start simulator w/ desired device—helps avoid issues w/ Xcode timing out when waiting for simulator to become ready
-        - open -b com.apple.iphonesimulator --args -CurrentDeviceUDID $SIMULATOR_ID
+        - xcodebuild build-for-testing -scheme SwiftCheck-iOS -destination "platform=iOS Simulator,name=${iOS_DEVICE_NAME},OS=${iOS_RUNTIME_VERSION}" | xcpretty -c
         - xcodebuild test -scheme SwiftCheck-iOS -destination "platform=iOS Simulator,name=${iOS_DEVICE_NAME},OS=${iOS_RUNTIME_VERSION}" | xcpretty -c
-        # -- End iOS --
+        - xcodebuild build-for-testing -scheme SwiftCheck-tvOS -destination 'platform=tvOS Simulator,name=Apple TV 1080p' | xcpretty -c
         - xcodebuild test -scheme SwiftCheck-tvOS -destination 'platform=tvOS Simulator,name=Apple TV 1080p' | xcpretty -c
     - os: linux
       language: generic

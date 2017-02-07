@@ -55,6 +55,7 @@ public struct Blind<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 	/// Retrieves the underlying value.
 	public let getBlind : A
 
+	/// Creates a new `Blind` modifier from an underlying value.
 	public init(_ blind : A) {
 		self.getBlind = blind
 	}
@@ -78,8 +79,9 @@ public struct Blind<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 }
 
 extension Blind : CoArbitrary {
-	// Take the lazy way out.
+	/// Uses the underlying value to perturb a generator.
 	public static func coarbitrary<C>(_ x : Blind) -> ((Gen<C>) -> Gen<C>) {
+		// Take the lazy way out.
 		return coarbitraryPrintable(x)
 	}
 }
@@ -89,6 +91,7 @@ public struct Static<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 	/// Retrieves the underlying value.
 	public let getStatic : A
 
+	/// Creates a new `Static` modifier from an underlying value.
 	public init(_ fixed : A) {
 		self.getStatic = fixed
 	}
@@ -105,8 +108,9 @@ public struct Static<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 }
 
 extension Static : CoArbitrary {
-	// Take the lazy way out.
+	/// Uses the underlying value to perturb a generator.
 	public static func coarbitrary<C>(_ x : Static) -> ((Gen<C>) -> Gen<C>) {
+		// Take the lazy way out.
 		return coarbitraryPrintable(x)
 	}
 }
@@ -121,6 +125,7 @@ public struct ArrayOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 		return ContiguousArray(self.getArray)
 	}
 
+	/// Creates a new `ArrayOf` modifier from an underlying array of values.
 	public init(_ array : [A]) {
 		self.getArray = array
 	}
@@ -142,6 +147,7 @@ public struct ArrayOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 }
 
 extension ArrayOf : CoArbitrary {
+	/// Uses the underlying array of values to perturb a generator.
 	public static func coarbitrary<C>(_ x : ArrayOf) -> ((Gen<C>) -> Gen<C>) {
 		let a = x.getArray
 		if a.isEmpty {
@@ -162,6 +168,11 @@ public struct OrderedArrayOf<A : Arbitrary & Comparable> : Arbitrary, CustomStri
 		return ContiguousArray(self.getOrderedArray)
 	}
 
+	/// Creates a new `OrderedArrayOf` modifier from an underlying array of 
+	/// values.
+	///
+	/// The values in the array are not required to be sorted, they will
+	/// be sorted by the initializer.
 	public init(_ array : [A]) {
 		self.getOrderedArray = array.sorted()
 	}
@@ -188,6 +199,8 @@ public struct DictionaryOf<K : Hashable & Arbitrary, V : Arbitrary> : Arbitrary,
 	/// Retrieves the underlying dictionary of values.
 	public let getDictionary : Dictionary<K, V>
 
+	/// Creates a new `DictionaryOf` modifier from an underlying dictionary of
+	/// key-value pairs.
 	public init(_ dict : Dictionary<K, V>) {
 		self.getDictionary = dict
 	}
@@ -209,6 +222,7 @@ public struct DictionaryOf<K : Hashable & Arbitrary, V : Arbitrary> : Arbitrary,
 }
 
 extension DictionaryOf : CoArbitrary {
+	/// Uses the underlying array of values to perturb a generator.
 	public static func coarbitrary<C>(_ x : DictionaryOf) -> ((Gen<C>) -> Gen<C>) {
 		return Dictionary.coarbitrary(x.getDictionary)
 	}
@@ -219,6 +233,7 @@ public struct OptionalOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 	/// Retrieves the underlying optional value.
 	public let getOptional : A?
 
+	/// Creates a new `OptionalOf` modifier from an underlying `Optional` value.
 	public init(_ opt : A?) {
 		self.getOptional = opt
 	}
@@ -240,6 +255,7 @@ public struct OptionalOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 }
 
 extension OptionalOf : CoArbitrary {
+	/// Uses the underlying presence or lack of a value to perturb a generator.
 	public static func coarbitrary<C>(_ x : OptionalOf) -> ((Gen<C>) -> Gen<C>) {
 		if let _ = x.getOptional {
 			return { $0.variant(0) }
@@ -253,6 +269,7 @@ public struct SetOf<A : Hashable & Arbitrary> : Arbitrary, CustomStringConvertib
 	/// Retrieves the underlying set of values.
 	public let getSet : Set<A>
 
+	/// Creates a new `SetOf` modifier from an underlying set of values.
 	public init(_ set : Set<A>) {
 		self.getSet = set
 	}
@@ -282,6 +299,7 @@ public struct SetOf<A : Hashable & Arbitrary> : Arbitrary, CustomStringConvertib
 }
 
 extension SetOf : CoArbitrary {
+	/// Uses the underlying set of values to perturb a generator.
 	public static func coarbitrary<C>(_ x : SetOf) -> ((Gen<C>) -> Gen<C>) {
 		if x.getSet.isEmpty {
 			return { $0.variant(0) }
@@ -384,6 +402,7 @@ public struct Large<A : RandomType & LatticeType & Integer> : Arbitrary {
 	/// Retrieves the underlying large value.
 	public let getLarge : A
 
+	/// Creates a new `Large` modifier from a given bounded integral value.
 	public init(_ lrg : A) {
 		self.getLarge = lrg
 	}
@@ -409,6 +428,7 @@ public struct Positive<A : Arbitrary & SignedNumber> : Arbitrary, CustomStringCo
 	/// Retrieves the underlying positive value.
 	public let getPositive : A
 
+	/// Creates a new `Positive` modifier from a given signed integral value.
 	public init(_ pos : A) {
 		self.getPositive = pos
 	}
@@ -430,8 +450,9 @@ public struct Positive<A : Arbitrary & SignedNumber> : Arbitrary, CustomStringCo
 }
 
 extension Positive : CoArbitrary {
-	// Take the lazy way out.
+	/// Uses the underlying positive integral value to perturb a generator.
 	public static func coarbitrary<C>(_ x : Positive) -> ((Gen<C>) -> Gen<C>) {
+		// Take the lazy way out.
 		return coarbitraryPrintable(x)
 	}
 }
@@ -441,6 +462,7 @@ public struct NonZero<A : Arbitrary & Integer> : Arbitrary, CustomStringConverti
 	/// Retrieves the underlying non-zero value.
 	public let getNonZero : A
 
+	/// Creates a new `NonZero` modifier from a given integral value.
 	public init(_ non : A) {
 		self.getNonZero = non
 	}
@@ -462,6 +484,7 @@ public struct NonZero<A : Arbitrary & Integer> : Arbitrary, CustomStringConverti
 }
 
 extension NonZero : CoArbitrary {
+	/// Uses the underlying non-zero integral value to perturb a generator.
 	public static func coarbitrary<C>(_ x : NonZero) -> ((Gen<C>) -> Gen<C>) {
 		return x.getNonZero.coarbitraryIntegral()
 	}
@@ -472,6 +495,7 @@ public struct NonNegative<A : Arbitrary & Integer> : Arbitrary, CustomStringConv
 	/// Retrieves the underlying non-negative value.
 	public let getNonNegative : A
 
+	/// Creates a new `NonNegative` modifier from a given integral value.
 	public init(_ non : A) {
 		self.getNonNegative = non
 	}
@@ -493,6 +517,7 @@ public struct NonNegative<A : Arbitrary & Integer> : Arbitrary, CustomStringConv
 }
 
 extension NonNegative : CoArbitrary {
+	/// Uses the underlying non-negative integral value to perturb a generator.
 	public static func coarbitrary<C>(_ x : NonNegative) -> ((Gen<C>) -> Gen<C>) {
 		return x.getNonNegative.coarbitraryIntegral()
 	}
