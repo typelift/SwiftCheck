@@ -10,16 +10,15 @@
 /// type.  It is analogous to `GeneratorType`, but rather than consume a
 /// sequence it uses sources of randomness to generate values indefinitely.
 public protocol RandomGeneneratorType {
-	/// The next operation returns an Int that is uniformly distributed in the
-	/// range returned by `genRange` (including both end points), and a new
-	/// generator.
+	/// Returns an `Int` that is uniformly distributed in the range returned by
+	/// `genRange` (including both end points), and a new random value generator.
 	var next : (Int, Self) { get }
-	/// The genRange operation yields the range of values returned by the
-	/// generator.
+	/// Yields the range of values returned by the generator.
 	///
 	/// This property must return integers in ascending order.
 	var genRange : (Int, Int) { get }
-	/// Splits the receiver into two distinct random value generators.
+	/// Splits the current random value generator into two distinct random value
+	/// generators.
 	var split : (Self, Self) { get }
 }
 
@@ -69,7 +68,8 @@ public struct StdGen : RandomGeneneratorType {
 		return (z_, StdGen(s1__, s2__))
 	}
 
-	/// Splits the receiver and returns two distinct random number generators.
+	/// Splits the random number generator and returns two distinct random 
+	/// number generators.
 	public var split : (StdGen, StdGen) {
 		let s1 = self.seed1
 		let s2 = self.seed2

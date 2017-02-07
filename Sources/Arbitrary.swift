@@ -10,7 +10,7 @@
 ///
 /// While testing, SwiftCheck will invoke `arbitrary` a given amount of times
 /// (usually 100 if the default settings are used).  During that time, the
-/// receiver has an opportunity to call through to any data or sources of
+/// callee has an opportunity to call through to any data or sources of
 /// randomness it needs to return what it deems an "Arbitrary" value.
 ///
 /// Shrinking is reduction in the complexity of a tested value to remove noise

@@ -225,7 +225,7 @@ public struct OptionalOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
 
 	/// A textual representation of `self`.
 	public var description : String {
-		return "\(self.getOptional)"
+		return "\(String(describing: self.getOptional))"
 	}
 
 	/// Returns a generator for `OptionalOf` values.
@@ -626,7 +626,7 @@ private final class PointerOfImpl<T : Arbitrary> : Arbitrary {
 	let size : Int
 
 	var description : String {
-		return "\(self.ptr)"
+		return "\(String(describing: self.ptr))"
 	}
 
 	init(_ ptr : UnsafeMutablePointer<T>, _ size : Int) {

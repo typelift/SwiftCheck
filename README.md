@@ -281,7 +281,7 @@ let vowels = Gen.fromElements(of: [ "A", "E", "I", "O", "U" ])
 
 let randomHexValue = Gen<UInt>.choose((0, 15))
 
-let uppers : Gen<Character>= Gen<Character>.fromElements(in: "A"..."Z")
+let uppers : Gen<Character> = Gen<Character>.fromElements(in: "A"..."Z")
 let lowers : Gen<Character> = Gen<Character>.fromElements(in: "a"..."z")
 let numbers : Gen<Character> = Gen<Character>.fromElements(in: "0"..."9")
  

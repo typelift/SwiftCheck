@@ -13,7 +13,7 @@
 /// generator relies on its size to help control aspects like the length of
 /// generated arrays and the magnitude of integral values.
 public struct Gen<A> {
-	/// The function underlying the receiver.
+	/// The function underlying the generator.
 	///
 	///          +--- An RNG
 	///          |       +--- The size of generated values.
@@ -64,7 +64,7 @@ public struct Gen<A> {
 
 	/// Constructs a Generator that uses a given array to produce smaller arrays
 	/// composed of its initial segments.  The size of each initial segment
-	/// increases with the receiver's size parameter.
+	/// increases with the generator's size parameter.
 	///
 	/// The input array is required to be non-empty.
 	public static func fromInitialSegments<S>(of xs : [S]) -> Gen<[S]> {
@@ -182,7 +182,7 @@ extension Gen {
 // MARK: Generator Modifiers
 
 extension Gen {
-	/// Shakes up the receiver's internal Random Number Generator with a seed.
+	/// Shakes up the generator's internal Random Number Generator with a seed.
 	public func variant<S : Integer>(_ seed : S) -> Gen<A> {
 		return Gen(unGen: { rng, n in
 			return self.unGen(vary(seed, rng), n)
@@ -218,7 +218,7 @@ extension Gen {
 
 			var size = n
 			var r1 = r
-			var scrutinee : A? = valGen.unGen(r, size)
+			var scrutinee : A? = valGen.unGen(r1, size)
 			while scrutinee == nil {
 				let (rl, rr) = r1.split
 				size = size + 1
@@ -254,7 +254,7 @@ extension Gen {
 	}
 
 	/// Modifies a Generator such that it produces arrays with a length
-	/// determined by the receiver's size parameter.
+	/// determined by the generator's size parameter.
 	public var proliferate : Gen<[A]> {
 		return Gen<[A]>.sized { n in
 			return Gen.choose((0, n)).flatMap(self.proliferate(withSize:))
@@ -262,7 +262,7 @@ extension Gen {
 	}
 
 	/// Modifies a Generator such that it produces non-empty arrays with a
-	/// length determined by the receiver's size parameter.
+	/// length determined by the generator's size parameter.
 	public var proliferateNonEmpty : Gen<[A]> {
 		return Gen<[A]>.sized { n in
 			return Gen.choose((1, max(1, n))).flatMap(self.proliferate(withSize:))
@@ -317,13 +317,13 @@ extension Gen {
 
 extension Gen /*: Functor*/ {
 	/// Returns a new generator that applies a given function to any outputs the
-	/// receiver creates.
+	/// generator creates.
 	///
 	/// This function is most useful for converting between generators of inter-
 	/// related types.  For example, you might have a Generator of `Character`
 	/// values that you then `.proliferate` into an `Array` of `Character`s.  You
-	/// can then use `fmap` to convert that generator of `Array`s to a generator of
-	/// `String`s.
+	/// can then use `map` to convert that generator of `Array`s to a generator 
+	/// of `String`s.
 	public func map<B>(_ f : @escaping (A) -> B) -> Gen<B> {
 		return Gen<B>(unGen: { r, n in
 			return f(self.unGen(r, n))
@@ -340,7 +340,7 @@ extension Gen /*: Applicative*/ {
 	}
 
 	/// Given a generator of functions, applies any generated function to any
-	/// outputs the receiver creates.
+	/// outputs the generator creates.
 	public func ap<B>(_ fn : Gen<(A) -> B>) -> Gen<B> {
 		return Gen<B>(unGen: { r, n in
 			let (r1, r2) = r.split
