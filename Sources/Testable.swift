@@ -45,16 +45,17 @@ public struct Property : Testable {
 public struct Prop : Testable {
 	var unProp : Rose<TestResult>
 
-	/// Returns a property that tests the receiver.
+	/// Returns a property that tests the `Prop`.
 	public var property : Property {
-		//        return Property(Gen.pure(Prop(unProp: .IORose(protectRose({ self.unProp })))))
+		// return Property(Gen.pure(Prop(unProp: .IORose(protectRose({ self.unProp })))))
 		return Property(Gen.pure(Prop(unProp: .ioRose({ self.unProp }))))
 	}
 }
 
 /// When returned from a test case, that particular case is discarded.
 public struct Discard : Testable {
-	/// Create a `Discard` suitable for
+	/// Create a `Discard` suitable for disregarding a test case as though a
+	/// precondition was false.
 	public init() { }
 
 	/// Returns a property that always rejects whatever result occurs.
@@ -64,15 +65,16 @@ public struct Discard : Testable {
 }
 
 extension TestResult : Testable {
-	/// Returns a property that tests the receiver.
+	/// Returns a property that evaluates to this test result.
 	public var property : Property {
 		return Property(Gen.pure(Prop(unProp: Rose.pure(self))))
 	}
 }
 
 extension Bool : Testable {
-	/// Returns a property that evaluates to a test success if the receiver is
-	/// `true`, else returns a property that evaluates to a test failure.
+	/// Returns a property that evaluates to a test success if this boolean 
+	/// value is `true`, else returns a property that evaluates to a test 
+	/// failure.
 	public var property : Property {
 		return TestResult.liftBool(self).property
 	}

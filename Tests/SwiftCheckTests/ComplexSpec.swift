@@ -9,7 +9,7 @@
 import SwiftCheck
 import XCTest
 
-let upper : Gen<Character>= Gen<Character>.fromElements(in: "A"..."Z")
+let upper : Gen<Character> = Gen<Character>.fromElements(in: "A"..."Z")
 let lower : Gen<Character> = Gen<Character>.fromElements(in: "a"..."z")
 let numeric : Gen<Character> = Gen<Character>.fromElements(in: "0"..."9")
 let special : Gen<Character> = Gen<Character>.fromElements(of: ["!", "#", "$", "%", "&", "'", "*", "+", "-", "/", "=", "?", "^", "_", "`", "{", "|", "}", "~", "."])
