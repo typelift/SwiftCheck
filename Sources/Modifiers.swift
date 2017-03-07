@@ -313,8 +313,8 @@ public struct PointerOf<T : Arbitrary> : Arbitrary, CustomStringConvertible {
 	fileprivate let _impl : PointerOfImpl<T>
 
 	/// Retrieves the underlying pointer value.
-	public var getPointer : UnsafePointer<T> {
-		return UnsafePointer(self._impl.ptr!)
+	public var getPointer : UnsafeBufferPointer<T> {
+		return UnsafeBufferPointer(start: self._impl.ptr, count: self.size)
 	}
 
 	public var size : Int {
@@ -673,7 +673,7 @@ private final class PointerOfImpl<T : Arbitrary> : Arbitrary {
 				return Gen.pure(PointerOfImpl(UnsafeMutablePointer<T>.allocate(capacity: size), size))
 			}
 			let pt = UnsafeMutablePointer<T>.allocate(capacity: n)
-			let gt = sequence(Array((0..<n)).map { _ in T.arbitrary }).map(pt.initialize)
+			let gt = sequence(Array((0..<n)).map { _ in T.arbitrary }).map({ UnsafeMutableBufferPointer(start: pt, count: n).initialize(from: $0) })
 			return gt.map { _ in PointerOfImpl(pt, n) }
 		}
 	}

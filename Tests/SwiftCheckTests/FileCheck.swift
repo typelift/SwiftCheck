@@ -9,8 +9,6 @@
 import Foundation
 #if os(Linux)
   import Glibc
-
-  typealias NSRegularExpression = RegularExpression
 #else
   import Darwin
 #endif
