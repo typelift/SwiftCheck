@@ -244,7 +244,7 @@ extension Float : Arbitrary {
 	public static func shrink(_ x : Float) -> [Float] {
 		let tail = Int64(x).shrinkIntegral.map(Float.init(_:))
 		if (x.sign == .minus) {
-			return [abs(x)] + tail
+			return [Swift.abs(x)] + tail
 		}
 		return tail
 	}
@@ -273,7 +273,7 @@ extension Double : Arbitrary {
 	public static func shrink(_ x : Double) -> [Double] {
 		let tail = Int64(x).shrinkIntegral.map(Double.init(_:))
 		if (x.sign == .minus) {
-			return [abs(x)] + tail
+			return [Swift.abs(x)] + tail
 		}
 		return tail
 	}

@@ -57,24 +57,24 @@ extension Int64 : LatticeType {}
 extension Float : LatticeType {
 	/// The lower limit of the `Float` type.
 	public static var min : Float {
-		return FLT_MIN
+		return Float.leastNormalMagnitude
 	}
 
 	/// The upper limit of the `Float` type.
 	public static var max : Float {
-		return FLT_MAX
+		return Float.greatestFiniteMagnitude
 	}
 }
 
 extension Double : LatticeType {
 	/// The lower limit of the `Double` type.
 	public static var min : Double {
-		return DBL_MIN
+		return Double.leastNormalMagnitude
 	}
 
 	/// The upper limit of the `Double` type.
 	public static var max : Double {
-		return DBL_MAX
+		return Double.greatestFiniteMagnitude
 	}
 }
 

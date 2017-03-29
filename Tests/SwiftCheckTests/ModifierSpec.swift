@@ -27,7 +27,7 @@ class ModifierSpec : XCTestCase {
 			// CHECK-NEXT: *** Passed 100 tests
 			// CHECK-NEXT: .
 			property("Pointers behave") <- forAll { (x : PointerOf<Int>) in
-				return x.size != 0
+				return x.size != 0 && x.getPointer.count == x.size
 			}
 
 			// CHECK-NEXT: *** Passed 100 tests
