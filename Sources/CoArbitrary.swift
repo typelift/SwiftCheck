@@ -17,7 +17,7 @@
 /// given generator (more than likely using `Gen.variant()`) based on the value
 /// it observes.
 public protocol CoArbitrary {
-	/// Uses an instance of the this type to return a function that perturbs a
+	/// Uses an instance of this type to return a function that perturbs a
 	/// generator.
 	static func coarbitrary<C>(_ x : Self) -> ((Gen<C>) -> Gen<C>)
 }
