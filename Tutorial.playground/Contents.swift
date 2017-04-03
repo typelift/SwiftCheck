@@ -455,7 +455,7 @@ import func Darwin.sqrt
 //          mark l[i]
 //      }
 //    - Remaining indices of unmarked numbers are primes
-func sieve(n : Int) -> [Int] {
+func sieve(_ n : Int) -> [Int] {
 	if n <= 1 {
 		return []
 	}
@@ -503,7 +503,7 @@ func isPrime(_ n : Int) -> Bool {
 //: following property:
 
 reportProperty("All Prime") <- forAll { (n : Positive<Int>) in
-	let primes = sieve(n: n.getPositive)
+	let primes = sieve(n.getPositive)
 	return primes.count > 1 ==> {
 		let primeNumberGen = Gen<Int>.fromElements(of: primes)
 		return forAll(primeNumberGen) { (p : Int) in
