@@ -240,7 +240,7 @@ extension Repeated where Element : Arbitrary {
 			return repeatElement(element , count: count)
 		}
 
-		return Gen<(Element, Int)>.zip(Element.arbitrary, Int.arbitrary).map(constructor)
+		return Gen<(Element, Int)>.zip(Element.arbitrary, Int.arbitrary).map({ t in constructor(t.0, t.1) })
 	}
 }
 

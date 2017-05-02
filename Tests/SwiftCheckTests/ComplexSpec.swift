@@ -88,6 +88,6 @@ func glue(_ parts : [Gen<String>]) -> Gen<String> {
 
 extension String {
 	fileprivate var initial : String {
-		return self[self.startIndex..<self.characters.index(before: self.endIndex)]
+		return self.substring(with: self.startIndex..<self.characters.index(before: self.endIndex))
 	}
 }

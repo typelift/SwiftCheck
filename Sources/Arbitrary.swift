@@ -89,6 +89,19 @@ extension Bool : Arbitrary {
 	}
 }
 
+extension BinaryInteger {
+	/// Shrinks any `Numeric` type.
+	public var shrinkIntegral : [Self] {
+		return unfoldr({ i in
+			if i <= 0 {
+				return .none
+			}
+			let n = i / 2
+			return .some((n, n))
+		}, initial: self < 0 ? (self * -1) : self)
+	}
+}
+
 extension Int : Arbitrary {
 	/// Returns a generator of `Int` values.
 	public static var arbitrary : Gen<Int> {
@@ -107,7 +120,7 @@ extension Int8 : Arbitrary {
 	/// Returns a generator of `Int8` values.
 	public static var arbitrary : Gen<Int8> {
 		return Gen.sized { n in
-			return Gen<Int8>.choose((Int8(truncatingBitPattern: -n), Int8(truncatingBitPattern: n)))
+			return Gen<Int8>.choose((Int8(extendingOrTruncating: -n), Int8(extendingOrTruncating: n)))
 		}
 	}
 
@@ -121,7 +134,7 @@ extension Int16 : Arbitrary {
 	/// Returns a generator of `Int16` values.
 	public static var arbitrary : Gen<Int16> {
 		return Gen.sized { n in
-			return Gen<Int16>.choose((Int16(truncatingBitPattern: -n), Int16(truncatingBitPattern: n)))
+			return Gen<Int16>.choose((Int16(extendingOrTruncating: -n), Int16(extendingOrTruncating: n)))
 		}
 	}
 
@@ -135,7 +148,7 @@ extension Int32 : Arbitrary {
 	/// Returns a generator of `Int32` values.
 	public static var arbitrary : Gen<Int32> {
 		return Gen.sized { n in
-			return Gen<Int32>.choose((Int32(truncatingBitPattern: -n), Int32(truncatingBitPattern: n)))
+			return Gen<Int32>.choose((Int32(extendingOrTruncating: -n), Int32(extendingOrTruncating: n)))
 		}
 	}
 
@@ -175,7 +188,7 @@ extension UInt8 : Arbitrary {
 	/// Returns a generator of `UInt8` values.
 	public static var arbitrary : Gen<UInt8> {
 		return Gen.sized { n in
-			return Gen.sized { n in Gen<UInt8>.choose((0, UInt8(truncatingBitPattern: n))) }
+			return Gen.sized { n in Gen<UInt8>.choose((0, UInt8(extendingOrTruncating: n))) }
 		}
 	}
 
@@ -188,7 +201,7 @@ extension UInt8 : Arbitrary {
 extension UInt16 : Arbitrary {
 	/// Returns a generator of `UInt16` values.
 	public static var arbitrary : Gen<UInt16> {
-		return Gen.sized { n in Gen<UInt16>.choose((0, UInt16(truncatingBitPattern: n))) }
+		return Gen.sized { n in Gen<UInt16>.choose((0, UInt16(extendingOrTruncating: n))) }
 	}
 
 	/// The default shrinking function for `UInt16` values.
@@ -200,7 +213,7 @@ extension UInt16 : Arbitrary {
 extension UInt32 : Arbitrary {
 	/// Returns a generator of `UInt32` values.
 	public static var arbitrary : Gen<UInt32> {
-		return Gen.sized { n in Gen<UInt32>.choose((0, UInt32(truncatingBitPattern: n))) }
+		return Gen.sized { n in Gen<UInt32>.choose((0, UInt32(extendingOrTruncating: n))) }
 	}
 
 	/// The default shrinking function for `UInt32` values.
@@ -263,8 +276,8 @@ extension Double : Arbitrary {
 			let numerator = Gen<Int64>.choose((Int64(-n) * precision, Int64(n) * precision))
 			let denominator = Gen<Int64>.choose((1, precision))
 
-			return Gen<(Int64, Int64)>.zip(numerator, denominator).map { a, b in
-				return Double(a) / Double(b)
+			return Gen<(Int64, Int64)>.zip(numerator, denominator).map { t in
+				return Double(t.0) / Double(t.1)
 			}
 		}
 	}
