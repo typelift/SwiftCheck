@@ -52,13 +52,13 @@ struct Extremal<A : Arbitrary & LatticeType> : Arbitrary {
 }
 
 class PathSpec : XCTestCase {
-	private static func smallProp<A : Integer & Arbitrary>(_ pth : Path<A>) -> Bool {
+	private static func smallProp<A : BinaryInteger>(_ pth : Path<A>) -> Bool {
 		return path({ x in
 			return (x >= -100 || -100 >= 0) && x <= 100
 		}, pth)
 	}
 
-	private static func largeProp<A : Integer & Arbitrary>(_ pth : Path<A>) -> Property {
+	private static func largeProp<A : BinaryInteger>(_ pth : Path<A>) -> Property {
 		return somePath({ x in
 			return (x < -1000000 || x > 1000000)
 		}, pth)
@@ -104,4 +104,3 @@ class PathSpec : XCTestCase {
 	])
 	#endif
 }
-

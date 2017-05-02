@@ -398,7 +398,7 @@ extension IsoOf : CustomReflectable {
 
 /// By default, SwiftCheck generates values drawn from a small range. `Large`
 /// gives you values drawn from the entire range instead.
-public struct Large<A : RandomType & LatticeType & Integer> : Arbitrary {
+public struct Large<A : RandomType & LatticeType & BinaryInteger> : Arbitrary {
 	/// Retrieves the underlying large value.
 	public let getLarge : A
 
@@ -424,7 +424,7 @@ public struct Large<A : RandomType & LatticeType & Integer> : Arbitrary {
 }
 
 /// Guarantees that every generated integer is greater than 0.
-public struct Positive<A : Arbitrary & SignedNumber> : Arbitrary, CustomStringConvertible {
+public struct Positive<A : Arbitrary & SignedInteger> : Arbitrary, CustomStringConvertible {
 	/// Retrieves the underlying positive value.
 	public let getPositive : A
 
@@ -458,7 +458,7 @@ extension Positive : CoArbitrary {
 }
 
 /// Guarantees that every generated integer is never 0.
-public struct NonZero<A : Arbitrary & Integer> : Arbitrary, CustomStringConvertible {
+public struct NonZero<A : Arbitrary & BinaryInteger> : Arbitrary, CustomStringConvertible {
 	/// Retrieves the underlying non-zero value.
 	public let getNonZero : A
 
@@ -491,7 +491,7 @@ extension NonZero : CoArbitrary {
 }
 
 /// Guarantees that every generated integer is greater than or equal to 0.
-public struct NonNegative<A : Arbitrary & Integer> : Arbitrary, CustomStringConvertible {
+public struct NonNegative<A : Arbitrary & BinaryInteger> : Arbitrary, CustomStringConvertible {
 	/// Retrieves the underlying non-negative value.
 	public let getNonNegative : A
 
@@ -565,9 +565,10 @@ fileprivate final class ArrowOfImpl<T : Hashable & CoArbitrary, U : Arbitrary> :
 	}
 
 	static func shrink(_ f : ArrowOfImpl<T, U>) -> [ArrowOfImpl<T, U>] {
-		return f.table.flatMap { (x, y) in
-			return U.shrink(y).map({ (y2 : U) -> ArrowOfImpl<T, U> in
-				return ArrowOfImpl<T, U>({ (z : T) -> U in
+		return f.table.flatMap { (t) -> [ArrowOfImpl<T, U>] in
+			let (x, y) = t
+			return U.shrink(y).map({ y2 in
+				return ArrowOfImpl<T, U>({ z in
 					if x == z {
 						return y2
 					}
@@ -603,7 +604,7 @@ fileprivate final class IsoOfImpl<T : Hashable & CoArbitrary & Arbitrary, U : Eq
 		}
 
 		self.project = { u in
-			let ts = table.filter { $1 == u }.map { $0.0 }
+			let ts = table.filter({ t in t.1 == u }).map { $0.0 }
 			if let k = ts.first, let _ = table[k] {
 				return k
 			}
@@ -622,12 +623,14 @@ fileprivate final class IsoOfImpl<T : Hashable & CoArbitrary & Arbitrary, U : Eq
 			return T.coarbitrary(a)(U.arbitrary)
 		}), promote({ a in
 			return U.coarbitrary(a)(T.arbitrary)
-		})).map(IsoOfImpl.init)
+		})).map({ t in IsoOfImpl(t.0, t.1) })
 	}
 
 	static func shrink(_ f : IsoOfImpl<T, U>) -> [IsoOfImpl<T, U>] {
-		return f.table.flatMap { (x, y) in
-			return Zip2Sequence(_sequence1: T.shrink(x), _sequence2: U.shrink(y)).map({ (y1 , y2) -> IsoOfImpl<T, U> in
+		return f.table.flatMap { (t) -> [IsoOfImpl<T, U>] in
+			let (x, y) = t
+			return Zip2Sequence(_sequence1: T.shrink(x), _sequence2: U.shrink(y)).map({ t in
+				let (y1 , y2) = t
 				return IsoOfImpl<T, U>(
 					{ (z : T) -> U in
 						if x == z {

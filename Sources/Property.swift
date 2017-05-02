@@ -161,7 +161,7 @@ extension Testable {
 	///
 	/// - returns: A `Property` that prints the counterexample value on failure.
 	public func counterexample(_ example : String) -> Property {
-		return self.withCallback(Callback.afterFinalFailure(kind: .counterexample) { _ in
+		return self.withCallback(Callback.afterFinalFailure(kind: .counterexample) { (_,_) in
 			return print(example)
 		})
 	}
@@ -173,7 +173,7 @@ extension Testable {
 	///
 	/// - returns: A `Property` that executes the given callback block on failure.
 	public func whenFail(_ callback : @escaping () -> ()) -> Property {
-		return self.withCallback(Callback.afterFinalFailure(kind: .notCounterexample) { _ in
+		return self.withCallback(Callback.afterFinalFailure(kind: .notCounterexample) { (_,_) in
 			return callback()
 		})
 	}
@@ -597,9 +597,9 @@ private func protectResult(_ r : @escaping () throws -> TestResult) -> (() -> Te
 	return { protect(exception("Exception"), x: r) }
 }
 
-internal func unionWith<K : Hashable, V>(_ f : (V, V) -> V, l : Dictionary<K, V>, r : Dictionary<K, V>) -> Dictionary<K, V> {
+internal func unionWith<K, V>(_ f : (V, V) -> V, l : Dictionary<K, V>, r : Dictionary<K, V>) -> Dictionary<K, V> {
 	var map = l
-	r.forEach { (k, v) in
+	for (k, v) in r {
 		if let val = map.updateValue(v, forKey: k) {
 			map.updateValue(f(val, v), forKey: k)
 		}
@@ -607,7 +607,7 @@ internal func unionWith<K : Hashable, V>(_ f : (V, V) -> V, l : Dictionary<K, V>
 	return map
 }
 
-private func insertWith<K : Hashable, V>(_ f : (V, V) -> V, k : K, v : V, m : Dictionary<K, V>) -> Dictionary<K, V> {
+private func insertWith<K, V>(_ f : (V, V) -> V, k : K, v : V, m : Dictionary<K, V>) -> Dictionary<K, V> {
 	var res = m
 	let oldV = res[k]
 	if let existV = oldV {
@@ -668,52 +668,51 @@ private func printLabels(_ st : TestResult) {
 	} else if st.labels.count == 1, let pt = st.labels.first {
 		print("(\(pt.0))")
 	} else {
-		let gAllLabels = st.labels.map({ (l, _) in
-			return l + ", "
+		let gAllLabels = st.labels.map({ t in
+			return t.0 + ", "
 		}).reduce("", +)
 		print("("  + gAllLabels[gAllLabels.startIndex..<gAllLabels.characters.index(gAllLabels.endIndex, offsetBy: -2)] + ")")
 	}
 }
 
 private func conj(_ k : @escaping (TestResult) -> TestResult, xs : [Rose<TestResult>]) -> Rose<TestResult> {
-	if xs.isEmpty {
+	guard let p = xs.first else {
 		return Rose.mkRose({ k(TestResult.succeeded) }, { [] })
-	} else if let p = xs.first {
-		return .ioRose(/*protectRose*/({
-			let rose = p.reduce
-			switch rose {
-			case .mkRose(let result, _):
-				if !result().expect {
-					return Rose.pure(TestResult.failed("expectFailure may not occur inside a conjunction"))
-				}
-
-				switch result().ok {
-				case .some(true):
-					return conj(comp(addLabels(result()), comp(addCallbacks(result()), k)), xs: [Rose<TestResult>](xs[1..<xs.endIndex]))
-				case .some(false):
-					return rose
-				case .none:
-					let rose2 = conj(comp(addCallbacks(result()), k), xs: [Rose<TestResult>](xs[1..<xs.endIndex])).reduce
-					switch rose2 {
-					case .mkRose(let result2, _):
-						switch result2().ok {
-						case .some(true):
-							return Rose.mkRose({ TestResult.rejected }, { [] })
-						case .some(false):
-							return rose2
-						case .none:
-							return rose2
-						}
-					default:
-						fatalError("Rose should not have reduced to IORose")
-					}
-				}
-			default:
-				fatalError("Rose should not have reduced to IORose")
-			}
-		}))
 	}
-	fatalError("Non-exhaustive if-else statement reached")
+	return .ioRose(/*protectRose*/({
+		let rose = p.reduce
+		switch rose {
+		case .mkRose(let result, _):
+			if !result().expect {
+				return Rose.pure(TestResult.failed("expectFailure may not occur inside a conjunction"))
+			}
+
+			switch result().ok {
+			case .some(true):
+				return conj(comp(addLabels(result()), comp(addCallbacks(result()), k)), xs: [Rose<TestResult>](xs[1..<xs.endIndex]))
+			case .some(false):
+				return rose
+			case .none:
+				let rose2 = conj(comp(addCallbacks(result()), k), xs: [Rose<TestResult>](xs[1..<xs.endIndex])).reduce
+				switch rose2 {
+				case .mkRose(let result2, _):
+					switch result2().ok {
+					case .some(true):
+						return Rose.mkRose({ TestResult.rejected }, { [] })
+					case .some(false):
+						return rose2
+					case .none:
+						return rose2
+					}
+				default:
+					fatalError("Rose should not have reduced to IORose")
+				}
+			}
+		default:
+			fatalError("Rose should not have reduced to IORose")
+		}
+		fatalError()
+	}))
 }
 
 private func disj(_ p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult> {
@@ -733,7 +732,7 @@ private func disj(_ p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResu
 				case .some(true):
 					return Rose<TestResult>.pure(result2)
 				case .some(false):
-					let callbacks : [Callback] = [.afterFinalFailure(kind: .counterexample, { _ in return print("") })]
+					let callbacks : [Callback] = [.afterFinalFailure(kind: .counterexample, { (_, _) in return print("") })]
 					return Rose<TestResult>.pure(TestResult(
 						ok:            .some(false),
 						expect:        true,
