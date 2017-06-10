@@ -398,7 +398,7 @@ extension IsoOf : CustomReflectable {
 
 /// By default, SwiftCheck generates values drawn from a small range. `Large`
 /// gives you values drawn from the entire range instead.
-public struct Large<A : RandomType & LatticeType & Integer> : Arbitrary {
+public struct Large<A : RandomType & LatticeType & FixedWidthInteger> : Arbitrary {
 	/// Retrieves the underlying large value.
 	public let getLarge : A
 
