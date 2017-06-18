@@ -264,8 +264,8 @@
 			isa = PBXGroup;
 			children = (
 				826D81521C953D070022266C /* SwiftCheck.h */,
-				844FCC8F198B320500EB242A /* SwiftCheck */,
-				844FCC9C198B320500EB242A /* SwiftCheckTests */,
+				844FCC8F198B320500EB242A /* Sources */,
+				844FCC9C198B320500EB242A /* Tests */,
 				FAAB9E781D91B96C0097AC78 /* Templates */,
 				844FCC8E198B320500EB242A /* Products */,
 			);
@@ -287,7 +287,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		844FCC8F198B320500EB242A /* SwiftCheck */ = {
+		844FCC8F198B320500EB242A /* Sources */ = {
 			isa = PBXGroup;
 			children = (
 				826D81461C953D070022266C /* Arbitrary.swift */,
@@ -308,7 +308,7 @@
 				826D81571C953D070022266C /* WitnessedArbitrary.swift */,
 				844FCC90198B320500EB242A /* Supporting Files */,
 			);
-			path = SwiftCheck;
+			path = Sources;
 			sourceTree = "<group>";
 		};
 		844FCC90198B320500EB242A /* Supporting Files */ = {
@@ -319,7 +319,7 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		844FCC9C198B320500EB242A /* SwiftCheckTests */ = {
+		844FCC9C198B320500EB242A /* Tests */ = {
 			isa = PBXGroup;
 			children = (
 				82F371481DA7010800D60203 /* FileCheck.swift */,
@@ -342,7 +342,7 @@
 				825C9ACC1D8EE84F003313E1 /* TestSpec.swift */,
 				844FCC9D198B320500EB242A /* Supporting Files */,
 			);
-			path = SwiftCheckTests;
+			path = Tests;
 			sourceTree = "<group>";
 		};
 		844FCC9D198B320500EB242A /* Supporting Files */ = {
