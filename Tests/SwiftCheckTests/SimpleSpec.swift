@@ -20,7 +20,10 @@ public struct ArbitraryFoo {
 
 extension ArbitraryFoo : Arbitrary {
 	public static var arbitrary : Gen<ArbitraryFoo> {
-		return Gen<(Int, Int)>.zip(Int.arbitrary, Int.arbitrary).map(ArbitraryFoo.init)
+		return Gen<(Int, Int)>.zip(Int.arbitrary, Int.arbitrary).map {
+			let (a1, a2) = $0
+			return ArbitraryFoo(x: a1, y: a2)
+		}
 	}
 }
 
@@ -93,16 +96,20 @@ extension ArbitraryLargeFoo : Arbitrary {
 			.zip( Int8.arbitrary, Int16.arbitrary, Int32.arbitrary, Int64.arbitrary
 				, UInt8.arbitrary, UInt16.arbitrary, UInt32.arbitrary, UInt64.arbitrary
 				, Int.arbitrary, UInt.arbitrary)
-			.flatMap { t in
+			.flatMap {
+				let (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9) = $0
 				return Gen<(Bool, (Bool, Bool), (Bool, Bool, Bool), (Bool, Bool, Bool, Bool))>
 					.map(
 						Bool.arbitrary,
 						Gen<(Bool, Bool)>.zip(Bool.arbitrary, Bool.arbitrary),
 						Gen<(Bool, Bool, Bool)>.zip(Bool.arbitrary, Bool.arbitrary, Bool.arbitrary),
 						Gen<(Bool, Bool, Bool, Bool)>.zip(Bool.arbitrary, Bool.arbitrary, Bool.arbitrary, Bool.arbitrary)
-					) { t2 in
-						(t.0, t.1, t.2, t.3, t.4, t.5, t.6, t.7, t.8, t.9, t2.0, t2.1, t2.2, t2.3)
-					}.map(ArbitraryLargeFoo.init)
+					) { u0, u1, u2, u3 in
+						return (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, u0, u1, u2, u3)
+					}.map {
+						let (a, b, c, d, e, f, g, h, i, j, k, l, m, n) = $0
+						return ArbitraryLargeFoo(a: a, b: b, c: c, d: d, e: e, f: f, g: g, h: h, i: i, j: j, k: k, l: l, m: m, n: n)
+					}
 		}
 	}
 }
@@ -205,7 +212,8 @@ class SimpleSpec : XCTestCase {
 			
 			// CHECK-NEXT: *** Passed 100 tests
 			// CHECK-NEXT: .
-			property("Inverses work") <- forAllNoShrink(inverses) { (op, iop) in
+			property("Inverses work") <- forAllNoShrink(inverses) {
+				let (op, iop) = $0
 				return forAll { (x : UInt8, y : UInt8) in
 					return op(x, y) ==== !iop(x, y)
 				}
