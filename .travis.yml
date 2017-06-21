@@ -45,9 +45,9 @@ matrix:
       before_install:
         - git submodule update --init --recursive
         - wget -q -O - https://swift.org/keys/all-keys.asc | gpg --import -
-        - wget https://swift.org/builds/swift-3.1-release/ubuntu1404/swift-3.1-RELEASE/swift-3.1-RELEASE-ubuntu14.04.tar.gz
-        - tar xzf swift-3.1-RELEASE-ubuntu14.04.tar.gz
-        - export PATH=${PWD}/swift-3.1-RELEASE-ubuntu14.04/usr/bin:"${PATH}"
+        - wget https://swift.org/builds/development/ubuntu1404/swift-DEVELOPMENT-SNAPSHOT-2017-06-19-a/swift-DEVELOPMENT-SNAPSHOT-2017-06-19-a-ubuntu14.04.tar.gz
+        - tar xzf swift-DEVELOPMENT-SNAPSHOT-2017-06-19-a-ubuntu14.04.tar.gz
+        - export PATH=${PWD}/swift-DEVELOPMENT-SNAPSHOT-2017-06-19-a-ubuntu14.04/usr/bin:"${PATH}"
         - pushd Utilities
         - ./compile.sh
         - popd
