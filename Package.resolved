@@ -3,11 +3,11 @@
     "pins": [
       {
         "package": "Operadics",
-        "repositoryURL": "https://github.com/typelift/Operadics.git",
+        "repositoryURL": "https://github.com/tcldr/Operadics.git",
         "state": {
-          "branch": null,
-          "revision": "bc8cdd83868c395b7075d0db5e930842172012ec",
-          "version": "0.2.3"
+          "branch": "swift-4",
+          "revision": "56028a5dd6374db7606db72509d5bb607dbfeb5a",
+          "version": null
         }
       }
     ]
