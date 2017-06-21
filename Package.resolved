@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Operadics",
+        "repositoryURL": "https://github.com/typelift/Operadics.git",
+        "state": {
+          "branch": null,
+          "revision": "bc8cdd83868c395b7075d0db5e930842172012ec",
+          "version": "0.2.3"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
