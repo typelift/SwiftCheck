@@ -6,7 +6,7 @@ import Foundation.NSDate
 //: # Prerequisites
 
 //: This tutorial assumes that you have a fairly good grasp of Swift, its syntax, and terms like
-//: 
+//:
 //: * [(Data) Type](https://developer.apple.com/library/ios/documentation/Swift/Conceptual/Swift_Programming_Language/TheBasics.html)
 //: * [Protocol-Oriented Programming](https://developer.apple.com/videos/wwdc/2015/?id=408)
 //: * [Test-Driven Development](https://en.wikipedia.org/wiki/Test-driven_development)
@@ -23,16 +23,16 @@ import Foundation.NSDate
 
 //: SwiftCheck is a testing library that augments libraries like `XCTest` and `Quick` by giving
 //: them the ability to automatically test program properties.  A property is a particular facet of
-//: an algorithm, method, data structure, or program that must *hold* (that is, remain valid) even 
-//: when fed random or pseudo-random data.  If that all seems complicated, it may be simpler to 
-//: think of Property Testing like Fuzz Testing, but with the outcome being to satisfy requirements 
+//: an algorithm, method, data structure, or program that must *hold* (that is, remain valid) even
+//: when fed random or pseudo-random data.  If that all seems complicated, it may be simpler to
+//: think of Property Testing like Fuzz Testing, but with the outcome being to satisfy requirements
 //: rather than break the program.  Throughout this tutorial, simplifications like the above will be
 //: made to aid your understanding.  Towards the end of it, we will begin to remove many of these
 //: "training wheels" and reveal the real concepts and types of the operations in the library, which
 //: are often much more powerful and generic than previously presented.
 //:
-//: Unlike Unit Testing, Property Testing is antithetical to the use of state and global variables.  Property 
-//: Tests are local, atomic entities that ideally only use the data given to them to match a 
+//: Unlike Unit Testing, Property Testing is antithetical to the use of state and global variables.  Property
+//: Tests are local, atomic entities that ideally only use the data given to them to match a
 //: user-defined specification for the behavior of a program or algorithm.  While this may
 //: seem draconian, the upshot of following these [unwritten] rules is that the produced tests become
 //: "law-like", as in a [Mathematical or Scientific Law](https://en.wikipedia.org/wiki/Laws_of_science).
@@ -46,8 +46,8 @@ import Foundation.NSDate
 //: # `Gen`erators
 
 //: In Swift, when one thinks of a Generator, they usually think of the `GeneratorType` protocol or
-//: the many many individual structures the Swift Standard Library exposes to allow loops to work 
-//: with data structures like `[T]` and `Set<T>`.  In *SwiftCheck*, we also have Generators, but we spell 
+//: the many many individual structures the Swift Standard Library exposes to allow loops to work
+//: with data structures like `[T]` and `Set<T>`.  In *SwiftCheck*, we also have Generators, but we spell
 //: them `Gen`erators, as in the universal Generator type `Gen`.
 //:
 //: `Gen` is a struct defined generically over any kind of type that looks like this:
@@ -56,8 +56,8 @@ import Foundation.NSDate
 //     struct Gen<Wrapped> { }
 //
 //: `Gen`, unlike `GeneratorType`, is not backed by a concrete data structure like an `Array` or
-//: `Dictionary`, but is instead constructed by invoking methods that refine the kind of data that 
-//: gets generated.  Below are some examples of `Gen`erators that generate random instances of 
+//: `Dictionary`, but is instead constructed by invoking methods that refine the kind of data that
+//: gets generated.  Below are some examples of `Gen`erators that generate random instances of
 //: simple data types.
 
 // `Gen.pure` constructs a generator that *only* produces the given value.
@@ -69,7 +69,7 @@ onlyFive.generate
 onlyFive.generate
 onlyFive.generate
 
-// `Gen.fromElementsIn` constructs a generator that pulls values from inside the  bounds of the 
+// `Gen.fromElementsIn` constructs a generator that pulls values from inside the  bounds of the
 // given Range.  Because generation is random, some values may be repeated.
 let fromOnetoFive = Gen<Int>.fromElements(in: 1...5)
 
@@ -101,14 +101,14 @@ specialCharacters.generate
 specialCharacters.generate
 specialCharacters.generate
 
-//: But SwiftCheck `Gen`erators aren't just flat types, they stack and compose and fit together in 
+//: But SwiftCheck `Gen`erators aren't just flat types, they stack and compose and fit together in
 //: amazing ways.
 
 // `Gen.oneOf` randomly picks one of the generators from the given list and draws element from it.
 let uppersAndLowers = Gen<Character>.one(of: [
-	lowerCaseLetters,
-	upperCaseLetters,
-])
+    lowerCaseLetters,
+    upperCaseLetters,
+    ])
 
 uppersAndLowers.generate
 uppersAndLowers.generate
@@ -123,15 +123,15 @@ pairsOfNumbers.generate
 pairsOfNumbers.generate
 pairsOfNumbers.generate
 
-//: `Gen`erators don't have to always generate their elements with equal frequency.  SwiftCheck 
-//: includes a number of functions for creating `Gen`erators with "weights" attached to their 
+//: `Gen`erators don't have to always generate their elements with equal frequency.  SwiftCheck
+//: includes a number of functions for creating `Gen`erators with "weights" attached to their
 //: elements.
 
 // This generator ideally generates nil 1/4 (1 / (1 + 3)) of the time and `.Some(5)` 3/4 of the time.
 let weightedGen = Gen<Int?>.weighted([
-	(1, nil),
-	(3, .some(5)),
-])
+    (1, nil),
+    (3, .some(5)),
+    ])
 
 weightedGen.generate
 weightedGen.generate
@@ -140,9 +140,9 @@ weightedGen.generate
 
 // `Gen.frequency` works like `Gen.weighted` and `Gen.oneOf` put together.
 let biasedUppersAndLowers = Gen<Character>.frequency([
-	(1, uppersAndLowers),
-	(3, lowerCaseLetters),
-])
+    (1, uppersAndLowers),
+    (3, lowerCaseLetters),
+    ])
 
 //: `Gen`erators can even filter, modify, or combine the elements they create.
 
@@ -153,7 +153,7 @@ oneToFiveEven.generate
 oneToFiveEven.generate
 oneToFiveEven.generate
 
-// `proliferate` turns a generator of single elements into a generator of arrays of those elements. 
+// `proliferate` turns a generator of single elements into a generator of arrays of those elements.
 let characterArray = uppersAndLowers.proliferate
 
 characterArray.generate
@@ -180,15 +180,15 @@ fromTwoToSix.generate
 fromTwoToSix.generate
 fromTwoToSix.generate
 
-// `Gen.flatMap` works exactly like `Array`'s `flatMap`, but instead of concatenating the generated 
-// arrays it produces a new generator that picks values from among the newly created generators 
+// `Gen.flatMap` works exactly like `Array`'s `flatMap`, but instead of concatenating the generated
+// arrays it produces a new generator that picks values from among the newly created generators
 // produced by the function.
 //
-// While that definition may *technically* be what occurs, it is better to think of `flatMap` as a 
-// way of making a generator depend on another.  For example, you can use a generator of sizes to 
+// While that definition may *technically* be what occurs, it is better to think of `flatMap` as a
+// way of making a generator depend on another.  For example, you can use a generator of sizes to
 // limit the length of generators of arrays:
 let generatorBoundedSizeArrays = fromOnetoFive.flatMap { len in
-	return characterArray.suchThat { xs in xs.count <= len }
+    return characterArray.suchThat { xs in xs.count <= len }
 }
 
 generatorBoundedSizeArrays.generate
@@ -212,43 +212,43 @@ let special : Gen<Character> = Gen<Character>.fromElements(of: ["!", "#", "$", "
 //: Now for the actual generator
 
 let allowedLocalCharacters : Gen<Character> = Gen<Character>.one(of: [
-	upperCaseLetters,
-	lowerCaseLetters,
-	numeric,
-	special,
-])
+    upperCaseLetters,
+    lowerCaseLetters,
+    numeric,
+    special,
+    ])
 
 
 //: Now we need a `String` made of these characters. so we'll just `proliferate` an array of characters and `map`
 //: to get a `String` back.
 
 let localEmail = allowedLocalCharacters
-					.proliferateNonEmpty // Make a non-empty array of characters
-					.suchThat({ $0[$0.index(before: $0.endIndex)] != "." }) // Such that the last character isn't a dot.
-					.map { String($0) } // Then make a string.
+    .proliferateNonEmpty // Make a non-empty array of characters
+    .suchThat({ $0[$0.index(before: $0.endIndex)] != "." }) // Such that the last character isn't a dot.
+    .map { String($0) } // Then make a string.
 
 //: The RFC says that the host name can only consist of lowercase letters, numbers, and dashes.  We'll skip some
 //: steps here and combine them all into one big generator.
 
 let hostname = Gen<Character>.one(of: [
-	lowerCaseLetters,
-	numeric,
-	Gen.pure("-"),
-]).proliferateNonEmpty.map { String($0) }
+    lowerCaseLetters,
+    numeric,
+    Gen.pure("-"),
+    ]).proliferateNonEmpty.map { String($0) }
 
 //: Finally, the RFC says the TLD for the address can only consist of lowercase letters with a length larger than 1.
 
 let tld = lowerCaseLetters
-			.proliferateNonEmpty
-			.suchThat({ $0.count > 1 })
-			.map { String($0) }
+    .proliferateNonEmpty
+    .suchThat({ $0.count > 1 })
+    .map { String($0) }
 
 //: So now that we've got all the pieces, so how do we put them together to make the final generator?  Well, how
 //: about some glue?
 
 // Concatenates an array of `String` `Gen`erators together in order.
 func glue(_ parts : [Gen<String>]) -> Gen<String> {
-	return sequence(parts).map { $0.reduce("", +) }
+    return sequence(parts).map { $0.reduce("", +) }
 }
 
 let emailGen = glue([localEmail, Gen.pure("@"), hostname, Gen.pure("."), tld])
@@ -288,18 +288,18 @@ emailGen.generate
 //: for `Int` calls `arc4random_uniform`.
 //:
 //: SwiftCheck uses a strategy called a `Modifier Type`–a wrapper around one type that we can't
-//: generate with another that we can–for a few of the more "difficult" types in the Swift Standard 
+//: generate with another that we can–for a few of the more "difficult" types in the Swift Standard
 //: Library, but we also use them in more benign ways too.  For example, we can write a modifier type
 //: that only generates positive numbers:
 
-public struct ArbitraryPositive<A : Arbitrary & SignedNumber> : Arbitrary {
-	public let getPositive : A
-
-	public init(_ pos : A) { self.getPositive = pos }
-
-	public static var arbitrary : Gen<ArbitraryPositive<A>> {
-		return A.arbitrary.map { ArbitraryPositive.init(abs($0)) }
-	}
+public struct ArbitraryPositive<A : Arbitrary & SignedNumeric & Comparable> : Arbitrary {
+    public let getPositive : A
+    
+    public init(_ pos : A) { self.getPositive = pos }
+    
+    public static var arbitrary : Gen<ArbitraryPositive<A>> {
+        return A.arbitrary.map { ArbitraryPositive.init(abs($0)) }
+    }
 }
 
 ArbitraryPositive<Int>.arbitrary.generate.getPositive
@@ -329,7 +329,7 @@ ArbitraryPositive<Int>.arbitrary.generate.getPositive
 //     |                                                          |
 //     v                                                          v
 property("The reverse of the reverse of an array is that array") <- forAll { (xs : [Int]) in
-	return xs.reversed().reversed() == xs
+    return xs.reversed().reversed() == xs
 }
 
 // From now on, all of our examples will take the form above.
@@ -341,17 +341,17 @@ property("The reverse of the reverse of an array is that array") <- forAll { (xs
 //                                           |                    |    can generate *functions*!!
 //                                           v                    v
 property("filter behaves") <- forAll { (xs : ArrayOf<Int>, pred : ArrowOf<Int, Bool>) in
-	let f = pred.getArrow
-	return xs.getArray.filter(f).reduce(true, { $0.0 && f($0.1) })
-	// ^ This property says that if we filter an array then apply the predicate
-	//   to all its elements, then they should all respond with `true`.
+    let f = pred.getArrow
+    return xs.getArray.filter(f).reduce(true, { $0 && f($1) })
+    // ^ This property says that if we filter an array then apply the predicate
+    //   to all its elements, then they should all respond with `true`.
 }
 
 // How about a little Boolean Algebra too?
 property("DeMorgan's Law") <- forAll { (x : Bool, y : Bool) in
-	let l = !(x && y) == (!x || !y)
-	let r = !(x || y) == (!x && !y)
-	return l && r
+    let l = !(x && y) == (!x || !y)
+    let r = !(x || y) == (!x && !y)
+    return l && r
 }
 
 //: The thing to notice about all of these examples is that there isn't a `Gen`erator in sight.  Not
@@ -368,9 +368,9 @@ property("DeMorgan's Law") <- forAll { (x : Bool, y : Bool) in
 // still print all failures to the console.  We use it here because XCTest does not like it when you
 // assert outside of a test case.
 reportProperty("Obviously wrong") <- forAll({ (x : Int) in
-	return x != x
+    return x != x
 }).whenFail { // `whenFail` attaches a callback to the test when we fail.
-	print("Oh noes!")
+    print("Oh noes!")
 }
 
 //: If you open the console for the playground, you'll see output very similar to the following:
@@ -424,19 +424,19 @@ Array<Int>.shrink([1, 2, 3])
 // will often be times when those default shrinkers don't cut it, or you need more control over
 // what happens when you generate or shrink values.  Modifier Types to the rescue!
 struct ArbitraryEmail : Arbitrary {
-	let getEmail : String
-
-	init(email : String) { self.getEmail = email }
-
-	static var arbitrary : Gen<ArbitraryEmail> { return emailGen.map(ArbitraryEmail.init) }
+    let getEmail : String
+    
+    init(email : String) { self.getEmail = email }
+    
+    static var arbitrary : Gen<ArbitraryEmail> { return emailGen.map(ArbitraryEmail.init) }
 }
 
 // Let's be wrong for the sake of example
 property("email addresses don't come with a TLD") <- forAll { (email : ArbitraryEmail) in
-	return !email.getEmail.contains(".")
-}.expectFailure // It turns out true things aren't the only thing we can test.  We can `expectFailure`
-				// to make SwiftCheck, well, expect failure.  Beware, however, that if you don't fail
-				// and live up to your expectations, SwiftCheck treats that as a failure of the test case.
+    return !email.getEmail.contains(".")
+    }.expectFailure // It turns out true things aren't the only thing we can test.  We can `expectFailure`
+// to make SwiftCheck, well, expect failure.  Beware, however, that if you don't fail
+// and live up to your expectations, SwiftCheck treats that as a failure of the test case.
 
 //: # All Together Now!
 
@@ -456,27 +456,27 @@ import func Darwin.sqrt
 //      }
 //    - Remaining indices of unmarked numbers are primes
 func sieve(_ n : Int) -> [Int] {
-	if n <= 1 {
-		return []
-	}
-
-	var marked : [Bool] = (0...n).map { _ in false }
-	marked[0] = true
-	marked[1] = true
-
-	for p in 2..<n {
-		for i in stride(from: 2 * p, to: n, by: p) {
-			marked[i] = true
-		}
-	}
-
-	var primes : [Int] = []
-	for (t, i) in zip(marked, 0...n) {
-		if !t {
-			primes.append(i)
-		}
-	}
-	return primes
+    if n <= 1 {
+        return []
+    }
+    
+    var marked : [Bool] = (0...n).map { _ in false }
+    marked[0] = true
+    marked[1] = true
+    
+    for p in 2..<n {
+        for i in stride(from: 2 * p, to: n, by: p) {
+            marked[i] = true
+        }
+    }
+    
+    var primes : [Int] = []
+    for (t, i) in zip(marked, 0...n) {
+        if !t {
+            primes.append(i)
+        }
+    }
+    return primes
 }
 
 // Trial Division
@@ -484,32 +484,32 @@ func sieve(_ n : Int) -> [Int] {
 // Short and sweet check if a number is prime by enumerating from 2...⌈√(x)⌉ and checking
 // for a nonzero modulus.
 func isPrime(_ n : Int) -> Bool {
-	if n == 0 || n == 1 {
-		return false
-	} else if n == 2 {
-		return true
-	}
-
-	let max = Int(ceil(sqrt(Double(n))))
-	for i in 2...max {
-		if n % i == 0 {
-			return false
-		}
-	}
-	return true
+    if n == 0 || n == 1 {
+        return false
+    } else if n == 2 {
+        return true
+    }
+    
+    let max = Int(ceil(sqrt(Double(n))))
+    for i in 2...max {
+        if n % i == 0 {
+            return false
+        }
+    }
+    return true
 }
 
 //: We would like to test whether our sieve works properly, so we run it through SwiftCheck with the
 //: following property:
 
 reportProperty("All Prime") <- forAll { (n : Positive<Int>) in
-	let primes = sieve(n.getPositive)
-	return primes.count > 1 ==> {
-		let primeNumberGen = Gen<Int>.fromElements(of: primes)
-		return forAll(primeNumberGen) { (p : Int) in
-			return isPrime(p)
-		}
-	}
+    let primes = sieve(n.getPositive)
+    return primes.count > 1 ==> {
+        let primeNumberGen = Gen<Int>.fromElements(of: primes)
+        return forAll(primeNumberGen) { (p : Int) in
+            return isPrime(p)
+        }
+    }
 }
 
 //: This test introduces several new concepts that we'll go through 1-by-1:
@@ -559,39 +559,39 @@ reportProperty("All Prime") <- forAll { (n : Positive<Int>) in
 //: Looks like we used `to:` when we meant `through:`.  Let's try again:
 
 func sieveProperly(_ n : Int) -> [Int] {
-	if n <= 1 {
-		return []
-	}
-
-	var marked : [Bool] = (0...n).map { _ in false }
-	marked[0] = true
-	marked[1] = true
-
-	for p in 2..<n {
-
-		for i in stride(from: 2 * p, through: n, by: p) {
-			marked[i] = true
-		}
-	}
-
-	var primes : [Int] = []
-	for (t, i) in zip(marked, 0...n) {
-		if !t {
-			primes.append(i)
-		}
-	}
-	return primes
+    if n <= 1 {
+        return []
+    }
+    
+    var marked : [Bool] = (0...n).map { _ in false }
+    marked[0] = true
+    marked[1] = true
+    
+    for p in 2..<n {
+        
+        for i in stride(from: 2 * p, through: n, by: p) {
+            marked[i] = true
+        }
+    }
+    
+    var primes : [Int] = []
+    for (t, i) in zip(marked, 0...n) {
+        if !t {
+            primes.append(i)
+        }
+    }
+    return primes
 }
 
 // Fo' Real This Time.
 property("All Prime") <- forAll { (n : Positive<Int>) in
-	let primes = sieveProperly(n.getPositive)
-	return primes.count > 1 ==> {
-		let primeNumberGen = Gen<Int>.fromElements(of: primes)
-		return forAll(primeNumberGen) { (p : Int) in
-			return isPrime(p)
-		}
-	}
+    let primes = sieveProperly(n.getPositive)
+    return primes.count > 1 ==> {
+        let primeNumberGen = Gen<Int>.fromElements(of: primes)
+        return forAll(primeNumberGen) { (p : Int) in
+            return isPrime(p)
+        }
+    }
 }
 
 //: And that's how you test with SwiftCheck.  When properties fail, it means some part of your algorithm
@@ -603,8 +603,8 @@ property("All Prime") <- forAll { (n : Positive<Int>) in
 //: Just for fun, let's try a simpler property that checks the same outcome:
 
 property("All Prime") <- forAll { (n : Positive<Int>) in
-	// Sieving Properly then filtering for primes is the same as just Sieving, right?
-	return sieveProperly(n.getPositive).filter(isPrime) == sieveProperly(n.getPositive)
+    // Sieving Properly then filtering for primes is the same as just Sieving, right?
+    return sieveProperly(n.getPositive).filter(isPrime) == sieveProperly(n.getPositive)
 }
 
 //: # One More Thing
@@ -626,11 +626,11 @@ property("All Prime") <- forAll { (n : Positive<Int>) in
 //: every so often on one particular value:
 
 reportProperty("Screw this value in particular") <- forAll { (n : UInt) in
-	if (n == 42) {
-		return false
-	}
-
-	return true
+    if (n == 42) {
+        return false
+    }
+    
+    return true
 }
 
 //: But with a replay seed of (1391985334, 382376411) we can always reproduce the failure because
@@ -640,11 +640,11 @@ reportProperty("Screw this value in particular") <- forAll { (n : UInt) in
 /// size to completely replicate a particular set of values that caused the first test to fail.
 let replayArgs = CheckerArguments(replay: (StdGen(1391985334, 382376411), 100))
 reportProperty("Replay", arguments: replayArgs) <- forAll { (n : UInt) in
-	if (n == 42) {
-		return false
-	}
-	return true
-}.verbose
+    if (n == 42) {
+        return false
+    }
+    return true
+    }.verbose
 
 //: # Conclusion
 
@@ -664,3 +664,4 @@ reportProperty("Replay", arguments: replayArgs) <- forAll { (n : UInt) in
 //: * [The Original (slightly outdated) QuickCheck Tutorial](http://www.cse.chalmers.se/~rjmh/QuickCheck/manual.html)
 //:
 //: Go forth and test.
+

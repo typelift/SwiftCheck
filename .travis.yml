@@ -5,7 +5,7 @@ matrix:
   include:
     - os: osx
       language: objective-c
-      osx_image: xcode8.3
+      osx_image: xcode9
       before_install:
         - git submodule update --init --recursive
         - pushd Utilities
@@ -16,7 +16,7 @@ matrix:
         - carthage build --no-skip-current
     - os: osx
       language: objective-c
-      osx_image: xcode8.3
+      osx_image: xcode9
       before_install:
         - git submodule update --init --recursive
         - pushd Utilities
@@ -27,8 +27,8 @@ matrix:
         - xcodebuild test -scheme SwiftCheck | xcpretty -c
         # -- Start iOS --
         # !!!: Make sure desired device name & OS version are suitable for the Xcode version installed on osx_image
-        - iOS_DEVICE_NAME="iPad Pro (12.9 inch)"
-        - iOS_RUNTIME_VERSION="10.0"
+        - iOS_DEVICE_NAME="iPad Pro (12.9-inch) (2nd generation)"
+        - iOS_RUNTIME_VERSION="11.0"
         # Get simulator identifier for desired device/runtime pair
         - SIMULATOR_ID=$(xcrun instruments -s | grep -o "${iOS_DEVICE_NAME} (${iOS_RUNTIME_VERSION}) \[.*\]" | grep -o "\[.*\]" | sed "s/^\[\(.*\)\]$/\1/")
         - echo $SIMULATOR_ID
@@ -45,9 +45,9 @@ matrix:
       before_install:
         - git submodule update --init --recursive
         - wget -q -O - https://swift.org/keys/all-keys.asc | gpg --import -
-        - wget https://swift.org/builds/swift-4.0-branch/ubuntu1404/swift-4.0-DEVELOPMENT-SNAPSHOT-2017-05-17-a/swift-4.0-DEVELOPMENT-SNAPSHOT-2017-05-17-a-ubuntu14.04.tar.gz
-        - tar xzf swift-4.0-DEVELOPMENT-SNAPSHOT-2017-05-17-a-ubuntu14.04.tar.gz
-        - export PATH=${PWD}/swift-4.0-DEVELOPMENT-SNAPSHOT-2017-05-17-a-ubuntu14.04/usr/bin:"${PATH}"
+        - wget https://swift.org/builds/swift-4.0-branch/ubuntu1404/swift-4.0-DEVELOPMENT-SNAPSHOT-2017-07-06-a/swift-4.0-DEVELOPMENT-SNAPSHOT-2017-07-06-a-ubuntu14.04.tar.gz
+        - tar xzf swift-4.0-DEVELOPMENT-SNAPSHOT-2017-07-06-a-ubuntu14.04.tar.gz
+        - export PATH=${PWD}/swift-4.0-DEVELOPMENT-SNAPSHOT-2017-07-06-a-ubuntu14.04/usr/bin:"${PATH}"
         - pushd Utilities
         - ./compile.sh
         - popd

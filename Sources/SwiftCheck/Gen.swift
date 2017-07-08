@@ -44,7 +44,7 @@ public struct Gen<A> {
 	/// collection and produces only that value.
 	///
 	/// The input collection is required to be non-empty.
-	public static func fromElements<S : Collection>(of xs : S) -> Gen<S._Element>
+	public static func fromElements<S : Collection>(of xs : S) -> Gen<S.Element>
 		where S.Index : RandomType
 	{
 		return Gen.fromElements(in: xs.startIndex...xs.index(xs.endIndex, offsetBy: -1)).map { i in
@@ -391,9 +391,9 @@ private func vary<S : BinaryInteger>(_ k : S, _ rng : StdGen) -> StdGen {
 	return (k == (k / 2)) ? gen : vary(k / 2, rng)
 }
 
-private func size<S : BinaryInteger>(_ k : S, _ m : Int) -> Int {
+private func size(_ k : Int, _ m : Int) -> Int {
 	let n = Double(m)
-	return Int((log(n + 1)) * (Double(exactly: k) ?? 0.0) / log(100))
+	return Int((log(n + 1)) * Double(k) / log(100))
 }
 
 private func selectOne<A>(_ xs : [A]) -> [(A, [A])] {

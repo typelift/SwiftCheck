@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Operadics",
+        "repositoryURL": "https://github.com/tcldr/Operadics.git",
+        "state": {
+          "branch": "swift-4",
+          "revision": "8ee78809312caa4c82625fa7a5cba40fb16f10fd",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}

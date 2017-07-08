@@ -54,7 +54,19 @@ class FailureSpec : XCTestCase {
 
 	/// h/t @robrix for the suggestion ~( https://github.com/antitypical/Assertions/blob/master/AssertionsTests/AssertionsTests.swift )
 	/// and @ishikawa for the idea ~( https://github.com/antitypical/Assertions/pull/3#issuecomment-76337761 )
-	override func recordFailure(withDescription message : String, inFile file : String, atLine line : UInt, expected : Bool) {
+	#if os(Linux)
+	override func recordFailure(
+		withDescription description: String, inFile filePath: String?, atLine lineNumber: UInt, expected: Bool) {
+		if !expected {
+			assert(false, "Assertion should never throw.")
+		} else {
+		//            super.recordFailureWithDescription(message, inFile: file, atLine: line, expected: expected)
+			failCount = (failCount + 1)
+		}
+	}
+	#else
+	override func recordFailure(
+		withDescription message : String, inFile file : String, atLine line : Int, expected : Bool) {
 		if !expected {
 			assert(false, "Assertion should never throw.")
 		} else {
@@ -62,11 +74,11 @@ class FailureSpec : XCTestCase {
 			failCount = (failCount + 1)
 		}
 	}
+	#endif
 
 	override func tearDown() {
 		XCTAssert(failCount == tests.count)
 	}
-
 
 	#if !(os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
 	static var allTests = testCase([
