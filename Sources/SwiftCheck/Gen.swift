@@ -402,9 +402,9 @@ private func vary<S : BinaryInteger>(_ k : S, _ rng : StdGen) -> StdGen {
 	return (k == (k / 2)) ? gen : vary(k / 2, rng)
 }
 
-private func size<S : BinaryInteger>(_ k : S, _ m : Int) -> Int {
+private func size(_ k : Int, _ m : Int) -> Int {
 	let n = Double(m)
-	return Int((log(n + 1)) * (Double(exactly: k) ?? 0.0) / log(100))
+	return Int((log(n + 1)) * Double(k) / log(100))
 }
 
 private func selectOne<A>(_ xs : [A]) -> [(A, [A])] {

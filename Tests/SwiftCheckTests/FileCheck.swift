@@ -301,7 +301,7 @@ private func findFirstMatch(in inbuffer : UnsafeBufferPointer<CChar>, among pref
 		let bd = Data(buffer: buffer)
 		let range = bd.range(of: prefixStr.data(using: .utf8)!)!
 		buffer = buffer.dropFront(range.lowerBound)
-		lineNumber += skippedPrefix.characters.filter({ c in c == "\n" }).count
+		lineNumber += skippedPrefix.filter({ c in c == "\n" }).characters.count
 		// Check that the matched prefix isn't a suffix of some other check-like
 		// word.
 		// FIXME: This is a very ad-hoc check. it would be better handled in some
@@ -658,11 +658,7 @@ private class Pattern {
 		// If this defines any variables, remember their values.
 		for (v, index) in self.variableDefs {
 			assert(index < fullMatch.numberOfRanges, "Internal paren error")
-			#if os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
-				let r = fullMatch.rangeAt(index)
-			#else
-				let r = fullMatch.range(at: index)
-			#endif
+			let r = fullMatch.range(at: index)
 			variableTable[v] = buffer.substring(
 				with: Range<String.Index>(
 					uncheckedBounds: (
