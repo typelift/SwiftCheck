@@ -27,7 +27,7 @@ matrix:
         - xcodebuild test -scheme SwiftCheck | xcpretty -c
         # -- Start iOS --
         # !!!: Make sure desired device name & OS version are suitable for the Xcode version installed on osx_image
-        - iOS_DEVICE_NAME="iPad Pro (12.9 inch)"
+        - iOS_DEVICE_NAME="iPad Pro (12.9-inch)"
         - iOS_RUNTIME_VERSION="10.0"
         # Get simulator identifier for desired device/runtime pair
         - SIMULATOR_ID=$(xcrun instruments -s | grep -o "${iOS_DEVICE_NAME} (${iOS_RUNTIME_VERSION}) \[.*\]" | grep -o "\[.*\]" | sed "s/^\[\(.*\)\]$/\1/")
