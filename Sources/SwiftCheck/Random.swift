@@ -154,7 +154,7 @@ extension Int : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(_ range : (Int, Int), gen : G) -> (Int, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
-		return (Int(truncatingBitPattern: bb), gg)
+		return (Int(extendingOrTruncating: bb), gg)
 	}
 }
 
@@ -163,7 +163,7 @@ extension Int8 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(_ range : (Int8, Int8), gen : G) -> (Int8, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
-		return (Int8(truncatingBitPattern: bb), gg)
+		return (Int8(extendingOrTruncating: bb), gg)
 	}
 }
 
@@ -172,7 +172,7 @@ extension Int16 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(_ range : (Int16, Int16), gen : G) -> (Int16, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
-		return (Int16(truncatingBitPattern: bb), gg)
+		return (Int16(extendingOrTruncating: bb), gg)
 	}
 }
 
@@ -181,7 +181,7 @@ extension Int32 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(_ range : (Int32, Int32), gen : G) -> (Int32, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = Int64.randomInRange((Int64(minl), Int64(maxl)), gen: gen)
-		return (Int32(truncatingBitPattern: bb), gg)
+		return (Int32(extendingOrTruncating: bb), gg)
 	}
 }
 
@@ -228,7 +228,7 @@ extension UInt : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(_ range : (UInt, UInt), gen : G) -> (UInt, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = UInt64.randomInRange((UInt64(minl), UInt64(maxl)), gen: gen)
-		return (UInt(truncatingBitPattern: bb), gg)
+		return (UInt(extendingOrTruncating: bb), gg)
 	}
 }
 
@@ -237,7 +237,7 @@ extension UInt8 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(_ range : (UInt8, UInt8), gen : G) -> (UInt8, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = UInt64.randomInRange((UInt64(minl), UInt64(maxl)), gen: gen)
-		return (UInt8(truncatingBitPattern: bb), gg)
+		return (UInt8(extendingOrTruncating: bb), gg)
 	}
 }
 
@@ -246,7 +246,7 @@ extension UInt16 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(_ range : (UInt16, UInt16), gen : G) -> (UInt16, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = UInt64.randomInRange((UInt64(minl), UInt64(maxl)), gen: gen)
-		return (UInt16(truncatingBitPattern: bb), gg)
+		return (UInt16(extendingOrTruncating: bb), gg)
 	}
 }
 
@@ -255,7 +255,7 @@ extension UInt32 : RandomType {
 	public static func randomInRange<G : RandomGeneneratorType>(_ range : (UInt32, UInt32), gen : G) -> (UInt32, G) {
 		let (minl, maxl) = range
 		let (bb, gg) = UInt64.randomInRange((UInt64(minl), UInt64(maxl)), gen: gen)
-		return (UInt32(truncatingBitPattern: bb), gg)
+		return (UInt32(extendingOrTruncating: bb), gg)
 	}
 }
 
@@ -356,8 +356,8 @@ private func mkStdRNG(_ o : Int) -> StdGen {
 	}
 
 	let (sec, psec) = (tt.tv_sec, tt.tv_nsec)
-	let (ll, _) = Int.multiplyWithOverflow(Int(sec), 12345)
-	return mkStdGen32(Int.addWithOverflow(ll, Int.addWithOverflow(psec, Int.addWithOverflow(ct, o).0).0).0)
+	let (ll, _) = Int(sec).multipliedReportingOverflow(by: 12345)
+	return mkStdGen32(ll.addingReportingOverflow(psec.addingReportingOverflow(ct.addingReportingOverflow(o).0).0).0)
 }
 
 private func clock_gettime(_ : Int, _ t : UnsafeMutablePointer<timespec>) -> ClockTimeResult {

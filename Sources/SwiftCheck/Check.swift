@@ -148,8 +148,7 @@ public func <- (checker : AssertiveQuickCheck, test : @autoclosure @escaping () 
 		XCTFail("Expected property to fail but it didn't.  Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
 	case let .insufficientCoverage(_, seed, sz, _, _):
 		XCTFail("Property coverage insufficient.  Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
-	default:
-		return
+	default: ()
 	}
 }
 
@@ -162,8 +161,7 @@ public func <- (checker : AssertiveQuickCheck, test : () -> Testable) {
 		XCTFail("Expected property to fail but it didn't.  Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
 	case let .insufficientCoverage(_, seed, sz, _, _):
 		XCTFail("Property coverage insufficient.  Replay with \(seed) and size \(sz)", file: checker.file, line: checker.line)
-	default:
-		return
+	default: ()
 	}
 }
 

@@ -44,7 +44,7 @@ public struct Gen<A> {
 	/// collection and produces only that value.
 	///
 	/// The input collection is required to be non-empty.
-	public static func fromElements<S : Collection>(of xs : S) -> Gen<S._Element>
+	public static func fromElements<S : Collection>(of xs : S) -> Gen<S.Element>
 		where S.Index : RandomType
 	{
 		return Gen.fromElements(in: xs.startIndex...xs.index(xs.endIndex, offsetBy: -1)).map { i in
@@ -157,7 +157,7 @@ public struct Gen<A> {
 	public static func weighted<S : Sequence>(_ xs : S) -> Gen<A>
 		where S.Iterator.Element == (Int, A)
 	{
-		return frequency(xs.map { ($0, Gen.pure($1)) })
+		return frequency(xs.map { t in (t.0, Gen.pure(t.1)) })
 	}
 }
 
@@ -175,7 +175,7 @@ extension Gen {
 	/// Returns a new generator that applies a given function to any outputs the
 	/// given generators produce.
 	public static func map<A1, A2, R>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, transform: @escaping (A1, A2) -> R) -> Gen<R> {
-		return zip(ga1, ga2).map(transform)
+		return zip(ga1, ga2).map({ t in transform(t.0, t.1) })
 	}
 }
 
@@ -183,7 +183,7 @@ extension Gen {
 
 extension Gen {
 	/// Shakes up the generator's internal Random Number Generator with a seed.
-	public func variant<S : Integer>(_ seed : S) -> Gen<A> {
+	public func variant<S : BinaryInteger>(_ seed : S) -> Gen<A> {
 		return Gen(unGen: { rng, n in
 			return self.unGen(vary(seed, rng), n)
 		})
@@ -275,44 +275,6 @@ extension Gen {
 	}
 }
 
-extension Gen {
-	@available(*, unavailable, renamed: "fromElements(of:)")
-	public static func fromElementsOf<S : Collection>(_ xs : S) -> Gen<S._Element>
-		where S.Index : RandomType
-	{
-		return Gen.fromElements(of: xs)
-	}
-
-
-	@available(*, unavailable, renamed: "fromElements(in:)")
-	public static func fromElementsIn<R : RandomType>(_ xs : ClosedRange<R>) -> Gen<R> {
-		return Gen.fromElements(in: xs)
-	}
-
-	@available(*, unavailable, renamed: "fromInitialSegments(of:)")
-	public static func fromInitialSegmentsOf<S>(_ xs : [S]) -> Gen<[S]> {
-		return Gen.fromInitialSegments(of: xs)
-	}
-
-	@available(*, unavailable, renamed: "fromShufflingElements(of:)")
-	public static func fromShufflingElementsOf<S>(_ xs : [S]) -> Gen<[S]> {
-		return Gen.fromShufflingElements(of: xs)
-	}
-
-
-	@available(*, unavailable, renamed: "one(of:)")
-	public static func oneOf<S : BidirectionalCollection>(_ gs : S) -> Gen<A>
-		where S.Iterator.Element == Gen<A>, S.Index : RandomType
-	{
-		return Gen.one(of: gs)
-	}
-
-	@available(*, unavailable, renamed: "proliferate(withSize:)")
-	public func proliferateSized(_ k : Int) -> Gen<[A]> {
-		return self.proliferate(withSize: k)
-	}
-}
-
 // MARK: Instances
 
 extension Gen /*: Functor*/ {
@@ -334,7 +296,7 @@ extension Gen /*: Functor*/ {
 extension Gen /*: Applicative*/ {
 	/// Lifts a value into a generator that will only generate that value.
 	public static func pure(_ a : A) -> Gen<A> {
-		return Gen(unGen: { _ in
+		return Gen(unGen: { (_,_) in
 			return a
 		})
 	}
@@ -423,15 +385,15 @@ private func delay<A>() -> Gen<(Gen<A>) -> A> {
 	})
 }
 
-private func vary<S : Integer>(_ k : S, _ rng : StdGen) -> StdGen {
+private func vary<S : BinaryInteger>(_ k : S, _ rng : StdGen) -> StdGen {
 	let s = rng.split
 	let gen = ((k % 2) == 0) ? s.0 : s.1
 	return (k == (k / 2)) ? gen : vary(k / 2, rng)
 }
 
-private func size<S : Integer>(_ k : S, _ m : Int) -> Int {
+private func size(_ k : Int, _ m : Int) -> Int {
 	let n = Double(m)
-	return Int((log(n + 1)) * Double(k.toIntMax()) / log(100))
+	return Int((log(n + 1)) * Double(k) / log(100))
 }
 
 private func selectOne<A>(_ xs : [A]) -> [(A, [A])] {

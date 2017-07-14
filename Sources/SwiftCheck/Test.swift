@@ -598,7 +598,7 @@ internal func quickCheckWithResult(_ args : CheckerArguments, _ p : Testable) ->
 		name:                         args.name,
 		maxAllowableSuccessfulTests:  args.maxAllowableSuccessfulTests,
 		maxAllowableDiscardedTests:   args.maxAllowableDiscardedTests,
-		computeSize:                  { computeSize(args, vals: $0) },
+		computeSize:                  { (t, u) in computeSize(args, vals: (t, u)) },
 		successfulTestCount:          0,
 		discardedTestCount:           0,
 		labels:                       [:],
@@ -977,7 +977,7 @@ private func dispatchAfterTestCallbacks(_ st : CheckerState, res : TestResult) {
 		case let .afterTest(_, f):
 			f(st, res)
 		default:
-			break
+			()
 		}
 	}
 }
@@ -992,7 +992,7 @@ private func dispatchAfterFinalFailureCallbacks(_ st : CheckerState, res : TestR
 		case let .afterFinalFailure(_, f):
 			f(st, res)
 		default:
-			break
+			()
 		}
 	}
 }
@@ -1021,7 +1021,8 @@ private func printDistributionGraph(_ st : CheckerState) {
 	let allLabels : [String] = Array(gPrint.sorted().reversed())
 
 	var covers = [String]()
-	st.labels.forEach { (l, reqP) in
+	st.labels.forEach { t in
+		let (l, reqP) = t
 		let p = labelPercentage(l, st: st)
 		if p < reqP {
 			covers += ["only \(p)% " + l + ", not \(reqP)%"]
@@ -1050,7 +1051,7 @@ private func pluralize(_ s : String, _ i : Int) -> String {
 
 private func insufficientCoverage(_ st : CheckerState) -> Bool {
 	return st.labels
-		.map({ (l, reqP) in labelPercentage(l, st: st) < reqP })
+		.map({ t in labelPercentage(t.0, st: st) < t.1 })
 		.reduce(false, { $0 || $1 })
 }
 
