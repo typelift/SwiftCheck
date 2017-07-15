@@ -3,10 +3,10 @@
     "pins": [
       {
         "package": "Operadics",
-        "repositoryURL": "https://github.com/tcldr/Operadics.git",
+        "repositoryURL": "https://github.com/typelift/Operadics.git",
         "state": {
-          "branch": "swift-4",
-          "revision": "8ee78809312caa4c82625fa7a5cba40fb16f10fd",
+          "branch": "swift-develop",
+          "revision": "743e71210ea319dfd9f0e39268c5e18877debc7f",
           "version": null
         }
       }
