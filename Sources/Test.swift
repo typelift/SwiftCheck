@@ -837,7 +837,7 @@ private func doneTesting(_ st : CheckerState) -> Result {
 	} else if insufficientCoverage(st) {
 		printCond(st.silence, "*** Insufficient coverage after " + "\(st.successfulTestCount)" + pluralize(" test", st.successfulTestCount))
 		printDistributionGraph(st)
-		return .insufficientCoverage(
+		return .insufficientCoverage( 
 			numTests:  st.successfulTestCount,
 			usedSeed:  st.randomSeedGenerator,
 			usedSize:  st.computeSize(st.successfulTestCount, st.discardedTestCount),
@@ -852,7 +852,6 @@ private func doneTesting(_ st : CheckerState) -> Result {
 }
 
 private func giveUp(_ st : CheckerState) -> Result {
-	printCond(st.silence, "*** Passed " + "\(st.successfulTestCount)" + pluralize(" test", st.successfulTestCount))
 	printDistributionGraph(st)
 	return .gaveUp(numTests: st.successfulTestCount, labels: summary(st), output: "")
 }
@@ -921,7 +920,7 @@ private func findMinimalFailingTestCase(_ st : CheckerState, res : TestResult, t
 		successfulShrinkCount = (successfulShrinkCount + 1)
 	}
 
-	let state = CheckerState(
+	let state = CheckerState( 
 		name:                         st.name,
 		maxAllowableSuccessfulTests:  st.maxAllowableSuccessfulTests,
 		maxAllowableDiscardedTests:   st.maxAllowableDiscardedTests,
@@ -1122,3 +1121,4 @@ private func computeSize(_ args : CheckerArguments, vals : (successes : Int, dis
 	}
 	return computeSize_(vals.successes, vals.discards)
 }
+
