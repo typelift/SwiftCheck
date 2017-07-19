@@ -52,6 +52,9 @@ public struct StdGen : RandomGeneneratorType {
 	/// Returns an `Int` generated uniformly within the bounds of the generator
 	/// and a new distinct random number generator.
 	public var next : (Int, StdGen) {
+		// P. L'Ecuyer, ``Efficient and Portable Combined Random Number Generators'', Communications of the ACM, 31 (1988), 742--749 and 774.
+		// https://www.iro.umontreal.ca/~lecuyer/myftp/papers/cacm88.pdf
+		
 		let s1 = self.seed1
 		let s2 = self.seed2
 
