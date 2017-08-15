@@ -224,7 +224,7 @@ let allowedLocalCharacters : Gen<Character> = Gen<Character>.one(of: [
 
 let localEmail = allowedLocalCharacters
 					.proliferateNonEmpty // Make a non-empty array of characters
-					.suchThat({ $0[$0.index(before: $0.endIndex)] != "." }) // Such that the last character isn't a dot.
+					.suchThat { $0[$0.index(before: $0.endIndex)] != "." } // Such that the last character isn't a dot.
 					.map { String($0) } // Then make a string.
 
 //: The RFC says that the host name can only consist of lowercase letters, numbers, and dashes.  We'll skip some
@@ -240,7 +240,7 @@ let hostname = Gen<Character>.one(of: [
 
 let tld = lowerCaseLetters
 			.proliferateNonEmpty
-			.suchThat({ $0.count > 1 })
+			.suchThat { $0.count > 1 }
 			.map { String($0) }
 
 //: So now that we've got all the pieces, so how do we put them together to make the final generator?  Well, how
@@ -367,9 +367,9 @@ property("DeMorgan's Law") <- forAll { (x : Bool, y : Bool) in
 // `reportProperty` is a variation of `property` that doesn't assert on failure.  It does, however,
 // still print all failures to the console.  We use it here because XCTest does not like it when you
 // assert outside of a test case.
-reportProperty("Obviously wrong") <- forAll({ (x : Int) in
+reportProperty("Obviously wrong") <- forAll { (x : Int) in
 	return x != x
-}).whenFail { // `whenFail` attaches a callback to the test when we fail.
+}.whenFail { // `whenFail` attaches a callback to the test when we fail.
 	print("Oh noes!")
 }
 
