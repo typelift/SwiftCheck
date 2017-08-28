@@ -61,7 +61,7 @@ extension Arbitrary {
 	}
 }
 
-extension Integer {
+extension FixedWidthInteger {
 	/// Shrinks any `IntegerType`.
 	public var shrinkIntegral : [Self] {
 		return unfoldr({ i in
@@ -70,7 +70,7 @@ extension Integer {
 			}
 			let n = i / 2
 			return .some((n, n))
-		}, initial: self < 0 ? (Self.multiplyWithOverflow(self, -1).0) : self)
+		}, initial: self < 0 ? self.multipliedReportingOverflow(by: -1).partialValue : self)
 	}
 }
 

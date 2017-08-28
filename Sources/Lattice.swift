@@ -79,12 +79,12 @@ extension Double : LatticeType {
 }
 
 extension AnyIndex : LatticeType {
-	/// The lower limit of the `AnyForwardIndex` type.
+	/// The lower limit of the `AnyIndex` type.
 	public static var min : AnyIndex {
 		return AnyIndex(Int64.min)
 	}
 
-	/// The upper limit of the `AnyForwardIndex` type.
+	/// The upper limit of the `AnyIndex` type.
 	public static var max : AnyIndex {
 		return AnyIndex(Int64.max)
 	}

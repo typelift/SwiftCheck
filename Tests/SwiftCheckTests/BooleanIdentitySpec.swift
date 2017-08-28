@@ -9,6 +9,7 @@
 import SwiftCheck
 import XCTest
 
+
 class BooleanIdentitySpec : XCTestCase {
 	func testAll() {
 		XCTAssert(fileCheckOutput {
