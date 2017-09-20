@@ -44,8 +44,8 @@ public struct Gen<A> {
 	/// collection and produces only that value.
 	///
 	/// The input collection is required to be non-empty.
-	public static func fromElements<S : Collection>(of xs : S) -> Gen<S._Element>
-		where S.Index : Comparable & RandomType
+	public static func fromElements<S : Collection>(of xs : S) -> Gen<S.Element>
+		where S.Index : RandomType
 	{
 		return Gen.fromElements(in: xs.startIndex...xs.index(xs.endIndex, offsetBy: -1)).map { i in
 			return xs[i]
@@ -120,7 +120,7 @@ public struct Gen<A> {
 	/// If control over the distribution of generators is needed, see
 	/// `Gen.frequency` or `Gen.weighted`.
 	public static func one<S : BidirectionalCollection>(of gs : S) -> Gen<A>
-		where S.Iterator.Element == Gen<A>, S.Index : RandomType & Comparable
+		where S.Iterator.Element == Gen<A>, S.Index : RandomType
 	{
 		assert(gs.count != 0, "oneOf used with empty list")
 
@@ -277,8 +277,8 @@ extension Gen {
 
 extension Gen {
 	@available(*, unavailable, renamed: "fromElements(of:)")
-	public static func fromElementsOf<S : Collection>(_ xs : S) -> Gen<S._Element>
-		where S.Index : Comparable & RandomType
+	public static func fromElementsOf<S : Collection>(_ xs : S) -> Gen<S.Element>
+		where S.Index : RandomType
 	{
 		return Gen.fromElements(of: xs)
 	}
@@ -302,7 +302,7 @@ extension Gen {
 
 	@available(*, unavailable, renamed: "one(of:)")
 	public static func oneOf<S : BidirectionalCollection>(_ gs : S) -> Gen<A>
-		where S.Iterator.Element == Gen<A>, S.Index : RandomType & Comparable
+		where S.Iterator.Element == Gen<A>, S.Index : RandomType
 	{
 		return Gen.one(of: gs)
 	}

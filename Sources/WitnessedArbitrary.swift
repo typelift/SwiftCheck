@@ -192,8 +192,9 @@ extension Dictionary where Key : Arbitrary, Value : Arbitrary {
 	/// The default shrinking function for `Dictionary`s of arbitrary `Key`s and
 	/// `Value`s.
 	public static func shrink(_ d : Dictionary<Key, Value>) -> [Dictionary<Key, Value>] {
-		return d.map { Dictionary(zip(Key.shrink($0), Value.shrink($1)).map({ (k, v) -> (key: Key, value: Value) in
-			(key: k, value: v)
+		return d.map { Dictionary(zip(Key.shrink($0.key), Value.shrink($0.value)).map({ keyValuePair in
+			let (k, v) = keyValuePair
+			return (key: k, value: v)
 		})) }
 	}
 }
@@ -205,7 +206,7 @@ extension EmptyCollection : Arbitrary {
 	}
 }
 
-extension Range where Bound : Comparable & Arbitrary {
+extension Range where Bound : Arbitrary {
 	/// Returns a generator of `HalfOpenInterval`s of arbitrary `Bound`s.
 	public static var arbitrary : Gen<Range<Bound>> {
 		return Bound.arbitrary.flatMap { l in
@@ -221,14 +222,14 @@ extension Range where Bound : Comparable & Arbitrary {
 	}
 }
 
-extension LazyCollection where Base : Collection & Arbitrary, Base.Index : Comparable {
+extension LazyCollection where Base : Arbitrary {
 	/// Returns a generator of `LazyCollection`s of arbitrary `Base`s.
 	public static var arbitrary : Gen<LazyCollection<Base>> {
 		return LazyCollection<Base>.arbitrary
 	}
 }
 
-extension LazySequence where Base : Sequence & Arbitrary {
+extension LazySequence where Base : Arbitrary {
 	/// Returns a generator of `LazySequence`s of arbitrary `Base`s.
 	public static var arbitrary : Gen<LazySequence<Base>> {
 		return LazySequence<Base>.arbitrary
@@ -259,7 +260,7 @@ extension Repeated : WitnessedArbitrary {
 	}
 }
 
-extension Set where Element : Arbitrary & Hashable {
+extension Set where Element : Arbitrary {
 	/// Returns a generator of `Set`s of arbitrary `Element`s.
 	public static var arbitrary : Gen<Set<Element>> {
 		return Gen.sized { n in
