@@ -28,7 +28,7 @@ struct Formatter<Value> {
 		if maxIndex >= formatted.endIndex {
 			return formatted
 		} else {
-			return formatted.substring(to: maxIndex)
+			return String(formatted[..<maxIndex])
 		}
 	}
 

@@ -74,8 +74,6 @@ extension AnySequence where Element : Arbitrary {
 	}
 }
 
-//FIXME: This does not compile as of Xcode 9 beta 3 / 4.0-DEVELOPMENT-SNAPSHOT-2017-07-06
-#if false
 extension AnySequence : WitnessedArbitrary {
 	public typealias Param = Element
 
@@ -87,7 +85,6 @@ extension AnySequence : WitnessedArbitrary {
 		})
 	}
 }
-#endif
 
 extension ArraySlice where Element : Arbitrary {
 	/// Returns a generator of `ArraySlice`s of arbitrary `Element`s.
