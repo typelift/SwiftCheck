@@ -8,6 +8,9 @@
 
 import SwiftCheck
 import XCTest
+#if !XCODE_BUILD
+import FileCheck
+#endif
 
 struct Name : Arbitrary, Equatable, Hashable, CustomStringConvertible {
 	let unName : String

@@ -8,6 +8,9 @@
 
 import SwiftCheck
 import XCTest
+#if !XCODE_BUILD
+import FileCheck
+#endif
 
 struct Path<A : Arbitrary> : Arbitrary {
 	let unPath : [A]
