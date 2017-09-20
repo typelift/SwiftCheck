@@ -597,7 +597,7 @@ private func protectResult(_ r : @escaping () throws -> TestResult) -> (() -> Te
 	return { protect(exception("Exception"), x: r) }
 }
 
-internal func unionWith<K : Hashable, V>(_ f : (V, V) -> V, l : Dictionary<K, V>, r : Dictionary<K, V>) -> Dictionary<K, V> {
+internal func unionWith<K, V>(_ f : (V, V) -> V, l : Dictionary<K, V>, r : Dictionary<K, V>) -> Dictionary<K, V> {
 	var map = l
 	r.forEach { (k, v) in
 		if let val = map.updateValue(v, forKey: k) {
@@ -607,7 +607,7 @@ internal func unionWith<K : Hashable, V>(_ f : (V, V) -> V, l : Dictionary<K, V>
 	return map
 }
 
-private func insertWith<K : Hashable, V>(_ f : (V, V) -> V, k : K, v : V, m : Dictionary<K, V>) -> Dictionary<K, V> {
+private func insertWith<K, V>(_ f : (V, V) -> V, k : K, v : V, m : Dictionary<K, V>) -> Dictionary<K, V> {
 	var res = m
 	let oldV = res[k]
 	if let existV = oldV {
