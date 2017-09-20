@@ -852,6 +852,7 @@ private func doneTesting(_ st : CheckerState) -> Result {
 }
 
 private func giveUp(_ st : CheckerState) -> Result {
+	printCond(st.silence, "*** Passed " + "\(st.successfulTestCount)" + pluralize(" test", st.successfulTestCount))
 	printDistributionGraph(st)
 	return .gaveUp(numTests: st.successfulTestCount, labels: summary(st), output: "")
 }
