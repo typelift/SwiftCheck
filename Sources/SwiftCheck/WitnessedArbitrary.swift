@@ -43,17 +43,24 @@ extension AnyBidirectionalCollection where Element : Arbitrary {
 	}
 }
 
+//FIXME: This works as of Xcode 9 beta 3 but is disabled until Travis has Xcode 9 > beta 3
+#if os(Linux)
 extension AnyBidirectionalCollection : WitnessedArbitrary {
 	public typealias Param = Element
 
 	/// Given a witness and a function to test, converts them into a universally
 	/// quantified property over `AnyBidirectionalCollection`s.
 	public static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Element, pf : @escaping (AnyBidirectionalCollection<Element>) -> Testable) -> Property {
-		return forAllShrink(AnyBidirectionalCollection<A>.arbitrary, shrinker: AnyBidirectionalCollection<A>.shrink, f: { bl in
-			return pf(AnyBidirectionalCollection<Element>(bl.map(wit)))
-		})
+		return forAllShrink(
+			AnyBidirectionalCollection<A>.arbitrary,
+			shrinker: AnyBidirectionalCollection<A>.shrink,
+			f: { bl in
+				return pf(AnyBidirectionalCollection<Element>(bl.map(wit)))
+			}
+		)
 	}
 }
+#endif
 
 extension AnySequence where Element : Arbitrary {
 	/// Returns a generator of `AnySequence`s of arbitrary `Element`s.
@@ -240,7 +247,7 @@ extension Repeated where Element : Arbitrary {
 			return repeatElement(element , count: count)
 		}
 
-		return Gen<(Element, Int)>.zip(Element.arbitrary, Int.arbitrary).map(constructor)
+		return Gen<(Element, Int)>.zip(Element.arbitrary, Int.arbitrary).map({ t in constructor(t.0, t.1) })
 	}
 }
 

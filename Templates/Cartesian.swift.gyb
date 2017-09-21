@@ -27,7 +27,8 @@ parameter_list = ', '.join(['_ ga{0} : Gen<A{0}>'.format(n) for n in range(1, ar
 previous_parameter_range = range(1, arity)
 
 previous_zip_arguments = ', '.join(['ga{0}'.format(n) for n in previous_parameter_range])
-expanded_previous_tuple = ', '.join(['$0.{0}'.format(n - 1) for n in previous_parameter_range])
+expanded_previous_tuple = ', '.join(['t.0.{0}'.format(n - 1) for n in previous_parameter_range])
+expanded_previous_tuple2 = ', '.join(['t.{0}'.format(n) for n in range(0, arity)])
 
 
 # Map body template
@@ -43,8 +44,8 @@ map_zip_argument_list = ', '.join(['ga{0}'.format(n) for n in range(1, arity + 1
 			.zip(
 				.zip(${previous_zip_arguments}),
 				ga${arity}
-			).map {
-				(${expanded_previous_tuple}, $$1)
+			).map { t in
+				(${expanded_previous_tuple}, t.1)
 			}
 	}
 
@@ -55,7 +56,7 @@ map_zip_argument_list = ', '.join(['ga{0}'.format(n) for n in range(1, arity + 1
 	/// - parameter ${p}: A generator of values of type `${t}`.
 % end
 	public static func map<${type_parameter_list}, R>(${parameter_list}, transform : @escaping (${type_parameter_list}) -> R) -> Gen<R> {
-		return zip(${map_zip_argument_list}).map(transform)
+		return zip(${map_zip_argument_list}).map({ t in transform(${expanded_previous_tuple2}) })
 	}
 
 % end

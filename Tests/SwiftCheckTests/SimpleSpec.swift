@@ -9,6 +9,14 @@
 import SwiftCheck
 import XCTest
 
+private func pack<A, B, C>(_ f : @escaping (A, B) -> C) -> ((A, B)) -> C {
+	return f
+}
+
+private func pack<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O>(_ f : @escaping (A, B, C, D, E, F, G, H, I, J, K, L, M, N) -> O) -> ((A, B, C, D, E, F, G, H, I, J, K, L, M, N)) -> O {
+	return f
+}
+
 public struct ArbitraryFoo {
 	let x : Int
 	let y : Int
@@ -20,7 +28,7 @@ public struct ArbitraryFoo {
 
 extension ArbitraryFoo : Arbitrary {
 	public static var arbitrary : Gen<ArbitraryFoo> {
-		return Gen<(Int, Int)>.zip(Int.arbitrary, Int.arbitrary).map(ArbitraryFoo.init)
+		return Gen<(Int, Int)>.zip(Int.arbitrary, Int.arbitrary).map(pack(ArbitraryFoo.init))
 	}
 }
 
@@ -100,9 +108,9 @@ extension ArbitraryLargeFoo : Arbitrary {
 						Gen<(Bool, Bool)>.zip(Bool.arbitrary, Bool.arbitrary),
 						Gen<(Bool, Bool, Bool)>.zip(Bool.arbitrary, Bool.arbitrary, Bool.arbitrary),
 						Gen<(Bool, Bool, Bool, Bool)>.zip(Bool.arbitrary, Bool.arbitrary, Bool.arbitrary, Bool.arbitrary)
-					) { t2 in
-						(t.0, t.1, t.2, t.3, t.4, t.5, t.6, t.7, t.8, t.9, t2.0, t2.1, t2.2, t2.3)
-					}.map(ArbitraryLargeFoo.init)
+					) { (t21, t22, t23, t24) in
+						(t.0, t.1, t.2, t.3, t.4, t.5, t.6, t.7, t.8, t.9, t21, t22, t23, t24)
+					}.map(pack(ArbitraryLargeFoo.init))
 		}
 	}
 }
@@ -205,9 +213,9 @@ class SimpleSpec : XCTestCase {
 			
 			// CHECK-NEXT: *** Passed 100 tests
 			// CHECK-NEXT: .
-			property("Inverses work") <- forAllNoShrink(inverses) { (op, iop) in
+			property("Inverses work") <- forAllNoShrink(inverses) { (t) in
 				return forAll { (x : UInt8, y : UInt8) in
-					return op(x, y) ==== !iop(x, y)
+					return t.0(x, y) ==== !t.1(x, y)
 				}
 			}
 			

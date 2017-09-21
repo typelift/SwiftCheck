@@ -22,7 +22,7 @@ public protocol CoArbitrary {
 	static func coarbitrary<C>(_ x : Self) -> ((Gen<C>) -> Gen<C>)
 }
 
-extension Integer {
+extension BinaryInteger {
 	/// A coarbitrary implementation for any IntegerType
 	public func coarbitraryIntegral<C>() -> (Gen<C>) -> Gen<C> {
 		return { $0.variant(self) }
@@ -71,7 +71,7 @@ extension String : CoArbitrary {
 		}
 		return comp(
 			Character.coarbitrary(x[x.startIndex]), 
-			String.coarbitrary(x[x.characters.index(after: x.startIndex)..<x.endIndex])
+			String.coarbitrary(String(x[x.characters.index(after: x.startIndex)..<x.endIndex]))
 		)
 	}
 }
