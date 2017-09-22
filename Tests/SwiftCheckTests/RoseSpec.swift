@@ -8,6 +8,9 @@
 
 import SwiftCheck
 import XCTest
+#if !XCODE_BUILD
+import FileCheck
+#endif
 
 class RoseSpec : XCTestCase {
 	private static func intRoseTree(_ v : Int) -> Rose<Int> {

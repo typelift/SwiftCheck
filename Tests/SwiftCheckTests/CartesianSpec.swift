@@ -13,6 +13,9 @@
 
 import SwiftCheck
 import XCTest
+#if !XCODE_BUILD
+import FileCheck
+#endif
 import Foundation
 
 final class CartesianSpec : XCTestCase {

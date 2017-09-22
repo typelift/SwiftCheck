@@ -8,6 +8,9 @@
 
 import SwiftCheck
 import XCTest
+#if !XCODE_BUILD
+import FileCheck
+#endif
 import Foundation
 
 class GenSpec : XCTestCase {

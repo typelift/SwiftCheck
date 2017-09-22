@@ -23,6 +23,7 @@ DerivedData
 Carthage/Build
 Carthage/Checkouts
 build/
+Package.resolved
 
 # Python
 *.pyc
