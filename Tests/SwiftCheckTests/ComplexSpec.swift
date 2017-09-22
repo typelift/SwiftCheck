@@ -8,6 +8,9 @@
 
 import SwiftCheck
 import XCTest
+#if !XCODE_BUILD
+import FileCheck
+#endif
 
 let upper : Gen<Character> = Gen<Character>.fromElements(in: "A"..."Z")
 let lower : Gen<Character> = Gen<Character>.fromElements(in: "a"..."z")
