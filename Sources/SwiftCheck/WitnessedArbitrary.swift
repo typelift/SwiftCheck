@@ -43,8 +43,6 @@ extension AnyBidirectionalCollection where Element : Arbitrary {
 	}
 }
 
-//FIXME: This works as of Xcode 9 beta 3 but is disabled until Travis has Xcode 9 > beta 3
-#if os(Linux)
 extension AnyBidirectionalCollection : WitnessedArbitrary {
 	public typealias Param = Element
 
@@ -60,7 +58,6 @@ extension AnyBidirectionalCollection : WitnessedArbitrary {
 		)
 	}
 }
-#endif
 
 extension AnySequence where Element : Arbitrary {
 	/// Returns a generator of `AnySequence`s of arbitrary `Element`s.
