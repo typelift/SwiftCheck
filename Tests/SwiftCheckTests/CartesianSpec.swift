@@ -13,7 +13,7 @@
 
 import SwiftCheck
 import XCTest
-#if !XCODE_BUILD
+#if SWIFT_PACKAGE
 import FileCheck
 #endif
 import Foundation
