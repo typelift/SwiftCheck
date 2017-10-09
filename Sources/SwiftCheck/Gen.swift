@@ -21,25 +21,6 @@ public struct Gen<A> {
 	///          v       v
 	let unGen : (StdGen, Int) -> A
 
-	/// Generates a value.
-	///
-	/// This property exists as a convenience mostly to test generators.  In
-	/// practice, you should never use this property because it hinders the
-	/// replay functionality and the robustness of tests in general.
-	public var generate : A {
-		let r = newStdGen()
-		return unGen(r, 30)
-	}
-
-	/// Generates some example values.
-	///
-	/// This property exists as a convenience mostly to test generators.  In
-	/// practice, you should never use this property because it hinders the
-	/// replay functionality and the robustness of tests in general.
-	public var sample : [A] {
-		return sequence((2...20).map(self.resize)).generate
-	}
-
 	/// Constructs a Generator that selects a random value from the given
 	/// collection and produces only that value.
 	///
@@ -284,6 +265,32 @@ extension Gen {
 	public func proliferate(withSize k : Int) -> Gen<[A]> {
 		return sequence(Array<Gen<A>>(repeating: self, count: k))
 	}
+}
+
+// MARK: Generating Example Values
+
+extension Gen {
+	/// Generates a value.
+	///
+	/// - Attention: This property exists as a convenience mostly to test
+	///   generators.  In practice, you should never use this property because
+	///   it hinders the replay functionality and the robustness of tests in
+	///   general.
+	public var generate : A {
+		let r = newStdGen()
+		return unGen(r, 30)
+	}
+
+	/// Generates some example values.
+	///
+	/// - Attention: This property exists as a convenience mostly to test
+	///   generators.  In practice, you should never use this property because
+	///   it hinders the replay functionality and the robustness of tests in
+	///   general.
+	public var sample : [A] {
+		return sequence((2...20).map(self.resize)).generate
+	}
+
 }
 
 // MARK: Instances
