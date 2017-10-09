@@ -46,8 +46,8 @@
 /// `forAllShrink` and `map`s the witness function to make sure all generated
 /// `Array`s are made of `Arbitrary ` elements:
 ///
-///    extension Array : WitnessedArbitrary {
-///        public typealias Param = Element
+///     extension Array : WitnessedArbitrary {
+///         public typealias Param = Element
 ///
 ///         public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element, pf : ([Element] -> Testable)) -> Property {
 ///             return forAllShrink([A].arbitrary, shrinker: [A].shrink, f: { bl in
@@ -73,7 +73,7 @@ public protocol WitnessedArbitrary {
 public func forAll<A : WitnessedArbitrary>(_ pf : @escaping (A) -> Testable) -> Property
 	where A.Param : Arbitrary
 {
-	return A.forAllWitnessed(id, pf: pf)
+	return A.forAllWitnessed({ $0 }, pf: pf)
 }
 
 /// Converts a function into a universally quantified property using the default

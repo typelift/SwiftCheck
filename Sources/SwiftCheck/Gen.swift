@@ -58,7 +58,7 @@ public struct Gen<A> {
 	/// composed of its initial segments.  The size of each initial segment
 	/// increases with the generator's size parameter.
 	///
-	/// The input array is required to be non-empty.
+	/// - Requires: The input array is required to be non-empty.
 	public static func fromInitialSegments<S>(of xs : [S]) -> Gen<[S]> {
 		assert(!xs.isEmpty, "Gen.fromInitialSegmentsOf used with empty list")
 
