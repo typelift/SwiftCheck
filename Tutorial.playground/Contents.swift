@@ -285,7 +285,7 @@ emailGen.generate
 //: There's our old friend, `Gen`!  So, an `Arbitrary` type is a type that can give us a generator
 //: to create `Arbitrary` values.  SwiftCheck defines `Arbitrary` instances for the majority of
 //: types in the Swift Standard Library in the ways you might expect e.g. The `Arbitrary` instance
-//: for `Int` calls `arc4random_uniform`.
+//: for `Int` essentially calls `arc4random_uniform`.
 //:
 //: SwiftCheck uses a strategy called a `Modifier Type`–a wrapper around one type that we can't
 //: generate with another that we can–for a few of the more "difficult" types in the Swift Standard 

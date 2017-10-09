@@ -52,7 +52,8 @@ public struct StdGen : RandomGeneneratorType {
 	/// Returns an `Int` generated uniformly within the bounds of the generator
 	/// and a new distinct random number generator.
 	public var next : (Int, StdGen) {
-		// P. L'Ecuyer, ``Efficient and Portable Combined Random Number Generators'', Communications of the ACM, 31 (1988), 742--749 and 774.
+		// P. L'Ecuyer, "Efficient and Portable Combined Random Number
+		///Generators". Communications of the ACM, 31 (1988), 742-749 and 774.
 		// https://www.iro.umontreal.ca/~lecuyer/myftp/papers/cacm88.pdf
 		
 		let s1 = self.seed1
@@ -109,13 +110,15 @@ public func newStdGen() -> StdGen {
 
 /// Types that can generate random versions of themselves.
 public protocol RandomType {
-	/// Takes a range `(lo, hi)` and a random number generator `G`, and returns
-	/// a random value uniformly distributed in the closed interval `[lo,hi]`,
-	/// together with a new generator. It is unspecified what happens if lo>hi.
+	/// Takes a range as a tuple of values `(lo, hi)` and a random number
+	/// generator `G`, and returns a random value uniformly distributed in the
+	/// closed interval `[lo,hi]`, together with a new generator.
 	///
-	/// For continuous types there is no requirement that the values `lo` and
-	/// `hi` are ever produced, but they may be, depending on the implementation
-	/// and the interval.
+	/// - Note: It is unspecified what happens if `lo > hi`.
+	///
+	/// - Remark: For continuous types there is no requirement that the values
+	///   `lo` and `hi` are ever produced, but they may be, depending on the
+	///   implementation and the interval.
 	static func randomInRange<G : RandomGeneneratorType>(_ range : (Self, Self), gen : G) -> (Self, G)
 }
 

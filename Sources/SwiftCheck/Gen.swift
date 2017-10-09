@@ -43,7 +43,7 @@ public struct Gen<A> {
 	/// Constructs a Generator that selects a random value from the given
 	/// collection and produces only that value.
 	///
-	/// The input collection is required to be non-empty.
+	/// - Requires: The input collection is required to be non-empty.
 	public static func fromElements<S : Collection>(of xs : S) -> Gen<S.Element>
 		where S.Index : RandomType
 	{
@@ -55,7 +55,7 @@ public struct Gen<A> {
 	/// Constructs a Generator that selects a random value from the given
 	/// collection and produces only that value.
 	///
-	/// The input collection is required to be non-empty.
+	/// - Requires: The input collection is required to be non-empty.
 	public static func fromElements<T>(of xs : Set<T>) -> Gen<T> {
 		precondition(!xs.isEmpty)
 		return Gen.fromElements(in: 0...xs.distance(from: xs.startIndex, to: xs.endIndex)-1).map { i in
@@ -66,7 +66,7 @@ public struct Gen<A> {
 	/// Constructs a Generator that selects a random value from the given
 	/// interval and produces only that value.
 	///
-	/// The input interval is required to be non-empty.
+	/// - Requires: The input interval is required to be non-empty.
 	public static func fromElements<R : RandomType>(in xs : ClosedRange<R>) -> Gen<R> {
 		assert(!xs.isEmpty, "Gen.fromElementsOf used with empty interval")
 
@@ -294,9 +294,9 @@ extension Gen /*: Functor*/ {
 	///
 	/// This function is most useful for converting between generators of inter-
 	/// related types.  For example, you might have a Generator of `Character`
-	/// values that you then `.proliferate` into an `Array` of `Character`s.  You
-	/// can then use `map` to convert that generator of `Array`s to a generator 
-	/// of `String`s.
+	/// values that you then `.proliferate` into an `Array` of `Character`s.
+	/// You can then use `map` to convert that generator of `Array`s to a
+	/// generator of `String`s.
 	public func map<B>(_ f : @escaping (A) -> B) -> Gen<B> {
 		return Gen<B>(unGen: { r, n in
 			return f(self.unGen(r, n))
@@ -342,9 +342,10 @@ extension Gen /*: Monad*/ {
 /// Creates and returns a Generator of arrays of values drawn from each
 /// generator in the given array.
 ///
-/// The array that is created is guaranteed to use each of the given Generators
-/// in the order they were given to the function exactly once.  Thus all arrays
-/// generated are of the same rank as the array that was given.
+/// - Invariant: The array that is created is guaranteed to use each of the
+///   given Generators in the order they were given to the function exactly
+///   once.  Thus all arrays generated are of the same rank as the array that
+///   was given.
 public func sequence<A>(_ ms : [Gen<A>]) -> Gen<[A]> {
 	return Gen<[A]>(unGen: { r, n in
 		var r1 = r
