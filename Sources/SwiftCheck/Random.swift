@@ -87,16 +87,16 @@ public struct StdGen : RandomGeneneratorType {
 }
 
 extension StdGen : Equatable, CustomStringConvertible {
+	/// Equality over random number generators.
+	///
+	/// Two `StdGen`s are equal iff their seeds match.
+	public static func == (l : StdGen, r : StdGen) -> Bool {
+		return l.seed1 == r.seed1 && l.seed2 == r.seed2
+	}
+
 	public var description : String {
 		return "\(self.seed1) \(self.seed2)"
 	}
-}
-
-/// Equality over random number generators.
-///
-/// Two `StdGen`s are equal iff their seeds match.
-public func == (l : StdGen, r : StdGen) -> Bool {
-	return l.seed1 == r.seed1 && l.seed2 == r.seed2
 }
 
 private var theStdGen : StdGen = mkStdRNG(0)
