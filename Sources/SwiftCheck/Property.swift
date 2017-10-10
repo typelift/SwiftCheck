@@ -15,7 +15,7 @@
 /// masked.  If fine-grained error reporting is needed, use a combination of
 /// `disjoin(_:)` and `verbose(_:)`.
 ///
-/// When conjoining properties all calls to `expectFailure` will fail.
+/// - note: When conjoining properties all calls to `expectFailure` will fail.
 ///
 /// - parameter ps: A variadic list of properties to be conjoined.
 ///
@@ -25,7 +25,7 @@ public func conjoin(_ ps : Testable...) -> Property {
 	return Property(sequence(ps.map({ (p : Testable) in
 		return p.property.unProperty.map { $0.unProp }
 	})).flatMap({ roses in
-		return Gen.pure(Prop(unProp: conj(id, xs: roses)))
+		return Gen.pure(Prop(unProp: conj({ $0 }, xs: roses)))
 	})).again
 }
 
@@ -38,8 +38,8 @@ public func conjoin(_ ps : Testable...) -> Property {
 /// SwiftCheck to print a distribution map of the success rate of each sub-
 /// property.
 ///
-/// When disjoining properties all calls to `expectFailure` will fail.  You can,
-/// however, `invert` the property.
+/// - note: When disjoining properties all calls to `expectFailure` will fail.
+///   You may `invert` the property instead.
 ///
 /// - parameter ps: A variadic list of properties to be disjoined.
 ///
@@ -171,7 +171,8 @@ extension Testable {
 	/// - parameter callback: A callback block to be executed after all failures
 	///   have been processed.
 	///
-	/// - returns: A `Property` that executes the given callback block on failure.
+	/// - returns: A `Property` that executes the given callback block on
+	///   failure.
 	public func whenFail(_ callback : @escaping () -> ()) -> Property {
 		return self.withCallback(Callback.afterFinalFailure(kind: .notCounterexample) { (_,_) in
 			return callback()
@@ -197,7 +198,7 @@ extension Testable {
 	/// result of the property every time it is tested.
 	///
 	/// This function maps AfterFinalFailure callbacks that have the
-	/// `.Counterexample` kind to `.AfterTest` callbacks.
+	/// `.counterexample` kind to `.afterTest` callbacks.
 	public var verbose : Property {
 		func chattyCallbacks(_ cbs : [Callback]) -> [Callback] {
 			let c = Callback.afterTest(kind: .counterexample) { (st, res) in
@@ -334,10 +335,11 @@ extension Testable {
 	/// generated test cases by replacing the test's rose tree with a custom
 	/// one.
 	///
-	/// - parameter transform: The transformation function to apply to the 
+	/// - parameter transform: The transformation function to apply to the
 	///   `Prop`s of this `Property`.
 	///
-	/// - returns: A `Property` that applies the given transformation upon evaluation.
+	/// - returns: A `Property` that applies the given transformation upon
+	///   evaluation.
 	public func mapProp(_ transform : @escaping (Prop) -> Prop) -> Property {
 		return Property(self.property.unProperty.map(transform))
 	}
@@ -347,7 +349,8 @@ extension Testable {
 	/// - parameter transform: The transformation function to apply to the size
 	///   of the generators underlying this `Property`.
 	///
-	/// - returns: A `Property` that applies the given transformation upon evaluation.
+	/// - returns: A `Property` that applies the given transformation upon
+	///   evaluation.
 	public func mapSize(_ transform : @escaping (Int) -> Int) -> Property {
 		return Property(Gen.sized { n in
 			return self.property.unProperty.resize(transform(n))
@@ -577,16 +580,12 @@ private func protectResults(_ rs : Rose<TestResult>) -> Rose<TestResult> {
 //    return { protect(Rose.pure • exception("Exception"), x: f) }
 //}
 
-internal func protect<A>(_ f : (Error) -> A, x : () throws -> A) -> A {
+private func protect<A>(_ f : (Error) -> A, x : () throws -> A) -> A {
 	do {
 		return try x()
 	} catch let e {
 		return f(e)
 	}
-}
-
-internal func id<A>(_ x : A) -> A {
-	return x
 }
 
 internal func comp<A, B, C>(_ f : @escaping (B) -> C, _ g : @escaping (A) -> B) -> (A) -> C {

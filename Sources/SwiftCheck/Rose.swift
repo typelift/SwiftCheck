@@ -12,8 +12,8 @@
 /// IO action SwiftCheck must execute in order to produce another rose tree.
 /// All values in a `Rose` are lazy.
 ///
-/// In practice SwiftCheck will minimize the side-effects performed in a given
-/// `IORose` to printing values to the console and executing callbacks.
+/// - Note: In practice SwiftCheck will minimize the side-effects performed in
+///   a given `IORose` to printing values to the console and executing callbacks.
 public enum Rose<A> {
 	/// A normal branch in the rose tree.
 	case mkRose(() -> A, () -> [Rose<A>])

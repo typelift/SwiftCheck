@@ -22,9 +22,9 @@ extension Gen {
 	///                 a: c.generate(),
 	///
 	///                 // or pass a custom generator
-	///                 b: c.generate(Bool.suchThat { $0 == false }),
+	///                 b: c.generate(Bool.arbitrary.suchThat { $0 == false }),
 	///
-	///                 // .. and so on, for as many values & types as you need
+	///                 // ... and so on, for as many values & types as you need
 	///                 c: c.generate(), ...
 	///             )
 	///         }
@@ -45,8 +45,8 @@ extension Gen {
 
 /// `GenComposer` presents an imperative interface over top of `Gen`.  
 ///
-/// Instances of this class may not be constructed manually.  
-/// Use `Gen.compose` instead.
+/// - Important: Instances of this class may not be constructed manually.
+///   Use `Gen.compose` instead.
 ///
 /// - seealso: Gen.compose
 public final class GenComposer {
@@ -59,7 +59,7 @@ public final class GenComposer {
 	}
 	
 	
-	/// Generate a new `T` with a specific generator.
+	/// Generate a new value of type `T` with a specific generator.
 	///
 	/// - parameter gen: The generator used to create a random value.
 	///
@@ -72,9 +72,9 @@ public final class GenComposer {
 	/// Generate a new value of type `T` with the default `Gen`erator 
 	/// for that type.
 	///
-	///  - returns: An arbitrary value of type `T`.
+	/// - returns: An arbitrary value of type `T`.
 	///
-	///  - seealso: generate\<T\>(gen:)
+	/// - seealso: generate<T>(using:)
 	public func generate<T>() -> T
 		where T: Arbitrary
 	{

@@ -6,7 +6,6 @@
 //  Copyright (c) 2015 TypeLift. All rights reserved.
 //
 
-
 /// The type of things that can be tested.  Consequently, the type of things
 /// that can be returned from a `forAll` block.
 ///

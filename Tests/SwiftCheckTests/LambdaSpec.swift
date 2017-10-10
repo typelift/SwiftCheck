@@ -27,10 +27,10 @@ struct Name : Arbitrary, Equatable, Hashable, CustomStringConvertible {
 	var hashValue : Int {
 		return self.unName.hashValue
 	}
-}
 
-func == (l : Name, r : Name) -> Bool {
-	return l.unName == r.unName
+	static func == (l : Name, r : Name) -> Bool {
+		return l.unName == r.unName
+	}
 }
 
 private func liftM2<A, B, C>(_ f : @escaping (A, B) -> C, _ m1 : Gen<A>, _ m2 : Gen<B>) -> Gen<C> {
@@ -45,18 +45,18 @@ indirect enum Exp : Equatable {
 	case lam(Name, Exp)
 	case app(Exp, Exp)
 	case `var`(Name)
-}
 
-func == (l : Exp, r : Exp) -> Bool {
-	switch (l, r) {
-	case let (.lam(ln, le), .lam(rn, re)):
-		return ln == rn && le == re
-	case let (.app(ln, le), .app(rn, re)):
-		return ln == rn && le == re
-	case let (.var(n1), .var(n2)):
-		return n1 == n2
-	default:
-		return false
+	static func == (l : Exp, r : Exp) -> Bool {
+		switch (l, r) {
+		case let (.lam(ln, le), .lam(rn, re)):
+			return ln == rn && le == re
+		case let (.app(ln, le), .app(rn, re)):
+			return ln == rn && le == re
+		case let (.var(n1), .var(n2)):
+			return n1 == n2
+		default:
+			return false
+		}
 	}
 }
 

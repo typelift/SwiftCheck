@@ -23,38 +23,38 @@
 /// example, to implement the protocol for `Array`, we declare the usual
 /// `arbitrary` and `shrink`:
 ///
-///    extension Array where Element : Arbitrary {
-///        public static var arbitrary : Gen<Array<Element>> {
-///            return Gen.sized { n in
-///                return Gen<Int>.choose((0, n)).flatMap { k in
-///                    if k == 0 {
-///                        return Gen.pure([])
-///                    }
+///     extension Array where Element : Arbitrary {
+///         public static var arbitrary : Gen<Array<Element>> {
+///             return Gen.sized { n in
+///                 return Gen<Int>.choose((0, n)).flatMap { k in
+///                     if k == 0 {
+///                         return Gen.pure([])
+///                     }
 ///
-///                    return sequence((0...k).map { _ in Element.arbitrary })
-///                }
-///            }
-///        }
+///                     return sequence((0...k).map { _ in Element.arbitrary })
+///                 }
+///             }
+///         }
 ///
-///        public static func shrink(bl : Array<Element>) -> [[Element]] {
-///            let rec : [[Element]] = shrinkOne(bl)
-///            return Int.shrink(bl.count).reverse().flatMap({ k in removes(k.successor(), n: bl.count, xs: bl) }) + rec
-///        }
-///    }
+///         public static func shrink(bl : Array<Element>) -> [[Element]] {
+///             let rec : [[Element]] = shrinkOne(bl)
+///             return Int.shrink(bl.count).reverse().flatMap({ k in removes(k.successor(), n: bl.count, xs: bl) }) + rec
+///         }
+///     }
 ///
 /// In addition, we declare a witnessed version of `forAll` that simply invokes
 /// `forAllShrink` and `map`s the witness function to make sure all generated
 /// `Array`s are made of `Arbitrary ` elements:
 ///
-///    extension Array : WitnessedArbitrary {
-///        public typealias Param = Element
+///     extension Array : WitnessedArbitrary {
+///         public typealias Param = Element
 ///
-///        public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element, pf : ([Element] -> Testable)) -> Property {
-///            return forAllShrink([A].arbitrary, shrinker: [A].shrink, f: { bl in
-///                return pf(bl.map(wit))
-///            })
-///        }
-///    }
+///         public static func forAllWitnessed<A : Arbitrary>(wit : A -> Element, pf : ([Element] -> Testable)) -> Property {
+///             return forAllShrink([A].arbitrary, shrinker: [A].shrink, f: { bl in
+///                 return pf(bl.map(wit))
+///             })
+///         }
+///     }
 public protocol WitnessedArbitrary {
 	/// The witnessing type parameter.
 	associatedtype Param
@@ -73,7 +73,7 @@ public protocol WitnessedArbitrary {
 public func forAll<A : WitnessedArbitrary>(_ pf : @escaping (A) -> Testable) -> Property
 	where A.Param : Arbitrary
 {
-	return A.forAllWitnessed(id, pf: pf)
+	return A.forAllWitnessed({ $0 }, pf: pf)
 }
 
 /// Converts a function into a universally quantified property using the default

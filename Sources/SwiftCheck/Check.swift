@@ -32,9 +32,18 @@
 ///            return i == i
 ///     }
 ///
-/// If no arguments are provided, or nil is given, SwiftCheck will select an internal default.
-public func property(_ msg : String, arguments : CheckerArguments? = nil, file : StaticString = #file, line : UInt = #line) -> AssertiveQuickCheck {
-	return AssertiveQuickCheck(msg: msg, file: file, line: line, args: arguments ?? CheckerArguments(name: msg))
+/// If no arguments are provided, or nil is given, SwiftCheck will select an
+/// internal default.
+///
+/// - Parameters:
+///   - message: A description of the property.
+///   - arguments: An optional set of arguments to tune the test runner.
+///   - file: The file in which test occurred. Defaults to the file name of the
+///     test case in which this function was called.
+///   - line: The line number on which test occurred. Defaults to the line
+///     number on which this function was called.
+public func property(_ message : String, arguments : CheckerArguments? = nil, file : StaticString = #file, line : UInt = #line) -> AssertiveQuickCheck {
+	return AssertiveQuickCheck(msg: message, file: file, line: line, args: arguments ?? CheckerArguments(name: message))
 }
 
 /// Describes a checker that uses XCTest to assert all testing failures and
@@ -55,8 +64,16 @@ public struct AssertiveQuickCheck {
 
 /// The interface for properties to be run through SwiftCheck without an XCTest
 /// assert.  The property will still generate console output during testing.
-public func reportProperty(_ msg : String, arguments : CheckerArguments? = nil, file : StaticString = #file, line : UInt = #line) -> ReportiveQuickCheck {
-	return ReportiveQuickCheck(msg: msg, file: file, line: line, args: arguments ?? CheckerArguments(name: msg))
+///
+/// - Parameters:
+///   - message: A description of the property.
+///   - arguments: An optional set of arguments to tune the test runner.
+///   - file: The file in which test occurred. Defaults to the file name of the
+///     test case in which this function was called.
+///   - line: The line number on which test occurred. Defaults to the line
+///     number on which this function was called.
+public func reportProperty(_ message : String, arguments : CheckerArguments? = nil, file : StaticString = #file, line : UInt = #line) -> ReportiveQuickCheck {
+	return ReportiveQuickCheck(msg: message, file: file, line: line, args: arguments ?? CheckerArguments(name: message))
 }
 
 /// Describes a checker that only reports failures to the testing log but does
@@ -78,27 +95,29 @@ public struct ReportiveQuickCheck {
 /// Represents the arguments the test driver will use while performing testing,
 /// shrinking, and printing results.
 public struct CheckerArguments {
-	/// Provides a way of re-doing a test at the given size with a new generator.
+	/// Provides a way of re-doing a test at the given size with a new
+	/// generator.
 	let replay : Optional<(StdGen, Int)>
-	/// The maximum number of test cases that must pass before the property itself
-	/// passes.
+	/// The maximum number of test cases that must pass before the property
+	/// itself passes.
 	///
-	/// The default value of this property is 100.  In general, some tests may require more than
-	/// this amount, but less is rare.  If you need a value of 1 use `.once`
-	/// on the property instead.
+	/// The default value of this property is 100.  In general, some tests may
+	/// require more than this amount, but less is rare.  If you need a value of
+	/// 1 use `.once` on the property instead.
 	let maxAllowableSuccessfulTests : Int
-	/// The maximum number of tests cases that can be discarded before testing gives up on the
-	/// property.
+	/// The maximum number of tests cases that can be discarded before testing
+	/// gives up on the property.
 	///
-	/// The default value of this property is 500.  In general, most tests will require less than
-	/// this amount.  `Discard`ed test cases do not affect the passing or failing status of the
-	/// property as a whole.
+	/// The default value of this property is 500.  In general, most tests will
+	/// require less than this amount.  `Discard`ed test cases do not affect
+	/// the passing or failing status of the property as a whole.
 	let maxAllowableDiscardedTests : Int
 	/// The limit to the size of all generators in the test.
 	///
-	/// The default value of this property is 100.  If "large" values, in magnitude or
-	/// size, are necessary then increase this value, else keep it relatively near the default.  If
-	/// it becomes too small the samples present in the test case will lose diversity.
+	/// The default value of this property is 100.  If "large" values, in
+	/// magnitude or size, are necessary then increase this value, else keep it
+	/// relatively near the default.  If it becomes too small the samples
+	/// present in the test case will lose diversity.
 	let maxTestCaseSize : Int
 
 	internal let silence : Bool
