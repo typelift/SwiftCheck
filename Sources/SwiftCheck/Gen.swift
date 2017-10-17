@@ -26,32 +26,11 @@ public struct Gen<A> {
 	///
 	/// - Requires: The input collection is required to be non-empty.
 	public static func fromElements<S : Collection>(of xs : S) -> Gen<S.Element>
-		where S.Index : RandomType
+		where S.Index : RandomType, A == S.Element
 	{
-		return Gen.fromElements(in: xs.startIndex...xs.index(xs.endIndex, offsetBy: -1)).map { i in
+		return Gen<S.Index>.fromElements(in: xs.startIndex...xs.index(xs.endIndex, offsetBy: -1)).map { i in
 			return xs[i]
 		}
-	}
-
-	/// Constructs a Generator that selects a random value from the given
-	/// collection and produces only that value.
-	///
-	/// - Requires: The input collection is required to be non-empty.
-	public static func fromElements<T>(of xs : Set<T>) -> Gen<T> {
-		precondition(!xs.isEmpty)
-		return Gen.fromElements(in: 0...xs.distance(from: xs.startIndex, to: xs.endIndex)-1).map { i in
-			return xs[xs.index(xs.startIndex, offsetBy: i)]
-		}
-	}
-
-	/// Constructs a Generator that selects a random value from the given
-	/// interval and produces only that value.
-	///
-	/// - Requires: The input interval is required to be non-empty.
-	public static func fromElements<R : RandomType>(in xs : ClosedRange<R>) -> Gen<R> {
-		assert(!xs.isEmpty, "Gen.fromElementsOf used with empty interval")
-
-		return choose((xs.lowerBound, xs.upperBound))
 	}
 
 	/// Constructs a Generator that uses a given array to produce smaller arrays
@@ -59,19 +38,19 @@ public struct Gen<A> {
 	/// increases with the generator's size parameter.
 	///
 	/// - Requires: The input array is required to be non-empty.
-	public static func fromInitialSegments<S>(of xs : [S]) -> Gen<[S]> {
+	public static func fromInitialSegments(of xs : [A]) -> Gen<[A]> {
 		assert(!xs.isEmpty, "Gen.fromInitialSegmentsOf used with empty list")
 
-		return Gen<[S]>.sized { n in
+		return Gen<[A]>.sized { n in
 			let ss = xs[xs.startIndex..<max((xs.startIndex + 1), size(xs.endIndex, n))]
-			return Gen<[S]>.pure([S](ss))
+			return Gen<[A]>.pure([A](ss))
 		}
 	}
 
 	/// Constructs a Generator that produces permutations of a given array.
-	public static func fromShufflingElements<S>(of xs : [S]) -> Gen<[S]> {
-		return choose((Int.min + 1, Int.max)).proliferate(withSize: xs.count).flatMap { ns in
-			return Gen<[S]>.pure(Swift.zip(ns, xs).sorted(by: { l, r in l.0 < r.0 }).map { $0.1 })
+	public static func fromShufflingElements(of xs : [A]) -> Gen<[A]> {
+		return Gen<Int>.choose((Int.min + 1, Int.max)).proliferate(withSize: xs.count).flatMap { ns in
+			return Gen<[A]>.pure(Swift.zip(ns, xs).sorted(by: { l, r in l.0 < r.0 }).map { $0.1 })
 		}
 	}
 
@@ -79,30 +58,6 @@ public struct Gen<A> {
 	public static func sized(_ f : @escaping (Int) -> Gen<A>) -> Gen<A> {
 		return Gen(unGen: { r, n in
 			return f(n).unGen(r, n)
-		})
-	}
-
-	/// Constructs a random element in the inclusive range of two `RandomType`s.
-	///
-	/// When using this function, it is necessary to explicitly specialize the
-	/// generic parameter `A`.  For example:
-	///
-	///     Gen<UInt32>.choose((32, 255)).flatMap(Gen<Character>.pure • Character.init • UnicodeScalar.init)
-	public static func choose<A : RandomType>(_ rng : (A, A)) -> Gen<A> {
-		return Gen<A>(unGen: { s, _ in
-			return A.randomInRange(rng, gen: s).0
-		})
-	}
-	
-	/// Constructs a random element in the range of a bounded `RandomType`.
-	///
-	/// When using this function, it is necessary to explicitly specialize the
-	/// generic parameter `A`.  For example:
-	///
-	///     Gen<UInt32>.chooseAny().flatMap(Gen<Character>.pure • Character.init • UnicodeScalar.init)
-	public static func chooseAny<A : RandomType & LatticeType>() -> Gen<A> {
-		return Gen<A>(unGen: { (s, _) in
-			return randomBound(s).0
 		})
 	}
 
@@ -116,7 +71,7 @@ public struct Gen<A> {
 	{
 		assert(gs.count != 0, "oneOf used with empty list")
 
-		return choose((gs.startIndex, gs.index(before: gs.endIndex))).flatMap { x in
+		return Gen<S.Index>.choose((gs.startIndex, gs.index(before: gs.endIndex))).flatMap { x in
 			return gs[x]
 		}
 	}
@@ -133,7 +88,7 @@ public struct Gen<A> {
 		let xs: [(Int, Gen<A>)] = Array(xs)
 		assert(xs.count != 0, "frequency used with empty list")
 
-		return choose((1, xs.map({ $0.0 }).reduce(0, +))).flatMap { l in
+		return Gen<Int>.choose((1, xs.map({ $0.0 }).reduce(0, +))).flatMap { l in
 			return pick(l, xs)
 		}
 	}
@@ -150,6 +105,59 @@ public struct Gen<A> {
 		where S.Iterator.Element == (Int, A)
 	{
 		return frequency(xs.map { t in (t.0, Gen.pure(t.1)) })
+	}
+}
+
+extension Gen where A : RandomType, A : Comparable {
+	/// Constructs a Generator that selects a random value from the given
+	/// interval and produces only that value.
+	///
+	/// - Requires: The input interval is required to be non-empty.
+	public static func fromElements(in xs : ClosedRange<A>) -> Gen {
+		assert(!xs.isEmpty, "Gen.fromElementsOf used with empty interval")
+		
+		return choose((xs.lowerBound, xs.upperBound))
+	}
+}
+
+extension Gen where A : RandomType {
+	/// Constructs a random element in the inclusive range of two `RandomType`s.
+	///
+	/// When using this function, it is necessary to explicitly specialize the
+	/// generic parameter `A`.  For example:
+	///
+	///     Gen<UInt32>.choose((32, 255)).flatMap(Gen<Character>.pure • Character.init • UnicodeScalar.init)
+	public static func choose(_ rng : (A, A)) -> Gen {
+		return Gen(unGen: { s, _ in
+			return A.randomInRange(rng, gen: s).0
+		})
+	}
+}
+
+extension Gen where A : RandomType, A : LatticeType {
+	/// Constructs a random element in the range of a bounded `RandomType`.
+	///
+	/// When using this function, it is necessary to explicitly specialize the
+	/// generic parameter `A`.  For example:
+	///
+	///     Gen<UInt32>.chooseAny().flatMap(Gen<Character>.pure • Character.init • UnicodeScalar.init)
+	public static func chooseAny() -> Gen {
+		return Gen(unGen: { (s, _) in
+			return randomBound(s).0
+		})
+	}
+}
+
+extension Gen where A : Hashable {
+	/// Constructs a Generator that selects a random value from the given
+	/// collection and produces only that value.
+	///
+	/// - Requires: The input collection is required to be non-empty.
+	public static func fromElements(of xs : Set<A>) -> Gen {
+		precondition(!xs.isEmpty)
+		return Gen<Int>.fromElements(in: 0...xs.distance(from: xs.startIndex, to: xs.endIndex)-1).map { i in
+			return xs[xs.index(xs.startIndex, offsetBy: i)]
+		}
 	}
 }
 
@@ -249,7 +257,7 @@ extension Gen {
 	/// determined by the generator's size parameter.
 	public var proliferate : Gen<[A]> {
 		return Gen<[A]>.sized { n in
-			return Gen.choose((0, n)).flatMap(self.proliferate(withSize:))
+			return Gen<Int>.choose((0, n)).flatMap(self.proliferate(withSize:))
 		}
 	}
 
@@ -257,7 +265,7 @@ extension Gen {
 	/// length determined by the generator's size parameter.
 	public var proliferateNonEmpty : Gen<[A]> {
 		return Gen<[A]>.sized { n in
-			return Gen.choose((1, max(1, n))).flatMap(self.proliferate(withSize:))
+			return Gen<Int>.choose((1, max(1, n))).flatMap(self.proliferate(withSize:))
 		}
 	}
 
