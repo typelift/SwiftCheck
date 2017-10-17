@@ -109,13 +109,13 @@ class GenSpec : XCTestCase {
 					return Discard()
 				}
 				let l = Set(xss)
-				return forAll(Gen<[Int]>.fromElements(of: xss)) { l.contains($0) }
+				return forAll(Gen.fromElements(of: xss)) { l.contains($0) }
 			}
 
 			// CHECK-NEXT: *** Passed 100 tests
 			// CHECK-NEXT: .
 			property("Gen.fromElementsOf only generates the elements of the given array") <- forAll { (n1 : Int, n2 : Int) in
-				return forAll(Gen<[Int]>.fromElements(of: [n1, n2])) { $0 == n1 || $0 == n2 }
+				return forAll(Gen.fromElements(of: [n1, n2])) { $0 == n1 || $0 == n2 }
 			}
 
 			// CHECK-NEXT: *** Passed 100 tests
@@ -123,7 +123,7 @@ class GenSpec : XCTestCase {
 			property("Gen.fromElementsIn only generates the elements of the given interval") <- forAll { (n1 : Int, n2 : Int) in
 				return (n1 < n2) ==> {
 					let interval = n1...n2
-					return forAll(Gen<[Int]>.fromElements(in: n1...n2)) { interval.contains($0) }
+					return forAll(Gen.fromElements(in: n1...n2)) { interval.contains($0) }
 				}
 			}
 
@@ -131,7 +131,7 @@ class GenSpec : XCTestCase {
 			// CHECK-NEXT: .
 			property("Gen.fromInitialSegmentsOf produces only prefixes of the generated array") <- forAll { (xs : Array<Int>) in
 				return !xs.isEmpty ==> {
-					return forAllNoShrink(Gen<[Int]>.fromInitialSegments(of: xs)) { (ys : Array<Int>) in
+					return forAllNoShrink(Gen.fromInitialSegments(of: xs)) { (ys : Array<Int>) in
 						return xs.starts(with: ys)
 					}
 				}
@@ -140,7 +140,7 @@ class GenSpec : XCTestCase {
 			// CHECK-NEXT: *** Passed 100 tests
 			// CHECK-NEXT: .
 			property("Gen.fromShufflingElementsOf produces only permutations of the generated array") <- forAll { (xs : Array<Int>) in
-				return forAllNoShrink(Gen<[Int]>.fromShufflingElements(of: xs)) { (ys : Array<Int>) in
+				return forAllNoShrink(Gen.fromShufflingElements(of: xs)) { (ys : Array<Int>) in
 					return (xs.count == ys.count) ^&&^ (xs.sorted() == ys.sorted())
 				}
 			}
@@ -355,8 +355,8 @@ class GenSpec : XCTestCase {
 	func testLaws() {
 		XCTAssert(fileCheckOutput(withPrefixes: ["LAW"]) {
 			/// Turns out Gen is a really sketchy monad because of the underlying randomness.
-			let lawfulGen = Gen<Gen<Int>>.fromElements(of: (0...500).map(Gen.pure))
-			let lawfulArrowGen = Gen<Gen<ArrowOf<Int, Int>>>.fromElements(of: ArrowOf<Int, Int>.arbitrary.proliferate(withSize: 10).generate.map(Gen.pure))
+			let lawfulGen = Gen.fromElements(of: (0...500).map(Gen.pure))
+			let lawfulArrowGen = Gen.fromElements(of: ArrowOf<Int, Int>.arbitrary.proliferate(withSize: 10).generate.map(Gen.pure))
 
 			// LAW: *** Passed 100 tests
 			// LAW-NEXT: .

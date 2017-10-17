@@ -321,7 +321,7 @@ extension String : Arbitrary {
 extension Character : Arbitrary {
 	/// Returns a generator of `Character` values.
 	public static var arbitrary : Gen<Character> {
-		return Gen<UInt32>.choose((32, 255)).flatMap(comp(Gen<Character>.pure, comp(Character.init, UnicodeScalar.init)))
+		return Gen<UInt8>.choose((32, 255)).flatMap(comp(Gen<Character>.pure, comp(Character.init, UnicodeScalar.init)))
 	}
 
 	/// The default shrinking function for `Character` values.

@@ -281,9 +281,9 @@ let vowels = Gen.fromElements(of: [ "A", "E", "I", "O", "U" ])
 
 let randomHexValue = Gen<UInt>.choose((0, 15))
 
-let uppers : Gen<Character> = Gen<Character>.fromElements(in: "A"..."Z")
-let lowers : Gen<Character> = Gen<Character>.fromElements(in: "a"..."z")
-let numbers : Gen<Character> = Gen<Character>.fromElements(in: "0"..."9")
+let uppers = Gen<Character>.fromElements(in: "A"..."Z")
+let lowers = Gen<Character>.fromElements(in: "a"..."z")
+let numbers = Gen<Character>.fromElements(in: "0"..."9")
  
 /// This generator will generate `.none` 1/4 of the time and an arbitrary
 /// `.some` 3/4 of the time
@@ -346,4 +346,3 @@ License
 =======
 
 SwiftCheck is released under the MIT license.
-
