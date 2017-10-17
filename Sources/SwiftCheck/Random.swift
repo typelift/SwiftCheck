@@ -298,7 +298,7 @@ extension Float : RandomType {
 	/// Produces a random `Float` value in the range `[Float.min, Float.max]`.
 	public static func random<G : RandomGeneneratorType>(_ rng : G) -> (Float, G) {
 		let (x, rng_) : (Int32, G) = randomBound(rng)
-		let twoto24 = Int32(2) ^ Int32(24)
+		let twoto24: Int32 = 1 << 24
 		let mask24 = twoto24 - 1
 
 		return (Float(mask24 & (x)) / Float(twoto24), rng_)
@@ -320,7 +320,7 @@ extension Double : RandomType {
 	/// Produces a random `Float` value in the range `[Double.min, Double.max]`.
 	public static func random<G : RandomGeneneratorType>(_ rng : G) -> (Double, G) {
 		let (x, rng_) : (Int64, G) = randomBound(rng)
-		let twoto53 = Int64(2) ^ Int64(53)
+		let twoto53: Int64 = 1 << 53
 		let mask53 = twoto53 - 1
 
 		return (Double(mask53 & (x)) / Double(twoto53), rng_)
