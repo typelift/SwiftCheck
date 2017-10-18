@@ -311,7 +311,7 @@ SwiftCheck can be included one of two ways:
 - Add SwiftCheck to your `Package.swift` file's dependencies section:
 
 ```swift
-.Package(url: "https://github.com/typelift/SwiftCheck.git", versions: Version(0,6,0)..<Version(1,0,0))
+.package(url: "https://github.com/typelift/SwiftCheck.git", from: "0.8.1")
 ```
  
 **Using Carthage**
