@@ -59,7 +59,7 @@ zip_with_argument_list = ', '.join(['ga{0}'.format(n) for n in range(1, arity + 
 % end
 	@available(*, deprecated, renamed: "zipWith")
 	public static func map<${type_parameter_list}>(${parameter_list}, transform : @escaping (${type_parameter_list}) -> A) -> Gen<A> {
-		return Gen<(${type_parameter_list})>.zip(${zip_with_argument_list}).map({ t in transform(${expanded_previous_tuple2}) })
+		return Gen<A>.zipWith(${zip_with_argument_list}, transform: transform)
 	}
 
 	/// Returns a new generator that applies a given function to any outputs the
