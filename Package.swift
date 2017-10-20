@@ -10,7 +10,7 @@ let package = Package(
 			targets: ["SwiftCheck"]),
 	],
 	dependencies: [
-		.package(url: "https://github.com/trill-lang/FileCheck.git", .branch("master"))
+		.package(url: "https://github.com/trill-lang/FileCheck.git", from: "0.0.3")
 	],
 	targets: [
 		.target(
