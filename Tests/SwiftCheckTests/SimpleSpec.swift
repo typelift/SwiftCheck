@@ -105,8 +105,10 @@ extension ArbitraryLargeFoo : Arbitrary {
 				, UInt8.arbitrary, UInt16.arbitrary, UInt32.arbitrary, UInt64.arbitrary
 				, Int.arbitrary, UInt.arbitrary)
 			.flatMap { t in
-				return Gen<(Bool, (Bool, Bool), (Bool, Bool, Bool), (Bool, Bool, Bool, Bool))>
-					.map(
+				return Gen<(Int8, Int16, Int32, Int64
+					, UInt8, UInt16, UInt32, UInt64
+					, Int , UInt, Bool, (Bool, Bool), (Bool, Bool, Bool), (Bool, Bool, Bool, Bool))>
+					.zipWith(
 						Bool.arbitrary,
 						Gen<(Bool, Bool)>.zip(Bool.arbitrary, Bool.arbitrary),
 						Gen<(Bool, Bool, Bool)>.zip(Bool.arbitrary, Bool.arbitrary, Bool.arbitrary),

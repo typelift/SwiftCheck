@@ -21,6 +21,8 @@ extension Gen /*: Cartesian*/ {
 # Function definition template
 types_list = ['A{0}'.format(n) for n in range(1, arity + 1)]
 type_parameter_list = ', '.join(types_list)
+previouse_type_parameter_list = ', '.join(['A{0}'.format(n) for n in range(1, arity)])
+latest_type_parameter = 'A{0}'.format(arity)
 parameter_list = ', '.join(['_ ga{0} : Gen<A{0}>'.format(n) for n in range(1, arity + 1)])
 
 # Zip body template
@@ -31,18 +33,18 @@ expanded_previous_tuple = ', '.join(['t.0.{0}'.format(n - 1) for n in previous_p
 expanded_previous_tuple2 = ', '.join(['t.{0}'.format(n) for n in range(0, arity)])
 
 
-# Map body template
-map_zip_argument_list = ', '.join(['ga{0}'.format(n) for n in range(1, arity + 1)])
+# ZipWith body template
+zip_with_argument_list = ', '.join(['ga{0}'.format(n) for n in range(1, arity + 1)])
 }%
 	/// Zips together ${arity} generators into a generator of ${arity}-tuples.
 	///
 % for (t, p) in zip(types_list, ['ga{0}'.format(n) for n in range(1, arity + 1)]):
 	/// - parameter ${p}: A generator of values of type `${t}`.
 % end
-	public static func zip<${type_parameter_list}>(${parameter_list}) -> Gen<(${type_parameter_list})> {
-		return Gen
+	public static func zip<${type_parameter_list}>(${parameter_list}) -> Gen<(${type_parameter_list})> where A == (${type_parameter_list}) {
+		return Gen<((${previouse_type_parameter_list}), ${latest_type_parameter})>
 			.zip(
-				.zip(${previous_zip_arguments}),
+				Gen<(${previouse_type_parameter_list})>.zip(${previous_zip_arguments}),
 				ga${arity}
 			).map { t in
 				(${expanded_previous_tuple}, t.1)
@@ -55,8 +57,19 @@ map_zip_argument_list = ', '.join(['ga{0}'.format(n) for n in range(1, arity + 1
 % for (t, p) in zip(types_list, ['ga{0}'.format(n) for n in range(1, arity + 1)]):
 	/// - parameter ${p}: A generator of values of type `${t}`.
 % end
-	public static func map<${type_parameter_list}, R>(${parameter_list}, transform : @escaping (${type_parameter_list}) -> R) -> Gen<R> {
-		return zip(${map_zip_argument_list}).map({ t in transform(${expanded_previous_tuple2}) })
+	@available(*, deprecated, renamed: "zipWith")
+	public static func map<${type_parameter_list}>(${parameter_list}, transform : @escaping (${type_parameter_list}) -> A) -> Gen<A> {
+		return Gen<A>.zipWith(${zip_with_argument_list}, transform: transform)
+	}
+
+	/// Returns a new generator that applies a given function to any outputs the
+	/// given generators produce.
+	///
+% for (t, p) in zip(types_list, ['ga{0}'.format(n) for n in range(1, arity + 1)]):
+	/// - parameter ${p}: A generator of values of type `${t}`.
+% end
+	public static func zipWith<${type_parameter_list}>(${parameter_list}, transform : @escaping (${type_parameter_list}) -> A) -> Gen<A> {
+		return Gen<(${type_parameter_list})>.zip(${zip_with_argument_list}).map({ t in transform(${expanded_previous_tuple2}) })
 	}
 
 % end

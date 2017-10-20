@@ -38,16 +38,16 @@ tupled_parameters      = ', '.join(['x{0}'.format(n) for n in range(1, arity + 1
 % end
 	}
 
-	func testGeneratedMaps() {
+	func testGeneratedZipWiths() {
 % for arity in range(3, MAX_ARITY + 1):
 %{
 gen_type_argument_list = ', '.join(['Int' for _ in range(1, arity + 1)])
-map_argument_list      = ', '.join(['Gen.pure({0})'.format(n) for n in range(1, arity + 1)])
+zip_with_argument_list  = ', '.join(['Gen.pure({0})'.format(n) for n in range(1, arity + 1)])
 tupled_parameters      = ', '.join(['x{0}'.format(n) for n in range(1, arity + 1)])
 max_argument_list      = ', '.join(['${0}'.format(n) for n in range(0, arity)])
 }%
 
-		let g${arity} = Gen<(${gen_type_argument_list})>.map(${map_argument_list}) { max(${max_argument_list}) }
+		let g${arity} = Gen<Int>.zipWith(${zip_with_argument_list}) { max(${max_argument_list}) }
 
 		property("Gen.zip${arity} behaves") <- forAllNoShrink(g${arity}) { maxInt in
 			maxInt == ${arity}
