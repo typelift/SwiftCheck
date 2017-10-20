@@ -108,7 +108,7 @@ extension ArbitraryLargeFoo : Arbitrary {
 				return Gen<(Int8, Int16, Int32, Int64
 					, UInt8, UInt16, UInt32, UInt64
 					, Int , UInt, Bool, (Bool, Bool), (Bool, Bool, Bool), (Bool, Bool, Bool, Bool))>
-					.map(
+					.zipWith(
 						Bool.arbitrary,
 						Gen<(Bool, Bool)>.zip(Bool.arbitrary, Bool.arbitrary),
 						Gen<(Bool, Bool, Bool)>.zip(Bool.arbitrary, Bool.arbitrary, Bool.arbitrary),
