@@ -670,7 +670,7 @@ private func printLabels(_ st : TestResult) {
 		let gAllLabels = st.labels.map({ t in
 			return t.0 + ", "
 		}).reduce("", +)
-		print("("  + gAllLabels[gAllLabels.startIndex..<gAllLabels.characters.index(gAllLabels.endIndex, offsetBy: -2)] + ")")
+		print("("  + gAllLabels[gAllLabels.startIndex..<gAllLabels.index(gAllLabels.endIndex, offsetBy: -2)] + ")")
 	}
 }
 

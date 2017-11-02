@@ -71,7 +71,7 @@ extension String : CoArbitrary {
 		}
 		return comp(
 			Character.coarbitrary(x[x.startIndex]), 
-			String.coarbitrary(String(x[x.characters.index(after: x.startIndex)..<x.endIndex]))
+			String.coarbitrary(String(x[x.index(after: x.startIndex)..<x.endIndex]))
 		)
 	}
 }

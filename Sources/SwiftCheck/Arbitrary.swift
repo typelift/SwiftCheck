@@ -314,7 +314,7 @@ extension String : Arbitrary {
 
 	/// The default shrinking function for `String` values.
 	public static func shrink(_ s : String) -> [String] {
-		return [Character].shrink([Character](s.characters)).map { String($0) }
+		return [Character].shrink(s.map{$0}).map { String($0) }
 	}
 }
 
