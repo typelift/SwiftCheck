@@ -232,6 +232,22 @@ class SimpleSpec : XCTestCase {
 			) { a, b in
 				return a != b
 			}
+
+			// CHECK: Passed: (.)
+			// CHECK-NEXT: 0
+			// CHECK-NEXT: 0 == 0
+			// CHECK: Passed: (.)
+			// CHECK-NEXT: {{[0-9]+}}
+			// CHECK-NEXT: {{[0-9]+}} == {{[0-9]+}}
+			// CHECK: Passed: (.)
+			// CHECK-NEXT: {{[0-9]+}}
+			// CHECK-NEXT: {{[0-9]+}} == {{[0-9]+}}
+			// CHECK: *** Passed 3 tests
+			// CHECK-NEXT: .
+			let verboseLimit = CheckerArguments(maxAllowableSuccessfulTests: 3)
+			property("Passing counter-counterexamples print correctly", arguments: verboseLimit) <- forAll { (x : Int) in
+				return x*x ==== x*x
+			}.verbose
 		})
 	}
 
