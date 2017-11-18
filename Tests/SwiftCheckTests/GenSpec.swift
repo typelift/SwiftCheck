@@ -147,12 +147,12 @@ class GenSpec : XCTestCase {
 
 			// CHECK-NEXT: *** Passed 100 tests
 			// CHECK-NEXT: .
-			property("oneOf n") <- forAll { (xss : ArrayOf<Int>) in
-				if xss.getArray.isEmpty {
+			property("oneOf n") <- forAll { (xss : [Int]) in
+				if xss.isEmpty {
 					return Discard()
 				}
-				let l = Set(xss.getArray)
-				return forAll(Gen.one(of: xss.getArray.map(Gen.pure))) { l.contains($0) }
+				let l = Set(xss)
+				return forAll(Gen.one(of: xss.map(Gen.pure))) { l.contains($0) }
 			}
 
 			// CHECK-NEXT: *** Passed 100 tests
@@ -166,14 +166,14 @@ class GenSpec : XCTestCase {
 			// CHECK-NEXT: *** Passed 100 tests
 			// CHECK-NEXT: .
 			property("Gen.proliferateSized n generates arrays of length n") <- forAll(Gen<Int>.choose((0, 100))) { n in
-				let g = Int.arbitrary.proliferate(withSize: n).map(ArrayOf.init)
-				return forAll(g) { $0.getArray.count == n }
+				let g = Int.arbitrary.proliferate(withSize: n)
+				return forAll(g) { $0.count == n }
 			}
 
 			// CHECK-NEXT: *** Passed 100 tests
 			// CHECK-NEXT: .
-			property("Gen.proliferateSized 0 generates only empty arrays") <- forAll(Int.arbitrary.proliferate(withSize: 0).map(ArrayOf.init)) {
-				return $0.getArray.isEmpty
+			property("Gen.proliferateSized 0 generates only empty arrays") <- forAll(Int.arbitrary.proliferate(withSize: 0)) {
+				return $0.isEmpty
 			}
 
 			// CHECK-NEXT: *** Passed 100 tests

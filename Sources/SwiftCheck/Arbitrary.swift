@@ -23,9 +23,9 @@
 /// implementation of `shrink` is provided, SwiftCheck will default to an empty
 /// one - that is, no shrinking will occur.
 ///
-/// As an example, take the `ArrayOf` implementation of shrink:
+/// As an example, take `Array`'s implementation of shrink:
 ///
-///     Arbitrary.shrink(ArrayOf([1, 2, 3]))
+///     Arbitrary.shrink([1, 2, 3])
 ///        > [[], [2,3], [1,3], [1,2], [0,2,3], [1,0,3], [1,1,3], [1,2,0], [1,2,2]]
 ///
 /// SwiftCheck will search each case forward, one-by-one, and continue shrinking

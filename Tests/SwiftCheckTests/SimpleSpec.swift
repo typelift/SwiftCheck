@@ -13,11 +13,11 @@ import FileCheck
 #endif
 
 private func pack<A, B, C>(_ f : @escaping (A, B) -> C) -> ((A, B)) -> C {
-	return f
+  return { xs in f(xs.0, xs.1) }
 }
 
 private func pack<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O>(_ f : @escaping (A, B, C, D, E, F, G, H, I, J, K, L, M, N) -> O) -> ((A, B, C, D, E, F, G, H, I, J, K, L, M, N)) -> O {
-	return f
+	return { xs in f(xs.0, xs.1, xs.2, xs.3, xs.4, xs.5, xs.6, xs.7, xs.8, xs.9, xs.10,  xs.11, xs.12, xs.13) }
 }
 
 public struct ArbitraryFoo {

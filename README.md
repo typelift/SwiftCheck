@@ -43,10 +43,7 @@ For a less contrived example, here is a program property that tests whether
 Array identity holds under double reversal:
 
 ```swift
-// Because Swift doesn't allow us to implement `Arbitrary` for certain types,
-// SwiftCheck instead implements 'modifier' types that wrap them.  Here,
-// `ArrayOf<T : Arbitrary>` generates random arrays of values of type `T`.
-property("The reverse of the reverse of an array is that array") <- forAll { (xs : ArrayOf<Int>) in
+property("The reverse of the reverse of an array is that array") <- forAll { (xs : [Int]) in
     // This property is using a number of SwiftCheck's more interesting 
     // features.  `^&&^` is the conjunction operator for properties that turns
     // both properties into a larger property that only holds when both sub-properties
@@ -56,9 +53,9 @@ property("The reverse of the reverse of an array is that array") <- forAll { (xs
     // *** Passed 100 tests
     // (100% , Right identity, Left identity)
     return
-        (xs.getArray.reverse().reverse() == xs.getArray) <?> "Left identity"
+        (xs.reverse().reverse() == xs) <?> "Left identity"
         ^&&^
-        (xs.getArray == xs.getArray.reverse().reverse()) <?> "Right identity"
+        (xs == xs.reverse().reverse()) <?> "Right identity"
 }
 ```
 
@@ -66,12 +63,12 @@ Because SwiftCheck doesn't require tests to return `Bool`, just `Testable`, we
 can produce tests for complex properties with ease:
 
 ```swift
-property("Shrunken lists of integers always contain [] or [0]") <- forAll { (l : ArrayOf<Int>) in
+property("Shrunken lists of integers always contain [] or [0]") <- forAll { (l : [Int]) in
     // Here we use the Implication Operator `==>` to define a precondition for
     // this test.  If the precondition fails the test is discarded.  If it holds
     // the test proceeds.
-    return (!l.getArray.isEmpty && l.getArray != [0]) ==> {
-        let ls = self.shrinkArbitrary(l).map { $0.getArray }
+    return (!l.isEmpty && l != [0]) ==> {
+        let ls = self.shrinkArbitrary(l)
         return (ls.filter({ $0 == [] || $0 == [0] }).count >= 1)
     }
 }

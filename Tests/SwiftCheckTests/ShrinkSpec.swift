@@ -49,9 +49,9 @@ class ShrinkSpec : XCTestCase {
 
 			// CHECK-NEXT: *** Passed 100 tests
 			// CHECK-NEXT: .
-			property("Shrunken arrays of integers always contain [] or [0]") <- forAll { (l : ArrayOf<Int>) in
-				return (!l.getArray.isEmpty && l.getArray != [0]) ==> {
-					let ls = self.shrinkArbitrary(l).map { $0.getArray }
+			property("Shrunken arrays of integers always contain [] or [0]") <- forAll { (l : [Int]) in
+				return (!l.isEmpty && l != [0]) ==> {
+					let ls = self.shrinkArbitrary(l)
 					return (ls.filter({ $0 == [] || $0 == [0] }).count >= 1)
 				}
 			}
