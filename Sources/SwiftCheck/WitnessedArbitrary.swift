@@ -6,7 +6,7 @@
 //  Copyright © 2016 Typelift. All rights reserved.
 //
 
-extension Array where Element : Arbitrary {
+extension Array : Arbitrary where Element : Arbitrary {
 	/// Returns a generator of `Array`s of arbitrary `Element`s.
 	public static var arbitrary : Gen<Array<Element>> {
 		return Element.arbitrary.proliferate
@@ -19,19 +19,7 @@ extension Array where Element : Arbitrary {
 	}
 }
 
-extension Array : WitnessedArbitrary {
-	public typealias Param = Element
-
-	/// Given a witness and a function to test, converts them into a universally
-	/// quantified property over `Array`s.
-	public static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Element, pf : @escaping ([Element]) -> Testable) -> Property {
-		return forAllShrink([A].arbitrary, shrinker: [A].shrink, f: { bl in
-			return pf(bl.map(wit))
-		})
-	}
-}
-
-extension AnyBidirectionalCollection where Element : Arbitrary {
+extension AnyBidirectionalCollection : Arbitrary where Element : Arbitrary {
 	/// Returns a generator of `AnyBidirectionalCollection`s of arbitrary `Element`s.
 	public static var arbitrary : Gen<AnyBidirectionalCollection<Element>> {
 		return [Element].arbitrary.map(AnyBidirectionalCollection.init)
@@ -43,23 +31,7 @@ extension AnyBidirectionalCollection where Element : Arbitrary {
 	}
 }
 
-extension AnyBidirectionalCollection : WitnessedArbitrary {
-	public typealias Param = Element
-
-	/// Given a witness and a function to test, converts them into a universally
-	/// quantified property over `AnyBidirectionalCollection`s.
-	public static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Element, pf : @escaping (AnyBidirectionalCollection<Element>) -> Testable) -> Property {
-		return forAllShrink(
-			AnyBidirectionalCollection<A>.arbitrary,
-			shrinker: AnyBidirectionalCollection<A>.shrink,
-			f: { bl in
-				return pf(AnyBidirectionalCollection<Element>(bl.map(wit)))
-			}
-		)
-	}
-}
-
-extension AnySequence where Element : Arbitrary {
+extension AnySequence : Arbitrary where Element : Arbitrary {
 	/// Returns a generator of `AnySequence`s of arbitrary `Element`s.
 	public static var arbitrary : Gen<AnySequence<Element>> {
 		return [Element].arbitrary.map(AnySequence.init)
@@ -71,19 +43,7 @@ extension AnySequence where Element : Arbitrary {
 	}
 }
 
-extension AnySequence : WitnessedArbitrary {
-	public typealias Param = Element
-
-	/// Given a witness and a function to test, converts them into a universally
-	/// quantified property over `AnySequence`s.
-	public static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Element, pf : @escaping (AnySequence<Element>) -> Testable) -> Property {
-		return forAllShrink(AnySequence<A>.arbitrary, shrinker: AnySequence<A>.shrink, f: { bl in
-			return pf(AnySequence<Element>(bl.map(wit)))
-		})
-	}
-}
-
-extension ArraySlice where Element : Arbitrary {
+extension ArraySlice : Arbitrary where Element : Arbitrary {
 	/// Returns a generator of `ArraySlice`s of arbitrary `Element`s.
 	public static var arbitrary : Gen<ArraySlice<Element>> {
 		return [Element].arbitrary.map(ArraySlice.init)
@@ -95,39 +55,15 @@ extension ArraySlice where Element : Arbitrary {
 	}
 }
 
-extension ArraySlice : WitnessedArbitrary {
-	public typealias Param = Element
-
-	/// Given a witness and a function to test, converts them into a universally
-	/// quantified property over `ArraySlice`s.
-	public static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Element, pf : @escaping (ArraySlice<Element>) -> Testable) -> Property {
-		return forAllShrink(ArraySlice<A>.arbitrary, shrinker: ArraySlice<A>.shrink, f: { bl in
-			return pf(ArraySlice<Element>(bl.map(wit)))
-		})
-	}
-}
-
-extension CollectionOfOne where Element : Arbitrary {
+extension CollectionOfOne : Arbitrary where Element : Arbitrary {
 	/// Returns a generator of `CollectionOfOne`s of arbitrary `Element`s.
 	public static var arbitrary : Gen<CollectionOfOne<Element>> {
 		return Element.arbitrary.map(CollectionOfOne.init)
 	}
 }
 
-extension CollectionOfOne : WitnessedArbitrary {
-	public typealias Param = Element
-
-	/// Given a witness and a function to test, converts them into a universally
-	/// quantified property over `CollectionOfOne`s.
-	public static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Element, pf : @escaping (CollectionOfOne<Element>) -> Testable) -> Property {
-		return forAllShrink(CollectionOfOne<A>.arbitrary, shrinker: { _ in [] }, f: { (bl : CollectionOfOne<A>) -> Testable in
-			return pf(CollectionOfOne<Element>(wit(bl[bl.startIndex])))
-		})
-	}
-}
-
 /// Generates an Optional of arbitrary values of type A.
-extension Optional where Wrapped : Arbitrary {
+extension Optional : Arbitrary where Wrapped : Arbitrary {
 	/// Returns a generator of `Optional`s of arbitrary `Wrapped` values.
 	public static var arbitrary : Gen<Optional<Wrapped>> {
 		return Gen<Optional<Wrapped>>.frequency([
@@ -146,19 +82,7 @@ extension Optional where Wrapped : Arbitrary {
 	}
 }
 
-extension Optional : WitnessedArbitrary {
-	public typealias Param = Wrapped
-
-	/// Given a witness and a function to test, converts them into a universally
-	/// quantified property over `Optional`s.
-	public static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Wrapped, pf : @escaping (Optional<Wrapped>) -> Testable) -> Property {
-		return forAllShrink(Optional<A>.arbitrary, shrinker: Optional<A>.shrink, f: { bl in
-			return pf(bl.map(wit))
-		})
-	}
-}
-
-extension ContiguousArray where Element : Arbitrary {
+extension ContiguousArray : Arbitrary where Element : Arbitrary {
 	/// Returns a generator of `ContiguousArray`s of arbitrary `Element`s.
 	public static var arbitrary : Gen<ContiguousArray<Element>> {
 		return [Element].arbitrary.map(ContiguousArray.init)
@@ -170,20 +94,8 @@ extension ContiguousArray where Element : Arbitrary {
 	}
 }
 
-extension ContiguousArray : WitnessedArbitrary {
-	public typealias Param = Element
-
-	/// Given a witness and a function to test, converts them into a universally
-	/// quantified property over `ContiguousArray`s.
-	public static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Element, pf : @escaping (ContiguousArray<Element>) -> Testable) -> Property {
-		return forAllShrink(ContiguousArray<A>.arbitrary, shrinker: ContiguousArray<A>.shrink, f: { bl in
-			return pf(ContiguousArray<Element>(bl.map(wit)))
-		})
-	}
-}
-
 /// Generates an dictionary of arbitrary keys and values.
-extension Dictionary where Key : Arbitrary, Value : Arbitrary {
+extension Dictionary : Arbitrary where Key : Arbitrary, Value : Arbitrary {
 	/// Returns a generator of `Dictionary`s of arbitrary `Key`s and `Value`s.
 	public static var arbitrary : Gen<Dictionary<Key, Value>> {
 		return [Key].arbitrary.flatMap { (k : [Key]) in
@@ -207,7 +119,7 @@ extension EmptyCollection : Arbitrary {
 	}
 }
 
-extension Range where Bound : Arbitrary {
+extension Range : Arbitrary where Bound : Arbitrary {
 	/// Returns a generator of `HalfOpenInterval`s of arbitrary `Bound`s.
 	public static var arbitrary : Gen<Range<Bound>> {
 		return Bound.arbitrary.flatMap { l in
@@ -223,21 +135,21 @@ extension Range where Bound : Arbitrary {
 	}
 }
 
-extension LazyCollection where Base : Arbitrary {
+extension LazyCollection : Arbitrary where Base : Arbitrary {
 	/// Returns a generator of `LazyCollection`s of arbitrary `Base`s.
 	public static var arbitrary : Gen<LazyCollection<Base>> {
 		return LazyCollection<Base>.arbitrary
 	}
 }
 
-extension LazySequence where Base : Arbitrary {
+extension LazySequence : Arbitrary where Base : Arbitrary {
 	/// Returns a generator of `LazySequence`s of arbitrary `Base`s.
 	public static var arbitrary : Gen<LazySequence<Base>> {
 		return LazySequence<Base>.arbitrary
 	}
 }
 
-extension Repeated where Element : Arbitrary {
+extension Repeated : Arbitrary where Element : Arbitrary {
 	/// Returns a generator of `Repeat`s of arbitrary `Element`s.
 	public static var arbitrary : Gen<Repeated<Element>> {
 		let constructor: (Element, Int) -> Repeated<Element> = { (element, count) in
@@ -248,20 +160,7 @@ extension Repeated where Element : Arbitrary {
 	}
 }
 
-extension Repeated : WitnessedArbitrary {
-	public typealias Param = Element
-
-	/// Given a witness and a function to test, converts them into a universally
-	/// quantified property over `Repeat`s.
-	public static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Element, pf : @escaping (Repeated<Element>) -> Testable) -> Property {
-		return forAllShrink(Repeated<A>.arbitrary, shrinker: { _ in [] }, f: { bl in
-			let xs = bl.map(wit)
-			return pf(repeatElement(xs.first!, count: xs.count))
-		})
-	}
-}
-
-extension Set where Element : Arbitrary {
+extension Set : Arbitrary where Element : Arbitrary {
 	/// Returns a generator of `Set`s of arbitrary `Element`s.
 	public static var arbitrary : Gen<Set<Element>> {
 		return Gen.sized { n in
@@ -278,18 +177,6 @@ extension Set where Element : Arbitrary {
 	/// The default shrinking function for `Set`s of arbitrary `Element`s.
 	public static func shrink(_ s : Set<Element>) -> [Set<Element>] {
 		return [Element].shrink([Element](s)).map(Set.init)
-	}
-}
-
-extension Set : WitnessedArbitrary {
-	public typealias Param = Element
-
-	/// Given a witness and a function to test, converts them into a universally
-	/// quantified property over `Set`s.
-	public static func forAllWitnessed<A : Arbitrary>(_ wit : @escaping (A) -> Element, pf : @escaping (Set<Element>) -> Testable) -> Property {
-		return forAll { (xs : [A]) in
-			return pf(Set<Element>(xs.map(wit)))
-		}
 	}
 }
 
