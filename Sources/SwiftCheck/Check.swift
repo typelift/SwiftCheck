@@ -194,6 +194,91 @@ public func <- (checker : ReportiveQuickCheck, test : @autoclosure @escaping () 
 	_ = quickCheckWithResult(checker.args, test())
 }
 
+/// Tests a property and prints the results to stdout.
+///
+/// - parameter prop: The property to be tested.
+/// - parameter name: The name of the property being tested.
+@available(*, deprecated, message: "Use quickCheck(asserting:) or quickCheck(reporting:) instead.")
+public func quickCheck(_ prop : Testable, name : String = "") {
+	_ = quickCheckWithResult(CheckerArguments(name: name), prop)
+}
+
+/// The interface for properties to be run through SwiftCheck with an XCTest
+/// assert.  The property will still generate console output during testing.
+///
+/// - Parameters:
+///   - message: A description of the property.
+///   - arguments: An optional set of arguments to tune the test runner.
+///   - file: The file in which test occurred. Defaults to the file name of the
+///     test case in which this function was called.
+///   - line: The line number on which test occurred. Defaults to the line
+///     number on which this function was called.
+///   - prop: A block that carries the property or invariant to be tested.
+public func quickCheck(
+	asserting message: String, arguments: CheckerArguments? = nil,
+	file : StaticString = #file, line : UInt = #line,
+	property prop : @autoclosure @escaping () -> Testable
+) {
+	property(message, arguments: arguments, file: file, line: line) <- prop
+}
+
+/// The interface for properties to be run through SwiftCheck with an XCTest
+/// assert.  The property will still generate console output during testing.
+///
+/// - Parameters:
+///   - message: A description of the property.
+///   - arguments: An optional set of arguments to tune the test runner.
+///   - file: The file in which test occurred. Defaults to the file name of the
+///     test case in which this function was called.
+///   - line: The line number on which test occurred. Defaults to the line
+///     number on which this function was called.
+///   - prop: A block that carries the property or invariant to be tested.
+public func quickCheck(
+	asserting message: String, arguments: CheckerArguments? = nil,
+	file : StaticString = #file, line : UInt = #line,
+	property prop : () -> Testable
+) {
+	property(message, arguments: arguments, file: file, line: line) <- prop
+}
+
+/// The interface for properties to be run through SwiftCheck without an XCTest
+/// assert.  The property will still generate console output during testing.
+///
+/// - Parameters:
+///   - message: A description of the property.
+///   - arguments: An optional set of arguments to tune the test runner.
+///   - file: The file in which test occurred. Defaults to the file name of the
+///     test case in which this function was called.
+///   - line: The line number on which test occurred. Defaults to the line
+///     number on which this function was called.
+///   - prop: A block that carries the property or invariant to be tested.
+public func quickCheck(
+	reporting message: String, arguments: CheckerArguments? = nil,
+	file : StaticString = #file, line : UInt = #line,
+	property prop : @autoclosure @escaping () -> Testable
+) {
+	reportProperty(message, arguments: arguments, file: file, line: line) <- prop
+}
+
+/// The interface for properties to be run through SwiftCheck without an XCTest
+/// assert.  The property will still generate console output during testing.
+///
+/// - Parameters:
+///   - message: A description of the property.
+///   - arguments: An optional set of arguments to tune the test runner.
+///   - file: The file in which test occurred. Defaults to the file name of the
+///     test case in which this function was called.
+///   - line: The line number on which test occurred. Defaults to the line
+///     number on which this function was called.
+///   - prop: A block that carries the property or invariant to be tested.
+public func quickCheck(
+	reporting message: String, arguments: CheckerArguments? = nil,
+	file : StaticString = #file, line : UInt = #line,
+	property prop : () -> Testable
+) {
+	reportProperty(message, arguments: arguments, file: file, line: line) <- prop
+}
+
 precedencegroup SwiftCheckImplicationPrecedence {
 	associativity: right
 	lowerThan: ComparisonPrecedence
