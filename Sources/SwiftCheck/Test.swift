@@ -533,14 +533,6 @@ public func exists<A : Arbitrary>(_ gen : Gen<A>, pf : @escaping (A) throws -> T
 	}
 }
 
-/// Tests a property and prints the results to stdout.
-///
-/// - parameter prop: The property to be tested.
-/// - parameter name: The name of the property being tested.
-public func quickCheck(_ prop : Testable, name : String = "") {
-	_ = quickCheckWithResult(CheckerArguments(name: name), prop)
-}
-
 // MARK: - Implementation Details
 
 internal enum Result {
