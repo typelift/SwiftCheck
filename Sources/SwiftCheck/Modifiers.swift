@@ -496,10 +496,8 @@ private final class PointerOfImpl<T : Arbitrary> : Arbitrary {
 	}
 
 	deinit {
-		if self.size > 0 && self.ptr != nil {
-			self.ptr?.deallocate(capacity: self.size)
-			self.ptr = nil
-		}
+		self.ptr?.deallocate()
+		self.ptr = nil
 	}
 
 	static var arbitrary : Gen<PointerOfImpl<T>> {

@@ -62,7 +62,7 @@ class PropertySpec : XCTestCase {
 			// CHECK-NEXT: .
 			property("Again undoes once") <- forAll { (n : Int) in
 				var counter : Int = 0
-				quickCheck(forAll { (_ : Int) in
+				quickCheck(asserting: "", property: forAll { (_ : Int) in
 					counter += 1
 					return true
 				}.once.again)
