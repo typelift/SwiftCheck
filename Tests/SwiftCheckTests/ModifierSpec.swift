@@ -53,22 +53,22 @@ class ModifierSpec : XCTestCase {
 
 			// CHECK-NEXT: *** Passed 100 tests
 			// CHECK-NEXT: .
-			property("ArrayOf modifiers nest") <- forAll { (xxxs : ArrayOf<ArrayOf<Int8>>) in
+			property("ArrayOf modifiers nest") <- forAll { (xxs : [[Int8]]) in
 				return true
 			}
 
 			// CHECK-NEXT: *** Passed 100 tests
 			// CHECK-NEXT: (100%, {{Left|Right}} identity, {{Left|Right}} identity)
-			property("The reverse of the reverse of an array is that array") <- forAll { (xs : ArrayOf<Int>) in
-				return (xs.getArray.reversed().reversed() == xs.getArray) <?> "Left identity"
+			property("The reverse of the reverse of an array is that array") <- forAll { (xs : [Int]) in
+				return (xs.reversed().reversed() == xs) <?> "Left identity"
 					^&&^
-					(xs.getArray == xs.getArray.reversed().reversed()) <?> "Right identity"
+					(xs == xs.reversed().reversed()) <?> "Right identity"
 			}
 
 			// CHECK-NEXT: *** Passed 100 tests
 			// CHECK-NEXT: .
-			property("map behaves") <- forAll { (xs : ArrayOf<Int>, f : ArrowOf<Int, Int>) in
-				return xs.getArray.map(f.getArrow) == xs.getArray.map(f.getArrow)
+			property("map behaves") <- forAll { (xs : [Int], f : ArrowOf<Int, Int>) in
+				return xs.map(f.getArrow) == xs.map(f.getArrow)
 			}
 
 			// CHECK-NEXT: *** Passed 100 tests
@@ -81,9 +81,9 @@ class ModifierSpec : XCTestCase {
 
 			// CHECK-NEXT: *** Passed 100 tests
 			// CHECK-NEXT: .
-			property("filter behaves") <- forAll { (xs : ArrayOf<Int>, pred : ArrowOf<Int, Bool>) in
+			property("filter behaves") <- forAll { (xs : [Int], pred : ArrowOf<Int, Bool>) in
 				let f = pred.getArrow
-				return (xs.getArray.filter(f).reduce(true, { (acc, val) in acc && f(val) }) as Bool)
+				return (xs.filter(f).reduce(true, { (acc, val) in acc && f(val) }) as Bool)
 			}
 		})
 	}

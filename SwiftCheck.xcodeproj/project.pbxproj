@@ -22,7 +22,6 @@
 		6A761BAA1F14E92100A7D74F /* SwiftCheck.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A761B831F14E91500A7D74F /* SwiftCheck.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6A761BAB1F14E92100A7D74F /* Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A761B841F14E91500A7D74F /* Test.swift */; };
 		6A761BAC1F14E92100A7D74F /* Testable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A761B851F14E91500A7D74F /* Testable.swift */; };
-		6A761BAD1F14E92100A7D74F /* Witness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A761B861F14E91500A7D74F /* Witness.swift */; };
 		6A761BAE1F14E92100A7D74F /* WitnessedArbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A761B871F14E91500A7D74F /* WitnessedArbitrary.swift */; };
 		6A761BAF1F14E92100A7D74F /* Arbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A761B771F14E91400A7D74F /* Arbitrary.swift */; };
 		6A761BB01F14E92200A7D74F /* Cartesian.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A761B781F14E91400A7D74F /* Cartesian.swift */; };
@@ -39,7 +38,6 @@
 		6A761BBB1F14E92200A7D74F /* SwiftCheck.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A761B831F14E91500A7D74F /* SwiftCheck.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6A761BBC1F14E92200A7D74F /* Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A761B841F14E91500A7D74F /* Test.swift */; };
 		6A761BBD1F14E92200A7D74F /* Testable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A761B851F14E91500A7D74F /* Testable.swift */; };
-		6A761BBE1F14E92200A7D74F /* Witness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A761B861F14E91500A7D74F /* Witness.swift */; };
 		6A761BBF1F14E92200A7D74F /* WitnessedArbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A761B871F14E91500A7D74F /* WitnessedArbitrary.swift */; };
 		6A761BC01F14E92200A7D74F /* Arbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A761B771F14E91400A7D74F /* Arbitrary.swift */; };
 		6A761BC11F14E92200A7D74F /* Cartesian.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A761B781F14E91400A7D74F /* Cartesian.swift */; };
@@ -56,7 +54,6 @@
 		6A761BCC1F14E92200A7D74F /* SwiftCheck.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A761B831F14E91500A7D74F /* SwiftCheck.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6A761BCD1F14E92200A7D74F /* Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A761B841F14E91500A7D74F /* Test.swift */; };
 		6A761BCE1F14E92200A7D74F /* Testable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A761B851F14E91500A7D74F /* Testable.swift */; };
-		6A761BCF1F14E92200A7D74F /* Witness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A761B861F14E91500A7D74F /* Witness.swift */; };
 		6A761BD01F14E92200A7D74F /* WitnessedArbitrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A761B871F14E91500A7D74F /* WitnessedArbitrary.swift */; };
 		6A761BD11F14E93900A7D74F /* BooleanIdentitySpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A761B8D1F14E91500A7D74F /* BooleanIdentitySpec.swift */; };
 		6A761BD21F14E93900A7D74F /* CartesianSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A761B8E1F14E91500A7D74F /* CartesianSpec.swift */; };
@@ -195,7 +192,6 @@
 		6A761B831F14E91500A7D74F /* SwiftCheck.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftCheck.h; sourceTree = "<group>"; };
 		6A761B841F14E91500A7D74F /* Test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Test.swift; sourceTree = "<group>"; };
 		6A761B851F14E91500A7D74F /* Testable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Testable.swift; sourceTree = "<group>"; };
-		6A761B861F14E91500A7D74F /* Witness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Witness.swift; sourceTree = "<group>"; };
 		6A761B871F14E91500A7D74F /* WitnessedArbitrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WitnessedArbitrary.swift; sourceTree = "<group>"; };
 		6A761B881F14E91500A7D74F /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		6A761B8A1F14E91500A7D74F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -308,7 +304,6 @@
 				6A761B821F14E91500A7D74F /* State.swift */,
 				6A761B841F14E91500A7D74F /* Test.swift */,
 				6A761B851F14E91500A7D74F /* Testable.swift */,
-				6A761B861F14E91500A7D74F /* Witness.swift */,
 				6A761B871F14E91500A7D74F /* WitnessedArbitrary.swift */,
 			);
 			path = SwiftCheck;
@@ -537,7 +532,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0730;
-				LastUpgradeCheck = 0900;
+				LastUpgradeCheck = 0930;
 				ORGANIZATIONNAME = Typelift;
 				TargetAttributes = {
 					8240CCB01C3A123600EF4D29 = {
@@ -669,7 +664,6 @@
 				6A761BC31F14E92200A7D74F /* CoArbitrary.swift in Sources */,
 				6A761BC21F14E92200A7D74F /* Check.swift in Sources */,
 				6A761BC41F14E92200A7D74F /* Compose.swift in Sources */,
-				6A761BCF1F14E92200A7D74F /* Witness.swift in Sources */,
 				6A761BCB1F14E92200A7D74F /* State.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -721,7 +715,6 @@
 				6A761BA11F14E92100A7D74F /* CoArbitrary.swift in Sources */,
 				6A761BA01F14E92100A7D74F /* Check.swift in Sources */,
 				6A761BA21F14E92100A7D74F /* Compose.swift in Sources */,
-				6A761BAD1F14E92100A7D74F /* Witness.swift in Sources */,
 				6A761BA91F14E92100A7D74F /* State.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -773,7 +766,6 @@
 				6A761BB21F14E92200A7D74F /* CoArbitrary.swift in Sources */,
 				6A761BB11F14E92200A7D74F /* Check.swift in Sources */,
 				6A761BB31F14E92200A7D74F /* Compose.swift in Sources */,
-				6A761BBE1F14E92200A7D74F /* Witness.swift in Sources */,
 				6A761BBA1F14E92200A7D74F /* State.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -949,12 +941,14 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -1003,12 +997,14 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;

@@ -82,7 +82,7 @@ extension Exp : Arbitrary {
 			return [a] + Exp.shrink(a).map { .lam(x, $0) }
 		case let .app(a, b):
 			let part1 : [Exp] = [a, b]
-				+ [a].flatMap({ (expr : Exp) -> Exp? in
+				+ [a].compactMap({ (expr : Exp) -> Exp? in
 					if case let .lam(x, a) = expr {
 						return a.subst(x, b)
 					}

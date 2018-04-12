@@ -37,16 +37,6 @@
 ///                return xs.map(f.getArrow) == xs.map(f.getArrow)
 ///         }
 ///     }
-///
-/// Finally, modifiers nest to allow the generation of intricate structures that
-/// would not otherwise be possible due to the limitations above.  For example,
-/// to generate an Array of Arrays of Dictionaries of Integers and Strings (a
-/// type that normally looks like `Array<Array<Dictionary<String, Int>>>`),
-/// would look like this:
-///
-///     property("Generating monstrous data types is possible") <- forAll { (xs : ArrayOf<ArrayOf<DictionaryOf<String, Int>>>) in
-///         /// We're gonna need a bigger boat.
-///     }
 
 /// For types that either do not have a `CustomStringConvertible` instance or
 /// that wish to have no description to print, Blind will create a default
@@ -115,48 +105,6 @@ extension Static : CoArbitrary {
 	}
 }
 
-/// Generates an array of arbitrary values of type A.
-public struct ArrayOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
-	/// Retrieves the underlying array of values.
-	public let getArray : [A]
-
-	/// Retrieves the underlying array of values as a contiguous array.
-	public var getContiguousArray : ContiguousArray<A> {
-		return ContiguousArray(self.getArray)
-	}
-
-	/// Creates a new `ArrayOf` modifier from an underlying array of values.
-	public init(_ array : [A]) {
-		self.getArray = array
-	}
-
-	/// A textual representation of `self`.
-	public var description : String {
-		return "\(self.getArray)"
-	}
-
-	/// Returns a generator of `ArrayOf` values.
-	public static var arbitrary : Gen<ArrayOf<A>> {
-		return Array<A>.arbitrary.map(ArrayOf.init)
-	}
-
-	/// The default shrinking function for an `ArrayOf` values.
-	public static func shrink(_ bl : ArrayOf<A>) -> [ArrayOf<A>] {
-		return Array<A>.shrink(bl.getArray).map(ArrayOf.init)
-	}
-}
-
-extension ArrayOf : CoArbitrary {
-	/// Uses the underlying array of values to perturb a generator.
-	public static func coarbitrary<C>(_ x : ArrayOf) -> ((Gen<C>) -> Gen<C>) {
-		let a = x.getArray
-		if a.isEmpty {
-			return { $0.variant(0) }
-		}
-		return comp({ $0.variant(1) }, ArrayOf.coarbitrary(ArrayOf([A](a[1..<a.endIndex]))))
-	}
-}
-
 /// Generates a sorted array of arbitrary values of type A.
 public struct OrderedArrayOf<A : Arbitrary & Comparable> : Arbitrary, CustomStringConvertible {
 	/// Retrieves the underlying sorted array of values.
@@ -190,121 +138,6 @@ public struct OrderedArrayOf<A : Arbitrary & Comparable> : Arbitrary, CustomStri
 	/// The default shrinking function for an `OrderedArrayOf` values.
 	public static func shrink(_ bl : OrderedArrayOf<A>) -> [OrderedArrayOf<A>] {
 		return Array<A>.shrink(bl.getOrderedArray).filter({ $0.sorted() == $0 }).map(OrderedArrayOf.init)
-	}
-}
-
-
-/// Generates an dictionary of arbitrary keys and values.
-public struct DictionaryOf<K : Hashable & Arbitrary, V : Arbitrary> : Arbitrary, CustomStringConvertible {
-	/// Retrieves the underlying dictionary of values.
-	public let getDictionary : Dictionary<K, V>
-
-	/// Creates a new `DictionaryOf` modifier from an underlying dictionary of
-	/// key-value pairs.
-	public init(_ dict : Dictionary<K, V>) {
-		self.getDictionary = dict
-	}
-
-	/// A textual representation of `self`.
-	public var description : String {
-		return "\(self.getDictionary)"
-	}
-
-	/// Returns a generator for a `DictionaryOf` values.
-	public static var arbitrary : Gen<DictionaryOf<K, V>> {
-		return Dictionary<K, V>.arbitrary.map(DictionaryOf.init)
-	}
-
-	/// The default shrinking function for a `DictionaryOf` values.
-	public static func shrink(_ d : DictionaryOf<K, V>) -> [DictionaryOf<K, V>] {
-		return Dictionary.shrink(d.getDictionary).map(DictionaryOf.init)
-	}
-}
-
-extension DictionaryOf : CoArbitrary {
-	/// Uses the underlying array of values to perturb a generator.
-	public static func coarbitrary<C>(_ x : DictionaryOf) -> ((Gen<C>) -> Gen<C>) {
-		return Dictionary.coarbitrary(x.getDictionary)
-	}
-}
-
-/// Generates an Optional of arbitrary values of type A.
-public struct OptionalOf<A : Arbitrary> : Arbitrary, CustomStringConvertible {
-	/// Retrieves the underlying optional value.
-	public let getOptional : A?
-
-	/// Creates a new `OptionalOf` modifier from an underlying `Optional` value.
-	public init(_ opt : A?) {
-		self.getOptional = opt
-	}
-
-	/// A textual representation of `self`.
-	public var description : String {
-		return "\(String(describing: self.getOptional))"
-	}
-
-	/// Returns a generator for `OptionalOf` values.
-	public static var arbitrary : Gen<OptionalOf<A>> {
-		return Optional<A>.arbitrary.map(OptionalOf.init)
-	}
-
-	/// The default shrinking function for `OptionalOf` values.
-	public static func shrink(_ bl : OptionalOf<A>) -> [OptionalOf<A>] {
-		return Optional<A>.shrink(bl.getOptional).map(OptionalOf.init)
-	}
-}
-
-extension OptionalOf : CoArbitrary {
-	/// Uses the underlying presence or lack of a value to perturb a generator.
-	public static func coarbitrary<C>(_ x : OptionalOf) -> ((Gen<C>) -> Gen<C>) {
-		if let _ = x.getOptional {
-			return { $0.variant(0) }
-		}
-		return { $0.variant(1) }
-	}
-}
-
-/// Generates a set of arbitrary values of type A.
-public struct SetOf<A : Hashable & Arbitrary> : Arbitrary, CustomStringConvertible {
-	/// Retrieves the underlying set of values.
-	public let getSet : Set<A>
-
-	/// Creates a new `SetOf` modifier from an underlying set of values.
-	public init(_ set : Set<A>) {
-		self.getSet = set
-	}
-
-	/// A textual representation of `self`.
-	public var description : String {
-		return "\(self.getSet)"
-	}
-
-	/// Returns a generator for a `SetOf` values.
-	public static var arbitrary : Gen<SetOf<A>> {
-		return Gen.sized { n in
-			return Gen<Int>.choose((0, n)).flatMap { k in
-				if k == 0 {
-					return Gen.pure(SetOf(Set([])))
-				}
-
-				return sequence(Array((0...k)).map { _ in A.arbitrary }).map(comp(SetOf.init, Set.init))
-			}
-		}
-	}
-
-	/// The default shrinking function for a `SetOf` values.
-	public static func shrink(_ s : SetOf<A>) -> [SetOf<A>] {
-		return ArrayOf.shrink(ArrayOf([A](s.getSet))).map({ SetOf(Set($0.getArray)) })
-	}
-}
-
-extension SetOf : CoArbitrary {
-	/// Uses the underlying set of values to perturb a generator.
-	public static func coarbitrary<C>(_ x : SetOf) -> ((Gen<C>) -> Gen<C>) {
-		if x.getSet.isEmpty {
-			return { $0.variant(0) }
-		}
-		return { $0.variant(1) }
 	}
 }
 
@@ -663,10 +496,8 @@ private final class PointerOfImpl<T : Arbitrary> : Arbitrary {
 	}
 
 	deinit {
-		if self.size > 0 && self.ptr != nil {
-			self.ptr?.deallocate(capacity: self.size)
-			self.ptr = nil
-		}
+		self.ptr?.deallocate()
+		self.ptr = nil
 	}
 
 	static var arbitrary : Gen<PointerOfImpl<T>> {

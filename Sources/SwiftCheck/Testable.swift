@@ -79,7 +79,7 @@ extension Bool : Testable {
 	}
 }
 
-extension Gen /*: Testable*/ where A : Testable {
+extension Gen : Testable where A : Testable {
 	public var property : Property {
 		return Property(self.flatMap { $0.property.unProperty })
 	}

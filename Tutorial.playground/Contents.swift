@@ -336,11 +336,11 @@ property("The reverse of the reverse of an array is that array") <- forAll { (xs
 
 //: Because `forAll` is variadic it works for a large number and variety of types too:
 
-//                                           +--- This Modifier Type produces Arrays of Integers.
-//                                           |                    +--- This Modifier Type generates functions.  That's right, SwiftCheck
-//                                           |                    |    can generate *functions*!!
-//                                           v                    v
-property("filter behaves") <- forAll { (xs : ArrayOf<Int>, pred : ArrowOf<Int, Bool>) in
+//                                           +--- Produce arrays of integers.
+//                                           |             +--- This Modifier Type generates functions.  That's right, SwiftCheck
+//                                           |             |    can generate *functions*!!
+//                                           v             v
+property("filter behaves") <- forAll { (xs : [Int], pred : ArrowOf<Int, Bool>) in
 	let f = pred.getArrow
 	return xs.getArray.filter(f).reduce(true, { $0 && f($1) })
 	// ^ This property says that if we filter an array then apply the predicate
