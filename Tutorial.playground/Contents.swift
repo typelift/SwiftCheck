@@ -342,7 +342,7 @@ property("The reverse of the reverse of an array is that array") <- forAll { (xs
 //                                           v             v
 property("filter behaves") <- forAll { (xs : [Int], pred : ArrowOf<Int, Bool>) in
 	let f = pred.getArrow
-	return xs.getArray.filter(f).reduce(true, { $0 && f($1) })
+	return xs.filter(f).reduce(true, { $0 && f($1) })
 	// ^ This property says that if we filter an array then apply the predicate
 	//   to all its elements, then they should all respond with `true`.
 }
