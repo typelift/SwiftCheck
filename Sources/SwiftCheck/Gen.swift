@@ -415,7 +415,7 @@ private func delay<A>() -> Gen<(Gen<A>) -> A> {
 private func vary<S : BinaryInteger>(_ k : S, _ rng : StdGen) -> StdGen {
 	let s = rng.split
 	let gen = ((k % 2) == 0) ? s.0 : s.1
-	return (k == (k / 2)) ? gen : vary(k / 2, rng)
+	return (k == (k / 2)) ? gen : vary(k / 2, gen)
 }
 
 private func size(_ k : Int, _ m : Int) -> Int {
