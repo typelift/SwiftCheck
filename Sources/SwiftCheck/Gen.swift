@@ -185,7 +185,7 @@ extension Gen {
 	/// Shakes up the generator's internal Random Number Generator with a seed.
 	public func variant<S : BinaryInteger>(_ seed : S) -> Gen<A> {
 		return Gen(unGen: { rng, n in
-			return self.unGen(vary(seed, rng), n)
+			return self.unGen(rng.vary(seed), n)
 		})
 	}
 
@@ -412,10 +412,48 @@ private func delay<A>() -> Gen<(Gen<A>) -> A> {
 	})
 }
 
-private func vary<S : BinaryInteger>(_ k : S, _ rng : StdGen) -> StdGen {
-	let s = rng.split
-	let gen = ((k % 2) == 0) ? s.0 : s.1
-	return (k == (k / 2)) ? gen : vary(k / 2, gen)
+extension StdGen {
+	fileprivate func vary<S : BinaryInteger>(_ seed : S) -> StdGen {
+		if seed >= 0 {
+			return variant(bool: false).variant(nat: seed)
+		} else if seed == -1 {
+			return variant(bool: true).variant(nat: 0)
+		} else {
+			return variant(bool: true).variant(int: (-Int(seed)) - 1)
+		}
+	}
+	
+	private func variant(bool : Bool) -> StdGen {
+		return bool ? split.0 : split.1
+	}
+	
+	private func variant<N : BinaryInteger>(nat n : N) -> StdGen {
+		if stop(n) {
+			return chip(true, seed: Int(n))
+		} else {
+			return variant(int: Int(n))
+		}
+	}
+	
+	private func variant(int n : Int) -> StdGen {
+		if stop(n) {
+			return chip(true, seed: n)
+		} else {
+			return chip(false, seed: n).variant(int: chop(n))
+		}
+	}
+	
+	private func chip(_ finished : Bool, seed n : Int) -> StdGen {
+		return variant(bool: n%2 == 0).variant(bool: finished)
+	}
+}
+
+private func chop(_ n : Int) -> Int {
+	return n / 2
+}
+
+private func stop<N : BinaryInteger>(_ n: N) -> Bool {
+	return n <= 1
 }
 
 private func size(_ k : Int, _ m : Int) -> Int {
