@@ -172,9 +172,13 @@ extension Gen {
 		}
 	}
 
+	@available(*, deprecated, renamed: "zipWith")
+	public static func map<A1, A2>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, transform: @escaping (A1, A2) -> A) -> Gen {
+		return Gen.zipWith(ga1, ga2, transform: transform)
+	}
 	/// Returns a new generator that applies a given function to any outputs the
 	/// given generators produce.
-	public static func map<A1, A2>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, transform: @escaping (A1, A2) -> A) -> Gen {
+	public static func zipWith<A1, A2>(_ ga1 : Gen<A1>, _ ga2 : Gen<A2>, transform: @escaping (A1, A2) -> A) -> Gen {
 		return Gen<(A1, A2)>.zip(ga1, ga2).map({ t in transform(t.0, t.1) })
 	}
 }
