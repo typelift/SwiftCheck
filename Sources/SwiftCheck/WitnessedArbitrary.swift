@@ -124,7 +124,7 @@ extension Range : Arbitrary where Bound : Arbitrary {
 	public static var arbitrary : Gen<Range<Bound>> {
 		return Bound.arbitrary.flatMap { l in
 			return Bound.arbitrary.flatMap { r in
-				return Gen.pure((min(l, r) ..< max(l, r)))
+				return Gen.pure((Swift.min(l, r) ..< Swift.max(l, r)))
 			}
 		}
 	}
@@ -138,14 +138,14 @@ extension Range : Arbitrary where Bound : Arbitrary {
 extension LazyCollection : Arbitrary where Base : Arbitrary {
 	/// Returns a generator of `LazyCollection`s of arbitrary `Base`s.
 	public static var arbitrary : Gen<LazyCollection<Base>> {
-		return LazyCollection<Base>.arbitrary
+		return Base.arbitrary.map({ $0.lazy })
 	}
 }
 
 extension LazySequence : Arbitrary where Base : Arbitrary {
 	/// Returns a generator of `LazySequence`s of arbitrary `Base`s.
 	public static var arbitrary : Gen<LazySequence<Base>> {
-		return LazySequence<Base>.arbitrary
+		return Base.arbitrary.map({ $0.lazy })
 	}
 }
 
