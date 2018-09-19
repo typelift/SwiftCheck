@@ -194,15 +194,6 @@ public func <- (checker : ReportiveQuickCheck, test : @autoclosure @escaping () 
 	_ = quickCheckWithResult(checker.args, test())
 }
 
-/// Tests a property and prints the results to stdout.
-///
-/// - parameter prop: The property to be tested.
-/// - parameter name: The name of the property being tested.
-@available(*, deprecated, message: "Use quickCheck(asserting:) or quickCheck(reporting:) instead.")
-public func quickCheck(_ prop : Testable, name : String = "") {
-	_ = quickCheckWithResult(CheckerArguments(name: name), prop)
-}
-
 /// The interface for properties to be run through SwiftCheck with an XCTest
 /// assert.  The property will still generate console output during testing.
 ///
