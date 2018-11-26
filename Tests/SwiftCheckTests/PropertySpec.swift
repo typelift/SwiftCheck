@@ -132,6 +132,14 @@ class PropertySpec : XCTestCase {
 				return (s.count == [Int](s).count).cover(s.count >= 15, percentage: 70, label: "large")
 			}.expectFailure
 
+			// CHECK-NEXT: +++ OK, failed as expected.
+			// CHECK-NEXT: *** Insufficient coverage after 100 tests
+			// CHECK-NEXT: (only {{[0-9]+}}% something happened, not {{[0-9]+}}%)
+			property("Cover reports failures for conditions that never happen") <- forAll { (s : Set<Int>) in
+				let somethingHappened = false
+				return (s.count == [Int](s).count).cover(somethingHappened, percentage: 1, label: "something happened")
+			}.expectFailure
+
 			// CHECK-NEXT: *** Passed 100 tests
 			// CHECK-NEXT: .
 			property("Prop ==> true") <- forAllNoShrink(Bool.arbitrary, Gen.pure(true)) { (p1, p2) in
