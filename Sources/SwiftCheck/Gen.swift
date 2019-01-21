@@ -69,7 +69,7 @@ public struct Gen<A> {
 	public static func one<S : BidirectionalCollection>(of gs : S) -> Gen<A>
 		where S.Iterator.Element == Gen<A>, S.Index : RandomType
 	{
-		assert(gs.count != 0, "oneOf used with empty list")
+		assert(gs.count != 0, "one(of:) used with empty list")
 
 		return Gen<S.Index>.choose((gs.startIndex, gs.index(before: gs.endIndex))).flatMap { x in
 			return gs[x]
@@ -81,7 +81,7 @@ public struct Gen<A> {
 	///
 	/// Only use this function when you need to assign uneven "weights" to each
 	/// generator.  If all generators need to have an equal chance of being
-	/// selected, use `Gen.oneOf`.
+	/// selected, use `Gen.one(of:)`.
 	public static func frequency<S : Sequence>(_ xs : S) -> Gen<A>
 		where S.Iterator.Element == (Int, Gen<A>)
 	{
