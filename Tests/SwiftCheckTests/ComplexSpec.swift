@@ -29,15 +29,15 @@ class ComplexSpec : XCTestCase {
 				lower,
 				numeric,
 				special,
-				]).proliferateNonEmpty.suchThat({ $0[($0.endIndex - 1)] != "." }).map(String.init(stringInterpolationSegment:))
+			]).proliferateNonEmpty.suchThat({ $0[($0.endIndex - 1)] != "." }).map(String.init(_:))
 
 			let hostname = Gen<Character>.one(of: [
 				lower,
 				numeric,
 				Gen.pure("-"),
-				]).proliferateNonEmpty.map(String.init(stringInterpolationSegment:))
+			]).proliferateNonEmpty.map(String.init(_:))
 
-			let tld = lower.proliferateNonEmpty.suchThat({ $0.count > 1 }).map(String.init(stringInterpolationSegment:))
+			let tld = lower.proliferateNonEmpty.suchThat({ $0.count > 1 }).map(String.init(_:))
 
 			let emailGen = glue([localEmail, Gen.pure("@"), hostname, Gen.pure("."), tld])
 
