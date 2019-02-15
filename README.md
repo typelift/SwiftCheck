@@ -77,13 +77,13 @@ property("Shrunken lists of integers always contain [] or [0]") <- forAll { (l :
 Properties can even depend on other properties:
 
 ```swift
-property("Gen.oneOf multiple generators picks only given generators") <- forAll { (n1 : Int, n2 : Int) in
+property("Gen.one(of:) multiple generators picks only given generators") <- forAll { (n1 : Int, n2 : Int) in
     let g1 = Gen.pure(n1)
     let g2 = Gen.pure(n2)
     // Here we give `forAll` an explicit generator.  Before SwiftCheck was using
     // the types of variables involved in the property to create an implicit
     // Generator behind the scenes.
-    return forAll(Gen.oneOf([g1, g2])) { $0 == n1 || $0 == n2 }
+    return forAll(Gen.one(of: [g1, g2])) { $0 == n1 || $0 == n2 }
 }
 ```
 
