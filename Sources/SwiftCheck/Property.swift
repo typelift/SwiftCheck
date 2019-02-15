@@ -311,22 +311,19 @@ extension Testable {
 	///
 	/// - returns: A property that carries a label dependent upon the condition.
 	public func cover(_ condition : Bool, percentage : Int, label : String) -> Property {
-		if condition {
-			return self.mapResult { res in
-				return TestResult(
-					ok:            res.ok,
-					expect:        res.expect,
-					reason:        res.reason,
-					theException:  res.theException,
-					labels:        insertWith(max, k: label, v: percentage, m: res.labels),
-					stamp:         res.stamp.union([label]),
-					callbacks:     res.callbacks,
-					abort:         res.abort,
-					quantifier:    res.quantifier
-				)
-			}
+		return self.mapResult { res in
+			return TestResult(
+				ok:            res.ok,
+				expect:        res.expect,
+				reason:        res.reason,
+				theException:  res.theException,
+				labels:        insertWith(max, k: label, v: percentage, m: res.labels),
+				stamp:         condition ? res.stamp.union([label]) : res.stamp,
+				callbacks:     res.callbacks,
+				abort:         res.abort,
+				quantifier:    res.quantifier
+			)
 		}
-		return self.property
 	}
 
 	/// Applies a function that modifies the property generator's inner `Prop`.
