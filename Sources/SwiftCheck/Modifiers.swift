@@ -462,7 +462,7 @@ fileprivate final class IsoOfImpl<T : Hashable & CoArbitrary & Arbitrary, U : Eq
 	static func shrink(_ f : IsoOfImpl<T, U>) -> [IsoOfImpl<T, U>] {
 		return f.table.flatMap { (t) -> [IsoOfImpl<T, U>] in
 			let (x, y) = t
-			return Zip2Sequence(_sequence1: T.shrink(x), _sequence2: U.shrink(y)).map({ t in
+			return zip(T.shrink(x), U.shrink(y)).map({ t in
 				let (y1 , y2) = t
 				return IsoOfImpl<T, U>(
 					{ (z : T) -> U in

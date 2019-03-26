@@ -142,13 +142,6 @@ extension LazyCollection : Arbitrary where Base : Arbitrary {
 	}
 }
 
-extension LazySequence : Arbitrary where Base : Arbitrary {
-	/// Returns a generator of `LazySequence`s of arbitrary `Base`s.
-	public static var arbitrary : Gen<LazySequence<Base>> {
-		return Base.arbitrary.map({ $0.lazy })
-	}
-}
-
 extension Repeated : Arbitrary where Element : Arbitrary {
 	/// Returns a generator of `Repeat`s of arbitrary `Element`s.
 	public static var arbitrary : Gen<Repeated<Element>> {
