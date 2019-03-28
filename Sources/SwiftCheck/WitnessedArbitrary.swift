@@ -135,13 +135,6 @@ extension Range : Arbitrary where Bound : Arbitrary {
 	}
 }
 
-extension LazyCollection : Arbitrary where Base : Arbitrary {
-	/// Returns a generator of `LazyCollection`s of arbitrary `Base`s.
-	public static var arbitrary : Gen<LazyCollection<Base>> {
-		return Base.arbitrary.map({ $0.lazy })
-	}
-}
-
 extension LazySequence : Arbitrary where Base : Arbitrary {
 	/// Returns a generator of `LazySequence`s of arbitrary `Base`s.
 	public static var arbitrary : Gen<LazySequence<Base>> {

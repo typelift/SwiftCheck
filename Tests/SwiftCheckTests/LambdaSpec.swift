@@ -24,8 +24,8 @@ struct Name : Arbitrary, Equatable, Hashable, CustomStringConvertible {
 		return self.unName
 	}
 
-	var hashValue : Int {
-		return self.unName.hashValue
+	func hash(into hasher: inout Hasher) {
+		hasher.combine(unName)
 	}
 
 	static func == (l : Name, r : Name) -> Bool {

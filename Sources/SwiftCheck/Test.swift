@@ -1006,7 +1006,7 @@ private func printDistributionGraph(_ st : CheckerState) {
 	}
 
 	let gAllLabels : [String] = st.collected.map({ (s : Set<String>) in
-		return s.filter({ t in st.labels[t] == .some(0) }).reduce("", { (l : String, r : String) in l + ", " + r })
+		return s.filter({ t in st.labels[t] == .some(0) }).sorted().reduce("", { (l : String, r : String) in l + ", " + r })
 	})
 	let gAll : [[String]] = gAllLabels.filter({ !$0.isEmpty }).sorted().groupBy(==)
 	let gPrint : [String] = gAll.map({ ss in showP((ss.count * 100) / st.successfulTestCount) + ss.first! })
