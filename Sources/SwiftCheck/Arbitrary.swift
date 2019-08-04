@@ -64,13 +64,14 @@ extension Arbitrary {
 extension FixedWidthInteger {
 	/// Shrinks any `IntegerType`.
 	public var shrinkIntegral : [Self] {
-		return unfoldr({ i in
+		let start = self < 0 ? self.multipliedReportingOverflow(by: -1).partialValue : self
+		return [Self](sequence(state: start) { i in
 			if i <= 0 {
 				return .none
 			}
-			let n = i / 2
-			return .some((n, n))
-		}, initial: self < 0 ? self.multipliedReportingOverflow(by: -1).partialValue : self)
+			i = i / 2
+			return .some(i)
+		})
 	}
 }
 
@@ -92,13 +93,14 @@ extension Bool : Arbitrary {
 extension BinaryInteger {
 	/// Shrinks any `Numeric` type.
 	public var shrinkIntegral : [Self] {
-		return unfoldr({ i in
+		let start = self < 0 ? (self * -1) : self
+		return [Self](sequence(state: start) { i in
 			if i <= 0 {
 				return .none
 			}
-			let n = i / 2
-			return .some((n, n))
-		}, initial: self < 0 ? (self * -1) : self)
+			i = i / 2
+			return .some(i)
+		})
 	}
 }
 
@@ -371,17 +373,6 @@ extension Array where Element : Hashable {
 		return [Element](Set(self))
 	}
 }
-
-private func unfoldr<A, B>(_ f : (B) -> Optional<(A, B)>, initial : B) -> [A] {
-	var acc = [A]()
-	var ini = initial
-	while let next = f(ini) {
-		acc.append(next.0)
-		ini = next.1
-	}
-	return acc.reversed()
-}
-
 #if os(Linux)
 	import Glibc
 #else
