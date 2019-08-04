@@ -535,7 +535,7 @@ public func exists<A : Arbitrary>(_ gen : Gen<A>, pf : @escaping (A) throws -> T
 
 // MARK: - Implementation Details
 
-internal enum Result {
+internal enum QuickCheckResult {
 	case success(
 		numTests  : Int,
 		labels    : [(String, Int)],
@@ -585,7 +585,7 @@ private indirect enum Either<L, R> {
 	case right(R)
 }
 
-internal func quickCheckWithResult(_ args : CheckerArguments, _ p : Testable) -> Result {
+internal func quickCheckWithResult(_ args : CheckerArguments, _ p : Testable) -> QuickCheckResult {
 	let istate = CheckerState(
 		name:                         args.name,
 		maxAllowableSuccessfulTests:  args.maxAllowableSuccessfulTests,
@@ -621,7 +621,7 @@ internal func quickCheckWithResult(_ args : CheckerArguments, _ p : Testable) ->
 // - giveUp: When the number of discarded tests exceeds the number given in the
 //           arguments we just give up turning the run loop to prevent excessive
 //           generation.
-private func test(_ st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Result {
+private func test(_ st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> QuickCheckResult {
 	var state = st
 	while true {
 		switch runATest(state, caseGen: caseGen) {
@@ -631,9 +631,9 @@ private func test(_ st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Resul
 				return fail.0
 			case let (_, .noExpectedFailure(numTests, seed, sz, labels, output)):
 				return .noExpectedFailure(numTests: numTests, usedSeed: seed, usedSize: sz, labels: labels, output: output)
-				// Existential Failures need explicit propagation.  Existentials increment the
-				// discard count so we check if it has been surpassed.  If it has with any kind
-				// of success we're done.  If no successes are found we've failed checking the
+			// Existential Failures need explicit propagation.  Existentials increment the
+			// discard count so we check if it has been surpassed.  If it has with any kind
+			// of success we're done.  If no successes are found we've failed checking the
 			// existential and report it as such.  Otherwise turn the testing loop.
 			case (.existentialFailure(_, _, _, _, _, _, _), _):
 				if fail.1.successfulTestCount == 0 || fail.1.discardedTestCount >= fail.1.maxAllowableDiscardedTests {
@@ -661,7 +661,7 @@ private func test(_ st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Resul
 //
 // On success the next state is returned.  On failure the final result and state
 // are returned.
-private func runATest(_ st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Either<(Result, CheckerState), CheckerState> {
+private func runATest(_ st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> Either<(QuickCheckResult, CheckerState), CheckerState> {
 	let size = st.computeSize(st.successfulTestCount, st.discardedTestCount)
 	let (rnd1, rnd2) = st.randomSeedGenerator.split
 
@@ -751,7 +751,7 @@ private func runATest(_ st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> E
 
 				/// However, some existentials outlive their usefulness
 				if nstate.discardedTestCount >= nstate.maxAllowableDiscardedTests {
-					let resul = Result.existentialFailure(
+					let resul = QuickCheckResult.existentialFailure(
 						numTests:    (st.successfulTestCount + 1),
 						usedSeed:    st.randomSeedGenerator,
 						usedSize:    st.computeSize(st.successfulTestCount, st.discardedTestCount),
@@ -769,11 +769,11 @@ private func runATest(_ st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> E
 			let (numShrinks, _, _) = findMinimalFailingTestCase(st, res: res, ts: ts())
 
 			if !expect {
-				let s = Result.success(numTests: (st.successfulTestCount + 1), labels: summary(st), output: "+++ OK, failed as expected. ")
+				let s = QuickCheckResult.success(numTests: (st.successfulTestCount + 1), labels: summary(st), output: "+++ OK, failed as expected. ")
 				return .left((s, st))
 			}
 
-			let stat = Result.failure(
+			let stat = QuickCheckResult.failure(
 				numTests:    (st.successfulTestCount + 1),
 				numShrinks:  numShrinks,
 				usedSeed:    st.randomSeedGenerator,
@@ -809,7 +809,7 @@ private func runATest(_ st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> E
 	}
 }
 
-private func doneTesting(_ st : CheckerState) -> Result {
+private func doneTesting(_ st : CheckerState) -> QuickCheckResult {
 	if !st.hasFulfilledExpectedFailure {
 		if insufficientCoverage(st) {
 			printCond(st.silence, "+++ OK, failed as expected. ")
@@ -843,7 +843,7 @@ private func doneTesting(_ st : CheckerState) -> Result {
 	}
 }
 
-private func giveUp(_ st : CheckerState) -> Result {
+private func giveUp(_ st : CheckerState) -> QuickCheckResult {
 	printDistributionGraph(st)
 	return .gaveUp(numTests: st.successfulTestCount, labels: summary(st), output: "")
 }
@@ -944,7 +944,7 @@ private func reportMinimumCaseFound(_ st : CheckerState, res : TestResult) -> (I
 	return (st.successfulShrinkCount, st.failedShrinkStepCount - st.failedShrinkStepDistance, st.failedShrinkStepDistance)
 }
 
-private func reportExistentialFailure(_ st : CheckerState, res : Result) -> Result {
+private func reportExistentialFailure(_ st : CheckerState, res : QuickCheckResult) -> QuickCheckResult {
 	switch res {
 	case let .existentialFailure(_, _, _, reason, _, _, lastTest):
 		let testMsg = " (after \(st.discardedTestCount) test"
