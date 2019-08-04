@@ -338,7 +338,8 @@ extension Double : RandomType {
 	}
 }
 
-/// Implementation Details Follow
+// MARK: - Implementation Details
+
 private enum ClockTimeResult {
 	case success
 	case failure(Int)

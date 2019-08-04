@@ -359,11 +359,6 @@ extension NonNegative : CoArbitrary {
 
 // MARK: - Implementation Details Follow
 
-
-private func undefined<A>() -> A {
-	fatalError("")
-}
-
 fileprivate final class ArrowOfImpl<T : Hashable & CoArbitrary, U : Arbitrary> : Arbitrary, CustomStringConvertible {
 	fileprivate var table : Dictionary<T, U>
 	fileprivate var arr : (T) -> U
@@ -375,7 +370,9 @@ fileprivate final class ArrowOfImpl<T : Hashable & CoArbitrary, U : Arbitrary> :
 
 	convenience init(_ arr : @escaping (T) -> U) {
 		var table = [T:U]()
-		self.init(table, { (_ : T) -> U in return undefined() })
+		self.init(table, { (_ : T) -> U in
+			fatalError("Table forced before initialization completed; is something re-entrant?")
+		})
 
 		self.arr = { x in
 			if let v = table[x] {
@@ -425,7 +422,11 @@ fileprivate final class IsoOfImpl<T : Hashable & CoArbitrary & Arbitrary, U : Eq
 
 	convenience init(_ embed : @escaping (T) -> U, _ project : @escaping (U) -> T) {
 		var table = [T:U]()
-		self.init(table, { (_ : T) -> U in return undefined() }, { (_ : U) -> T in return undefined() })
+		self.init(table, { (_ : T) -> U in
+			fatalError("Table forced before initialization completed; is something re-entrant?")
+		}, { (_ : U) -> T in
+			fatalError("Table forced before initialization completed; is something re-entrant?")
+		})
 
 		self.embed = { t in
 			if let v = table[t] {
