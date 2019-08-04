@@ -303,7 +303,12 @@ extension UnicodeScalar : Arbitrary {
 	/// The default shrinking function for `UnicodeScalar` values.
 	public static func shrink(_ x : UnicodeScalar) -> [UnicodeScalar] {
 		let s : UnicodeScalar = UnicodeScalar(UInt32(tolower(Int32(x.value))))!
-		return [ "a", "b", "c", s, "A", "B", "C", "1", "2", "3", "\n", " " ].nub.filter { $0 < x }
+		let scalarSet = Set<UnicodeScalar>([ "a", "b", "c", "A", "B", "C", "1", "2", "3", "\n", " " ])
+		if scalarSet.contains(s) {
+			return [ "a", "b", "c", "A", "B", "C", "1", "2", "3", "\n", " " ].filter { $0 < x }
+		} else {
+			return [ "a", "b", "c", s, "A", "B", "C", "1", "2", "3", "\n", " " ].filter { $0 < x }
+		}
 	}
 }
 
@@ -365,14 +370,6 @@ extension Mirror : Arbitrary {
 	}
 }
 
-
-// MARK: - Implementation Details Follow
-
-extension Array where Element : Hashable {
-	fileprivate var nub : [Element] {
-		return [Element](Set(self))
-	}
-}
 #if os(Linux)
 	import Glibc
 #else
