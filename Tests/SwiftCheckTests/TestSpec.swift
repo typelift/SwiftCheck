@@ -26,7 +26,7 @@ class TestSpec : XCTestCase {
 		XCTAssert(fileCheckOutput {
 			// CHECK: *** Passed 100 tests
 			// CHECK-NEXT: .
-			property("Dictionaries behave") <- forAll { (xs : Dictionary<String, Int>) in
+			property("Dictionaries behave") <- forAll { (xs : Dictionary<Int, Int>) in
 				return true
 			}
 
