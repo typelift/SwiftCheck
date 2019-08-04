@@ -100,7 +100,7 @@ extension Dictionary : Arbitrary where Key : Arbitrary, Value : Arbitrary {
 	public static var arbitrary : Gen<Dictionary<Key, Value>> {
 		return [Key].arbitrary.flatMap { (k : [Key]) in
 			return [Value].arbitrary.flatMap { (v : [Value]) in
-				return Gen.pure(Dictionary(zip(k, v)))
+				return Gen.pure(Dictionary(zip(k, v)) { $1 })
 			}
 		}
 	}
@@ -173,7 +173,7 @@ extension Set : Arbitrary where Element : Arbitrary {
 	}
 }
 
-// MARK: - Implementation Details Follow
+// MARK: - Implementation Details
 
 private func removes<A : Arbitrary>(_ k : Int, n : Int, xs : [A]) -> [[A]] {
 	let xs2 : [A] = Array(xs.suffix(max(0, xs.count - k)))
@@ -200,14 +200,9 @@ private func shrinkOne<A : Arbitrary>(_ xs : [A]) -> [[A]] {
 	fatalError("Array could not produce a first element")
 }
 
-extension Dictionary {
-	fileprivate init<S : Sequence>(_ pairs : S)
-		where S.Iterator.Element == (Key, Value)
-	{
-		self.init()
-		var g = pairs.makeIterator()
-		while let (k, v): (Key, Value) = g.next() {
-			self[k] = v
-		}
-	}
+	let xss = [A](xs[1..<xs.endIndex])
+	let a : [[A]] = A.shrink(x).map({ [$0] + xss })
+	let b : [[A]] = shrinkOne(xss).map({ [x] + $0 })
+	return a + b
 }
+
