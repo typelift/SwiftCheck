@@ -189,16 +189,9 @@ private func removes<A : Arbitrary>(_ k : Int, n : Int, xs : [A]) -> [[A]] {
 }
 
 private func shrinkOne<A : Arbitrary>(_ xs : [A]) -> [[A]] {
-	if xs.isEmpty {
+	guard let x : A = xs.first else {
 		return [[A]]()
-	} else if let x : A = xs.first {
-		let xss = [A](xs[1..<xs.endIndex])
-		let a : [[A]] = A.shrink(x).map({ [$0] + xss })
-		let b : [[A]] = shrinkOne(xss).map({ [x] + $0 })
-		return a + b
 	}
-	fatalError("Array could not produce a first element")
-}
 
 	let xss = [A](xs[1..<xs.endIndex])
 	let a : [[A]] = A.shrink(x).map({ [$0] + xss })
