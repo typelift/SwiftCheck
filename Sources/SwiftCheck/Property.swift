@@ -671,6 +671,18 @@ private func printLabels(_ st : TestResult) {
 	}
 }
 
+/// Takes a sequence of trees of test results from several properties into
+/// a single labelled rose tree for the conjunction.
+///
+/// This function is written in continuation passsing style to facilitate the
+/// construction of a lazy rose tree that preserves the labels and callbacks
+/// associated with the sub-properties.
+///
+/// The general idea is that the properties are tested from first to last.  If
+/// any of them fails, the conjunct need not evaluate further and returns that
+/// first failing result.  Else, each passing sub-property continues on to the
+/// next sub-property and decorates the overall result with its callbacks and
+/// labels.  Discards act to skip that sub-property, as expected.
 private func conj(_ k : @escaping (TestResult) -> TestResult, xs : [Rose<TestResult>]) -> Rose<TestResult> {
 	guard let p = xs.first else {
 		return Rose.mkRose({ k(TestResult.succeeded) }, { [] })
@@ -679,16 +691,20 @@ private func conj(_ k : @escaping (TestResult) -> TestResult, xs : [Rose<TestRes
 		let rose = p.reduce
 		switch rose {
 		case .mkRose(let result, _):
-			if !result().expect {
+			guard result().expect else {
 				return Rose.pure(TestResult.failed("expectFailure may not occur inside a conjunction"))
 			}
 
 			switch result().ok {
 			case .some(true):
+				// Passed - Adjoin the labels and test the next property.
 				return conj(comp(addLabels(result()), comp(addCallbacks(result()), k)), xs: [Rose<TestResult>](xs[1..<xs.endIndex]))
 			case .some(false):
+				// Failed - Return the first failure and don't continue
+				// evaluating the other conjuncts.
 				return rose
 			case .none:
+				// Discard - Try the next property.
 				let rose2 = conj(comp(addCallbacks(result()), k), xs: [Rose<TestResult>](xs[1..<xs.endIndex])).reduce
 				switch rose2 {
 				case .mkRose(let result2, _):
@@ -711,23 +727,28 @@ private func conj(_ k : @escaping (TestResult) -> TestResult, xs : [Rose<TestRes
 	}))
 }
 
+/// Computes the disjunction of two test results.
 private func disj(_ p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResult> {
 	return p.flatMap { result1 in
-		if !result1.expect {
+		guard result1.expect else {
 			return Rose<TestResult>.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 		}
 		switch result1.ok {
 		case .some(true):
+			// Passed - Don't evaluate the other tree.
 			return Rose<TestResult>.pure(result1)
 		case .some(false):
-			return q.flatMap { (result2 : TestResult) in
-				if !result2.expect {
+			// Failed - Try the other tree.
+			return q.flatMap { result2 in
+				guard result2.expect else {
 					return Rose<TestResult>.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 				}
 				switch result2.ok {
 				case .some(true):
 					return Rose<TestResult>.pure(result2)
 				case .some(false):
+					// Failed - Combine the exceptions and callbacks from each
+					// sub-property.
 					let callbacks : [Callback] = [.afterFinalFailure(kind: .counterexample, { (_, _) in return print("") })]
 					return Rose<TestResult>.pure(TestResult(
 						ok:            .some(false),
@@ -745,8 +766,9 @@ private func disj(_ p : Rose<TestResult>, q : Rose<TestResult>) -> Rose<TestResu
 				}
 			}
 		case .none:
-			return q.flatMap { (result2 : TestResult) in
-				if !result2.expect {
+			// Discarded - Try the other property.
+			return q.flatMap { result2 in
+				guard result2.expect else {
 					return Rose<TestResult>.pure(TestResult.failed("expectFailure may not occur inside a disjunction"))
 				}
 				switch result2.ok {

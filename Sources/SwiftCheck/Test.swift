@@ -768,7 +768,7 @@ private func runATest(_ st : CheckerState, caseGen : (StdGen, Int) -> Prop) -> E
 			// Attempt a shrink.
 			let (numShrinks, _, _) = findMinimalFailingTestCase(st, res: res, ts: ts())
 
-			if !expect {
+			guard expect else {
 				let s = QuickCheckResult.success(numTests: (st.successfulTestCount + 1), labels: summary(st), output: "+++ OK, failed as expected. ")
 				return .left((s, st))
 			}
