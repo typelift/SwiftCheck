@@ -16,6 +16,7 @@ public protocol RandomGeneneratorType {
 	/// Yields the range of values returned by the generator.
 	///
 	/// This property must return integers in ascending order.
+	@available(*, deprecated, message: "genRange serves no purpose and will be removed in a future release")
 	var genRange : (Int, Int) { get }
 	/// Splits the current random value generator into two distinct random value
 	/// generators.
