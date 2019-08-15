@@ -12,13 +12,21 @@ import XCTest
 import FileCheck
 #endif
 
+enum MyException: String, Error, Arbitrary {
+	case phony
+	case baloney
+
+	static var arbitrary: Gen<MyException> {
+		return Gen.fromElements(of: [ .phony, .baloney ])
+	}
+}
+
 class TestSpec : XCTestCase {
 	func testAll() {
-		let dictionaryGen: Gen<Dictionary<String, Int>> = Gen<(String, Int)>.zip(String.arbitrary, Int.arbitrary).proliferate.map { _ -> Dictionary<String, Int> in [:] } 
 		XCTAssert(fileCheckOutput {
 			// CHECK: *** Passed 100 tests
 			// CHECK-NEXT: .
-			property("Dictionaries behave") <- forAllNoShrink(dictionaryGen) { (xs : Dictionary<String, Int>) in
+			property("Dictionaries behave") <- forAll { (xs : Dictionary<Int, Int>) in
 				return true
 			}
 
@@ -31,6 +39,12 @@ class TestSpec : XCTestCase {
 			// CHECK-NEXT: *** Passed 100 tests
 			// CHECK-NEXT: .
 			property("Sets behave") <- forAll { (xs : Set<Int>) in
+				return true
+			}
+
+			// CHECK-NEXT: *** Passed 100 tests
+			// CHECK-NEXT: .
+			property("Results behave") <- forAll { (xs : Result<String, MyException>) in
 				return true
 			}
 

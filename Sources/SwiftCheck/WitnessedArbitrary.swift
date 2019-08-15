@@ -173,6 +173,28 @@ extension Set : Arbitrary where Element : Arbitrary {
 	}
 }
 
+extension Result : Arbitrary where Success : Arbitrary, Failure : Arbitrary {
+	/// Returns a generator of `Result`s of arbitrary `Success` and
+	/// `Failure` values.
+	public static var arbitrary : Gen<Result<Success, Failure>> {
+		return Gen<Result<Success, Failure>>.one(of: [
+			Success.arbitrary.map(Result<Success, Failure>.success),
+			Failure.arbitrary.map(Result<Success, Failure>.failure),
+		])
+	}
+
+	/// The default shrinking function for `Result`s of arbitrary `Success` and
+	/// `Failure` values.
+	public static func shrink(_ bl : Result<Success, Failure>) -> [Result<Success, Failure>] {
+		switch bl {
+		case let .success(value):
+			return Success.shrink(value).map(Result<Success, Failure>.success)
+		case let .failure(value):
+			return Failure.shrink(value).map(Result<Success, Failure>.failure)
+		}
+	}
+}
+
 // MARK: - Implementation Details
 
 private func removes<A : Arbitrary>(_ k : Int, n : Int, xs : [A]) -> [[A]] {
