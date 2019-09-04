@@ -53,9 +53,9 @@ property("The reverse of the reverse of an array is that array") <- forAll { (xs
     // *** Passed 100 tests
     // (100% , Right identity, Left identity)
     return
-        (xs.reverse().reverse() == xs) <?> "Left identity"
+        (xs.reversed().reversed() == xs) <?> "Left identity"
         ^&&^
-        (xs == xs.reverse().reverse()) <?> "Right identity"
+        (xs == xs.reversed().reversed()) <?> "Right identity"
 }
 ```
 

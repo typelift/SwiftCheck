@@ -83,9 +83,9 @@
 ///     v                                                                v
 ///     property("The reverse of the reverse of an array is that array") <- forAll { (xs : [Int]) in
 ///            return
-///                (xs.reverse().reverse() == xs) <?> "Reverse on the left"
+///                (xs.reversed().reversed() == xs) <?> "Reverse on the left"
 ///             ^&&^
-///                 (xs == xs.reverse().reverse()) <?> "Reverse on the right"
+///                 (xs == xs.reversed().reversed()) <?> "Reverse on the right"
 ///     }
 ///
 /// Why require types?  For one, Swift cannot infer the types of local variables
