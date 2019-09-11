@@ -25,7 +25,7 @@ matrix:
       script:
         - set -o pipefail
         - xcodebuild test -scheme SwiftCheck | xcpretty -c
-        - xcodebuild build-for-testing -scheme SwiftCheck-iOS -destination "platform=iOS Simulator,name=iPad Pro (12.9-inch) (3rd  generation)" | xcpretty -c
+        - xcodebuild build-for-testing -scheme SwiftCheck-iOS -destination "platform=iOS Simulator,name=iPad Pro (12.9-inch) (3rd generation)" | xcpretty -c
         - xcodebuild test -scheme SwiftCheck-iOS -destination "platform=iOS Simulator,name=iPad Pro (12.9-inch) (3rd generation)" | xcpretty -c
         - xcodebuild build-for-testing -scheme SwiftCheck-tvOS -destination 'platform=tvOS Simulator,name=Apple TV 4K (at 1080p)' | xcpretty -c
         - xcodebuild test -scheme SwiftCheck-tvOS -destination 'platform=tvOS Simulator,name=Apple TV 4K (at 1080p)' | xcpretty -c
