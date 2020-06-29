@@ -12,6 +12,7 @@ import XCTest
 
 #if !os(macOS)
 XCTMain([
+	ArbitrarySpec.allTests,
 	BooleanIdentitySpec.allTests,
 	ComplexSpec.allTests,
 	DiscardSpec.allTests,
