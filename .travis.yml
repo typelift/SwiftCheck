@@ -32,7 +32,7 @@ matrix:
     - os: linux
       language: generic
       sudo: required
-      dist: trusty
+      dist: xenial
       before_install:
         - git submodule update --init --recursive
         - wget -q -O - https://swift.org/keys/all-keys.asc | gpg --import -
