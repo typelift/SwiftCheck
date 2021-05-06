@@ -32,13 +32,13 @@ matrix:
     - os: linux
       language: generic
       sudo: required
-      dist: trusty
+      dist: xenial
       before_install:
         - git submodule update --init --recursive
         - wget -q -O - https://swift.org/keys/all-keys.asc | gpg --import -
-        - wget https://swift.org/builds/swift-5.0-release/ubuntu1404/swift-5.0-RELEASE/swift-5.0-RELEASE-ubuntu14.04.tar.gz
-        - tar xzf swift-5.0-RELEASE-ubuntu14.04.tar.gz
-        - export PATH=${PWD}/swift-5.0-RELEASE-ubuntu14.04/usr/bin:"${PATH}"
+        - wget https://swift.org/builds/swift-5.2.4-release/ubuntu1604/swift-5.2.4-RELEASE/swift-5.2.4-RELEASE-ubuntu16.04.tar.gz
+        - tar xzf swift-5.2.4-RELEASE-ubuntu16.04.tar.gz
+        - export PATH=${PWD}/swift-5.2.4-RELEASE-ubuntu16.04/usr/bin:"${PATH}"
         - pushd Utilities
         - ./compile.sh
         - popd

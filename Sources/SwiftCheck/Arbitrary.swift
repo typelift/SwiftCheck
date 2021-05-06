@@ -370,6 +370,62 @@ extension Mirror : Arbitrary {
 	}
 }
 
+import Foundation
+
+extension Date: Arbitrary {
+    public static var arbitrary: Gen<Date> {
+        return TimeInterval.arbitrary.map(Date.init(timeIntervalSinceNow:))
+    }
+}
+
+extension UUID: Arbitrary {
+	/// Returns a generator of `UUID` values.
+    public static var arbitrary: Gen<UUID> {
+        return Gen.compose { composer in
+            var bytes = (0..<16).map { _ in composer.generate(using: UInt8.arbitrary) }
+            bytes[7] = bytes[7] | 0b01000000 // UUID version 4
+            bytes[9] = bytes[9] | 0b01000000 // clock_seq_hi_and_reserved
+
+            let part1 = Data(bytes[0..<4]).hexEncodedString()
+            let part2 = Data(bytes[4..<6]).hexEncodedString()
+            let part3 = Data(bytes[6..<8]).hexEncodedString()
+            let part4 = Data(bytes[8..<10]).hexEncodedString()
+            let part5 = Data(bytes[10..<16]).hexEncodedString()
+
+            return UUID(uuidString: part1 + "-" + part2 + "-" + part3 + "-" + part4 + "-" + part5)!
+        }
+    }
+}
+
+extension Data {
+
+	/// Creates a new `Data` instance using the hexadecimal-encoded string.
+	///
+	/// - Parameter string: A string with even non-zero length containing only digits or a/A through f/F.
+    public init?(hexEncoded string: String) {
+        if string.count == 0 || string.count % 2 != 0 { return nil }
+
+        var bytes = [UInt8]()
+        var start = string.startIndex
+        while start < string.endIndex {
+            let chunkEnd = string.index(start, offsetBy: 2)
+            let chunk = string[start..<chunkEnd]
+            guard let byte = UInt8(chunk, radix: 16) else { return nil }
+            bytes.append(byte)
+            start = chunkEnd
+        }
+        self.init(bytes)
+    }
+
+
+	/// Creates a hexadecimal string representation of the data.
+	///
+	/// - Returns:A string with even non-zero length containing only digits or a/A through f/F.
+    public func hexEncodedString() -> String {
+        return [UInt8](self).map { String(format: "%.2x", $0) }.reduce("", {$0+$1})
+    }
+}
+
 #if os(Linux)
 	import Glibc
 #else
