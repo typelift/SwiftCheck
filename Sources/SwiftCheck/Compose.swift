@@ -22,7 +22,7 @@ extension Gen {
 	///                 a: c.generate(),
 	///
 	///                 // or pass a custom generator
-	///                 b: c.generate(Bool.arbitrary.suchThat { $0 == false }),
+	///                 b: c.generate(using: Bool.arbitrary.suchThat { $0 == false }),
 	///
 	///                 // ... and so on, for as many values & types as you need
 	///                 c: c.generate(), ...
