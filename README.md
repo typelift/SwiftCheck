@@ -236,7 +236,7 @@ public static var arbitrary : Gen<MyClass> {
             a: c.generate(),
 
             // or pass a custom generator
-            b: c.generate(Bool.suchThat { $0 == false }),
+            b: c.generate(using: Bool.arbitrary.suchThat { $0 == false }),
 
             // .. and so on, for as many values and types as you need.
             c: c.generate(), ...
